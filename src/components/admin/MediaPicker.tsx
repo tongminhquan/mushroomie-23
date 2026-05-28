@@ -60,8 +60,20 @@ export default function MediaPicker({ value, onChange, onClose }: MediaPickerPro
     seo_title: '',
   })
   const fileRef = useRef<HTMLInputElement>(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   const [customImages, setCustomImages] = useState<MediaItem[]>([])
+
+  useEffect(() => {
+    fetch('/api/upload')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setCustomImages(data)
+        }
+      })
+      .catch(console.error)
+  }, [])
 
   const allImages = [...customImages, ...DEMO_IMAGES]
   const filtered = allImages.filter(img =>
@@ -126,18 +138,41 @@ export default function MediaPicker({ value, onChange, onClose }: MediaPickerPro
                   <Upload size={40} className="mx-auto text-neutral-400 mb-4" />
                   <p className="font-semibold text-neutral-700 mb-1">Kéo thả tệp vào đây</p>
                   <p className="text-sm text-neutral-500 mb-4">hoặc nhấn để chọn tệp từ máy tính</p>
-                  <button className="bg-primary text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors">
-                    Chọn tệp
+                  <button 
+                    disabled={isUploading}
+                    className="bg-primary text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isUploading ? 'Đang tải lên...' : 'Chọn tệp'}
                   </button>
-                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => {
+                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={async e => {
                     const file = e.target.files?.[0]
                     if (file) {
-                      const url = URL.createObjectURL(file)
-                      const item: MediaItem = { id: Date.now(), url, filename: file.name, size: file.size }
-                      setCustomImages(prev => [item, ...prev])
-                      setSelected(item)
-                      setMeta(prev => ({ ...prev, url, seo_title: file.name.replace(/\.\w+$/, '') }))
-                      setTab('library')
+                      setIsUploading(true)
+                      const formData = new FormData()
+                      formData.append('file', file)
+                      
+                      try {
+                        const res = await fetch('/api/upload', {
+                          method: 'POST',
+                          body: formData
+                        })
+                        
+                        if (res.ok) {
+                          const item = await res.json()
+                          setCustomImages(prev => [item, ...prev])
+                          setSelected(item)
+                          setMeta(prev => ({ ...prev, url: item.url, seo_title: item.filename.replace(/\.\w+$/, '') }))
+                          setTab('library')
+                        } else {
+                          alert('Có lỗi xảy ra khi tải lên!')
+                        }
+                      } catch (err) {
+                        console.error('Upload error', err)
+                        alert('Không thể tải ảnh lên, vui lòng thử lại!')
+                      } finally {
+                        setIsUploading(false)
+                        if (e.target) e.target.value = '' // Reset input
+                      }
                     }
                   }} />
                 </div>
