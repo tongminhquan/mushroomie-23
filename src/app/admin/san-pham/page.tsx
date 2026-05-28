@@ -40,9 +40,6 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
   }
   
   const getStatusLabel = (status: string) => {
-    if (status === 'active') return 'Đang bán'
-    if (status === 'inactive') return 'Ẩn'
-    if (status === 'draft') return 'Nháp'
     const custom = customStatuses.find(s => s.slug === status)
     return custom ? custom.name : status
   }
@@ -79,9 +76,6 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
         </select>
         <select defaultValue={sp.status} className="px-3 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary">
           <option value="">Tất cả trạng thái</option>
-          <option value="active">Đang bán</option>
-          <option value="inactive">Ẩn</option>
-          <option value="draft">Nháp</option>
           {customStatuses.map((s) => <option key={s.id} value={s.slug}>{s.name}</option>)}
         </select>
       </div>

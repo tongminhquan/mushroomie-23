@@ -158,9 +158,7 @@ export default function AddProductPage() {
               <label className="block text-sm font-semibold mb-1">Trạng thái</label>
               <select name="status" value={form.status} onChange={handleChange}
                 className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none bg-white">
-                <option value="active">Hiển thị (Active)</option>
-                <option value="draft">Nháp (Draft)</option>
-                <option value="inactive">Ẩn (Inactive)</option>
+                {statuses.length === 0 && <option value="active">--- Chọn trạng thái ---</option>}
                 {statuses.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
               </select>
             </div>
