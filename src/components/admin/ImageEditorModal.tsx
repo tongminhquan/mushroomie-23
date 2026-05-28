@@ -1,5 +1,5 @@
 'use client'
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import Cropper, { ReactCropperElement } from 'react-cropper'
 import 'cropperjs/dist/cropper.css'
 import { Crop, ZoomIn, ZoomOut, RotateCcw, RotateCw, Undo, Redo, X, Check } from 'lucide-react'
@@ -13,6 +13,14 @@ interface ImageEditorModalProps {
 export default function ImageEditorModal({ src, onSave, onCancel }: ImageEditorModalProps) {
   const cropperRef = useRef<ReactCropperElement>(null)
   const [isSaving, setIsSaving] = useState(false)
+
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = originalOverflow
+    }
+  }, [])
 
   const handleZoomIn = () => cropperRef.current?.cropper.zoom(0.1)
   const handleZoomOut = () => cropperRef.current?.cropper.zoom(-0.1)
