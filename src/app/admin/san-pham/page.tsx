@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { formatPrice, formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import AddCategoryButton from '@/components/admin/AddCategoryButton'
+import DeleteProductButton from '@/components/admin/DeleteProductButton'
 
 export const metadata: Metadata = { title: 'Quản lý sản phẩm | Admin Mushroomie' }
 
@@ -42,9 +44,12 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           <h1 className="font-heading text-2xl font-bold">Quản lý sản phẩm</h1>
           <p className="text-neutral-500 text-sm">{total} sản phẩm</p>
         </div>
-        <Link href="/admin/san-pham/them" className="bg-primary text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-colors">
-          + Thêm sản phẩm
-        </Link>
+        <div className="flex items-center gap-3">
+          <AddCategoryButton />
+          <Link href="/admin/san-pham/them" className="bg-primary text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-colors shadow-sm">
+            + Thêm sản phẩm
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}
@@ -113,6 +118,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                   <td className="py-3 px-4 text-neutral-500 text-xs">{formatDate(product.created_at)}</td>
                   <td className="py-3 px-4 text-right">
                     <Link href={`/admin/san-pham/${product.id}`} className="text-primary text-xs font-semibold hover:underline">Sửa</Link>
+                    <DeleteProductButton id={product.id} />
                   </td>
                 </tr>
               ))}
