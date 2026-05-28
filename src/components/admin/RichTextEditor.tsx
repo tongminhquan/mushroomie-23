@@ -1,5 +1,7 @@
 'use client'
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
+import { ImageIcon, AlignLeft, AlignCenter, AlignRight, AlignJustify, Edit2, X } from 'lucide-react'
+import MediaPicker from './MediaPicker'
 
 interface RichTextEditorProps {
   value: string
@@ -37,7 +39,6 @@ const TOOLBAR_BUTTONS = [
   ]},
   { group: 'insert', items: [
     { cmd: 'createLink', icon: '🔗', title: 'Chèn liên kết' },
-    { cmd: 'insertImage', icon: '🖼', title: 'Chèn hình ảnh' },
     { cmd: 'insertHorizontalRule', icon: '─', title: 'Kẻ ngang' },
     { cmd: 'formatBlock', val: 'blockquote', icon: '❝', title: 'Trích dẫn' },
     { cmd: 'formatBlock', val: 'pre', icon: '{ }', title: 'Code block' },
@@ -53,6 +54,10 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
   const editorRef = useRef<HTMLDivElement>(null)
   const isComposing = useRef(false)
   const lastValue = useRef(value)
+  const [showMediaPicker, setShowMediaPicker] = useState(false)
+  const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null)
+  const [imgOffset, setImgOffset] = useState({ top: 0, left: 0 })
+  const [showImageDetails, setShowImageDetails] = useState(false)
 
   // Init editor
   useEffect(() => {
@@ -69,9 +74,6 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     if (cmd === 'createLink') {
       const url = prompt('Nhập URL liên kết:', 'https://')
       if (url) document.execCommand('createLink', false, url)
-    } else if (cmd === 'insertImage') {
-      const url = prompt('Nhập URL hình ảnh:', 'https://')
-      if (url) document.execCommand('insertImage', false, url)
     } else if (val) {
       document.execCommand(cmd, false, val)
     } else {
@@ -105,8 +107,82 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     onChange(editorRef.current?.innerHTML || '')
   }
 
+  useEffect(() => {
+    const editor = editorRef.current
+    if (!editor) return
+
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (target.closest('.img-floating-toolbar') || target.closest('.img-details-modal')) return
+      
+      if (target.tagName === 'IMG' && editor.contains(target)) {
+        setSelectedImage(target as HTMLImageElement)
+        setImgOffset({
+          top: target.offsetTop,
+          left: target.offsetLeft + target.offsetWidth / 2
+        })
+      } else {
+        setSelectedImage(null)
+      }
+    }
+
+    const handleKeydown = (e: KeyboardEvent) => {
+      if (selectedImage) {
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+          // If wrapped in figure, delete figure
+          const parent = selectedImage.parentElement
+          if (parent && parent.tagName === 'FIGURE') {
+            parent.remove()
+          } else {
+            selectedImage.remove()
+          }
+          setSelectedImage(null)
+          onChange(editor.innerHTML)
+        } else {
+          setSelectedImage(null)
+        }
+      }
+    }
+
+    document.addEventListener('mousedown', handleGlobalClick)
+    editor.addEventListener('keydown', handleKeydown)
+
+    return () => {
+      document.removeEventListener('mousedown', handleGlobalClick)
+      editor.removeEventListener('keydown', handleKeydown)
+    }
+  }, [selectedImage, onChange])
+
+  const handleAlign = (align: 'left' | 'center' | 'right' | 'none') => {
+    if (!selectedImage) return
+    const target = (selectedImage.parentElement?.tagName === 'FIGURE') ? selectedImage.parentElement : selectedImage
+    
+    target.style.display = ''
+    target.style.margin = ''
+    target.style.float = ''
+
+    if (align === 'center') {
+      target.style.display = 'block'
+      target.style.margin = '1em auto'
+    } else if (align === 'left') {
+      target.style.display = 'inline'
+      target.style.float = 'left'
+      target.style.margin = '0 1em 1em 0'
+    } else if (align === 'right') {
+      target.style.display = 'inline'
+      target.style.float = 'right'
+      target.style.margin = '0 0 1em 1em'
+    }
+
+    onChange(editorRef.current?.innerHTML || '')
+    setImgOffset({
+      top: target.offsetTop,
+      left: target.offsetLeft + target.offsetWidth / 2
+    })
+  }
+
   return (
-    <div className="rich-editor border border-neutral-200 rounded-xl overflow-hidden bg-white">
+    <div className="rich-editor border border-neutral-200 rounded-xl overflow-hidden bg-white relative">
       <style>{`
         .rich-editor .editor-toolbar {
           display: flex; flex-wrap: wrap; gap: 2px; padding: 6px 8px;
@@ -151,7 +227,13 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           background: #1f2937; color: #f9fafb; padding: 1em; border-radius: 8px;
           font-family: monospace; font-size: 13px; overflow-x: auto; margin: 0.5em 0;
         }
+        .rich-editor .ql-editor-area figure.image {
+          display: block; margin: 1em 0; text-align: center;
+        }
         .rich-editor .ql-editor-area img { max-width: 100%; border-radius: 8px; margin: 0.5em 0; }
+        .rich-editor .ql-editor-area figcaption {
+          font-size: 13px; color: #6b7280; margin-top: 0.5em; font-style: italic; text-align: center;
+        }
         .rich-editor .ql-editor-area a { color: #2563eb; text-decoration: underline; }
         .rich-editor .ql-editor-area hr { border: none; border-top: 2px solid #e5e7eb; margin: 1em 0; }
         .rich-editor .status-bar {
@@ -159,6 +241,13 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between;
         }
       `}</style>
+
+      {/* Media Button */}
+      <div className="p-2 border-b border-neutral-200 bg-neutral-50 flex items-center">
+        <button onClick={() => setShowMediaPicker(true)} className="flex items-center gap-2 px-3 py-1.5 border border-primary text-primary rounded-lg text-sm font-semibold hover:bg-primary/5 transition-colors">
+          <ImageIcon size={16} /> Thêm tệp Media
+        </button>
+      </div>
 
       {/* Toolbar */}
       <div className="editor-toolbar">
@@ -228,7 +317,6 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
 
         {/* Insert */}
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('createLink') }} title="Chèn liên kết">🔗</button>
-        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('insertImage') }} title="Chèn hình ảnh">🖼️</button>
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('insertHorizontalRule') }} title="Kẻ ngang">—</button>
 
         <div className="sep" />
@@ -262,11 +350,153 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         }}
       />
 
+      {/* Floating Image Toolbar */}
+      {selectedImage && !showImageDetails && (
+        <div 
+          className="img-floating-toolbar absolute z-10 flex items-center bg-white border border-neutral-200 shadow-lg rounded-lg overflow-hidden transition-all"
+          style={{ top: Math.max(0, imgOffset.top - 45), left: imgOffset.left, transform: 'translateX(-50%)' }}
+        >
+          <button className="p-2 hover:bg-neutral-100 text-neutral-600" onClick={() => handleAlign('left')} title="Căn trái"><AlignLeft size={16} /></button>
+          <button className="p-2 hover:bg-neutral-100 text-neutral-600" onClick={() => handleAlign('center')} title="Căn giữa"><AlignCenter size={16} /></button>
+          <button className="p-2 hover:bg-neutral-100 text-neutral-600" onClick={() => handleAlign('right')} title="Căn phải"><AlignRight size={16} /></button>
+          <button className="p-2 hover:bg-neutral-100 text-neutral-600" onClick={() => handleAlign('none')} title="Không căn lề"><AlignJustify size={16} /></button>
+          <div className="w-px h-6 bg-neutral-200 mx-1" />
+          <button className="p-2 hover:bg-neutral-100 text-neutral-600" onClick={() => setShowImageDetails(true)} title="Chỉnh sửa chi tiết"><Edit2 size={16} /></button>
+          <button className="p-2 hover:bg-red-50 text-red-500" onClick={() => { 
+            const p = selectedImage.parentElement
+            if (p && p.tagName === 'FIGURE') p.remove()
+            else selectedImage.remove()
+            setSelectedImage(null)
+            onChange(editorRef.current?.innerHTML || '') 
+          }} title="Xóa"><X size={16} /></button>
+        </div>
+      )}
+
       {/* Status bar */}
       <div className="status-bar">
         <span>Hỗ trợ định dạng HTML</span>
         <span>{editorRef.current?.innerText?.trim().split(/\s+/).filter(Boolean).length ?? 0} từ</span>
       </div>
+
+      {showMediaPicker && (
+        <MediaPicker
+          value=""
+          title="Chèn Media vào bài viết"
+          submitText="Chèn vào bài viết"
+          onChange={(url, meta) => {
+            setShowMediaPicker(false)
+            if (!url) return
+            editorRef.current?.focus()
+            
+            const alt = meta?.alt_text || meta?.seo_title || ''
+            let html = `<img src="${url}" alt="${alt}" />`
+            if (meta?.caption) {
+              html = `<figure class="image"><img src="${url}" alt="${alt}" /><figcaption>${meta.caption}</figcaption></figure>`
+            }
+            document.execCommand('insertHTML', false, html)
+            onChange(editorRef.current?.innerHTML || '')
+          }}
+          onClose={() => setShowMediaPicker(false)}
+        />
+      )}
+
+      {showImageDetails && selectedImage && (
+        <div className="img-details-modal fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden">
+            <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+              <h3 className="font-bold text-lg text-neutral-800">Chi tiết hình ảnh</h3>
+              <button onClick={() => setShowImageDetails(false)} className="p-1 text-neutral-400 hover:bg-neutral-100 rounded-lg"><X size={20}/></button>
+            </div>
+            <div className="p-6 flex flex-col md:flex-row gap-6">
+              <div className="flex-1 space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold mb-1 text-neutral-700">Văn bản thay thế (Alt text)</label>
+                  <input id="img-details-alt" defaultValue={selectedImage.alt} className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:border-primary outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1 text-neutral-700">Chú thích (Caption)</label>
+                  <textarea id="img-details-caption" defaultValue={selectedImage.parentElement?.tagName === 'FIGURE' ? (selectedImage.parentElement.querySelector('figcaption')?.textContent || '') : ''} className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:border-primary outline-none resize-none" rows={2} />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1 text-neutral-700">Kích thước (pixel)</label>
+                  <div className="flex gap-2">
+                    <input id="img-details-width" placeholder="Rộng" defaultValue={selectedImage.getAttribute('width') || ''} className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:border-primary outline-none" />
+                    <input id="img-details-height" placeholder="Cao" defaultValue={selectedImage.getAttribute('height') || ''} className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:border-primary outline-none" />
+                  </div>
+                </div>
+              </div>
+              <div className="w-full md:w-64 flex flex-col items-center justify-center bg-neutral-50 border border-neutral-200 rounded-xl p-2">
+                <img src={selectedImage.src} className="max-w-full max-h-48 object-contain rounded" alt="" />
+              </div>
+            </div>
+            <div className="p-4 border-t border-neutral-200 bg-neutral-50 flex justify-end gap-2">
+              <button onClick={() => setShowImageDetails(false)} className="px-4 py-2 bg-white border border-neutral-200 text-neutral-600 rounded-xl text-sm font-semibold hover:bg-neutral-100">Hủy</button>
+              <button onClick={() => {
+                const alt = (document.getElementById('img-details-alt') as HTMLInputElement).value
+                const caption = (document.getElementById('img-details-caption') as HTMLTextAreaElement).value
+                const width = (document.getElementById('img-details-width') as HTMLInputElement).value
+                const height = (document.getElementById('img-details-height') as HTMLInputElement).value
+                
+                selectedImage.alt = alt
+                if (width) selectedImage.setAttribute('width', width); else selectedImage.removeAttribute('width')
+                if (height) selectedImage.setAttribute('height', height); else selectedImage.removeAttribute('height')
+
+                const parent = selectedImage.parentElement
+                if (caption.trim()) {
+                  if (parent && parent.tagName === 'FIGURE') {
+                    let fc = parent.querySelector('figcaption')
+                    if (!fc) {
+                      fc = document.createElement('figcaption')
+                      parent.appendChild(fc)
+                    }
+                    fc.textContent = caption
+                  } else {
+                    const figure = document.createElement('figure')
+                    figure.className = 'image'
+                    // copy alignment styles if any
+                    if (selectedImage.style.float) {
+                      figure.style.float = selectedImage.style.float
+                      figure.style.margin = selectedImage.style.margin
+                      figure.style.display = 'inline'
+                      selectedImage.style.float = ''
+                      selectedImage.style.margin = ''
+                      selectedImage.style.display = ''
+                    } else if (selectedImage.style.display === 'block') {
+                      figure.style.display = 'block'
+                      figure.style.margin = '1em auto'
+                      selectedImage.style.display = ''
+                      selectedImage.style.margin = ''
+                    }
+                    selectedImage.parentNode?.insertBefore(figure, selectedImage)
+                    figure.appendChild(selectedImage)
+                    const fc = document.createElement('figcaption')
+                    fc.textContent = caption
+                    figure.appendChild(fc)
+                  }
+                } else {
+                  if (parent && parent.tagName === 'FIGURE') {
+                    // move styles back
+                    if (parent.style.float) {
+                      selectedImage.style.float = parent.style.float
+                      selectedImage.style.margin = parent.style.margin
+                      selectedImage.style.display = 'inline'
+                    } else if (parent.style.display === 'block') {
+                      selectedImage.style.display = 'block'
+                      selectedImage.style.margin = '1em auto'
+                    }
+                    parent.parentNode?.insertBefore(selectedImage, parent)
+                    parent.remove()
+                  }
+                }
+
+                onChange(editorRef.current?.innerHTML || '')
+                setShowImageDetails(false)
+                setSelectedImage(null)
+              }} className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors">Cập nhật</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

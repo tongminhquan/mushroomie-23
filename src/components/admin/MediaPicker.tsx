@@ -27,6 +27,8 @@ interface MediaPickerProps {
   value: string
   onChange: (url: string, meta?: Partial<SelectedImageMeta>) => void
   onClose: () => void
+  title?: string
+  submitText?: string
 }
 
 // Simulated media library from picsum
@@ -48,7 +50,7 @@ function formatBytes(bytes: number) {
   return (bytes / 1048576).toFixed(1) + ' MB'
 }
 
-export default function MediaPicker({ value, onChange, onClose }: MediaPickerProps) {
+export default function MediaPicker({ value, onChange, onClose, title, submitText }: MediaPickerProps) {
   const [tab, setTab] = useState<'upload' | 'library'>('library')
   const [selected, setSelected] = useState<MediaItem | null>(null)
   const [search, setSearch] = useState('')
@@ -103,7 +105,7 @@ export default function MediaPicker({ value, onChange, onClose }: MediaPickerPro
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
-          <h2 className="font-bold text-lg text-neutral-800">Ảnh đại diện</h2>
+          <h2 className="font-bold text-lg text-neutral-800">{title || 'Ảnh đại diện'}</h2>
           <button onClick={onClose} className="p-2 hover:bg-neutral-100 rounded-lg transition-colors">
             <X size={20} />
           </button>
@@ -310,7 +312,7 @@ export default function MediaPicker({ value, onChange, onClose }: MediaPickerPro
                   onClick={handleConfirm}
                   className="w-full bg-primary text-white py-2.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-colors"
                 >
-                  Đặt ảnh đại diện
+                  {submitText || 'Đặt ảnh đại diện'}
                 </button>
               </div>
             )}
