@@ -351,3 +351,24 @@ model Review {
 
   @@map("reviews")
 }
+
+// ─────────────────────────────────────────────
+// BANNERS
+// ─────────────────────────────────────────────
+model Banner {
+  id                    Int      @id @default(autoincrement())
+  image_url             String   @db.Text
+  title                 String?  // Phụ kiện nhỏ,
+  subtitle              String?  // cảm xúc lớn
+  description           String?  @db.Text
+  button_text           String?  // Khám phá ngay
+  button_link           String?  // /san-pham
+  secondary_button_text String?  // Tự thiết kế phụ kiện
+  secondary_button_link String?  // /lien-he
+  sort_order            Int      @default(0)
+  status                String   @default("active") // "active" | "hidden"
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  @@map("banners")
+}

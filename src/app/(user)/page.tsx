@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import ProductCard from '@/components/product/ProductCard'
 import PostCard from '@/components/blog/PostCard'
+import HomeHeroCarousel from '@/components/home/HomeHeroCarousel'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const [featuredProducts, posts, reviews, categories] = await Promise.all([
+  const [featuredProducts, posts, reviews, categories, banners] = await Promise.all([
     prisma.product.findMany({
       where: { status: 'active', is_featured: true },
       include: { category: true, images: { orderBy: { sort_order: 'asc' }, take: 1 } },
@@ -32,6 +33,10 @@ export default async function HomePage() {
       take: 6,
     }).catch(() => []),
     prisma.category.findMany({ where: { type: 'product' } }).catch(() => []),
+    prisma.banner.findMany({
+      where: { status: 'active' },
+      orderBy: { sort_order: 'asc' }
+    }).catch(() => []),
   ])
 
   const categoryIcons: Record<string, string> = {
@@ -41,40 +46,44 @@ export default async function HomePage() {
     'phu-kien': '🌈',
   }
 
-  return (
-    <div>
-      {/* HERO */}
-      <section className="relative min-h-[90vh] bg-gradient-to-br from-primary via-red-600 to-pink-500 flex items-center overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {['top-10 left-10', 'top-1/4 right-20', 'bottom-20 left-1/4', 'bottom-10 right-10', 'top-1/2 left-1/3'].map((pos, i) => (
-            <div key={i} className={`absolute ${pos} text-5xl opacity-20`} style={{ animation: `bounce 2s ease-in-out ${i * 0.5}s infinite` }}>
-              {['🍄', '✨', '💛', '🌸', '🧶'][i]}
-            </div>
-          ))}
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6 backdrop-blur-sm">
-              <span>🍄</span> Handmade với tình yêu thương
-            </div>
-            <h1 className="font-heading text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
-              Phụ kiện nhỏ,<br />
-              <span className="text-yellow-300">cảm xúc lớn</span>
-            </h1>
-            <p className="text-white/85 text-lg md:text-xl leading-relaxed mb-8">
-              Mỗi sản phẩm Mushroomie được làm thủ công 100%, cá nhân hóa theo phong cách, cảm xúc và câu chuyện riêng của bạn.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/san-pham" className="bg-white text-primary px-8 py-4 rounded-full font-bold text-base hover:bg-yellow-50 transition-all shadow-lg hover:shadow-xl active:scale-95">
-                Khám phá ngay →
-              </Link>
-              <Link href="/lien-he" className="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-base hover:bg-white hover:text-primary transition-all">
-                Tự thiết kế phụ kiện
-              </Link>
-            </div>
+  const fallbackHero = (
+    <section className="relative min-h-[90vh] bg-gradient-to-br from-primary via-red-600 to-pink-500 flex items-center overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {['top-10 left-10', 'top-1/4 right-20', 'bottom-20 left-1/4', 'bottom-10 right-10', 'top-1/2 left-1/3'].map((pos, i) => (
+          <div key={i} className={`absolute ${pos} text-5xl opacity-20`} style={{ animation: `bounce 2s ease-in-out ${i * 0.5}s infinite` }}>
+            {['🍄', '✨', '💛', '🌸', '🧶'][i]}
+          </div>
+        ))}
+      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
+        <div className="max-w-2xl">
+          <div className="inline-flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6 backdrop-blur-sm">
+            <span>🍄</span> Handmade với tình yêu thương
+          </div>
+          <h1 className="font-heading text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
+            Phụ kiện nhỏ,<br />
+            <span className="text-yellow-300">cảm xúc lớn</span>
+          </h1>
+          <p className="text-white/85 text-lg md:text-xl leading-relaxed mb-8">
+            Mỗi sản phẩm Mushroomie được làm thủ công 100%, cá nhân hóa theo phong cách, cảm xúc và câu chuyện riêng của bạn.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <Link href="/san-pham" className="bg-white text-primary px-8 py-4 rounded-full font-bold text-base hover:bg-yellow-50 transition-all shadow-lg hover:shadow-xl active:scale-95">
+              Khám phá ngay →
+            </Link>
+            <Link href="/lien-he" className="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-base hover:bg-white hover:text-primary transition-all">
+              Tự thiết kế phụ kiện
+            </Link>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+  )
+
+  return (
+    <div>
+      {/* HERO CAROUSEL */}
+      <HomeHeroCarousel banners={banners} fallbackHero={fallbackHero} />
 
       {/* CATEGORIES */}
       <section className="py-16 bg-white">
