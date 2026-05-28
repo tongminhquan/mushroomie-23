@@ -79,3 +79,8 @@ body {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* Fix cropper lag caused by global transform transition */
+.cropper-container, .cropper-container * {
+  transition: none !important;
+}
