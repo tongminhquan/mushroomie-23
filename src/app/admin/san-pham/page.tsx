@@ -2,7 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { formatPrice, formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import AddCategoryButton from '@/components/admin/AddCategoryButton'
+import ManageCategoriesModal from '@/components/admin/ManageCategoriesModal'
+import ManageStatusesModal from '@/components/admin/ManageStatusesModal'
 import DeleteProductButton from '@/components/admin/DeleteProductButton'
 
 export const metadata: Metadata = { title: 'Quản lý sản phẩm | Admin Mushroomie' }
@@ -19,7 +20,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
   if (sp.category) where.category = { slug: sp.category }
   if (sp.status) where.status = sp.status
 
-  const [products, total, categories] = await Promise.all([
+  const [products, total, categories, customStatuses] = await Promise.all([
     prisma.product.findMany({
       where,
       include: { category: true, images: { take: 1 } },
@@ -29,12 +30,21 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
     }).catch(() => []),
     prisma.product.count({ where }).catch(() => 0),
     prisma.category.findMany({ where: { type: 'product' } }).catch(() => []),
+    prisma.category.findMany({ where: { type: 'product_status' } }).catch(() => []),
   ])
 
   const statusColors: Record<string, string> = {
     active: 'bg-green-100 text-green-700',
     inactive: 'bg-neutral-100 text-neutral-700',
     draft: 'bg-yellow-100 text-yellow-700',
+  }
+  
+  const getStatusLabel = (status: string) => {
+    if (status === 'active') return 'Đang bán'
+    if (status === 'inactive') return 'Ẩn'
+    if (status === 'draft') return 'Nháp'
+    const custom = customStatuses.find(s => s.slug === status)
+    return custom ? custom.name : status
   }
 
   return (
@@ -45,7 +55,8 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           <p className="text-neutral-500 text-sm">{total} sản phẩm</p>
         </div>
         <div className="flex items-center gap-3">
-          <AddCategoryButton />
+          <ManageCategoriesModal />
+          <ManageStatusesModal />
           <Link href="/admin/san-pham/them" className="bg-primary text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-colors shadow-sm">
             + Thêm sản phẩm
           </Link>
@@ -71,6 +82,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           <option value="active">Đang bán</option>
           <option value="inactive">Ẩn</option>
           <option value="draft">Nháp</option>
+          {customStatuses.map((s) => <option key={s.id} value={s.slug}>{s.name}</option>)}
         </select>
       </div>
 
@@ -112,7 +124,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                   </td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors[product.status] || 'bg-neutral-100'}`}>
-                      {product.status === 'active' ? 'Đang bán' : product.status === 'inactive' ? 'Ẩn' : 'Nháp'}
+                      {getStatusLabel(product.status)}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-neutral-500 text-xs">{formatDate(product.created_at)}</td>

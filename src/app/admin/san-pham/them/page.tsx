@@ -10,6 +10,7 @@ export default function AddProductPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [categories, setCategories] = useState<{ id: number, name: string }[]>([])
+  const [statuses, setStatuses] = useState<{ slug: string, name: string }[]>([])
 
   const [form, setForm] = useState({
     name: '',
@@ -31,6 +32,11 @@ export default function AddProductPage() {
     fetch('/api/categories?type=product')
       .then(res => res.json())
       .then(data => setCategories(data.categories || []))
+      .catch(err => console.error(err))
+      
+    fetch('/api/categories?type=product_status')
+      .then(res => res.json())
+      .then(data => setStatuses(data.categories || []))
       .catch(err => console.error(err))
   }, [])
 
@@ -155,6 +161,7 @@ export default function AddProductPage() {
                 <option value="active">Hiển thị (Active)</option>
                 <option value="draft">Nháp (Draft)</option>
                 <option value="inactive">Ẩn (Inactive)</option>
+                {statuses.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
               </select>
             </div>
           </div>

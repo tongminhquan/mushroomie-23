@@ -28,6 +28,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [slugEdited, setSlugEdited] = useState(true) // Start true since it is loaded from database
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([])
+  const [statuses, setStatuses] = useState<{ slug: string; name: string }[]>([])
 
   const [form, setForm] = useState({
     name: '',
@@ -52,6 +53,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       .then(res => res.json())
       .then(data => setCategories(data.categories || []))
       .catch(err => console.error('Lỗi tải danh mục:', err))
+
+    fetch('/api/categories?type=product_status')
+      .then(res => res.json())
+      .then(data => setStatuses(data.categories || []))
+      .catch(err => console.error('Lỗi tải trạng thái:', err))
 
     // Load product details
     params.then(async ({ id }) => {
@@ -355,6 +361,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     <option value="active">Đang bán (Active)</option>
                     <option value="draft">Bản nháp (Draft)</option>
                     <option value="inactive">Ẩn (Inactive)</option>
+                    {statuses.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
                   </select>
                 </div>
                 <div className="flex items-center justify-between text-sm">
