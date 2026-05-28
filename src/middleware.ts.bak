@@ -1,0 +1,32 @@
+import { auth } from '@/lib/auth'
+import { NextResponse } from 'next/server'
+
+export default auth((req) => {
+  const { nextUrl } = req
+  const isLoggedIn = !!req.auth
+  const role = (req.auth?.user as any)?.role
+
+  // Bảo vệ /admin/*
+  if (nextUrl.pathname.startsWith('/admin')) {
+    if (!isLoggedIn || role !== 'admin') {
+      return NextResponse.redirect(new URL('/tai-khoan/dang-nhap?callbackUrl=' + nextUrl.pathname, req.url))
+    }
+  }
+
+  // Bảo vệ /tai-khoan/* (trừ đăng nhập/đăng ký)
+  if (
+    nextUrl.pathname.startsWith('/tai-khoan') &&
+    !nextUrl.pathname.includes('/dang-nhap') &&
+    !nextUrl.pathname.includes('/dang-ky')
+  ) {
+    if (!isLoggedIn) {
+      return NextResponse.redirect(new URL('/tai-khoan/dang-nhap?callbackUrl=' + nextUrl.pathname, req.url))
+    }
+  }
+
+  return NextResponse.next()
+})
+
+export const config = {
+  matcher: ['/admin/:path*', '/tai-khoan/:path*'],
+}

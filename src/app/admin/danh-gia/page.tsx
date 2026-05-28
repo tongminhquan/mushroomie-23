@@ -1,0 +1,83 @@
+import { prisma } from '@/lib/prisma'
+import { formatDate } from '@/lib/utils'
+import type { Metadata } from 'next'
+import ReviewActions from '@/components/admin/ReviewActions'
+
+export const metadata: Metadata = { title: 'Quản lý đánh giá | Admin Mushroomie' }
+
+interface SearchParams { status?: string }
+
+export default async function AdminReviewsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const sp = await searchParams
+  const where: any = {}
+  if (sp.status) where.status = sp.status
+
+  const reviews = await prisma.review.findMany({
+    where,
+    include: { product: true },
+    orderBy: { created_at: 'desc' },
+    take: 50,
+  }).catch(() => [])
+
+  const pendingCount = await prisma.review.count({ where: { status: 'pending' } }).catch(() => 0)
+
+  const statusColors: Record<string, string> = {
+    pending: 'bg-yellow-100 text-yellow-700',
+    approved: 'bg-green-100 text-green-700',
+    rejected: 'bg-red-100 text-red-700',
+  }
+
+  return (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="font-heading text-2xl font-bold">Quản lý đánh giá</h1>
+          {pendingCount > 0 && <p className="text-yellow-600 text-sm font-semibold">{pendingCount} đánh giá chờ duyệt</p>}
+        </div>
+      </div>
+
+      <div className="flex gap-2 mb-6">
+        {[
+          { value: '', label: 'Tất cả' },
+          { value: 'pending', label: '⏳ Chờ duyệt' },
+          { value: 'approved', label: '✅ Đã duyệt' },
+          { value: 'rejected', label: '❌ Từ chối' },
+        ].map((tab) => (
+          <a key={tab.value} href={`/admin/danh-gia${tab.value ? `?status=${tab.value}` : ''}`}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+              (sp.status || '') === tab.value ? 'bg-primary text-white' : 'bg-white text-neutral-700 hover:bg-neutral-100 shadow-sm'
+            }`}>
+            {tab.label}
+          </a>
+        ))}
+      </div>
+
+      <div className="space-y-3">
+        {reviews.map((review) => (
+          <div key={review.id} className="bg-white rounded-2xl p-5 shadow-card">
+            <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">{review.name}</span>
+                <div className="flex text-yellow-400 text-sm">{'★'.repeat(review.rating)}</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors[review.status] || ''}`}>
+                  {review.status === 'pending' ? 'Chờ duyệt' : review.status === 'approved' ? 'Đã duyệt' : 'Từ chối'}
+                </span>
+                <span className="text-neutral-400 text-xs">{formatDate(review.created_at)}</span>
+              </div>
+            </div>
+            {review.product && (
+              <p className="text-xs text-primary mb-2">Sản phẩm: {review.product.name}</p>
+            )}
+            <p className="text-neutral-600 text-sm bg-neutral-50 rounded-xl p-3">{review.content}</p>
+              <ReviewActions review={review} />
+          </div>
+        ))}
+        {reviews.length === 0 && (
+          <div className="text-center py-12 text-neutral-500 bg-white rounded-2xl">Không có đánh giá nào</div>
+        )}
+      </div>
+    </div>
+  )
+}
