@@ -56,7 +56,7 @@ export default function ImageEditorModal({ src, onSave, onCancel }: ImageEditorM
   }
 
   return (
-    <div className="fixed inset-0 z-[110] bg-black/80 flex items-center justify-center p-4">
+    <div className="image-editor-modal fixed inset-0 z-[110] bg-black/80 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden">
         
         {/* Toolbar */}

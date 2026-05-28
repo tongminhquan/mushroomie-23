@@ -117,7 +117,12 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
 
     const handleGlobalClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
-      if (target.closest('.img-floating-toolbar') || target.closest('.img-details-modal')) return
+      if (
+        target.closest('.img-floating-toolbar') || 
+        target.closest('.img-details-modal') ||
+        target.closest('.image-editor-modal') ||
+        target.closest('.media-picker-modal')
+      ) return
       
       if (target.tagName === 'IMG' && editor.contains(target)) {
         setSelectedImage(target as HTMLImageElement)
