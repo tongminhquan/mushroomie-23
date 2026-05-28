@@ -2,6 +2,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { ImageIcon, AlignLeft, AlignCenter, AlignRight, AlignJustify, Edit2, X } from 'lucide-react'
 import MediaPicker from './MediaPicker'
+import ImageEditorModal from './ImageEditorModal'
 
 interface RichTextEditorProps {
   value: string
@@ -58,6 +59,9 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
   const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null)
   const [imgOffset, setImgOffset] = useState({ top: 0, left: 0 })
   const [showImageDetails, setShowImageDetails] = useState(false)
+  const [showImageEditor, setShowImageEditor] = useState(false)
+  // Used to replace the current selected image instead of inserting a new one
+  const [isReplacingImage, setIsReplacingImage] = useState(false)
 
   // Init editor
   useEffect(() => {
@@ -382,10 +386,26 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         <MediaPicker
           value=""
           title="Chèn Media vào bài viết"
-          submitText="Chèn vào bài viết"
+          submitText={isReplacingImage ? "Thay thế ảnh" : "Chèn vào bài viết"}
           onChange={(url, meta) => {
             setShowMediaPicker(false)
-            if (!url) return
+            if (!url) {
+              setIsReplacingImage(false)
+              return
+            }
+
+            if (isReplacingImage && selectedImage) {
+              selectedImage.src = url
+              if (meta?.alt_text || meta?.seo_title) {
+                selectedImage.alt = (meta?.alt_text || meta?.seo_title) as string
+              }
+              // We keep the old caption if there is one, or replace it?
+              // The user is replacing the image, so updating src is usually enough.
+              onChange(editorRef.current?.innerHTML || '')
+              setIsReplacingImage(false)
+              return
+            }
+
             editorRef.current?.focus()
             
             const alt = meta?.alt_text || meta?.seo_title || ''
@@ -396,7 +416,10 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
             document.execCommand('insertHTML', false, html)
             onChange(editorRef.current?.innerHTML || '')
           }}
-          onClose={() => setShowMediaPicker(false)}
+          onClose={() => {
+            setShowMediaPicker(false)
+            setIsReplacingImage(false)
+          }}
         />
       )}
 
@@ -425,8 +448,16 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                   </div>
                 </div>
               </div>
-              <div className="w-full md:w-64 flex flex-col items-center justify-center bg-neutral-50 border border-neutral-200 rounded-xl p-2">
+              <div className="w-full md:w-64 flex flex-col items-center justify-center border border-neutral-200 rounded-xl p-4 bg-white shadow-sm">
                 <img src={selectedImage.src} className="max-w-full max-h-48 object-contain rounded" alt="" />
+                <div className="mt-4 flex gap-2 w-full justify-center">
+                  <button onClick={() => setShowImageEditor(true)} className="px-3 py-1.5 border border-primary text-primary rounded text-xs font-semibold hover:bg-primary/5 bg-white transition-colors">
+                    Sửa bản gốc
+                  </button>
+                  <button onClick={() => { setIsReplacingImage(true); setShowMediaPicker(true) }} className="px-3 py-1.5 border border-primary text-primary rounded text-xs font-semibold hover:bg-primary/5 bg-white transition-colors">
+                    Thay thế
+                  </button>
+                </div>
               </div>
             </div>
             <div className="p-4 border-t border-neutral-200 bg-neutral-50 flex justify-end gap-2">
@@ -496,6 +527,18 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
             </div>
           </div>
         </div>
+      )}
+
+      {showImageEditor && selectedImage && (
+        <ImageEditorModal
+          src={selectedImage.src}
+          onSave={(newUrl) => {
+            selectedImage.src = newUrl
+            onChange(editorRef.current?.innerHTML || '')
+            setShowImageEditor(false)
+          }}
+          onCancel={() => setShowImageEditor(false)}
+        />
       )}
     </div>
   )
