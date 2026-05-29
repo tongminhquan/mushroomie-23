@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Deployment and SQL scripts
+*.sql
+*.js
+!next.config.js
+!postcss.config.js
+!tailwind.config.js
+*.zip
+cpanel-deploy/
+deploy-temp/
+test-v*-extract/
+*.bak
+

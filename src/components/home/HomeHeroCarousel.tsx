@@ -29,6 +29,8 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
 
   const [current, setCurrent] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [touchEnd, setTouchEnd] = useState<number | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Auto sliding interval: 5 seconds
@@ -72,11 +74,62 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
     setTimeout(() => setIsAnimating(false), 600)
   }
 
+  const minSwipeDistance = 50
+
+  const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
+    setTouchEnd(null)
+    if ('touches' in e) {
+      setTouchStart(e.targetTouches[0].clientX)
+    } else {
+      setTouchStart(e.clientX)
+    }
+    stopTimer() // Pause timer while dragging
+  }
+
+  const handleTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
+    if ('touches' in e) {
+      setTouchEnd(e.targetTouches[0].clientX)
+    } else {
+      if (touchStart !== null) {
+        setTouchEnd(e.clientX)
+      }
+    }
+  }
+
+  const handleTouchEnd = () => {
+    startTimer() // Resume timer after drag
+    if (touchStart === null || touchEnd === null) return
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+    if (isLeftSwipe) {
+      handleNext()
+    }
+    if (isRightSwipe) {
+      handlePrev()
+    }
+    setTouchStart(null)
+    setTouchEnd(null)
+  }
+
+  const handleMouseLeave = () => {
+    startTimer()
+    if (touchStart !== null) {
+      handleTouchEnd()
+    }
+  }
+
   return (
     <section 
-      className="relative min-h-[90vh] bg-neutral-900 flex items-center overflow-hidden group select-none"
+      className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] xl:h-[650px] bg-neutral-900 flex items-center overflow-hidden group select-none cursor-grab active:cursor-grabbing"
       onMouseEnter={stopTimer}
-      onMouseLeave={startTimer}
+      onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onMouseDown={handleTouchStart}
+      onMouseMove={handleTouchMove}
+      onMouseUp={handleTouchEnd}
     >
       {/* Slides Container */}
       <div className="absolute inset-0 w-full h-full">
@@ -97,12 +150,12 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
               <img 
                 src={banner.image_url} 
                 alt={banner.title || 'Mushroomie Banner'} 
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover pointer-events-none"
               />
 
               {/* Gradient Overlay (Only if there is text content to ensure readability) */}
               <div 
-                className={`absolute inset-0 transition-opacity duration-700 ${
+                className={`absolute inset-0 transition-opacity duration-700 pointer-events-none ${
                   isPureImage 
                     ? 'bg-black/10' // Subtle darkening even for pure images
                     : 'bg-gradient-to-tr from-black/85 via-black/45 to-black/10 lg:from-black/75 lg:via-black/35 lg:to-transparent'
@@ -126,11 +179,11 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
 
               {/* Slide Content */}
               {!isPureImage && (
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-20 h-full flex items-center">
-                  <div className="max-w-2xl text-left text-white space-y-6">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-20 relative z-20 h-full flex items-center pointer-events-none">
+                  <div className="max-w-2xl text-left text-white space-y-4 sm:space-y-6">
                     {/* Floating pill badge */}
                     <div 
-                      className={`inline-flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm transition-all duration-700 delay-100 transform ${
+                      className={`inline-flex items-center gap-2 bg-white/20 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-semibold backdrop-blur-sm transition-all duration-700 delay-100 transform ${
                         isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                       }`}
                     >
@@ -139,7 +192,7 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
 
                     {/* Banner Headline */}
                     <h1 
-                      className={`font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight transition-all duration-700 delay-200 transform ${
+                      className={`font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight transition-all duration-700 delay-200 transform ${
                         isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                       }`}
                     >
@@ -155,7 +208,7 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
                     {/* Banner Description */}
                     {banner.description && (
                       <p 
-                        className={`text-white/85 text-base sm:text-lg md:text-xl leading-relaxed transition-all duration-700 delay-300 transform ${
+                        className={`text-white/85 text-sm sm:text-lg md:text-xl leading-relaxed transition-all duration-700 delay-300 transform ${
                           isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                         }`}
                       >
@@ -166,14 +219,14 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
                     {/* Action buttons */}
                     {(banner.button_text || banner.secondary_button_text) && (
                       <div 
-                        className={`flex flex-wrap gap-4 pt-4 transition-all duration-700 delay-400 transform ${
+                        className={`flex flex-wrap gap-3 sm:gap-4 pt-2 sm:pt-4 transition-all duration-700 delay-400 transform pointer-events-auto ${
                           isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                         }`}
                       >
                         {banner.button_text && (
                           <Link 
                             href={banner.button_link || '#'} 
-                            className="bg-white text-primary px-8 py-3.5 rounded-full font-bold text-base hover:bg-yellow-50 transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center min-w-[140px]"
+                            className="bg-white text-primary px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-full font-bold text-sm sm:text-base hover:bg-yellow-50 transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center min-w-[120px] sm:min-w-[140px]"
                           >
                             {banner.button_text}
                           </Link>
@@ -181,7 +234,7 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
                         {banner.secondary_button_text && (
                           <Link 
                             href={banner.secondary_button_link || '#'} 
-                            className="border-2 border-white text-white px-8 py-3 rounded-full font-bold text-base hover:bg-white hover:text-neutral-900 transition-all flex items-center justify-center min-w-[140px]"
+                            className="border-2 border-white text-white px-6 sm:px-8 py-2 sm:py-3 rounded-full font-bold text-sm sm:text-base hover:bg-white hover:text-neutral-900 transition-all flex items-center justify-center min-w-[120px] sm:min-w-[140px]"
                           >
                             {banner.secondary_button_text}
                           </Link>
@@ -194,7 +247,7 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
 
               {/* If it's a pure image, make the entire slide a clickable link if button_link is specified */}
               {isPureImage && banner.button_link && (
-                <Link href={banner.button_link} className="absolute inset-0 z-20 w-full h-full cursor-pointer" />
+                <Link href={banner.button_link} className="absolute inset-0 z-20 w-full h-full cursor-pointer pointer-events-auto" />
               )}
             </div>
           )
@@ -205,35 +258,35 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
       {banners.length > 1 && (
         <>
           <button 
-            onClick={handlePrev}
-            className="absolute left-4 z-30 p-3 rounded-full bg-black/30 hover:bg-black/50 text-white border border-white/10 hover:border-white/20 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 active:scale-90"
+            onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+            className="absolute left-2 sm:left-4 z-30 p-2 sm:p-3 rounded-full bg-black/30 hover:bg-black/50 text-white border border-white/10 hover:border-white/20 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 active:scale-90"
             title="Slide trước"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
           <button 
-            onClick={handleNext}
-            className="absolute right-4 z-30 p-3 rounded-full bg-black/30 hover:bg-black/50 text-white border border-white/10 hover:border-white/20 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 active:scale-90"
+            onClick={(e) => { e.stopPropagation(); handleNext(); }}
+            className="absolute right-2 sm:right-4 z-30 p-2 sm:p-3 rounded-full bg-black/30 hover:bg-black/50 text-white border border-white/10 hover:border-white/20 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 active:scale-90"
             title="Slide tiếp theo"
           >
-            <ChevronRight size={24} />
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </>
       )}
 
       {/* Pagination Dots */}
       {banners.length > 1 && (
-        <div className="absolute bottom-6 left-0 right-0 z-30 flex justify-center items-center gap-2.5">
+        <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 z-30 flex justify-center items-center gap-2 sm:gap-2.5">
           {banners.map((_, index) => {
             const isActive = index === current
             return (
               <button 
                 key={index}
-                onClick={() => handleDotClick(index)}
-                className={`h-2.5 rounded-full transition-all duration-300 ${
+                onClick={(e) => { e.stopPropagation(); handleDotClick(index); }}
+                className={`h-2 sm:h-2.5 rounded-full transition-all duration-300 ${
                   isActive 
-                    ? 'w-8 bg-yellow-300 shadow-sm' 
-                    : 'w-2.5 bg-white/50 hover:bg-white/80'
+                    ? 'w-6 sm:w-8 bg-yellow-300 shadow-sm' 
+                    : 'w-2 sm:w-2.5 bg-white/50 hover:bg-white/80'
                 }`}
                 title={`Chuyển đến slide ${index + 1}`}
               />

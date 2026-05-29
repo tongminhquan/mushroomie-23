@@ -7,7 +7,8 @@ const registerSchema = z.object({
   name: z.string().min(2, 'Tên phải có ít nhất 2 ký tự'),
   email: z.string().email('Email không hợp lệ'),
   password: z.string().min(8, 'Mật khẩu phải có ít nhất 8 ký tự'),
-  phone: z.string().optional(),
+  phone: z.string().min(9, 'Số điện thoại phải từ 9 đến 11 số'),
+  address: z.string().min(5, 'Địa chỉ phải có ít nhất 5 ký tự'),
 })
 
 export async function POST(request: NextRequest) {
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 })
     }
 
-    const { name, email, password, phone } = parsed.data
+    const { name, email, password, phone, address } = parsed.data
 
     const existing = await prisma.user.findUnique({ where: { email } })
     if (existing) {
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     const password_hash = await bcrypt.hash(password, 12)
     const user = await prisma.user.create({
-      data: { name, email, password_hash, phone, role: 'user' },
+      data: { name, email, password_hash, phone, address, role: 'user' },
     })
 
     return NextResponse.json({ success: true, userId: user.id }, { status: 201 })

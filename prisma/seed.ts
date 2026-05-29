@@ -1,34 +1,8 @@
 import { PrismaClient } from '@prisma/client'
-import { PrismaMariaDb } from '@prisma/adapter-mariadb'
 import bcrypt from 'bcryptjs'
 import 'dotenv/config'
 
-function parseDatabaseUrl(url: string) {
-  try {
-    const u = new URL(url)
-    return {
-      host: u.hostname,
-      port: parseInt(u.port || '3306'),
-      user: u.username,
-      password: decodeURIComponent(u.password),
-      database: u.pathname.replace('/', ''),
-      allowPublicKeyRetrieval: true,
-    }
-  } catch {
-    return {
-      host: 'localhost',
-      port: 3306,
-      user: 'root',
-      password: 'password',
-      database: 'mushroomie',
-      allowPublicKeyRetrieval: true,
-    }
-  }
-}
-
-const dbConfig = parseDatabaseUrl(process.env.DATABASE_URL || '')
-const adapter = new PrismaMariaDb(dbConfig)
-const prisma = new PrismaClient({ adapter })
+const prisma = new PrismaClient()
 
 async function main() {
   console.log('🌱 Seeding database...')

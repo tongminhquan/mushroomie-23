@@ -30,5 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "cpanel-deploy", "deploy-temp", "test-v3-extract", "test-v4-extract"]
 }
