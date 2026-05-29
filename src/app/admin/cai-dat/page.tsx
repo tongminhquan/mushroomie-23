@@ -120,11 +120,11 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold mb-1 text-neutral-700">Số điện thoại Hotline</label>
-                    <input defaultValue="0900 000 000" className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" />
+                    <input defaultValue="+84 84 874 4060" className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold mb-1 text-neutral-700">Email hỗ trợ</label>
-                    <input defaultValue="mushroomie.vn@gmail.com" className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" />
+                    <input defaultValue="cskh@mushroomie.io.vn" className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" />
                   </div>
                   <div className="pt-4 flex justify-end">
                     <Button className="flex items-center gap-2"><Save size={18} /> Lưu thay đổi</Button>

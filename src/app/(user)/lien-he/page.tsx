@@ -41,11 +41,11 @@ export default function ContactPage() {
               <h2 className="font-heading font-bold text-xl mb-4">Thông tin liên hệ</h2>
               <div className="space-y-3">
                 {[
-                  { emoji: '📧', label: 'Email', value: 'mushroomie.vn@gmail.com' },
-                  { emoji: '📞', label: 'Điện thoại', value: '0900 000 000' },
+                  { emoji: '📍', label: 'Địa chỉ', value: 'Hẻm 2 tổ 11, phường Trảng Dài, thành phố Đồng Nai' },
+                  { emoji: '📧', label: 'Email', value: 'cskh@mushroomie.io.vn' },
+                  { emoji: '📞', label: 'Điện thoại', value: '+84 84 874 4060' },
                   { emoji: '⏰', label: 'Giờ làm việc', value: 'T2-CN: 8:00 - 21:00' },
-                  { emoji: '📷', label: 'Instagram', value: '@mushroomie.vn' },
-                  { emoji: '💬', label: 'Zalo', value: '0900 000 000' },
+                  { emoji: '📷', label: 'Instagram', value: '@mushr00mie._' },
                 ].map((item) => (
                   <div key={item.label} className="flex items-center gap-3 py-2 border-b border-neutral-50 last:border-0">
                     <span className="text-xl w-8">{item.emoji}</span>
