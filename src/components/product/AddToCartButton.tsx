@@ -120,22 +120,22 @@ export default function AddToCartButton({ product }: Props) {
       </div>
 
       {/* Actions */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
         <Button
           onClick={handleAddToCart}
           disabled={isOutOfStock || added}
           size="lg"
-          className="flex-1"
+          className="w-full"
           variant={added ? 'secondary' : 'primary'}
         >
           {added ? (
-            <><CheckCircle size={18} />Đã thêm vào giỏ</>
+            <><CheckCircle size={18} className="shrink-0" />Đã thêm vào giỏ</>
           ) : isOutOfStock ? 'Hết hàng' : (
-            <><ShoppingBag size={18} />Thêm vào giỏ hàng</>
+            <><ShoppingBag size={18} className="shrink-0" />Thêm vào giỏ hàng</>
           )}
         </Button>
         {!isOutOfStock && (
-          <Button onClick={handleBuyNow} variant="outline" size="lg" className="flex-1 sm:flex-none w-full">Mua ngay</Button>
+          <Button onClick={handleBuyNow} variant="outline" size="lg" className="w-full">Mua ngay</Button>
         )}
       </div>
     </div>

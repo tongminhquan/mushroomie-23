@@ -133,6 +133,21 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
+
+      {/* Map Section */}
+      <div className="max-w-4xl mx-auto px-4 pb-16">
+        <div className="bg-white rounded-2xl p-2 shadow-card overflow-hidden">
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m13!1m8!1m3!1d979.143346171457!2d106.8820431!3d10.9955388!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTDCsDU5JzQ2LjgiTiAxMDbCsDUyJzU2LjMiRQ!5e0!3m2!1svi!2s!4v1780065547238!5m2!1svi!2s" 
+            width="100%" 
+            height="450" 
+            style={{ border: 0, borderRadius: '0.75rem' }} 
+            allowFullScreen={true} 
+            loading="lazy" 
+            referrerPolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
+      </div>
     </div>
   )
 }

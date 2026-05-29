@@ -165,7 +165,7 @@ export default async function HomePage() {
             <h2 className="font-heading text-3xl font-bold mb-3">Quy trình đặt hàng cá nhân hóa</h2>
             <p className="text-white/80">Đơn giản, nhanh chóng, dễ thương</p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
             {[
               { num: '01', emoji: '🛒', title: 'Chọn sản phẩm', desc: 'Duyệt sản phẩm và chọn loại phụ kiện phù hợp' },
               { num: '02', emoji: '🎨', title: 'Tùy chỉnh', desc: 'Chọn charm, màu sắc, kiểu dây và ghi chú cá nhân' },
@@ -173,12 +173,12 @@ export default async function HomePage() {
               { num: '04', emoji: '🚚', title: 'Nhận hàng', desc: 'Mushroomie làm và gửi đến tay bạn trong 3-5 ngày' },
             ].map((step) => (
               <div key={step.num} className="text-center">
-                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-                  <span className="text-2xl">{step.emoji}</span>
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-5 backdrop-blur-sm">
+                  <span className="text-3xl">{step.emoji}</span>
                 </div>
-                <div className="text-white/60 text-xs font-bold mb-1">BƯỚC {step.num}</div>
-                <h3 className="font-heading font-bold text-base mb-2">{step.title}</h3>
-                <p className="text-white/75 text-xs leading-relaxed">{step.desc}</p>
+                <div className="text-white/60 text-sm font-bold mb-2 tracking-wider">BƯỚC {step.num}</div>
+                <h3 className="font-heading font-bold text-lg mb-3">{step.title}</h3>
+                <p className="text-white/80 text-sm leading-relaxed px-2">{step.desc}</p>
               </div>
             ))}
           </div>
