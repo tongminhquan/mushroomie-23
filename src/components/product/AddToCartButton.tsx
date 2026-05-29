@@ -4,6 +4,7 @@ import { useCartStore } from '@/store/cart'
 import Button from '@/components/ui/Button'
 import { ShoppingBag, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 interface ProductOption {
   id: number
@@ -36,6 +37,8 @@ export default function AddToCartButton({ product }: Props) {
   const imageUrl = product.featured_image || `https://picsum.photos/seed/${product.id}/400`
   const isOutOfStock = product.stock <= 0
 
+  const router = useRouter()
+
   const handleAddToCart = () => {
     if (isOutOfStock) return
     addItem({
@@ -49,6 +52,20 @@ export default function AddToCartButton({ product }: Props) {
     })
     setAdded(true)
     setTimeout(() => { setAdded(false); openCart() }, 1000)
+  }
+
+  const handleBuyNow = () => {
+    if (isOutOfStock) return
+    addItem({
+      productId: product.id,
+      name: product.name,
+      price: displayPrice,
+      image: imageUrl,
+      quantity,
+      selectedOptions: Object.keys(selectedOptions).length > 0 ? selectedOptions : undefined,
+      customNote: customNote || undefined,
+    })
+    router.push('/thanh-toan')
   }
 
   return (
@@ -118,9 +135,7 @@ export default function AddToCartButton({ product }: Props) {
           )}
         </Button>
         {!isOutOfStock && (
-          <Link href="/thanh-toan">
-            <Button variant="outline" size="lg" className="flex-1 sm:flex-none w-full">Mua ngay</Button>
-          </Link>
+          <Button onClick={handleBuyNow} variant="outline" size="lg" className="flex-1 sm:flex-none w-full">Mua ngay</Button>
         )}
       </div>
     </div>
