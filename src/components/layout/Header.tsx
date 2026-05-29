@@ -19,11 +19,11 @@ export default function Header() {
   }, [])
 
   const navLinks = [
-    { href: '/', label: 'Trang chu' },
-    { href: '/san-pham', label: 'San pham' },
-    { href: '/tin-tuc', label: 'Tin tuc' },
-    { href: '/gioi-thieu', label: 'Gioi thieu' },
-    { href: '/lien-he', label: 'Lien he' },
+    { href: '/', label: 'Trang chủ' },
+    { href: '/san-pham', label: 'Sản phẩm' },
+    { href: '/tin-tuc', label: 'Tin tức' },
+    { href: '/gioi-thieu', label: 'Giới thiệu' },
+    { href: '/lien-he', label: 'Liên hệ' },
   ]
 
   return (
@@ -44,7 +44,7 @@ export default function Header() {
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <button onClick={toggleCart} className="relative p-2 rounded-full hover:bg-primary-light transition-colors" aria-label="Gio hang">
+            <button onClick={toggleCart} className="relative p-2 rounded-full hover:bg-primary-light transition-colors" aria-label="Giỏ hàng">
               <ShoppingBag size={20} className="text-neutral-700" />
               {totalItems > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">{totalItems}</span>
@@ -58,18 +58,18 @@ export default function Header() {
                 </button>
                 <div className="absolute right-0 top-full pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="bg-white rounded-2xl shadow-xl border border-neutral-100 p-2">
-                    <Link href="/tai-khoan" className="block px-4 py-2 text-sm rounded-xl hover:bg-primary-light hover:text-primary transition-colors">Tai khoan cua toi</Link>
-                    <Link href="/tai-khoan/don-hang" className="block px-4 py-2 text-sm rounded-xl hover:bg-primary-light hover:text-primary transition-colors">Don hang</Link>
+                    <Link href="/tai-khoan" className="block px-4 py-2 text-sm rounded-xl hover:bg-primary-light hover:text-primary transition-colors">Tài khoản của tôi</Link>
+                    <Link href="/tai-khoan/don-hang" className="block px-4 py-2 text-sm rounded-xl hover:bg-primary-light hover:text-primary transition-colors">Đơn hàng</Link>
                     {(session.user as any)?.role === 'admin' && (
-                      <Link href="/admin" className="block px-4 py-2 text-sm rounded-xl hover:bg-primary-light hover:text-primary transition-colors">Quan tri</Link>
+                      <Link href="/admin" className="block px-4 py-2 text-sm rounded-xl hover:bg-primary-light hover:text-primary transition-colors">Quản trị</Link>
                     )}
-                    <button onClick={() => signOut({ callbackUrl: '/' })} className="w-full text-left px-4 py-2 text-sm rounded-xl hover:bg-red-50 hover:text-primary transition-colors mt-1 border-t border-neutral-100 pt-2">Dang xuat</button>
+                    <button onClick={() => signOut({ callbackUrl: '/' })} className="w-full text-left px-4 py-2 text-sm rounded-xl hover:bg-red-50 hover:text-primary transition-colors mt-1 border-t border-neutral-100 pt-2">Đăng xuất</button>
                   </div>
                 </div>
               </div>
             ) : (
               <Link href="/tai-khoan/dang-nhap" className="hidden md:flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-colors">
-                <User size={16} />Dang nhap
+                <User size={16} />Đăng nhập
               </Link>
             )}
             <button className="md:hidden p-2 rounded-full hover:bg-primary-light transition-colors" onClick={() => setIsMenuOpen(!isMenuOpen)}>
