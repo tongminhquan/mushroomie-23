@@ -94,10 +94,16 @@ export default async function HomePage() {
           </div>
           {categories.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {categories.map((cat) => (
+              {categories.map((cat: any) => (
                 <Link key={cat.id} href={`/san-pham?category=${cat.slug}`}
                   className="group bg-gradient-to-br from-primary-light to-white rounded-2xl p-6 text-center hover:shadow-hover transition-all duration-300 hover:-translate-y-1">
-                  <div className="text-4xl mb-3">{categoryIcons[cat.slug] || '💛'}</div>
+                  {cat.image_url ? (
+                    <div className="mx-auto w-16 h-16 mb-4 rounded-xl overflow-hidden shadow-sm border border-neutral-100 bg-white p-1">
+                       <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover rounded-lg group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                  ) : (
+                    <div className="text-4xl mb-3">{categoryIcons[cat.slug] || '💛'}</div>
+                  )}
                   <h3 className="font-heading font-bold text-neutral-900 group-hover:text-primary transition-colors">{cat.name}</h3>
                 </Link>
               ))}
