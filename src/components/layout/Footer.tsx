@@ -25,6 +25,7 @@ export default function Footer() {
               <li><Link href="/gioi-thieu" className="text-neutral-400 text-sm hover:text-white transition-colors">Ve Mushroomie</Link></li>
               <li><Link href="/tin-tuc" className="text-neutral-400 text-sm hover:text-white transition-colors">Tin tuc</Link></li>
               <li><Link href="/lien-he" className="text-neutral-400 text-sm hover:text-white transition-colors">Lien he</Link></li>
+              <li><Link href="/chinh-sach-bao-mat" className="text-neutral-400 text-sm hover:text-white transition-colors">Chinh sach & Bao mat</Link></li>
             </ul>
             <div className="mt-4">
               <p className="text-neutral-400 text-xs">📧 mushroomie.vn@gmail.com</p>
