@@ -77,8 +77,8 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3 text-neutral-400 text-sm">
                 <Mail className="w-5 h-5 text-neutral-500 shrink-0" />
-                <a href="mailto:mushroomie.vn@gmail.com" className="hover:text-white transition-colors">
-                  mushroomie.vn@gmail.com
+                <a href="mailto:cskh@mushroomie.io.vn" className="hover:text-white transition-colors">
+                  cskh@mushroomie.io.vn
                 </a>
               </li>
               <li className="flex items-center gap-3 text-neutral-400 text-sm">
