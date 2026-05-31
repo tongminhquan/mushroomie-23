@@ -5,6 +5,7 @@ import { ArrowLeft, Save, Trash2, ExternalLink, ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
 import MultiImageUploader from '@/components/admin/MultiImageUploader'
+import SingleImageUploader from '@/components/admin/SingleImageUploader'
 
 function generateSlug(text: string) {
   return text
@@ -403,13 +404,25 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             {/* Featured Image */}
             <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
               <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
-                <span className="font-bold text-xs text-neutral-600 uppercase">Hình ảnh sản phẩm</span>
+                <span className="font-bold text-xs text-neutral-600 uppercase">Ảnh chính (Tối đa 1 ảnh)</span>
+              </div>
+              <div className="p-4">
+                <SingleImageUploader 
+                  value={form.featured_image || ''}
+                  onChange={(featured_image) => setForm(prev => ({ ...prev, featured_image }))}
+                />
+              </div>
+            </div>
+
+            {/* Sub Images */}
+            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
+              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
+                <span className="font-bold text-xs text-neutral-600 uppercase">Ảnh phụ (Không giới hạn)</span>
               </div>
               <div className="p-4">
                 <MultiImageUploader 
-                  featuredImage={form.featured_image || null}
                   images={form.images}
-                  onChange={(featured, images) => setForm(prev => ({ ...prev, featured_image: featured || '', images }))}
+                  onChange={(images) => setForm(prev => ({ ...prev, images }))}
                 />
               </div>
             </div>

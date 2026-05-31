@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import MultiImageUploader from '@/components/admin/MultiImageUploader'
+import SingleImageUploader from '@/components/admin/SingleImageUploader'
 
 export default function AddProductPage() {
   const router = useRouter()
@@ -181,12 +182,21 @@ export default function AddProductPage() {
               className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none resize-y" />
           </div>
           <div>
-            <label className="block text-sm font-semibold mb-3">Hình ảnh sản phẩm</label>
-            <MultiImageUploader 
-              featuredImage={form.featured_image || null}
-              images={form.images}
-              onChange={(featured, images) => setForm(prev => ({ ...prev, featured_image: featured || '', images }))}
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold mb-3">Ảnh chính (Tối đa 1 ảnh)</label>
+              <SingleImageUploader 
+                value={form.featured_image || ''}
+                onChange={(featured_image) => setForm(prev => ({ ...prev, featured_image }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-3">Ảnh phụ (Không giới hạn)</label>
+              <MultiImageUploader 
+                images={form.images}
+                onChange={(images) => setForm(prev => ({ ...prev, images }))}
+              />
+            </div>
           </div>
         </div>
 
