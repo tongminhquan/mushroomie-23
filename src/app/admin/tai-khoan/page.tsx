@@ -124,7 +124,7 @@ export default function AdminAccountsPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
+          <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="text-xs text-neutral-500 uppercase bg-neutral-50/50">
               <tr>
                 <th className="px-6 py-4 font-medium">Người dùng</th>

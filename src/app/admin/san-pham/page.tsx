@@ -46,15 +46,15 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="font-heading text-2xl font-bold">Quản lý sản phẩm</h1>
           <p className="text-neutral-500 text-sm">{total} sản phẩm</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <ManageCategoriesModal />
           <ManageStatusesModal />
-          <Link href="/admin/san-pham/them" className="bg-primary text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-colors shadow-sm">
+          <Link href="/admin/san-pham/them" className="bg-primary text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-colors shadow-sm whitespace-nowrap flex-1 text-center md:flex-none">
             + Thêm sản phẩm
           </Link>
         </div>
@@ -83,7 +83,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
       {/* Table */}
       <div className="bg-white rounded-2xl shadow-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm whitespace-nowrap">
             <thead className="bg-neutral-50 border-b border-neutral-100">
               <tr>
                 <th className="text-left py-3 px-4 text-neutral-500 font-medium">Sản phẩm</th>

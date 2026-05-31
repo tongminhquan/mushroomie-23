@@ -81,7 +81,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
             className="w-full px-4 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto whitespace-nowrap pb-1">
           {['', 'PENDING_PAYMENT', 'PROCESSING', 'MAKING', 'PACKING', 'SHIPPING', 'COMPLETED', 'CANCELLED'].map((s) => (
             <Link key={s} href={`/admin/don-hang?${s ? `status=${s}` : ''}`}
               className={`px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
@@ -96,7 +96,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
       {/* Table */}
       <div className="bg-white rounded-2xl shadow-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm whitespace-nowrap">
             <thead className="bg-neutral-50 border-b border-neutral-100">
               <tr>
                 <th className="text-left py-3 px-4 text-neutral-500 font-medium">Mã đơn</th>

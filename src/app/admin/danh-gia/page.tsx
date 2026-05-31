@@ -29,14 +29,14 @@ export default async function AdminReviewsPage({ searchParams }: { searchParams:
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="font-heading text-2xl font-bold">Quản lý đánh giá</h1>
           {pendingCount > 0 && <p className="text-yellow-600 text-sm font-semibold">{pendingCount} đánh giá chờ duyệt</p>}
         </div>
       </div>
 
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 overflow-x-auto whitespace-nowrap pb-1">
         {[
           { value: '', label: 'Tất cả' },
           { value: 'pending', label: '⏳ Chờ duyệt' },

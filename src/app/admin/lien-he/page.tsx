@@ -28,7 +28,7 @@ export default async function AdminContactsPage({ searchParams }: { searchParams
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="font-heading text-2xl font-bold">Quản lý liên hệ</h1>
           {unreadCount > 0 && <p className="text-red-600 text-sm font-semibold">{unreadCount} tin chưa đọc</p>}
@@ -36,7 +36,7 @@ export default async function AdminContactsPage({ searchParams }: { searchParams
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 overflow-x-auto whitespace-nowrap pb-1">
         {[
           { value: '', label: 'Tất cả' },
           { value: 'unread', label: '🔴 Chưa đọc' },

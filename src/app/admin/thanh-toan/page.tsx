@@ -35,12 +35,12 @@ export default function AdminPaymentsPage() {
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold font-heading">Quản lý Thanh toán</h1>
           <p className="text-neutral-500 text-sm mt-1">Lịch sử giao dịch và trạng thái thanh toán đơn hàng.</p>
         </div>
-        <div className="flex gap-2 bg-white p-1 rounded-xl shadow-sm border border-neutral-200">
+        <div className="flex gap-2 overflow-x-auto whitespace-nowrap bg-white p-1 rounded-xl shadow-sm border border-neutral-200">
           {['ALL', 'PENDING', 'PAID', 'FAILED'].map(status => (
             <button
               key={status}
@@ -57,7 +57,7 @@ export default function AdminPaymentsPage() {
 
       <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
+          <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="bg-neutral-50 text-neutral-500 font-semibold border-b border-neutral-200">
               <tr>
                 <th className="px-6 py-4">Mã Đơn / Khách hàng</th>
