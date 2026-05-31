@@ -4,11 +4,11 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
 const registerSchema = z.object({
-  name: z.string().min(2, 'Tên phải có ít nhất 2 ký tự'),
-  email: z.string().email('Email không hợp lệ'),
+  name: z.string().min(2, 'Tên phải có ít nhất 2 ký tự').trim(),
+  email: z.string().email('Email không hợp lệ').trim(),
   password: z.string().min(8, 'Mật khẩu phải có ít nhất 8 ký tự'),
-  phone: z.string().min(9, 'Số điện thoại phải từ 9 đến 11 số'),
-  address: z.string().min(5, 'Địa chỉ phải có ít nhất 5 ký tự'),
+  phone: z.string().regex(/^(0|\+84)[0-9]{8,9}$/, 'Số điện thoại không hợp lệ (phải bắt đầu bằng 0 hoặc +84 và gồm 10-11 số)'),
+  address: z.string().min(10, 'Vui lòng nhập địa chỉ cụ thể (ít nhất 10 ký tự)').trim(),
 })
 
 export async function POST(request: NextRequest) {
