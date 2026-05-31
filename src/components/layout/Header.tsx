@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useCartStore } from '@/store/cart'
-import { ShoppingBag, Menu, X, User, Phone, Mail, Search } from 'lucide-react'
+import { ShoppingBag, Menu, X, User, Phone, Mail, Search, MapPin, ChevronDown } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -35,162 +35,211 @@ export default function Header() {
   }
 
   const navLinks = [
-    { href: '/', label: 'Trang chủ' },
-    { href: '/san-pham', label: 'Sản phẩm' },
-    { href: '/tin-tuc', label: 'Tin tức' },
-    { href: '/gioi-thieu', label: 'Giới thiệu' },
-    { href: '/lien-he', label: 'Liên hệ' },
+    { href: '/', label: 'TRANG CHỦ' },
+    { href: '/san-pham', label: 'TẤT CẢ SẢN PHẨM' },
+    { href: '/san-pham?category=vong-tay', label: 'VÒNG TAY' },
+    { href: '/san-pham?category=moc-khoa', label: 'MÓC KHÓA' },
+    { href: '/tin-tuc', label: 'TIN TỨC' },
+    { href: '/chinh-sach-tra-gop', label: 'TRẢ GÓP' },
+    { href: '/lien-he', label: 'LIÊN HỆ' },
   ]
 
   return (
-    <>
-      {/* TOP BAR */}
-      <div className={`gradient-primary text-white text-xs transition-all duration-300 overflow-hidden ${
-        isScrolled ? 'max-h-0 opacity-0' : 'max-h-10 opacity-100'
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-9">
-          <div className="flex items-center gap-4">
-            <a href="tel:+84848744060" className="flex items-center gap-1.5 hover:text-yellow-200 transition-colors">
-              <Phone size={12} /> 0848 744 060
+    <header className="w-full font-body">
+      {/* 1. TOP BAR (Light Gray) */}
+      <div className={`bg-neutral-100 text-neutral-600 text-xs hidden md:block border-b border-neutral-200 transition-all duration-300 ${isScrolled ? 'hidden' : 'block'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-8 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <a href="tel:+84848744060" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+              <Phone size={12} /> Hotline: 0848 744 060
             </a>
-            <a href="mailto:cskh@mushroomie.io.vn" className="hidden sm:flex items-center gap-1.5 hover:text-yellow-200 transition-colors">
-              <Mail size={12} /> cskh@mushroomie.io.vn
+            <a href="mailto:cskh@mushroomie.io.vn" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+              <Mail size={12} /> Email: cskh@mushroomie.io.vn
             </a>
+            <span className="flex items-center gap-1.5">
+              <MapPin size={12} /> Hệ thống cửa hàng Mushroomie
+            </span>
           </div>
-          <div className="flex items-center gap-3">
-            <a href="https://www.facebook.com/mushr00mie" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-200 transition-colors">
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            </a>
-            <a href="https://www.instagram.com/mushr00mie._/" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-200 transition-colors">
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-            </a>
-            <a href="https://www.tiktok.com/@mushr00mie._?lang=vi-VN" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-200 transition-colors">
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
-            </a>
+          <div className="flex items-center gap-4">
+            <Link href="/chinh-sach-tra-gop" className="hover:text-primary transition-colors">Chính sách trả góp</Link>
+            <Link href="/chinh-sach-bao-mat" className="hover:text-primary transition-colors">Bảo hành & Đổi trả</Link>
+            <span className="text-neutral-300">|</span>
+            <a href="https://www.facebook.com/mushr00mie" target="_blank" rel="noopener noreferrer" className="hover:text-[#1877F2]">Facebook</a>
           </div>
         </div>
       </div>
 
-      {/* MAIN HEADER */}
-      <header className={`sticky top-0 z-50 bg-white transition-all duration-300 ${
-        isScrolled ? 'shadow-lg' : 'shadow-sm'
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Logo + Search + Icons row */}
-          <div className="flex items-center justify-between h-16 gap-4">
-            <Link href="/" className="flex items-center group shrink-0">
-              <img src="/logo.png" alt="Mushroomie Logo" className="h-12 w-auto object-contain transition-transform group-hover:scale-105" />
-            </Link>
+      {/* 2. MAIN HEADER (White, Sticky) */}
+      <div className={`bg-white sticky top-0 z-50 transition-shadow ${isScrolled ? 'shadow-md' : ''}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 md:h-24 flex items-center justify-between gap-4 md:gap-8">
+          
+          {/* Mobile Menu Button */}
+          <button className="md:hidden p-2 text-neutral-700" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
 
-            {/* Search bar - desktop */}
-            <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-auto">
-              <div className="relative w-full">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Tìm kiếm sản phẩm..."
-                  className="w-full pl-4 pr-12 py-2.5 bg-neutral-50 border border-neutral-200 rounded-full text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-light placeholder:text-neutral-400"
-                />
-                <button type="submit" className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 gradient-primary rounded-full flex items-center justify-center hover:opacity-90 transition-opacity">
-                  <Search size={14} className="text-white" />
-                </button>
-              </div>
-            </form>
+          {/* Logo */}
+          <Link href="/" className="shrink-0 flex items-center justify-center">
+            <img src="/logo.png" alt="Mushroomie Logo" className="h-12 md:h-16 w-auto object-contain" />
+          </Link>
 
-            <div className="flex items-center gap-2">
-              {/* Search icon - mobile */}
-              <button onClick={() => setShowSearch(!showSearch)} className="md:hidden p-2 rounded-full hover:bg-primary-light transition-colors" aria-label="Tìm kiếm">
-                <Search size={20} className="text-neutral-700" />
-              </button>
-              <button onClick={toggleCart} className="relative p-2 rounded-full hover:bg-primary-light transition-colors" aria-label="Giỏ hàng">
-                <ShoppingBag size={20} className="text-neutral-700" />
-                {totalItems > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 gradient-primary text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">{totalItems}</span>
-                )}
-              </button>
-              {session ? (
-                <div className="relative group flex items-center">
-                  {/* Mobile user icon */}
-                  <Link href="/tai-khoan" className="md:hidden p-2 rounded-full hover:bg-primary-light transition-colors">
-                    <User size={20} className="text-neutral-700" />
-                  </Link>
-                  {/* Desktop user button */}
-                  <button className="hidden md:flex items-center gap-2 p-2 rounded-full hover:bg-primary-light transition-colors">
-                    <User size={20} className="text-neutral-700" />
-                    <span className="hidden lg:block text-sm font-semibold text-neutral-700">{session.user?.name?.split(' ')[0]}</span>
-                  </button>
-                  {/* Desktop user dropdown */}
-                  <div className="absolute right-0 top-full pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 hidden md:block">
-                    <div className="bg-white rounded-2xl shadow-xl border border-neutral-100 p-2">
-                      <Link href="/tai-khoan" className="block px-4 py-2 text-sm rounded-xl hover:bg-primary-light hover:text-primary transition-colors">Tài khoản của tôi</Link>
-                      <Link href="/tai-khoan/don-hang" className="block px-4 py-2 text-sm rounded-xl hover:bg-primary-light hover:text-primary transition-colors">Đơn hàng</Link>
-                      {['super_admin', 'admin', 'viewer'].includes((session.user as any)?.role) && (
-                        <Link href="/admin" className="block px-4 py-2 text-sm rounded-xl hover:bg-primary-light hover:text-primary transition-colors">Quản trị</Link>
-                      )}
-                      <button onClick={() => signOut({ callbackUrl: '/' })} className="w-full text-left px-4 py-2 text-sm rounded-xl hover:bg-red-50 hover:text-primary transition-colors mt-1 border-t border-neutral-100 pt-2">Đăng xuất</button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <Link href="/tai-khoan/dang-nhap" className="hidden md:flex items-center gap-2 gradient-btn px-5 py-2 rounded-full text-sm font-semibold">
-                  <User size={14} />Đăng nhập
-                </Link>
-              )}
-              <button className="md:hidden p-2 rounded-full hover:bg-primary-light transition-colors" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          {/* Search Bar (Center, huge) */}
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl mx-auto">
+            <div className="flex w-full">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Ba mẹ muốn tìm đồ chơi gì cho bé? (VD: Vòng tay, móc khóa...)"
+                className="w-full px-5 py-3 bg-white border-2 border-primary rounded-l-md text-sm focus:outline-none placeholder:text-neutral-400 font-medium"
+              />
+              <button type="submit" className="bg-primary hover:bg-primary-dark transition-colors px-6 text-white rounded-r-md flex items-center justify-center">
+                <Search size={20} />
               </button>
             </div>
-          </div>
+          </form>
 
-          {/* Bottom nav - Desktop */}
-          <nav className={`hidden md:flex items-center justify-center gap-1 transition-all duration-300 ${
-            isScrolled ? 'h-0 opacity-0 overflow-hidden' : 'h-11 opacity-100 border-t border-neutral-100'
-          }`}>
-            {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} className="px-4 py-2 text-sm font-bold text-neutral-700 hover:text-primary transition-colors relative group">
-                {link.label}
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 gradient-primary rounded-full group-hover:w-3/4 transition-all duration-300" />
-              </Link>
-            ))}
-          </nav>
+          {/* Right Action Icons (Account, Cart) */}
+          <div className="flex items-center gap-2 md:gap-6 shrink-0">
+            {/* Mobile Search Toggle */}
+            <button onClick={() => setShowSearch(!showSearch)} className="md:hidden p-2 text-neutral-700">
+              <Search size={24} />
+            </button>
+
+            {/* Account Block */}
+            <div className="hidden md:flex items-center gap-3 relative group cursor-pointer">
+              <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-primary group-hover:bg-primary-light transition-colors">
+                <User size={20} />
+              </div>
+              <div className="flex flex-col text-sm">
+                <span className="text-neutral-500 text-xs">Tài khoản</span>
+                <div className="font-bold text-neutral-800 flex items-center gap-1 group-hover:text-primary transition-colors">
+                  {session ? session.user?.name?.split(' ')[0] : 'Đăng nhập'} <ChevronDown size={14} />
+                </div>
+              </div>
+              
+              {/* Dropdown menu */}
+              <div className="absolute right-0 top-full pt-4 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="bg-white rounded-md shadow-xl border border-neutral-100 py-2">
+                  {session ? (
+                    <>
+                      <Link href="/tai-khoan" className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary">Tài khoản của tôi</Link>
+                      <Link href="/tai-khoan/don-hang" className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary">Đơn hàng của tôi</Link>
+                      {['super_admin', 'admin', 'viewer'].includes((session.user as any)?.role) && (
+                        <Link href="/admin" className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary font-bold">Quản trị viên</Link>
+                      )}
+                      <button onClick={() => signOut({ callbackUrl: '/' })} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 mt-1 border-t border-neutral-100 pt-2">Đăng xuất</button>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/tai-khoan/dang-nhap" className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary">Đăng nhập</Link>
+                      <Link href="/tai-khoan/dang-ky" className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary">Đăng ký tài khoản</Link>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Cart Block */}
+            <div onClick={toggleCart} className="flex items-center gap-3 cursor-pointer group">
+              <div className="relative w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white group-hover:bg-primary-dark transition-colors">
+                <ShoppingBag size={20} />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#FFB347] text-white text-[11px] font-bold rounded-full flex items-center justify-center shadow-sm border-2 border-white">
+                    {totalItems}
+                  </span>
+                )}
+              </div>
+              <div className="hidden md:flex flex-col text-sm">
+                <span className="text-neutral-500 text-xs">Giỏ hàng</span>
+                <span className="font-bold text-neutral-800 group-hover:text-primary transition-colors">Sản phẩm</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Mobile search */}
+        {/* Mobile Search Bar Expand */}
         {showSearch && (
-          <div className="md:hidden px-4 pb-3 border-t border-neutral-100">
+          <div className="md:hidden px-4 pb-4 border-t border-neutral-100 bg-white">
             <form onSubmit={handleSearch} className="flex mt-3">
-              <div className="relative w-full">
+              <div className="flex w-full">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Tìm kiếm sản phẩm..."
-                  className="w-full pl-4 pr-12 py-2.5 bg-neutral-50 border border-neutral-200 rounded-full text-sm focus:outline-none focus:border-primary"
+                  className="w-full px-4 py-2 bg-neutral-50 border border-neutral-200 rounded-l-md text-sm focus:outline-none focus:border-primary"
                   autoFocus
                 />
-                <button type="submit" className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 gradient-primary rounded-full flex items-center justify-center">
-                  <Search size={14} className="text-white" />
+                <button type="submit" className="bg-primary px-4 text-white rounded-r-md flex items-center justify-center">
+                  <Search size={18} />
                 </button>
               </div>
             </form>
           </div>
         )}
+      </div>
 
-        {/* Mobile menu */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-white border-t border-neutral-100 shadow-lg">
-            <div className="px-4 py-4 space-y-1">
+      {/* 3. NAVIGATION BAR (Solid Red, Sticky) */}
+      <nav className={`hidden md:block w-full bg-primary sticky top-[96px] z-40 shadow-sm transition-transform ${isScrolled ? '-translate-y-8' : ''}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center">
+          <ul className="flex items-center h-full w-full justify-center lg:justify-start gap-1">
+            <li className="h-full flex items-center bg-primary-dark px-4 mr-2">
+              <button className="flex items-center gap-2 text-white font-bold text-sm tracking-wide">
+                <Menu size={20} /> DANH MỤC SẢN PHẨM
+              </button>
+            </li>
+            {navLinks.map((link) => (
+              <li key={link.href} className="h-full">
+                <Link 
+                  href={link.href} 
+                  className="h-full px-4 lg:px-6 flex items-center text-white text-sm font-bold tracking-wide hover:bg-primary-dark transition-colors whitespace-nowrap"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </nav>
+
+      {/* Mobile Menu Overlay */}
+      {isMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-[100] bg-black/50" onClick={() => setIsMenuOpen(false)}>
+          <div className="w-[280px] h-full bg-white flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="p-4 border-b border-neutral-100 flex items-center justify-between bg-neutral-50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-600">
+                  <User size={20} />
+                </div>
+                {session ? (
+                  <div className="flex flex-col">
+                    <span className="font-bold text-sm">{session.user?.name}</span>
+                    <button onClick={() => signOut()} className="text-xs text-red-500 text-left">Đăng xuất</button>
+                  </div>
+                ) : (
+                  <Link href="/tai-khoan/dang-nhap" className="font-bold text-sm text-primary" onClick={() => setIsMenuOpen(false)}>
+                    Đăng nhập / Đăng ký
+                  </Link>
+                )}
+              </div>
+              <button onClick={() => setIsMenuOpen(false)} className="p-2 bg-white rounded-full border border-neutral-200 text-neutral-500"><X size={16} /></button>
+            </div>
+            <div className="overflow-y-auto flex-1 py-2">
               {navLinks.map((link) => (
-                <Link key={link.href} href={link.href} className="block px-4 py-3 text-sm font-bold rounded-xl hover:bg-primary-light hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>{link.label}</Link>
+                <Link 
+                  key={link.href} 
+                  href={link.href} 
+                  className="block px-6 py-3.5 text-sm font-bold text-neutral-700 hover:bg-neutral-50 hover:text-primary transition-colors border-b border-neutral-50" 
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
               ))}
-              {!session && (
-                <Link href="/tai-khoan/dang-nhap" className="block px-4 py-3 text-sm font-bold text-primary rounded-xl bg-primary-light text-center mt-2" onClick={() => setIsMenuOpen(false)}>Đăng nhập</Link>
-              )}
             </div>
           </div>
-        )}
-      </header>
-    </>
+        </div>
+      )}
+    </header>
   )
 }
