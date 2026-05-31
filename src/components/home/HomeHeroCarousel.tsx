@@ -121,7 +121,7 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
 
   return (
     <section 
-      className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] xl:h-[650px] bg-neutral-900 flex items-center overflow-hidden group select-none cursor-grab active:cursor-grabbing"
+      className="relative w-full aspect-video bg-neutral-900 flex items-center overflow-hidden group select-none cursor-grab active:cursor-grabbing"
       onMouseEnter={stopTimer}
       onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart}

@@ -472,7 +472,7 @@ export default function AdminBannersPage() {
                 <div>
                   <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Hình ảnh banner *</label>
                   {form.image_url ? (
-                    <div className="relative rounded-2xl overflow-hidden border border-neutral-200 group aspect-[21/9] bg-neutral-100">
+                    <div className="relative rounded-2xl overflow-hidden border border-neutral-200 group aspect-video bg-neutral-100">
                       <img src={form.image_url} alt="Preview" className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <button 
@@ -495,7 +495,7 @@ export default function AdminBannersPage() {
                     <button 
                       type="button" 
                       onClick={() => setShowMediaPicker(true)} 
-                      className="w-full aspect-[21/9] border-2 border-dashed border-neutral-300 rounded-2xl flex flex-col items-center justify-center gap-2 text-neutral-400 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all"
+                      className="w-full aspect-video border-2 border-dashed border-neutral-300 rounded-2xl flex flex-col items-center justify-center gap-2 text-neutral-400 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all"
                     >
                       <ImageIcon size={32} />
                       <span className="text-sm font-semibold">Chọn hình ảnh từ thư viện</span>
@@ -636,7 +636,7 @@ export default function AdminBannersPage() {
                   <h4 className="font-bold text-sm text-neutral-800 uppercase tracking-wider">Xem trước thời gian thực (Preview)</h4>
                   
                   {/* Banner Preview Card */}
-                  <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-lg border border-neutral-200 bg-neutral-900 group">
+                  <div className="relative w-full aspect-video rounded-3xl overflow-hidden shadow-lg border border-neutral-200 bg-neutral-900 group">
                     {form.image_url ? (
                       <img 
                         src={form.image_url} 
