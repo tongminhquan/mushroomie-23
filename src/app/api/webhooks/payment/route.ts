@@ -205,6 +205,15 @@ export async function POST(request: Request) {
 }
 
 function extractOrderCodes(content: string, prefix: string): string[] {
-  const regex = new RegExp(`${prefix}-[A-Z0-9]+`, 'g')
-  return content.match(regex) || []
+  // Allow optional hyphens or spaces between prefix and the rest of the code
+  const regex = new RegExp(`${prefix}[\\-\\s]*[A-Z0-9]+`, 'g')
+  const matches = content.match(regex) || []
+  
+  return matches.map(match => {
+    // Remove all spaces and hyphens
+    const cleanMatch = match.replace(/[\-\s]/g, '')
+    // Reconstruct with exact format: PREFIX-SUFFIX
+    const suffix = cleanMatch.substring(prefix.length)
+    return `${prefix}-${suffix}`
+  })
 }
