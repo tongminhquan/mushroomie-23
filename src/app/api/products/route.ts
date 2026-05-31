@@ -18,6 +18,7 @@ const productSchema = z.object({
   is_featured: z.boolean().default(false),
   featured_image: z.string().optional().nullable(),
   category_id: z.number().optional().nullable(),
+  images: z.array(z.string()).optional(),
 })
 
 export async function GET(request: NextRequest) {
@@ -78,9 +79,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
 
-    const slug = parsed.data.slug || generateSlug(parsed.data.name)
+    const { images, ...productData } = parsed.data
+
+    const slug = productData.slug || generateSlug(productData.name)
     const product = await prisma.product.create({
-      data: { ...parsed.data, slug },
+      data: { 
+        ...productData, 
+        slug,
+        images: images?.length ? {
+          create: images.map((url, index) => ({
+            image_url: url,
+            sort_order: index,
+          }))
+        } : undefined
+      },
     })
 
     return NextResponse.json(product, { status: 201 })

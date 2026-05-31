@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Trash2, ExternalLink, ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
-import MediaPicker from '@/components/admin/MediaPicker'
+import MultiImageUploader from '@/components/admin/MultiImageUploader'
 
 function generateSlug(text: string) {
   return text
@@ -24,7 +24,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [isLoading, setIsLoading] = useState(false)
   const [isFetching, setIsFetching] = useState(true)
   const [error, setError] = useState('')
-  const [showMediaPicker, setShowMediaPicker] = useState(false)
   const [slugEdited, setSlugEdited] = useState(true) // Start true since it is loaded from database
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([])
@@ -43,6 +42,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     is_customizable: false,
     is_featured: false,
     featured_image: '',
+    images: [] as string[],
     category_id: ''
   })
 
@@ -81,6 +81,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           is_customizable: !!product.is_customizable,
           is_featured: !!product.is_featured,
           featured_image: product.featured_image || '',
+          images: product.images?.map((img: any) => img.image_url) || [],
           category_id: product.category_id ? String(product.category_id) : '',
         })
       } catch (e) {
@@ -122,6 +123,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         price: Number(form.price),
         sale_price: form.sale_price ? Number(form.sale_price) : null,
         stock: Number(form.stock),
+        images: form.images,
         category_id: form.category_id ? Number(form.category_id) : null,
       }
 
@@ -401,52 +403,14 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             {/* Featured Image */}
             <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
               <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
-                <span className="font-bold text-xs text-neutral-600 uppercase">Ảnh đại diện sản phẩm</span>
+                <span className="font-bold text-xs text-neutral-600 uppercase">Hình ảnh sản phẩm</span>
               </div>
               <div className="p-4">
-                {form.featured_image ? (
-                  <div className="space-y-3">
-                    <div className="relative group rounded-xl overflow-hidden border border-neutral-200">
-                      <img src={form.featured_image} alt={form.name} className="w-full aspect-square object-cover" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setShowMediaPicker(true)}
-                          className="bg-white text-neutral-800 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-neutral-100"
-                        >
-                          Thay đổi
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setForm(p => ({ ...p, featured_image: '' }))}
-                          className="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-600"
-                        >
-                          Xóa
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-neutral-600 mb-1">Đường dẫn ảnh đại diện</label>
-                      <input
-                        name="featured_image"
-                        value={form.featured_image}
-                        onChange={handleChange}
-                        placeholder="Hoặc điền URL ảnh..."
-                        className="w-full px-3 py-1.5 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setShowMediaPicker(true)}
-                    className="w-full border-2 border-dashed border-neutral-200 rounded-xl py-12 flex flex-col items-center gap-2 text-neutral-400 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all"
-                  >
-                    <ImageIcon size={28} />
-                    <span className="text-sm font-medium">Chọn ảnh sản phẩm</span>
-                    <span className="text-xs">Mở thư viện Media</span>
-                  </button>
-                )}
+                <MultiImageUploader 
+                  featuredImage={form.featured_image || null}
+                  images={form.images}
+                  onChange={(featured, images) => setForm(prev => ({ ...prev, featured_image: featured || '', images }))}
+                />
               </div>
             </div>
 
@@ -490,14 +454,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         </form>
       </div>
 
-      {/* Media Picker Modal */}
-      {showMediaPicker && (
-        <MediaPicker
-          value={form.featured_image}
-          onChange={(url) => setForm(p => ({ ...p, featured_image: url }))}
-          onClose={() => setShowMediaPicker(false)}
-        />
-      )}
+      {/* Media Picker Modal Removed as it is handled in MultiImageUploader */}
     </div>
   )
 }

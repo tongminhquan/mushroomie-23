@@ -33,7 +33,22 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params
     const body = await request.json()
     if (body.name && !body.slug) body.slug = generateSlug(body.name)
-    const product = await prisma.product.update({ where: { id: Number(id) }, data: body })
+    
+    const { images, ...productData } = body
+    
+    const product = await prisma.product.update({ 
+      where: { id: Number(id) }, 
+      data: {
+        ...productData,
+        images: images !== undefined ? {
+          deleteMany: {},
+          create: images.map((url: string, index: number) => ({
+            image_url: url,
+            sort_order: index,
+          }))
+        } : undefined
+      } 
+    })
     return NextResponse.json(product)
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import MultiImageUploader from '@/components/admin/MultiImageUploader'
 
 export default function AddProductPage() {
   const router = useRouter()
@@ -25,6 +26,7 @@ export default function AddProductPage() {
     is_customizable: false,
     is_featured: false,
     featured_image: '',
+    images: [] as string[],
     category_id: ''
   })
 
@@ -179,10 +181,12 @@ export default function AddProductPage() {
               className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none resize-y" />
           </div>
           <div>
-            <label className="block text-sm font-semibold mb-1">URL Ảnh Đại Diện</label>
-            <input name="featured_image" value={form.featured_image} onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none"
-              placeholder="/images/products/example.jpg" />
+            <label className="block text-sm font-semibold mb-3">Hình ảnh sản phẩm</label>
+            <MultiImageUploader 
+              featuredImage={form.featured_image || null}
+              images={form.images}
+              onChange={(featured, images) => setForm(prev => ({ ...prev, featured_image: featured || '', images }))}
+            />
           </div>
         </div>
 

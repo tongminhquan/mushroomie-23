@@ -1,10 +1,9 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import ProductCard from '@/components/product/ProductCard'
 import AddToCartButton from '@/components/product/AddToCartButton'
-import Badge from '@/components/ui/Badge'
+import ProductGallery from '@/components/product/ProductGallery'
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 import { formatPrice } from '@/lib/utils'
 import type { Metadata } from 'next'
@@ -76,31 +75,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-4">
           {/* Gallery */}
           <AnimateOnScroll animation="fade-right">
-            <div className="space-y-4">
-              <div className="relative h-96 lg:h-[500px] bg-white rounded-2xl overflow-hidden shadow-card">
-                <Image
-                  src={allImages[0] || defaultImage}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
-                  {product.is_customizable && <Badge variant="custom">Cá nhân hóa</Badge>}
-                  {isOnSale && <Badge variant="sale">Sale</Badge>}
-                  <Badge variant="handmade">🧶 Handmade</Badge>
-                </div>
-              </div>
-              {allImages.length > 1 && (
-                <div className="grid grid-cols-4 gap-2">
-                  {allImages.slice(1, 5).map((img, i) => (
-                    <div key={i} className="relative h-24 bg-white rounded-xl overflow-hidden shadow-sm">
-                      <Image src={img} alt={`${product.name} ${i + 2}`} fill className="object-cover" />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ProductGallery
+              images={allImages.length > 0 ? allImages : [defaultImage]}
+              productName={product.name}
+              isCustomizable={!!product.is_customizable}
+              isOnSale={isOnSale}
+            />
           </AnimateOnScroll>
 
           {/* Product info */}
