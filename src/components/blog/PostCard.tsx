@@ -33,7 +33,7 @@ export default function PostCard({ post }: PostCardProps) {
           <h3 className="font-heading font-bold text-neutral-900 text-base leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2">{post.title}</h3>
           {post.excerpt && <p className="text-neutral-500 text-sm leading-relaxed mb-3 line-clamp-2">{post.excerpt}</p>}
           {post.published_at && (
-            <div className="flex items-center gap-1 text-xs text-neutral-400">
+            <div className="flex items-center gap-1 text-xs text-neutral-400" suppressHydrationWarning>
               <Calendar size={12} />
               {formatDate(post.published_at)}
             </div>
