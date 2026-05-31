@@ -2,12 +2,15 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth()
     if (!session?.user || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const resolvedParams = await params
+    const userId = parseInt(resolvedParams.id)
 
     const { role } = await req.json()
     if (role !== 'admin' && role !== 'user') {
@@ -15,12 +18,12 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     }
 
     // Prevent removing admin from oneself
-    if (parseInt(params.id) === parseInt(session.user.id as string) && role !== 'admin') {
+    if (userId === parseInt(session.user.id as string) && role !== 'admin') {
       return NextResponse.json({ error: 'Cannot remove your own admin rights' }, { status: 400 })
     }
 
     const user = await prisma.user.update({
-      where: { id: parseInt(params.id) },
+      where: { id: userId },
       data: { role }
     })
 
