@@ -26,6 +26,11 @@ echo "📂 Sao chép file tĩnh sang standalone..."
 cp -r .next/static .next/standalone/.next/static
 cp -r public .next/standalone/public
 
+# Xóa thư mục uploads trống (nếu có) và tạo symlink
+echo "🔗 Tạo liên kết cho thư mục uploads..."
+rm -rf .next/standalone/public/uploads
+ln -s /var/www/mushroomie/public/uploads /var/www/mushroomie/.next/standalone/public/uploads
+
 # Khởi động lại ứng dụng
 echo "🔄 Khởi động lại PM2..."
 pm2 restart mushroomie --update-env
