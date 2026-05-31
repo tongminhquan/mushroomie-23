@@ -17,6 +17,7 @@
   --color-secondary: #fff5f5;
   --color-accent-peach: #FFB347;
   --color-accent-mint: #A8E6CF;
+  --color-accent-orange: #FF6B35;
   --color-neutral-50: #FAFAFA;
   --color-neutral-100: #F5F5F5;
   --color-neutral-200: #E5E5E5;
@@ -30,8 +31,9 @@
 
   --radius-card: 16px;
   --radius-pill: 9999px;
-  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
-  --shadow-hover: 0 8px 30px rgba(228, 29, 29, 0.15);
+  --shadow-card: 0 4px 15px rgba(64, 64, 64, 0.12);
+  --shadow-hover: 0 8px 30px rgba(228, 29, 29, 0.18);
+  --shadow-strong: 0 4px 25px rgba(64, 64, 64, 0.2);
 }
 
 * {
@@ -50,6 +52,28 @@ body {
 .font-heading { font-family: var(--font-heading); }
 .font-body { font-family: var(--font-body); }
 
+/* Gradient utilities */
+.gradient-primary {
+  background: linear-gradient(135deg, #e41d1d 0%, #FF6B35 100%);
+}
+.gradient-text {
+  background: linear-gradient(135deg, #e41d1d 0%, #FF6B35 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.gradient-btn {
+  background: linear-gradient(135deg, #e41d1d 0%, #FF6B35 100%);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 25px rgba(228, 29, 29, 0.35);
+  transition: all 0.3s ease;
+}
+.gradient-btn:hover {
+  box-shadow: 0 6px 30px rgba(228, 29, 29, 0.5);
+  transform: translateY(-2px);
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--color-neutral-100); }
@@ -66,6 +90,15 @@ body {
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
+}
+
+/* Float animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 
 /* Smooth transitions */

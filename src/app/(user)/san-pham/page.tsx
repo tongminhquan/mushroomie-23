@@ -54,8 +54,8 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 flex-shrink-0">
-            <div className="bg-white rounded-2xl p-5 shadow-card sticky top-20">
-              <h2 className="font-heading font-bold text-lg mb-4">Lọc sản phẩm</h2>
+            <div className="bg-white rounded-xl p-5 shadow-[0_4px_15px_rgba(64,64,64,0.12)] sticky top-20">
+              <h2 className="font-heading font-bold text-lg gradient-text mb-4">Lọc sản phẩm</h2>
               <div className="mb-4">
                 <h3 className="font-semibold text-sm text-neutral-700 mb-2">Danh mục</h3>
                 <div className="space-y-1">
@@ -97,7 +97,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           <main className="flex-1">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
               <div>
-                <h1 className="font-heading text-2xl font-bold text-neutral-900">Sản phẩm</h1>
+                <h1 className="font-heading text-2xl font-bold gradient-text">Sản phẩm</h1>
                 <p className="text-neutral-500 text-sm">{total} sản phẩm</p>
               </div>
               {sp.search && (
@@ -112,7 +112,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
               <EmptyState
                 title="Không tìm thấy sản phẩm"
                 description="Thử tìm kiếm với từ khóa khác hoặc xem tất cả sản phẩm."
-                action={<Link href="/san-pham" className="bg-primary text-white px-5 py-2.5 rounded-full font-semibold text-sm hover:bg-primary-dark transition-colors">Xem tất cả sản phẩm</Link>}
+                action={<Link href="/san-pham" className="gradient-btn px-5 py-2.5 rounded-full font-semibold text-sm">Xem tất cả sản phẩm</Link>}
               />
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
@@ -127,8 +127,8 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
               <div className="flex justify-center gap-2 mt-10">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                   <Link key={p} href={`/san-pham?${new URLSearchParams({ ...sp, page: String(p) })}`}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
-                      p === page ? 'bg-primary text-white' : 'bg-white text-neutral-700 hover:bg-primary-light'
+                    className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
+                      p === page ? 'gradient-primary text-white shadow-md' : 'bg-white text-neutral-700 hover:bg-primary-light shadow-sm'
                     }`}>
                     {p}
                   </Link>

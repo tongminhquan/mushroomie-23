@@ -18,7 +18,7 @@ interface PostCardProps {
 export default function PostCard({ post }: PostCardProps) {
   return (
     <Link href={`/tin-tuc/${post.slug}`} className="group block">
-      <article className="bg-white rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1 h-full">
+      <article className="bg-white rounded-xl overflow-hidden shadow-[0_4px_15px_rgba(64,64,64,0.12)] hover:shadow-[0_8px_30px_rgba(228,29,29,0.18)] transition-all duration-300 hover:-translate-y-1 h-full">
         <div className="relative h-48 overflow-hidden bg-neutral-50">
           {post.featured_image ? (
             <Image src={post.featured_image} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 33vw" />
@@ -26,7 +26,7 @@ export default function PostCard({ post }: PostCardProps) {
             <div className="w-full h-full bg-gradient-to-br from-primary-light to-accent-mint flex items-center justify-center"><span className="text-4xl">🍄</span></div>
           )}
           {post.category && (
-            <span className="absolute top-3 left-3 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full">{post.category.name}</span>
+            <span className="absolute top-3 left-3 gradient-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">{post.category.name}</span>
           )}
         </div>
         <div className="p-4">
