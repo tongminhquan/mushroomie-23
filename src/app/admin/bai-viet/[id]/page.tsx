@@ -41,6 +41,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   const [hasToc, setHasToc] = useState(false)
   const [tocHeadings, setTocHeadings] = useState({ h2: true, h3: true, h4: false, h5: false })
   const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [editorMode, setEditorMode] = useState<'rich' | 'html'>('rich')
 
   const [form, setForm] = useState({
     title: '',
@@ -224,16 +225,39 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
             </div>
 
             {/* Rich Text Editor */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden flex flex-col">
               <div className="px-5 py-3 border-b border-neutral-100 bg-neutral-50 flex items-center justify-between">
                 <p className="text-sm font-semibold text-neutral-700">Nội dung bài viết</p>
-                <span className="text-xs text-neutral-400">Hỗ trợ định dạng HTML</span>
+                <div className="flex bg-neutral-200/50 p-1 rounded-lg">
+                  <button 
+                    onClick={() => setEditorMode('rich')} 
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${editorMode === 'rich' ? 'bg-white text-primary shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
+                  >
+                    Văn bản thường
+                  </button>
+                  <button 
+                    onClick={() => setEditorMode('html')} 
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${editorMode === 'html' ? 'bg-white text-primary shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
+                  >
+                    Viết thuần HTML
+                  </button>
+                </div>
               </div>
-              <RichTextEditor
-                value={form.content}
-                onChange={v => setForm(p => ({ ...p, content: v }))}
-                placeholder="Bắt đầu viết nội dung bài viết của bạn..."
-              />
+              {editorMode === 'rich' ? (
+                <RichTextEditor
+                  value={form.content}
+                  onChange={v => setForm(p => ({ ...p, content: v }))}
+                  placeholder="Bắt đầu viết nội dung bài viết của bạn..."
+                />
+              ) : (
+                <textarea
+                  value={form.content}
+                  onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
+                  placeholder="<p>Nhập mã HTML tại đây...</p>"
+                  className="w-full min-h-[450px] p-5 font-mono text-sm bg-[#1e1e1e] text-[#d4d4d4] outline-none resize-y"
+                  spellCheck={false}
+                />
+              )}
             </div>
 
             {/* Excerpt */}
