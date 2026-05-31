@@ -36,6 +36,7 @@ export default function Header() {
 
   const navLinks = [
     { href: '/', label: 'TRANG CHỦ' },
+    { href: '/gioi-thieu', label: 'GIỚI THIỆU' },
     { href: '/san-pham', label: 'TẤT CẢ SẢN PHẨM' },
     { href: '/san-pham?category=vong-tay', label: 'VÒNG TAY' },
     { href: '/san-pham?category=moc-khoa', label: 'MÓC KHÓA' },
