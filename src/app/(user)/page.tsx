@@ -38,7 +38,7 @@ export default async function HomePage() {
   ])
 
   const fallbackHero = (
-    <section className="relative min-h-[90vh] gradient-primary flex items-center overflow-hidden">
+    <section className="relative min-h-[50vh] lg:min-h-[60vh] gradient-primary flex items-center overflow-hidden">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-20 -right-20 w-96 h-96 bg-white/5 rounded-full" />
         <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-white/5 rounded-full" />
