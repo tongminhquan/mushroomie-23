@@ -13,7 +13,7 @@ export default function Footer() {
               {/* Brand */}
               <div className="lg:col-span-4">
                 <Link href="/" className="inline-block mb-4">
-                  <img src="/logo.png" alt="Mushroomie" className="h-14 brightness-0 invert" />
+                  <img src="/logo.png" alt="Mushroomie" className="h-14" />
                 </Link>
                 <p className="text-white/80 text-sm leading-relaxed mb-5 max-w-xs">
                   Phụ kiện handmade cá nhân hóa dành cho giới trẻ. Mỗi sản phẩm là một câu chuyện, một kỷ niệm, một phần của bạn.
