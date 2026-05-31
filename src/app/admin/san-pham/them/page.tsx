@@ -181,7 +181,6 @@ export default function AddProductPage() {
             <textarea name="description" value={form.description} onChange={handleChange} rows={5}
               className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none resize-y" />
           </div>
-          <div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-semibold mb-3">Ảnh chính (Tối đa 1 ảnh)</label>
