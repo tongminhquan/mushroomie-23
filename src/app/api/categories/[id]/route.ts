@@ -26,7 +26,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     
     const { id } = await params
     const body = await request.json()
-    const { name, slug, image_url } = body
+    const { name, slug, image_url, icon } = body
 
     const category = await prisma.category.update({
       where: { id: Number(id) },
@@ -34,6 +34,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         ...(name && { name }),
         ...(slug && { slug }),
         ...(image_url !== undefined && { image_url }),
+        ...(icon !== undefined && { icon }),
       }
     })
     return NextResponse.json({ category })

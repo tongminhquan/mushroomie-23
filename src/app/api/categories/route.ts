@@ -18,10 +18,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, slug, type, description, image_url } = body
+    const { name, slug, type, description, image_url, icon } = body
     if (!name || !slug) return NextResponse.json({ error: 'Tên và slug là bắt buộc' }, { status: 400 })
     const category = await prisma.category.create({
-      data: { name, slug, type: type || 'post', description: description || null, image_url: image_url || null },
+      data: { name, slug, type: type || 'post', description: description || null, image_url: image_url || null, icon: icon || null },
     })
     return NextResponse.json({ category }, { status: 201 })
   } catch (e: any) {

@@ -4,7 +4,7 @@ import EmptyState from '@/components/ui/EmptyState'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { AnimateOnScroll } from '@/components/ui/AnimateOnScroll'
+import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 
 export const metadata: Metadata = {
   title: 'Sản phẩm | Mushroomie',

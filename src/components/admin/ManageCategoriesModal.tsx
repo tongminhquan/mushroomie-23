@@ -14,6 +14,7 @@ export default function ManageCategoriesModal() {
   
   const [name, setName] = useState('')
   const [imageUrl, setImageUrl] = useState('')
+  const [icon, setIcon] = useState('')
   
   const [loading, setLoading] = useState(false)
   const [showMediaPicker, setShowMediaPicker] = useState(false)
@@ -34,6 +35,7 @@ export default function ManageCategoriesModal() {
     setEditId(null)
     setName('')
     setImageUrl('')
+    setIcon('')
   }
 
   const handleEditClick = (cat: any) => {
@@ -41,6 +43,7 @@ export default function ManageCategoriesModal() {
     setEditId(cat.id)
     setName(cat.name)
     setImageUrl(cat.image_url || '')
+    setIcon(cat.icon || '')
   }
 
   const handleSave = async () => {
@@ -54,7 +57,7 @@ export default function ManageCategoriesModal() {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), slug, type: 'product', image_url: imageUrl })
+        body: JSON.stringify({ name: name.trim(), slug, type: 'product', image_url: imageUrl, icon: icon.trim() })
       })
       
       if (res.ok) {
@@ -108,13 +111,21 @@ export default function ManageCategoriesModal() {
               
               <div className="flex gap-3 items-end">
                 <div className="flex-1 space-y-2">
-                  <input 
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    placeholder="Tên danh mục mới (VD: Vòng tay)..."
-                    className="w-full px-4 py-2 border border-neutral-200 rounded-xl outline-none focus:border-primary text-sm"
-                    onKeyDown={e => e.key === 'Enter' && handleSave()}
-                  />
+                  <div className="flex gap-2">
+                    <input 
+                      value={icon}
+                      onChange={e => setIcon(e.target.value)}
+                      placeholder="Icon (VD: 💛)"
+                      className="w-16 px-3 py-2 border border-neutral-200 rounded-xl outline-none focus:border-primary text-sm text-center"
+                    />
+                    <input 
+                      value={name}
+                      onChange={e => setName(e.target.value)}
+                      placeholder="Tên danh mục mới (VD: Vòng tay)..."
+                      className="flex-1 px-4 py-2 border border-neutral-200 rounded-xl outline-none focus:border-primary text-sm"
+                      onKeyDown={e => e.key === 'Enter' && handleSave()}
+                    />
+                  </div>
                   <div className="flex items-center gap-2">
                     {imageUrl ? (
                       <div className="relative h-12 w-12 rounded-lg overflow-hidden border border-neutral-200 group">
@@ -151,7 +162,7 @@ export default function ManageCategoriesModal() {
                       <img src={c.image_url} alt={c.name} className="w-8 h-8 rounded-lg object-cover border border-neutral-200" />
                     ) : (
                       <div className="w-8 h-8 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-400 border border-neutral-200">
-                        <ImageIcon size={14} />
+                        {c.icon ? <span className="text-lg">{c.icon}</span> : <ImageIcon size={14} />}
                       </div>
                     )}
                     <span className="font-medium text-sm">{c.name}</span>
