@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Search, Shield, User as UserIcon, Loader2 } from 'lucide-react'
-import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 
@@ -31,7 +30,7 @@ export default function AdminAccountsPage() {
       const data = await res.json()
       setUsers(data)
     } catch (error) {
-      toast.error('Lỗi khi tải danh sách người dùng')
+      alert('Lỗi khi tải danh sách người dùng')
     } finally {
       setIsLoading(false)
     }
@@ -57,10 +56,10 @@ export default function AdminAccountsPage() {
         throw new Error(data.error || 'Failed to update')
       }
 
-      toast.success('Cập nhật quyền thành công')
+      alert('Cập nhật quyền thành công')
       setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u))
     } catch (error: any) {
-      toast.error(error.message || 'Lỗi khi cập nhật quyền')
+      alert(error.message || 'Lỗi khi cập nhật quyền')
     } finally {
       setUpdatingId(null)
     }
