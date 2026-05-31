@@ -156,6 +156,7 @@ model Order {
   payment_status   String    @default("PENDING") // PENDING | PAID | FAILED | REFUNDED
   order_status     String    @default("PENDING_PAYMENT")
   // PENDING_PAYMENT | PROCESSING | MAKING | PACKING | SHIPPING | COMPLETED | CANCELLED
+  is_reviewed      Boolean   @default(false)
   created_at       DateTime  @default(now())
   updated_at       DateTime  @updatedAt
 
@@ -349,6 +350,7 @@ model Review {
   product_id  Int?
   is_featured Boolean  @default(false) // Hiện trang chủ
   status      String   @default("pending") // "pending" | "approved" | "rejected"
+  admin_reply String?  @db.Text
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 

@@ -5,6 +5,7 @@ import { formatPrice, formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import AnimateOnScroll, { StaggerChildren } from '@/components/ui/AnimateOnScroll'
+import ReviewOrderModal from '@/components/account/ReviewOrderModal'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Đơn hàng của tôi | Mushroomie' }
@@ -88,6 +89,9 @@ export default async function MyOrdersPage() {
                       className="bg-primary text-white text-xs px-4 py-1.5 rounded-full font-semibold hover:bg-primary-dark transition-colors">
                       Thanh toán
                     </Link>
+                  )}
+                  {order.order_status === 'COMPLETED' && !(order as any).is_reviewed && (
+                    <ReviewOrderModal orderId={order.id} />
                   )}
                 </div>
               </div>

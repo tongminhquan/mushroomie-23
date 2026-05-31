@@ -71,6 +71,12 @@ export default async function AdminReviewsPage({ searchParams }: { searchParams:
               <p className="text-xs text-primary mb-2">Sản phẩm: {review.product.name}</p>
             )}
             <p className="text-neutral-600 text-sm bg-neutral-50 rounded-xl p-3">{review.content}</p>
+            {(review as any).admin_reply && (
+              <div className="mt-3 bg-primary/5 p-3 rounded-xl border border-primary/20">
+                <p className="text-xs font-semibold text-primary mb-1">Mushroomie phản hồi:</p>
+                <p className="text-sm text-neutral-700">{(review as any).admin_reply}</p>
+              </div>
+            )}
               <ReviewActions review={review} />
           </div>
         ))}
