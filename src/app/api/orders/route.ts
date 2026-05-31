@@ -19,6 +19,7 @@ const orderSchema = z.object({
     custom_note: z.string().optional(),
   })),
   shipping_fee: z.number().min(0).default(0),
+  payment_method: z.string().default('bank_transfer'),
 })
 
 export async function POST(request: NextRequest) {
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
     const session = await auth()
     const userId = session?.user?.id ? Number(session.user.id) : null
 
-    const { items, shipping_fee, ...orderData } = parsed.data
+    const { items, shipping_fee, payment_method, ...orderData } = parsed.data
 
     const subtotal = items.reduce((sum, item) => sum + item.price_snapshot * item.quantity, 0)
     const total = subtotal + shipping_fee
@@ -46,9 +47,9 @@ export async function POST(request: NextRequest) {
         subtotal,
         shipping_fee,
         total,
-        payment_method: 'bank_transfer',
+        payment_method,
         payment_status: 'PENDING',
-        order_status: 'PENDING_PAYMENT',
+        order_status: payment_method === 'cod' ? 'PROCESSING' : 'PENDING_PAYMENT',
         items: {
           create: items.map((item) => ({
             product_id: item.product_id,
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
       data: {
         order_id: order.id,
         old_status: '',
-        new_status: 'PENDING_PAYMENT',
+        new_status: payment_method === 'cod' ? 'PROCESSING' : 'PENDING_PAYMENT',
         changed_by: 'SYSTEM',
         note: 'Đơn hàng được tạo',
       },

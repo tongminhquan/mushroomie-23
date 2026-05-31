@@ -15,6 +15,7 @@ export default function CheckoutPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'cod'>('bank_transfer')
 
   const [form, setForm] = useState({
     customer_name: (session?.user?.name as string) || '',
@@ -46,6 +47,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           ...form,
           shipping_fee: shippingFee,
+          payment_method: paymentMethod,
           items: items.map((item) => ({
             product_id: item.productId,
             product_name: item.name,
@@ -60,13 +62,14 @@ export default function CheckoutPage() {
       if (!orderRes.ok) throw new Error('Tạo đơn hàng thất bại')
       const { orderId, orderCode } = await orderRes.json()
 
-      const payRes = await fetch('/api/payments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId, orderCode }),
-      })
-
-      if (!payRes.ok) throw new Error('Tạo thanh toán thất bại')
+      if (paymentMethod === 'bank_transfer') {
+        const payRes = await fetch('/api/payments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId, orderCode }),
+        })
+        if (!payRes.ok) throw new Error('Tạo thanh toán thất bại')
+      }
 
       clearCart()
       router.push(`/thanh-toan/xac-nhan?orderCode=${orderCode}`)
@@ -139,13 +142,44 @@ export default function CheckoutPage() {
               {/* Payment method */}
               <div className="bg-white rounded-2xl p-6 shadow-card">
                 <h2 className="font-heading font-bold text-lg mb-4">Phương thức thanh toán</h2>
-                <div className="flex items-center gap-3 p-4 border-2 border-primary bg-primary-light rounded-xl">
-                  <span className="text-2xl">🏦</span>
-                  <div>
-                    <div className="font-semibold text-sm">Chuyển khoản ngân hàng (QR Code)</div>
-                    <div className="text-xs text-neutral-500">Tự động xác nhận sau khi chuyển khoản</div>
+                <div className="space-y-3">
+                  {/* Bank Transfer */}
+                  <div 
+                    onClick={() => setPaymentMethod('bank_transfer')}
+                    className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-colors ${
+                      paymentMethod === 'bank_transfer' ? 'border-primary bg-primary-light' : 'border-neutral-200 hover:border-primary-light'
+                    }`}
+                  >
+                    <span className="text-2xl">🏦</span>
+                    <div>
+                      <div className="font-semibold text-sm text-neutral-800">Chuyển khoản ngân hàng (QR Code)</div>
+                      <div className="text-xs text-neutral-500">Tự động xác nhận sau khi chuyển khoản</div>
+                    </div>
+                    <div className={`ml-auto w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      paymentMethod === 'bank_transfer' ? 'border-primary' : 'border-neutral-300'
+                    }`}>
+                      {paymentMethod === 'bank_transfer' && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                    </div>
                   </div>
-                  <div className="ml-auto w-4 h-4 rounded-full border-2 border-primary bg-primary" />
+                  
+                  {/* COD */}
+                  <div 
+                    onClick={() => setPaymentMethod('cod')}
+                    className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-colors ${
+                      paymentMethod === 'cod' ? 'border-primary bg-primary-light' : 'border-neutral-200 hover:border-primary-light'
+                    }`}
+                  >
+                    <span className="text-2xl">📦</span>
+                    <div>
+                      <div className="font-semibold text-sm text-neutral-800">Thanh toán khi nhận hàng (COD)</div>
+                      <div className="text-xs text-neutral-500">Thanh toán bằng tiền mặt cho shipper</div>
+                    </div>
+                    <div className={`ml-auto w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      paymentMethod === 'cod' ? 'border-primary' : 'border-neutral-300'
+                    }`}>
+                      {paymentMethod === 'cod' && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -189,7 +223,9 @@ export default function CheckoutPage() {
                 <Button type="submit" isLoading={isLoading} className="w-full mt-4" size="lg">
                   Đặt hàng và thanh toán
                 </Button>
-                <p className="text-xs text-neutral-500 text-center mt-3">Bạn sẽ được chuyển đến trang QR code để chuyển khoản</p>
+                <p className="text-xs text-neutral-500 text-center mt-3">
+                  {paymentMethod === 'bank_transfer' ? 'Bạn sẽ được chuyển đến trang QR code để thanh toán' : 'Đơn hàng sẽ được đóng gói và giao đến bạn'}
+                </p>
               </div>
             </AnimateOnScroll>
           </div>

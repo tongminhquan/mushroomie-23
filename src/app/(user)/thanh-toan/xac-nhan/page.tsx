@@ -34,6 +34,7 @@ export default function ConfirmPage() {
   const [loading, setLoading] = useState(true)
   const [polling, setPolling] = useState(false)
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
+  const [orderInfo, setOrderInfo] = useState<any>(null)
 
   const fetchData = useCallback(async () => {
     if (!orderCode) return
@@ -44,6 +45,7 @@ export default function ConfirmPage() {
       ])
       const orderData = await orderRes.json()
       const statusData = await statusRes.json()
+      setOrderInfo(orderData)
       setPayment(orderData.payment)
       setPaymentStatus(statusData)
       if (statusData.expiresAt) {
@@ -59,8 +61,9 @@ export default function ConfirmPage() {
 
   useEffect(() => { fetchData() }, [fetchData])
 
-  // Poll every 5s if pending
+  // Poll every 5s if pending (only for bank transfer)
   useEffect(() => {
+    if (orderInfo?.payment_method === 'cod') return
     if (paymentStatus?.status === 'PAID' || paymentStatus?.status === 'EXPIRED') return
     const interval = setInterval(async () => {
       setPolling(true)
@@ -102,6 +105,27 @@ export default function ConfirmPage() {
           <h1 className="font-heading text-2xl font-bold text-neutral-900 mb-2">Thanh toán thành công! 🎉</h1>
           <p className="text-neutral-500 mb-2">Mã đơn hàng: <strong>#{orderCode}</strong></p>
           <p className="text-neutral-500 text-sm mb-6">Mushroomie đã nhận được thanh toán và sẽ bắt đầu làm sản phẩm ngay cho bạn! 💛</p>
+          <div className="space-y-3">
+            <Link href={`/tai-khoan/don-hang/${orderCode}`}>
+              <Button className="w-full">Xem chi tiết đơn hàng</Button>
+            </Link>
+            <Link href="/san-pham">
+              <Button variant="outline" className="w-full">Tiếp tục mua sắm</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (orderInfo?.payment_method === 'cod') {
+    return (
+      <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 text-center">
+          <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
+          <h1 className="font-heading text-2xl font-bold text-neutral-900 mb-2">Đặt hàng thành công! 🎉</h1>
+          <p className="text-neutral-500 mb-2">Mã đơn hàng: <strong>#{orderCode}</strong></p>
+          <p className="text-neutral-500 text-sm mb-6">Mushroomie sẽ liên hệ và giao hàng đến bạn trong thời gian sớm nhất. Bạn sẽ thanh toán khi nhận hàng nhé! 📦💛</p>
           <div className="space-y-3">
             <Link href={`/tai-khoan/don-hang/${orderCode}`}>
               <Button className="w-full">Xem chi tiết đơn hàng</Button>
