@@ -83,7 +83,12 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-1">Mật khẩu</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-semibold">Mật khẩu</label>
+                <Link href="/tai-khoan/quen-mat-khau" className="text-sm text-primary font-semibold hover:underline">
+                  Quên mật khẩu?
+                </Link>
+              </div>
               <input
                 type="password"
                 value={form.password}
