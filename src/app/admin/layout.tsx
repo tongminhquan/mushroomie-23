@@ -5,7 +5,9 @@ import { SessionProvider } from 'next-auth/react'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
-  if (!session || (session.user as any).role !== 'admin') {
+  const role = (session?.user as any)?.role
+  const allowedAdminRoles = ['super_admin', 'admin', 'viewer']
+  if (!session || !allowedAdminRoles.includes(role)) {
     redirect('/tai-khoan/dang-nhap')
   }
 

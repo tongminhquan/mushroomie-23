@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import {
   LayoutDashboard, Package, FileText, ShoppingCart,
   MessageSquare, Star, LogOut, ChevronRight, ExternalLink,
@@ -25,11 +25,20 @@ const navItems = [
 
 export default function AdminSidebar() {
   const pathname = usePathname()
+  const { data: session } = useSession()
+  const role = (session?.user as any)?.role
 
   const isActive = (href: string, exact?: boolean) => {
     if (exact) return pathname === href
     return pathname.startsWith(href)
   }
+
+  const filteredNavItems = navItems.filter(item => {
+    if (item.href === '/admin/tai-khoan' && role !== 'super_admin') {
+      return false
+    }
+    return true
+  })
 
   return (
     <aside className="w-64 bg-neutral-900 min-h-screen flex flex-col flex-shrink-0">
@@ -45,7 +54,7 @@ export default function AdminSidebar() {
 
       {/* Nav */}
       <nav className="flex-1 p-4 space-y-1">
-        {navItems.map((item) => (
+        {filteredNavItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}

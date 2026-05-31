@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const isAdmin = (session.user as any).role === 'admin'
+    const isAdmin = ['super_admin', 'admin', 'viewer'].includes((session.user as any).role)
     const userId = Number((session.user as any).id)
     const { searchParams } = new URL(request.url)
     const page = Number(searchParams.get('page') || 1)

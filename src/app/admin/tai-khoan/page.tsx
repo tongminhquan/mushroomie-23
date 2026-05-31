@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Shield, User as UserIcon, Loader2 } from 'lucide-react'
+import { Search, Shield, User as UserIcon, Loader2, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 interface User {
   id: number
@@ -14,14 +16,25 @@ interface User {
 }
 
 export default function AdminAccountsPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const role = (session?.user as any)?.role
+
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [updatingId, setUpdatingId] = useState<number | null>(null)
 
   useEffect(() => {
+    if (status === 'loading') return
+    if (role !== 'super_admin') {
+      router.push('/admin')
+      return
+    }
     fetchUsers()
-  }, [])
+  }, [status, role])
+
+  if (status === 'loading' || role !== 'super_admin') return null
 
   const fetchUsers = async (searchQuery = '') => {
     try {
@@ -63,6 +76,28 @@ export default function AdminAccountsPage() {
     } finally {
       setUpdatingId(null)
     }
+  }
+
+  const handleDeleteUser = async (userId: number) => {
+    if (!confirm('Bạn có chắc chắn muốn xóa tài khoản này? Hành động này không thể hoàn tác.')) return
+    
+    try {
+      const res = await fetch(`/api/users/${userId}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Lỗi khi xóa')
+      
+      alert('Xóa tài khoản thành công')
+      setUsers(users.filter(u => u.id !== userId))
+    } catch (error: any) {
+      alert(error.message || 'Lỗi khi xóa tài khoản')
+    }
+  }
+
+  const roleLabels: Record<string, string> = {
+    super_admin: 'Chủ hệ thống',
+    admin: 'Admin',
+    viewer: 'Viewer',
+    user: 'User'
   }
 
   return (
@@ -131,24 +166,37 @@ export default function AdminAccountsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                        user.role === 'admin' 
+                        ['super_admin', 'admin', 'viewer'].includes(user.role) 
                           ? 'bg-blue-100 text-blue-700' 
                           : 'bg-neutral-100 text-neutral-700'
                       }`}>
-                        {user.role === 'admin' ? <Shield size={12} /> : <UserIcon size={12} />}
-                        {user.role === 'admin' ? 'Admin' : 'User'}
+                        {['super_admin', 'admin', 'viewer'].includes(user.role) ? <Shield size={12} /> : <UserIcon size={12} />}
+                        {roleLabels[user.role] || user.role}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <select
-                        value={user.role}
-                        onChange={(e) => handleUpdateRole(user.id, e.target.value)}
-                        disabled={updatingId === user.id}
-                        className="bg-neutral-50 border border-neutral-200 text-neutral-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-32 p-2 ml-auto disabled:opacity-50"
-                      >
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                      </select>
+                      <div className="flex items-center justify-end gap-2">
+                        <select
+                          value={user.role}
+                          onChange={(e) => handleUpdateRole(user.id, e.target.value)}
+                          disabled={updatingId === user.id}
+                          className="bg-neutral-50 border border-neutral-200 text-neutral-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-32 p-2 disabled:opacity-50"
+                        >
+                          <option value="user">User</option>
+                          <option value="viewer">Viewer</option>
+                          <option value="admin">Admin</option>
+                          <option value="super_admin">Chủ hệ thống</option>
+                        </select>
+                        {user.id !== (session?.user as any)?.id && (
+                          <button
+                            onClick={() => handleDeleteUser(user.id)}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Xóa tài khoản"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

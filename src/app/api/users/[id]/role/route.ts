@@ -5,7 +5,7 @@ import { auth } from '@/lib/auth'
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth()
-    if (!session?.user || session.user.role !== 'admin') {
+    if (!session?.user || session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -13,12 +13,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const userId = parseInt(resolvedParams.id)
 
     const { role } = await req.json()
-    if (role !== 'admin' && role !== 'user') {
+    if (!['super_admin', 'admin', 'viewer', 'user'].includes(role)) {
       return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
     }
 
     // Prevent removing admin from oneself
-    if (userId === parseInt(session.user.id as string) && role !== 'admin') {
+    if (userId === parseInt(session.user.id as string) && role !== 'super_admin') {
       return NextResponse.json({ error: 'Cannot remove your own admin rights' }, { status: 400 })
     }
 

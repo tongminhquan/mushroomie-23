@@ -20,7 +20,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const { id } = await params
     const isNumeric = /^\d+$/.test(id)
-    const isAdmin = (session.user as any).role === 'admin'
+    const isAdmin = ['super_admin', 'admin', 'viewer'].includes((session.user as any).role)
     const userId = Number((session.user as any).id)
 
     const order = await prisma.order.findFirst({
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth()
-    if (!session || (session.user as any).role !== 'admin') {
+    if (!session || !['super_admin', 'admin'].includes((session.user as any).role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
