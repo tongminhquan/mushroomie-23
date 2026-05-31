@@ -2,7 +2,15 @@ import Link from 'next/link'
 import { MapPin, Phone, Mail, Globe } from 'lucide-react'
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 
-export default function Footer() {
+import { prisma } from '@/lib/prisma'
+
+export default async function Footer() {
+  const categories = await prisma.category.findMany({
+    where: { type: 'product' },
+    take: 5,
+    orderBy: { created_at: 'asc' }
+  })
+
   return (
     <footer>
       <AnimateOnScroll animation="fade-up">
@@ -42,9 +50,13 @@ export default function Footer() {
               <div className="lg:col-span-2">
                 <h4 className="font-heading font-bold text-base mb-4">Danh mục</h4>
                 <ul className="space-y-2.5">
-                  <li><Link href="/san-pham?category=vong-tay" className="text-white/75 hover:text-white text-sm transition-colors">Vòng tay</Link></li>
-                  <li><Link href="/san-pham?category=moc-khoa" className="text-white/75 hover:text-white text-sm transition-colors">Móc khóa</Link></li>
-                  <li><Link href="/san-pham?category=charm" className="text-white/75 hover:text-white text-sm transition-colors">Charm</Link></li>
+                  {categories.map((category) => (
+                    <li key={category.id}>
+                      <Link href={`/san-pham?category=${category.slug}`} className="text-white/75 hover:text-white text-sm transition-colors">
+                        {category.name}
+                      </Link>
+                    </li>
+                  ))}
                   <li><Link href="/san-pham" className="text-white/75 hover:text-white text-sm transition-colors">Tất cả sản phẩm</Link></li>
                 </ul>
               </div>
