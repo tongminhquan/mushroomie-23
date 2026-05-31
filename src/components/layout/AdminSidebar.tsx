@@ -5,7 +5,7 @@ import { signOut } from 'next-auth/react'
 import {
   LayoutDashboard, Package, FileText, ShoppingCart,
   MessageSquare, Star, LogOut, ChevronRight, ExternalLink,
-  CreditCard, Activity, Settings, Image
+  CreditCard, Activity, Settings, Image, Users
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -19,6 +19,7 @@ const navItems = [
   { href: '/admin/lien-he', icon: MessageSquare, label: 'Liên hệ' },
   { href: '/admin/danh-gia', icon: Star, label: 'Đánh giá' },
   { href: '/admin/banner', icon: Image, label: 'Banners' },
+  { href: '/admin/tai-khoan', icon: Users, label: 'Tài khoản' },
   { href: '/admin/cai-dat', icon: Settings, label: 'Cài đặt' },
 ]
 
