@@ -101,6 +101,37 @@ body {
   animation: float 3s ease-in-out infinite;
 }
 
+/* Hero entrance animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Pulse glow for CTA */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 4px 25px rgba(228, 29, 29, 0.35); }
+  50% { box-shadow: 0 4px 40px rgba(228, 29, 29, 0.55); }
+}
+.animate-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
 /* Smooth transitions */
 * { transition-property: color, background-color, border-color, transform, box-shadow, opacity;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);

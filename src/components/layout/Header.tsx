@@ -13,8 +13,11 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
-  const totalItems = getTotalItems()
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
+
+  useEffect(() => { setMounted(true) }, [])
+  const totalItems = mounted ? getTotalItems() : 0
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 40)
