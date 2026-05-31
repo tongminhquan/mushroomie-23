@@ -119,7 +119,7 @@ export default function Header() {
                     <div className="bg-white rounded-2xl shadow-xl border border-neutral-100 p-2">
                       <Link href="/tai-khoan" className="block px-4 py-2 text-sm rounded-xl hover:bg-primary-light hover:text-primary transition-colors">Tài khoản của tôi</Link>
                       <Link href="/tai-khoan/don-hang" className="block px-4 py-2 text-sm rounded-xl hover:bg-primary-light hover:text-primary transition-colors">Đơn hàng</Link>
-                      {(session.user as any)?.role === 'admin' && (
+                      {['super_admin', 'admin', 'viewer'].includes((session.user as any)?.role) && (
                         <Link href="/admin" className="block px-4 py-2 text-sm rounded-xl hover:bg-primary-light hover:text-primary transition-colors">Quản trị</Link>
                       )}
                       <button onClick={() => signOut({ callbackUrl: '/' })} className="w-full text-left px-4 py-2 text-sm rounded-xl hover:bg-red-50 hover:text-primary transition-colors mt-1 border-t border-neutral-100 pt-2">Đăng xuất</button>
