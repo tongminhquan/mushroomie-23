@@ -10,7 +10,7 @@ git pull origin main
 
 # Cài đặt dependencies (nếu có thay đổi)
 echo "📦 Cài đặt dependencies..."
-npm install
+npm install --legacy-peer-deps
 
 # Build dự án
 echo "🏗️ Đang build Next.js app..."
