@@ -3,6 +3,7 @@ import PostCard from '@/components/blog/PostCard'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 
 export const metadata: Metadata = {
   title: 'Tin tức Handmade | Mushroomie',
@@ -37,29 +38,35 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
     <div className="min-h-screen bg-secondary">
       <section className="bg-gradient-to-br from-primary to-red-700 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h1 className="font-heading text-4xl font-bold mb-3">Tin tức & Cảm hứng</h1>
-          <p className="text-white/80">Tips handmade, xu hướng phụ kiện và câu chuyện từ Mushroomie</p>
+          <AnimateOnScroll animation="fade-up">
+            <h1 className="font-heading text-4xl font-bold mb-3">Tin tức & Cảm hứng</h1>
+            <p className="text-white/80">Tips handmade, xu hướng phụ kiện và câu chuyện từ Mushroomie</p>
+          </AnimateOnScroll>
         </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Breadcrumb items={[{ label: 'Tin tức' }]} />
+        <AnimateOnScroll animation="fade" delay={100}>
+          <Breadcrumb items={[{ label: 'Tin tức' }]} />
+        </AnimateOnScroll>
 
         {/* Category filter */}
         {categories.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-8">
-            <Link href="/tin-tuc" className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              !sp.category ? 'bg-primary text-white' : 'bg-white text-neutral-700 hover:bg-primary-light hover:text-primary'
-            }`}>Tất cả</Link>
-            {categories.map((cat) => (
-              <Link key={cat.id} href={`/tin-tuc?category=${cat.slug}`}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  sp.category === cat.slug ? 'bg-primary text-white' : 'bg-white text-neutral-700 hover:bg-primary-light hover:text-primary'
-                }`}>
-                {cat.name}
-              </Link>
-            ))}
-          </div>
+          <AnimateOnScroll animation="fade-up" delay={200}>
+            <div className="flex flex-wrap gap-2 mb-8">
+              <Link href="/tin-tuc" className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                !sp.category ? 'bg-primary text-white' : 'bg-white text-neutral-700 hover:bg-primary-light hover:text-primary'
+              }`}>Tất cả</Link>
+              {categories.map((cat) => (
+                <Link key={cat.id} href={`/tin-tuc?category=${cat.slug}`}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    sp.category === cat.slug ? 'bg-primary text-white' : 'bg-white text-neutral-700 hover:bg-primary-light hover:text-primary'
+                  }`}>
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
+          </AnimateOnScroll>
         )}
 
         {posts.length === 0 ? (
