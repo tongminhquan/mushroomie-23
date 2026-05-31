@@ -42,7 +42,7 @@ export default function AboutPage() {
       <section className="py-20 relative">
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <AnimateOnScroll animation="slide-right">
+            <AnimateOnScroll animation="fade-right">
               <div className="relative">
                 {/* Image Placeholder or abstract shape representing the pixel mushroom */}
                 <div className="aspect-square rounded-[3rem] bg-gradient-to-br from-red-100 to-rose-50 p-8 shadow-inner border border-white/50 relative overflow-hidden flex items-center justify-center">
@@ -60,7 +60,7 @@ export default function AboutPage() {
               </div>
             </AnimateOnScroll>
 
-            <AnimateOnScroll animation="slide-left" delay={200}>
+            <AnimateOnScroll animation="fade-left" delay={200}>
               <div className="space-y-6">
                 <h2 className="font-heading text-3xl md:text-4xl font-bold text-neutral-900">
                   Câu chuyện bắt đầu <br/>từ niềm đam mê "không đụng hàng"
@@ -170,12 +170,12 @@ export default function AboutPage() {
       <section className="py-24 bg-[#FDFBF7]">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-            <AnimateOnScroll animation="slide-right">
+            <AnimateOnScroll animation="fade-right">
               <h2 className="font-heading text-3xl md:text-5xl font-bold text-neutral-900 max-w-lg leading-tight">
                 Thế giới phụ kiện <br/>của chúng mình
               </h2>
             </AnimateOnScroll>
-            <AnimateOnScroll animation="slide-left" delay={100}>
+            <AnimateOnScroll animation="fade-left" delay={100}>
               <Link href="/san-pham" className="group flex items-center gap-2 text-primary font-bold hover:text-red-700 transition-colors pb-2 border-b-2 border-primary/30 hover:border-primary">
                 Xem tất cả sản phẩm
                 <span className="transform group-hover:translate-x-1 transition-transform">→</span>
