@@ -63,7 +63,7 @@ export default async function AccountPage() {
                   {user._count.orders}
                 </span>
               </Link>
-              {user.role === 'admin' && (
+              {['super_admin', 'admin', 'viewer'].includes(user.role) && (
                 <Link href="/admin" className="flex items-center gap-3 px-4 py-3 text-stone-600 hover:bg-stone-50 rounded-xl font-medium transition-colors">
                   <Settings size={20} />
                   Quản trị viên

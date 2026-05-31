@@ -110,12 +110,18 @@ export default function Header() {
                 )}
               </button>
               {session ? (
-                <div className="relative group">
-                  <button className="flex items-center gap-2 p-2 rounded-full hover:bg-primary-light transition-colors">
+                <div className="relative group flex items-center">
+                  {/* Mobile user icon */}
+                  <Link href="/tai-khoan" className="md:hidden p-2 rounded-full hover:bg-primary-light transition-colors">
+                    <User size={20} className="text-neutral-700" />
+                  </Link>
+                  {/* Desktop user button */}
+                  <button className="hidden md:flex items-center gap-2 p-2 rounded-full hover:bg-primary-light transition-colors">
                     <User size={20} className="text-neutral-700" />
                     <span className="hidden lg:block text-sm font-semibold text-neutral-700">{session.user?.name?.split(' ')[0]}</span>
                   </button>
-                  <div className="absolute right-0 top-full pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  {/* Desktop user dropdown */}
+                  <div className="absolute right-0 top-full pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 hidden md:block">
                     <div className="bg-white rounded-2xl shadow-xl border border-neutral-100 p-2">
                       <Link href="/tai-khoan" className="block px-4 py-2 text-sm rounded-xl hover:bg-primary-light hover:text-primary transition-colors">Tài khoản của tôi</Link>
                       <Link href="/tai-khoan/don-hang" className="block px-4 py-2 text-sm rounded-xl hover:bg-primary-light hover:text-primary transition-colors">Đơn hàng</Link>
