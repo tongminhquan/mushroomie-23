@@ -186,16 +186,16 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StaggerChildren animation="zoom-in" staggerDelay={100}>
               {[
-                { name: 'Vòng tay thủ công', desc: 'Hạt cườm pastel, tết dây cá tính.', icon: '📿', color: 'bg-blue-50' },
-                { name: 'Dây chuyền / Vòng cổ', desc: 'Điểm nhấn pha lê, hoa rực rỡ.', icon: '✨', color: 'bg-rose-50' },
-                { name: 'Móc khóa', desc: 'Dango anh đào, thú cưng nhỏ xinh.', icon: '🔑', color: 'bg-amber-50' },
-                { name: 'Dây treo điện thoại', desc: 'Phong cách Y2K, Sóng xanh hút mắt.', icon: '📱', color: 'bg-emerald-50' },
+                { name: 'Vòng tay thủ công', desc: 'Hạt cườm pastel, tết dây cá tính.', icon: '📿', color: 'bg-blue-50', link: '/san-pham?category=vong-tay' },
+                { name: 'Dây chuyền / Vòng cổ', desc: 'Điểm nhấn pha lê, hoa rực rỡ.', icon: '✨', color: 'bg-rose-50', link: '/san-pham?category=phu-kien' },
+                { name: 'Móc khóa', desc: 'Dango anh đào, thú cưng nhỏ xinh.', icon: '🔑', color: 'bg-amber-50', link: '/san-pham?category=moc-khoa' },
+                { name: 'Dây treo điện thoại', desc: 'Phong cách Y2K, Sóng xanh hút mắt.', icon: '📱', color: 'bg-emerald-50', link: '/san-pham?category=phu-kien' },
               ].map((prod, idx) => (
-                <div key={idx} className={`${prod.color} p-8 rounded-3xl border border-black/5 hover:scale-[1.02] transition-transform duration-300 cursor-pointer`}>
+                <Link href={prod.link} key={idx} className={`${prod.color} block p-8 rounded-3xl border border-black/5 hover:scale-[1.02] transition-transform duration-300 cursor-pointer`}>
                   <div className="text-4xl mb-4 bg-white/60 w-14 h-14 flex items-center justify-center rounded-full shadow-sm">{prod.icon}</div>
                   <h3 className="font-heading font-bold text-lg text-neutral-900 mb-2">{prod.name}</h3>
                   <p className="text-neutral-600 text-sm">{prod.desc}</p>
-                </div>
+                </Link>
               ))}
             </StaggerChildren>
           </div>
