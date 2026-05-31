@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { formatPrice, formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import Breadcrumb from '@/components/layout/Breadcrumb'
+import AnimateOnScroll, { StaggerChildren } from '@/components/ui/AnimateOnScroll'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Đơn hàng của tôi | Mushroomie' }
@@ -43,21 +44,26 @@ export default async function MyOrdersPage() {
     <div className="min-h-screen bg-secondary py-6">
       <div className="max-w-4xl mx-auto px-4">
         <Breadcrumb items={[{ label: 'Tài khoản', href: '/tai-khoan' }, { label: 'Đơn hàng' }]} />
-        <h1 className="font-heading text-2xl font-bold mt-2 mb-6">Đơn hàng của tôi</h1>
+        <AnimateOnScroll animation="fade-down">
+          <h1 className="font-heading text-2xl font-bold mt-2 mb-6">Đơn hàng của tôi</h1>
+        </AnimateOnScroll>
 
         {orders.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-card p-12 text-center">
-            <div className="text-5xl mb-4">📦</div>
-            <h2 className="font-heading font-bold text-xl mb-2">Chưa có đơn hàng nào</h2>
-            <p className="text-neutral-500 mb-6">Hãy khám phá sản phẩm và đặt hàng ngay!</p>
-            <Link href="/san-pham" className="bg-primary text-white px-6 py-3 rounded-full font-semibold hover:bg-primary-dark transition-colors">
-              Mua sắm ngay
-            </Link>
-          </div>
+          <AnimateOnScroll animation="zoom-in">
+            <div className="bg-white rounded-2xl shadow-card p-12 text-center">
+              <div className="text-5xl mb-4">📦</div>
+              <h2 className="font-heading font-bold text-xl mb-2">Chưa có đơn hàng nào</h2>
+              <p className="text-neutral-500 mb-6">Hãy khám phá sản phẩm và đặt hàng ngay!</p>
+              <Link href="/san-pham" className="bg-primary text-white px-6 py-3 rounded-full font-semibold hover:bg-primary-dark transition-colors">
+                Mua sắm ngay
+              </Link>
+            </div>
+          </AnimateOnScroll>
         ) : (
           <div className="space-y-4">
-            {orders.map((order) => (
-              <div key={order.id} className="bg-white rounded-2xl shadow-card p-5 hover:shadow-hover transition-all">
+            <StaggerChildren animation="fade-up" staggerDelay={100}>
+              {orders.map((order) => (
+                <div key={order.id} className="bg-white rounded-2xl shadow-card p-5 hover:shadow-hover transition-all">
                 <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                   <div>
                     <div className="font-mono font-bold text-primary text-sm">#{order.order_code}</div>
@@ -86,6 +92,7 @@ export default async function MyOrdersPage() {
                 </div>
               </div>
             ))}
+            </StaggerChildren>
           </div>
         )}
       </div>

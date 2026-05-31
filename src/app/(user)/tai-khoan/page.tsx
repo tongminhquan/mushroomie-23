@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Package, User as UserIcon, Settings } from 'lucide-react'
 import { SignOutButton } from '@/components/layout/SignOutButton'
 import { EditProfileForm } from '@/components/account/EditProfileForm'
+import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 
 export const metadata = {
   title: 'Tài khoản của tôi | Mushroomie',
@@ -31,12 +32,15 @@ export default async function AccountPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 min-h-[70vh]">
-      <h1 className="text-3xl font-heading font-bold text-primary mb-8">Tài khoản của tôi</h1>
+      <AnimateOnScroll animation="fade-down">
+        <h1 className="text-3xl font-heading font-bold text-primary mb-8">Tài khoản của tôi</h1>
+      </AnimateOnScroll>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Sidebar */}
         <div className="col-span-1">
-          <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6 overflow-hidden sticky top-24">
+          <AnimateOnScroll animation="fade-right">
+            <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6 overflow-hidden sticky top-24">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 font-bold text-xl">
                 {user.name.charAt(0).toUpperCase()}
@@ -70,11 +74,13 @@ export default async function AccountPage() {
               </div>
             </nav>
           </div>
+          </AnimateOnScroll>
         </div>
         
         {/* Main Content */}
         <div className="col-span-1 md:col-span-2">
-          <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6 sm:p-8">
+          <AnimateOnScroll animation="fade-up" delay={200}>
+            <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6 sm:p-8">
             <h2 className="text-xl font-bold text-primary mb-6">Thông tin cá nhân</h2>
             
             <EditProfileForm
@@ -84,6 +90,7 @@ export default async function AccountPage() {
               initialAddress={(user as any).address || ''}
             />
           </div>
+          </AnimateOnScroll>
         </div>
       </div>
     </div>

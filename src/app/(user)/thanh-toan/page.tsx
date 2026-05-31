@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 
 export default function CheckoutPage() {
   const { items, getTotalPrice, clearCart } = useCartStore()
@@ -96,7 +97,7 @@ export default function CheckoutPage() {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             {/* Customer info */}
-            <div className="lg:col-span-3 space-y-4">
+            <AnimateOnScroll animation="fade-right" className="lg:col-span-3 space-y-4">
               <div className="bg-white rounded-2xl p-6 shadow-card">
                 <h2 className="font-heading font-bold text-lg mb-4">Thông tin giao hàng</h2>
                 <div className="space-y-4">
@@ -151,10 +152,10 @@ export default function CheckoutPage() {
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{error}</div>
               )}
-            </div>
+            </AnimateOnScroll>
 
             {/* Order summary */}
-            <div className="lg:col-span-2">
+            <AnimateOnScroll animation="fade-left" className="lg:col-span-2">
               <div className="bg-white rounded-2xl p-6 shadow-card sticky top-20">
                 <h2 className="font-heading font-bold text-lg mb-4">Đơn hàng ({items.length} sản phẩm)</h2>
                 <div className="space-y-3 mb-4 max-h-64 overflow-y-auto pr-1">
@@ -190,7 +191,7 @@ export default function CheckoutPage() {
                 </Button>
                 <p className="text-xs text-neutral-500 text-center mt-3">Bạn sẽ được chuyển đến trang QR code để chuyển khoản</p>
               </div>
-            </div>
+            </AnimateOnScroll>
           </div>
         </form>
       </div>

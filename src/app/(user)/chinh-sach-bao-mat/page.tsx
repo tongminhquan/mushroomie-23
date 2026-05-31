@@ -1,5 +1,6 @@
 import React from 'react';
 import { Shield, Database, Lock, RefreshCcw, UserCheck, AlertTriangle } from 'lucide-react';
+import AnimateOnScroll from '@/components/ui/AnimateOnScroll';
 
 export const metadata = {
   title: 'Chính sách & Bảo mật | Mushroomie',
@@ -80,7 +81,7 @@ export default function PrivacyPolicyPage() {
       <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         
         {/* Header Section */}
-        <div className="text-center mb-16">
+        <AnimateOnScroll animation="fade-down" className="text-center mb-16">
           <div className="inline-flex items-center justify-center p-3 bg-white rounded-2xl shadow-sm mb-4">
             <Shield className="w-10 h-10 text-[#e41d1d]" />
           </div>
@@ -91,40 +92,41 @@ export default function PrivacyPolicyPage() {
             Tại Mushroomie, chúng tôi tin rằng sự tin tưởng của bạn là tài sản quý giá nhất. 
             Đọc để hiểu rõ cách chúng tôi bảo vệ thông tin của bạn.
           </p>
-        </div>
+        </AnimateOnScroll>
         
         {/* Policy Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {policies.map((policy, index) => (
-            <div 
-              key={index} 
-              className="bg-white p-8 rounded-[16px] shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(228,29,29,0.1)] transition-all duration-300 hover:-translate-y-1 group border border-neutral-100"
-            >
-              <div className="flex items-start gap-5">
-                <div className="p-3 bg-neutral-50 rounded-xl group-hover:bg-[#fde8e8] transition-colors duration-300 shrink-0">
-                  {policy.icon}
-                </div>
-                <div>
-                  <h2 className="font-heading text-xl font-bold text-neutral-900 mb-3 group-hover:text-[#e41d1d] transition-colors duration-300">
-                    {policy.title}
-                  </h2>
-                  <div className="text-neutral-600 leading-relaxed text-sm sm:text-base">
-                    {policy.content}
+            <AnimateOnScroll key={index} animation="fade-up" delay={index * 100}>
+              <div 
+                className="bg-white p-8 rounded-[16px] shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(228,29,29,0.1)] transition-all duration-300 hover:-translate-y-1 group border border-neutral-100 h-full"
+              >
+                <div className="flex items-start gap-5">
+                  <div className="p-3 bg-neutral-50 rounded-xl group-hover:bg-[#fde8e8] transition-colors duration-300 shrink-0">
+                    {policy.icon}
+                  </div>
+                  <div>
+                    <h2 className="font-heading text-xl font-bold text-neutral-900 mb-3 group-hover:text-[#e41d1d] transition-colors duration-300">
+                      {policy.title}
+                    </h2>
+                    <div className="text-neutral-600 leading-relaxed text-sm sm:text-base">
+                      {policy.content}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </AnimateOnScroll>
           ))}
         </div>
 
         {/* Footer Note */}
-        <div className="mt-16 text-center">
+        <AnimateOnScroll animation="fade-up" delay={200} className="mt-16 text-center">
           <div className="inline-block bg-white px-6 py-3 rounded-full shadow-sm border border-neutral-100">
             <p className="text-sm text-neutral-500 font-medium">
               Cập nhật lần cuối: <span className="text-[#e41d1d]">Tháng 5 năm 2026</span>
             </p>
           </div>
-        </div>
+        </AnimateOnScroll>
 
       </div>
     </div>
