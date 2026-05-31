@@ -48,16 +48,16 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   const totalPages = Math.ceil(total / limit)
 
   return (
-    <div className="min-h-screen bg-secondary">
+    <div className="min-h-screen bg-neutral-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Breadcrumb items={[{ label: 'Sản phẩm' }]} />
 
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-6 mt-4">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 flex-shrink-0">
             <AnimateOnScroll animation="fade-right">
-              <div className="bg-white rounded-xl p-5 shadow-[0_4px_15px_rgba(64,64,64,0.12)] sticky top-20">
-                <h2 className="font-heading font-bold text-lg gradient-text mb-4">Lọc sản phẩm</h2>
+              <div className="bg-white rounded-lg p-5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-neutral-100 sticky top-24">
+                <h2 className="font-heading font-bold text-lg uppercase text-neutral-800 mb-4 pb-2 border-b border-neutral-100">Bộ lọc</h2>
                 <div className="mb-4">
                   <h3 className="font-semibold text-sm text-neutral-700 mb-2">Danh mục</h3>
                   <div className="space-y-1">
@@ -97,12 +97,12 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           </aside>
 
           {/* Main */}
-          <main className="flex-1">
+          <main className="flex-1 bg-white p-4 sm:p-6 rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-neutral-100">
             <AnimateOnScroll animation="fade-down">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-neutral-100">
                 <div>
-                  <h1 className="font-heading text-2xl font-bold gradient-text">Sản phẩm</h1>
-                  <p className="text-neutral-500 text-sm">{total} sản phẩm</p>
+                  <h1 className="font-heading text-2xl font-bold uppercase text-neutral-800">Tất cả sản phẩm</h1>
+                  <p className="text-neutral-500 text-sm mt-1">{total} sản phẩm</p>
                 </div>
                 {sp.search && (
                   <div className="bg-primary-light text-primary px-4 py-2 rounded-full text-sm">
@@ -117,11 +117,11 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
               <EmptyState
                 title="Không tìm thấy sản phẩm"
                 description="Thử tìm kiếm với từ khóa khác hoặc xem tất cả sản phẩm."
-                action={<Link href="/san-pham" className="gradient-btn px-5 py-2.5 rounded-full font-semibold text-sm">Xem tất cả sản phẩm</Link>}
+                action={<Link href="/san-pham" className="bg-primary text-white px-6 py-2.5 rounded-md font-semibold text-sm">Xem tất cả sản phẩm</Link>}
               />
             ) : (
               <AnimateOnScroll animation="fade-up">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
                   {products.map((product) => (
                     <ProductCard key={product.id} product={product as any} />
                   ))}

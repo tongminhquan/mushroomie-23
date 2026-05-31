@@ -29,41 +29,37 @@ export default function HomeAnimatedContent({ featuredProducts, posts, reviews, 
   return (
     <>
       {/* CATEGORIES */}
-      <section className="py-16 bg-white">
+      <section className="py-8 bg-white border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimateOnScroll animation="fade-up" className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 gradient-primary text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 shadow-md">
-              <span>🛍️</span> DANH MỤC
-            </div>
-            <h2 className="font-heading text-3xl font-bold gradient-text mb-3">Danh mục sản phẩm</h2>
-            <p className="text-neutral-500">Tìm kiếm phụ kiện ưng ý của bạn</p>
-          </AnimateOnScroll>
+          <h2 className="font-heading text-lg font-bold uppercase text-neutral-800 mb-6 text-center">Danh mục nổi bật</h2>
           {categories.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-              <StaggerChildren animation="zoom-in" staggerDelay={100}>
-                {categories.map((cat: any, i: number) => (
+            <div className="flex flex-nowrap md:flex-wrap md:justify-center overflow-x-auto gap-4 md:gap-8 pb-4 hide-scrollbar snap-x">
+              <StaggerChildren animation="zoom-in" staggerDelay={50} className="flex gap-4 md:gap-8 min-w-max md:min-w-0 px-2 md:px-0">
+                {categories.map((cat: any) => (
                   <Link key={cat.id} href={`/san-pham?category=${cat.slug}`}
-                    className={`group bg-gradient-to-br ${categoryColors[i % categoryColors.length]} rounded-2xl p-6 text-center transition-all duration-300 hover:-translate-y-2 shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_30px_rgba(228,29,29,0.25)]`}>
-                    {cat.image_url ? (
-                      <div className="mx-auto w-16 h-16 mb-4 rounded-xl overflow-hidden shadow-sm border border-white bg-white p-1">
-                         <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover rounded-lg group-hover:scale-110 transition-transform duration-500" />
-                      </div>
-                    ) : (
-                      <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">{cat.icon || categoryIcons[cat.slug] || '💛'}</div>
-                    )}
-                    <h3 className="font-heading font-bold text-neutral-800 group-hover:text-white transition-colors">{cat.name}</h3>
+                    className="group flex flex-col items-center w-20 md:w-28 flex-shrink-0 snap-start">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-neutral-100 flex items-center justify-center mb-3 overflow-hidden group-hover:border-primary group-hover:shadow-md transition-all">
+                      {cat.image_url ? (
+                         <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                      ) : (
+                        <div className="text-3xl group-hover:scale-110 transition-transform">{cat.icon || categoryIcons[cat.slug] || '💛'}</div>
+                      )}
+                    </div>
+                    <h3 className="font-heading font-semibold text-xs md:text-sm text-neutral-700 text-center line-clamp-2 group-hover:text-primary transition-colors">{cat.name}</h3>
                   </Link>
                 ))}
               </StaggerChildren>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-              <StaggerChildren animation="zoom-in" staggerDelay={100}>
-                {[{ slug: 'vong-tay', name: 'Vòng tay' }, { slug: 'moc-khoa', name: 'Móc khóa' }, { slug: 'charm', name: 'Charm' }, { slug: 'phu-kien', name: 'Phụ kiện' }].map((cat, i) => (
+            <div className="flex justify-center gap-8">
+              <StaggerChildren animation="zoom-in" staggerDelay={50} className="flex gap-8">
+                {[{ slug: 'vong-tay', name: 'Vòng tay' }, { slug: 'moc-khoa', name: 'Móc khóa' }, { slug: 'charm', name: 'Charm' }, { slug: 'phu-kien', name: 'Phụ kiện' }].map((cat) => (
                   <Link key={cat.slug} href={`/san-pham?category=${cat.slug}`}
-                    className={`group bg-gradient-to-br ${categoryColors[i]} rounded-2xl p-6 text-center transition-all duration-300 hover:-translate-y-2 shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_30px_rgba(228,29,29,0.25)]`}>
-                    <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">{categoryIcons[cat.slug]}</div>
-                    <h3 className="font-heading font-bold text-neutral-800 group-hover:text-white transition-colors">{cat.name}</h3>
+                    className="group flex flex-col items-center w-24">
+                    <div className="w-20 h-20 rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-neutral-100 flex items-center justify-center mb-3 group-hover:border-primary transition-all">
+                      <div className="text-3xl group-hover:scale-110 transition-transform">{categoryIcons[cat.slug]}</div>
+                    </div>
+                    <h3 className="font-heading font-semibold text-sm text-neutral-700 group-hover:text-primary transition-colors">{cat.name}</h3>
                   </Link>
                 ))}
               </StaggerChildren>
@@ -74,102 +70,60 @@ export default function HomeAnimatedContent({ featuredProducts, posts, reviews, 
 
       {/* FEATURED PRODUCTS */}
       {featuredProducts.length > 0 && (
-        <section className="py-16 bg-secondary">
+        <section className="py-10 bg-neutral-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <AnimateOnScroll animation="fade-up">
-              <div className="flex items-center justify-between mb-10">
-                <div>
-                  <div className="inline-flex items-center gap-2 gradient-primary text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 shadow-md">
-                    <span>⭐</span> NỔI BẬT
-                  </div>
-                  <h2 className="font-heading text-3xl font-bold gradient-text mb-2">Sản phẩm nổi bật</h2>
-                  <p className="text-neutral-500">Những chiếc phụ kiện được yêu thích nhất</p>
+            <div className="bg-white rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100">
+                <h2 className="font-heading text-xl font-bold uppercase text-primary flex items-center gap-2">
+                  <span className="text-2xl animate-pulse">🔥</span> SẢN PHẨM NỔI BẬT
+                </h2>
+                <Link href="/san-pham" className="text-sm font-semibold text-primary hover:underline hidden md:block">
+                  Xem tất cả &gt;&gt;
+                </Link>
+              </div>
+              <div className="p-4 md:p-5">
+                <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+                  <StaggerChildren animation="fade-up" staggerDelay={50}>
+                    {featuredProducts.map((product) => (
+                      <ProductCard key={product.id} product={product as any} />
+                    ))}
+                  </StaggerChildren>
                 </div>
-                <Link href="/san-pham" className="gradient-btn px-6 py-2.5 rounded-full font-bold text-sm hidden md:inline-block">
-                  Xem tất cả →
-                </Link>
+                <div className="md:hidden text-center mt-6">
+                  <Link href="/san-pham" className="text-sm font-semibold text-primary hover:underline">
+                    Xem tất cả sản phẩm &gt;&gt;
+                  </Link>
+                </div>
               </div>
-            </AnimateOnScroll>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              <StaggerChildren animation="fade-up" staggerDelay={80}>
-                {featuredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product as any} />
-                ))}
-              </StaggerChildren>
             </div>
-            <AnimateOnScroll animation="fade-up" delay={300}>
-              <div className="md:hidden text-center mt-8">
-                <Link href="/san-pham" className="gradient-btn px-8 py-3 rounded-full font-bold text-sm inline-block">
-                  Xem tất cả sản phẩm →
-                </Link>
-              </div>
-            </AnimateOnScroll>
           </div>
         </section>
       )}
 
-      {/* WHY MUSHROOMIE */}
-      <section className="py-16 bg-white">
+      {/* WHY MUSHROOMIE (Clean Version) */}
+      <section className="py-12 bg-white border-y border-neutral-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimateOnScroll animation="fade-up" className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 gradient-primary text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 shadow-md">
-              <span>💎</span> VÌ SAO CHỌN CHÚNG TÔI
-            </div>
-            <h2 className="font-heading text-3xl font-bold gradient-text mb-3">Vì sao chọn Mushroomie?</h2>
-          </AnimateOnScroll>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <StaggerChildren animation="fade-up" staggerDelay={150}>
-              {[
-                { emoji: '🧵', title: 'Thủ công 100%', desc: 'Mỗi sản phẩm được làm bằng tay từ những nguyên liệu chất lượng như hạt charm, dây cước, dây polyester.' },
-                { emoji: '🎨', title: 'Cá nhân hóa', desc: 'Bạn tự chọn charm, màu sắc, kiểu dây theo phong cách cá nhân. Không có hai sản phẩm giống nhau!' },
-                { emoji: '💛', title: 'Cảm xúc thật', desc: 'Mỗi sản phẩm là kỷ niệm, cá tính, câu chuyện riêng. Không chỉ là đồ vật, mà là một phần của bạn.' },
-              ].map((item) => (
-                <div key={item.title} className="bg-white rounded-2xl p-8 text-center shadow-[0_4px_25px_rgba(64,64,64,0.1)] hover:shadow-[0_8px_35px_rgba(228,29,29,0.15)] transition-all duration-300 hover:-translate-y-2 border border-neutral-50">
-                  <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg">
-                    <span className="text-3xl">{item.emoji}</span>
-                  </div>
-                  <h3 className="font-heading font-bold text-xl gradient-text mb-3">{item.title}</h3>
-                  <p className="text-neutral-500 text-sm leading-relaxed">{item.desc}</p>
-                </div>
-              ))}
-            </StaggerChildren>
-          </div>
-        </div>
-      </section>
-
-      {/* ORDER PROCESS */}
-      <section className="py-16 gradient-primary text-white relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-20 -right-20 w-80 h-80 bg-white/5 rounded-full" />
-          <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-white/5 rounded-full" />
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <AnimateOnScroll animation="fade-up" className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 bg-white/20 text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 backdrop-blur-sm">
-              <span>📋</span> QUY TRÌNH
-            </div>
-            <h2 className="font-heading text-3xl font-bold mb-3">Quy trình đặt hàng cá nhân hóa</h2>
-            <p className="text-white/80">Đơn giản, nhanh chóng, dễ thương</p>
-          </AnimateOnScroll>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 relative">
-            <div className="hidden md:block absolute top-10 left-[12%] right-[12%] h-0.5 bg-white/20" />
-            <StaggerChildren animation="fade-up" staggerDelay={150}>
-              {[
-                { num: '01', emoji: '🛒', title: 'Chọn sản phẩm', desc: 'Duyệt sản phẩm và chọn loại phụ kiện phù hợp' },
-                { num: '02', emoji: '🎨', title: 'Tùy chỉnh', desc: 'Chọn charm, màu sắc, kiểu dây và ghi chú cá nhân' },
-                { num: '03', emoji: '💳', title: 'Thanh toán', desc: 'Chuyển khoản ngân hàng qua QR code dễ tiện' },
-                { num: '04', emoji: '🚚', title: 'Nhận hàng', desc: 'Mushroomie làm và gửi đến tay bạn trong 3-5 ngày' },
-              ].map((step) => (
-                <div key={step.num} className="text-center relative">
-                  <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-5 shadow-[0_4px_25px_rgba(0,0,0,0.15)] relative z-10">
-                    <span className="text-3xl">{step.emoji}</span>
-                  </div>
-                  <div className="text-yellow-300 text-sm font-bold mb-2 tracking-wider">BƯỚC {step.num}</div>
-                  <h3 className="font-heading font-bold text-lg mb-3">{step.title}</h3>
-                  <p className="text-white/80 text-sm leading-relaxed px-2">{step.desc}</p>
-                </div>
-              ))}
-            </StaggerChildren>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-x divide-neutral-100">
+            <AnimateOnScroll animation="fade-up" delay={0}>
+              <div className="text-4xl mb-3">🚚</div>
+              <h3 className="font-heading font-bold text-sm uppercase text-neutral-800 mb-1">Giao hàng tận nơi</h3>
+              <p className="text-xs text-neutral-500 hidden md:block">Ship COD toàn quốc, nhanh chóng</p>
+            </AnimateOnScroll>
+            <AnimateOnScroll animation="fade-up" delay={100}>
+              <div className="text-4xl mb-3">💎</div>
+              <h3 className="font-heading font-bold text-sm uppercase text-neutral-800 mb-1">Thủ công 100%</h3>
+              <p className="text-xs text-neutral-500 hidden md:block">Làm bằng tay với tình yêu thương</p>
+            </AnimateOnScroll>
+            <AnimateOnScroll animation="fade-up" delay={200}>
+              <div className="text-4xl mb-3">🎨</div>
+              <h3 className="font-heading font-bold text-sm uppercase text-neutral-800 mb-1">Cá nhân hóa</h3>
+              <p className="text-xs text-neutral-500 hidden md:block">Tự chọn charm và màu sắc</p>
+            </AnimateOnScroll>
+            <AnimateOnScroll animation="fade-up" delay={300}>
+              <div className="text-4xl mb-3">💳</div>
+              <h3 className="font-heading font-bold text-sm uppercase text-neutral-800 mb-1">Thanh toán dễ dàng</h3>
+              <p className="text-xs text-neutral-500 hidden md:block">QR Code tự động hoặc COD</p>
+            </AnimateOnScroll>
           </div>
         </div>
       </section>
@@ -208,23 +162,17 @@ export default function HomeAnimatedContent({ featuredProducts, posts, reviews, 
 
       {/* BLOG PREVIEW */}
       {posts.length > 0 && (
-        <section className="py-16 bg-white">
+        <section className="py-12 bg-neutral-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <AnimateOnScroll animation="fade-up">
-              <div className="flex items-center justify-between mb-10">
-                <div>
-                  <div className="inline-flex items-center gap-2 gradient-primary text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 shadow-md">
-                    <span>📝</span> TIN TỨC
-                  </div>
-                  <h2 className="font-heading text-3xl font-bold gradient-text mb-2">Tin tức mới nhất</h2>
-                  <p className="text-neutral-500">Tips & tricks cho tín đồ handmade</p>
-                </div>
-                <Link href="/tin-tuc" className="gradient-btn px-6 py-2.5 rounded-full font-bold text-sm hidden md:inline-block">
-                  Xem tất cả →
-                </Link>
-              </div>
-            </AnimateOnScroll>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-heading text-xl font-bold uppercase text-neutral-800">
+                Tin tức & Mẹo vặt
+              </h2>
+              <Link href="/tin-tuc" className="text-sm font-semibold text-primary hover:underline hidden md:block">
+                Xem tất cả &gt;&gt;
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               <StaggerChildren animation="fade-up" staggerDelay={120}>
                 {posts.map((post: any) => <PostCard key={post.id} post={post as any} />)}
               </StaggerChildren>
@@ -234,20 +182,14 @@ export default function HomeAnimatedContent({ featuredProducts, posts, reviews, 
       )}
 
       {/* CTA */}
-      <section className="py-20 gradient-primary relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/5 rounded-full" />
-          <div className="absolute -bottom-20 -right-10 w-60 h-60 bg-white/5 rounded-full" />
-          <div className="absolute top-1/2 left-1/4 w-20 h-20 bg-white/5 rounded-full" />
-        </div>
-        <AnimateOnScroll animation="zoom-in" className="max-w-2xl mx-auto px-4 text-center relative z-10">
-          <div className="text-5xl mb-4 animate-float">🍄</div>
-          <h2 className="font-heading text-3xl md:text-4xl font-bold text-white mb-4">Sẵn sàng tạo nên câu chuyện của bạn?</h2>
-          <p className="text-white/80 mb-8 text-lg">Hãy để Mushroomie giúp bạn có một món phụ kiện thủ công không ai có, thật sự là của bạn.</p>
-          <Link href="/san-pham" className="bg-white text-primary px-10 py-4 rounded-full font-bold text-base hover:bg-yellow-50 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.2)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.3)] inline-block hover:-translate-y-1">
-            Bắt đầu ngay →
+      <section className="bg-primary/5 py-12">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="font-heading text-2xl md:text-3xl font-bold text-neutral-800 mb-4">Bạn cần tìm phụ kiện độc đáo?</h2>
+          <p className="text-neutral-600 mb-6 text-sm md:text-base">Mushroomie sẽ giúp bạn thiết kế những món đồ thủ công không ai có, thật sự là của riêng bạn.</p>
+          <Link href="/san-pham" className="bg-primary text-white px-8 py-3 rounded-full font-bold text-sm hover:bg-primary/90 transition-all shadow-md">
+            Khám phá ngay
           </Link>
-        </AnimateOnScroll>
+        </div>
       </section>
     </>
   )
