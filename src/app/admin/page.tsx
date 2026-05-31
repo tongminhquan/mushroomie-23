@@ -29,7 +29,7 @@ const statusLabels: Record<string, string> = {
 export default async function AdminDashboard() {
   const [totalOrders, revenueResult, totalProducts, totalPosts, unreadContacts, recentOrders] = await Promise.all([
     prisma.order.count().catch(() => 0),
-    prisma.order.aggregate({ _sum: { total: true }, where: { payment_status: 'PAID' } }).catch(() => ({ _sum: { total: 0 } })),
+    prisma.order.aggregate({ _sum: { total: true }, where: { order_status: { not: 'CANCELLED' }, OR: [{ payment_status: 'PAID' }, { order_status: 'COMPLETED' }] } }).catch(() => ({ _sum: { total: 0 } })),
     prisma.product.count({ where: { status: 'active' } }).catch(() => 0),
     prisma.post.count({ where: { status: 'published' } }).catch(() => 0),
     prisma.contact.count({ where: { status: 'unread' } }).catch(() => 0),

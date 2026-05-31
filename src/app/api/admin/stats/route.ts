@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
     const [totalOrders, totalRevenue, totalProducts, totalPosts, totalContacts, recentOrders] = await Promise.all([
       prisma.order.count(),
-      prisma.order.aggregate({ _sum: { total: true }, where: { payment_status: 'PAID' } }),
+      prisma.order.aggregate({ _sum: { total: true }, where: { order_status: { not: 'CANCELLED' }, OR: [{ payment_status: 'PAID' }, { order_status: 'COMPLETED' }] } }),
       prisma.product.count({ where: { status: 'active' } }),
       prisma.post.count({ where: { status: 'published' } }),
       prisma.contact.count({ where: { status: 'unread' } }),
