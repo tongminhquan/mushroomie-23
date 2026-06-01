@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useCartStore } from '@/store/cart'
-import { ShoppingBag, Menu, X, User, Phone, Mail, Search, MapPin, ChevronDown } from 'lucide-react'
+import { ShoppingBag, Menu, X, User, Phone, Mail, Search, MapPin, ChevronDown, ChevronRight } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -221,9 +221,10 @@ export default function Header() {
                     <li key={idx}>
                       <Link 
                         href={cat.href}
-                        className="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-primary transition-colors border-b border-neutral-50 last:border-0"
+                        className="group flex items-center justify-between px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-primary transition-all duration-300 border-b border-neutral-50 last:border-0"
                       >
-                        {cat.label}
+                        <span className="transform transition-transform duration-300 group-hover:translate-x-1">{cat.label}</span>
+                        <ChevronRight size={16} className="opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 text-primary" />
                       </Link>
                     </li>
                   ))}
