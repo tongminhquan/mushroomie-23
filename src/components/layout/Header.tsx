@@ -16,6 +16,7 @@ export default function Header() {
   const [showSearch, setShowSearch] = useState(false)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
+  const categoryMenuRef = React.useRef<HTMLLIElement>(null)
 
   useEffect(() => { setMounted(true) }, [])
   const totalItems = mounted ? getTotalItems() : 0
@@ -24,6 +25,16 @@ export default function Header() {
     const handleScroll = () => setIsScrolled(window.scrollY > 40)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (categoryMenuRef.current && !categoryMenuRef.current.contains(event.target as Node)) {
+        setIsCategoryOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   const handleSearch = (e: React.FormEvent) => {
@@ -192,9 +203,8 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center">
           <ul className="flex items-center h-full w-full justify-start gap-1 overflow-x-auto no-scrollbar">
             <li 
+              ref={categoryMenuRef}
               className="h-full relative shrink-0"
-              onMouseEnter={() => setIsCategoryOpen(true)}
-              onMouseLeave={() => setIsCategoryOpen(false)}
             >
               <button 
                 type="button"
