@@ -17,7 +17,10 @@ export default function FloatingWidgets() {
         
         {/* Nút chính */}
         <div className="relative flex items-center justify-center w-full h-full bg-white rounded-full shadow-lg border-2 border-[#0068FF] group-hover:scale-110 transition-transform duration-300">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Logo_Zalo.svg/512px-Logo_Zalo.svg.png" alt="Zalo" className="w-10 h-10 object-contain" />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="w-10 h-10 object-contain">
+            <path fill="#0068FF" d="M50 5C25.15 5 5 25.15 5 50c0 14.28 6.64 26.96 17 35.15-1 6.85-6 11.85-6 11.85s8-1 16-5c5.3 2 11.4 3 18 3 24.85 0 45-20.15 45-45S74.85 5 50 5z"/>
+            <text x="50" y="62" fontFamily="Arial, Helvetica, sans-serif" fontWeight="900" fontSize="34" fill="#FFFFFF" textAnchor="middle" letterSpacing="-1">Zalo</text>
+          </svg>
         </div>
       </Link>
 
