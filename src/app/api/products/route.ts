@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { z } from 'zod'
 import { generateSlug } from '@/lib/utils'
+import { logAdminAction } from '@/lib/admin-logger'
 
 const productSchema = z.object({
   name: z.string().min(1),
@@ -93,6 +94,14 @@ export async function POST(request: NextRequest) {
           }))
         } : undefined
       },
+    })
+
+    await logAdminAction({
+      userId: Number(session.user.id),
+      action: 'CREATE',
+      entity: 'PRODUCT',
+      details: { id: product.id, name: product.name },
+      ipAddress: request.headers.get('x-forwarded-for') || undefined
     })
 
     return NextResponse.json(product, { status: 201 })

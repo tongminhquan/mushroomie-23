@@ -30,6 +30,7 @@ model User {
   orders              Order[]
   posts               Post[]
   order_status_histories OrderStatusHistory[]
+  admin_logs          AdminLog[]
 
   @@map("users")
 }
@@ -380,4 +381,21 @@ model Banner {
   updated_at            DateTime @updatedAt
 
   @@map("banners")
+}
+
+// ─────────────────────────────────────────────
+// ADMIN LOGS
+// ─────────────────────────────────────────────
+model AdminLog {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  action     String   // "CREATE" | "UPDATE" | "DELETE"
+  entity     String   // "PRODUCT" | "ORDER" | "POST" | "USER" | "BANNER" | "CATEGORY"
+  details    String?  @db.Text
+  ip_address String?
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("admin_logs")
 }

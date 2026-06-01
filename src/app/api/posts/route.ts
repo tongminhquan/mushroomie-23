@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { generateSlug } from '@/lib/utils'
+import { logAdminAction } from '@/lib/admin-logger'
 
 export async function GET(request: NextRequest) {
   try {
@@ -64,6 +65,14 @@ export async function POST(request: NextRequest) {
         author_id: Number((session.user as any).id),
         published_at: status === 'published' ? new Date() : null,
       },
+    })
+
+    await logAdminAction({
+      userId: Number(session.user.id),
+      action: 'CREATE',
+      entity: 'POST',
+      details: { id: post.id, title: post.title },
+      ipAddress: request.headers.get('x-forwarded-for') || undefined
     })
 
     return NextResponse.json(post, { status: 201 })

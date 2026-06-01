@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+import { logAdminAction } from '@/lib/admin-logger'
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -25,6 +26,14 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const user = await prisma.user.update({
       where: { id: userId },
       data: { role }
+    })
+
+    await logAdminAction({
+      userId: Number(session.user.id),
+      action: 'UPDATE',
+      entity: 'USER',
+      details: { id: user.id, email: user.email, new_role: role },
+      ipAddress: req.headers.get('x-forwarded-for') || undefined
     })
 
     return NextResponse.json({ success: true, role: user.role })

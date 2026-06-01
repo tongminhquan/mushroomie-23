@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { generateSlug } from '@/lib/utils'
+import { logAdminAction } from '@/lib/admin-logger'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -44,6 +45,15 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     // Remove undefined keys
     Object.keys(data).forEach(k => data[k] === undefined && delete data[k])
     const post = await prisma.post.update({ where: { id: Number(id) }, data })
+    
+    await logAdminAction({
+      userId: Number(session.user.id),
+      action: 'UPDATE',
+      entity: 'POST',
+      details: { id: post.id, title: post.title },
+      ipAddress: request.headers.get('x-forwarded-for') || undefined
+    })
+    
     return NextResponse.json({ post })
   } catch (e: any) {
     if (e?.code === 'P2002') return NextResponse.json({ error: 'Slug đã tồn tại' }, { status: 409 })
@@ -58,9 +68,18 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const { id } = await params
-    await prisma.post.delete({ where: { id: Number(id) } })
+    const deleted = await prisma.post.delete({ where: { id: Number(id) } })
+    
+    await logAdminAction({
+      userId: Number(session.user.id),
+      action: 'DELETE',
+      entity: 'POST',
+      details: { id: deleted.id, title: deleted.title },
+      ipAddress: request.headers.get('x-forwarded-for') || undefined
+    })
+    
     return NextResponse.json({ success: true })
-  } catch {
+  } catch (error) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

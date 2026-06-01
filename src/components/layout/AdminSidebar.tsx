@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import {
   LayoutDashboard, Package, FileText, ShoppingCart,
   MessageSquare, Star, LogOut, ChevronRight, ExternalLink,
-  CreditCard, Activity, Settings, Image, Users
+  CreditCard, Activity, Settings, Image, Users, ClipboardList
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -21,6 +21,7 @@ const navItems = [
   { href: '/admin/danh-gia', icon: Star, label: 'Đánh giá' },
   { href: '/admin/banner', icon: Image, label: 'Banners' },
   { href: '/admin/tai-khoan', icon: Users, label: 'Tài khoản' },
+  { href: '/admin/nhat-ky', icon: ClipboardList, label: 'Nhật ký HĐ' },
   { href: '/admin/cai-dat', icon: Settings, label: 'Cài đặt' },
 ]
 
@@ -36,7 +37,7 @@ export default function AdminSidebar() {
   }
 
   const filteredNavItems = navItems.filter(item => {
-    if (item.href === '/admin/tai-khoan' && role !== 'super_admin') {
+    if ((item.href === '/admin/tai-khoan' || item.href === '/admin/nhat-ky') && role !== 'super_admin') {
       return false
     }
     return true

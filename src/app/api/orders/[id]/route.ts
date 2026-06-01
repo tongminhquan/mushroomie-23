@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { sendOrderEmail } from '@/lib/payment/email/sender'
 import { EmailTemplateKey } from '@/types'
+import { logAdminAction } from '@/lib/admin-logger'
 
 const ORDER_EMAIL_MAP: Record<string, EmailTemplateKey> = {
   PROCESSING: 'order_processing',
@@ -78,8 +79,16 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       sendOrderEmail(Number(id), emailKey).catch(console.error)
     }
 
+    await logAdminAction({
+      userId: Number(session.user.id),
+      action: 'UPDATE',
+      entity: 'ORDER',
+      details: { id: updatedOrder.id, order_code: updatedOrder.order_code, new_status: order_status, note },
+      ipAddress: request.headers.get('x-forwarded-for') || undefined
+    })
+
     return NextResponse.json(updatedOrder)
-  } catch {
+  } catch (error) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

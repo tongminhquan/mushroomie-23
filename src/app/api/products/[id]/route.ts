@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { generateSlug } from '@/lib/utils'
+import { logAdminAction } from '@/lib/admin-logger'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -49,8 +50,17 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         } : undefined
       } 
     })
+    
+    await logAdminAction({
+      userId: Number(session.user.id),
+      action: 'UPDATE',
+      entity: 'PRODUCT',
+      details: { id: product.id, name: product.name },
+      ipAddress: request.headers.get('x-forwarded-for') || undefined
+    })
+    
     return NextResponse.json(product)
-  } catch {
+  } catch (error) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
@@ -62,9 +72,18 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const { id } = await params
-    await prisma.product.delete({ where: { id: Number(id) } })
+    const deleted = await prisma.product.delete({ where: { id: Number(id) } })
+    
+    await logAdminAction({
+      userId: Number(session.user.id),
+      action: 'DELETE',
+      entity: 'PRODUCT',
+      details: { id: deleted.id, name: deleted.name },
+      ipAddress: request.headers.get('x-forwarded-for') || undefined
+    })
+
     return NextResponse.json({ success: true })
-  } catch {
+  } catch (error) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
