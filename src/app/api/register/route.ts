@@ -26,8 +26,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: { email: ['Email này đã được sử dụng'] } }, { status: 409 })
     }
 
+    const password_hash = await bcrypt.hash(password, 12)
     const user = await prisma.user.create({
-      data: { name, email, password_hash: password, phone, address, role: 'user' },
+      data: { name, email, password_hash, phone, address, role: 'user' },
     })
 
     return NextResponse.json({ success: true, userId: user.id }, { status: 201 })

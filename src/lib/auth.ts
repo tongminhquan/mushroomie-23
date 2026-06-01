@@ -51,13 +51,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // Tài khoản Google OAuth không có password
         if (!user.password_hash) return null
 
-        let passwordMatch = false
-        if (user.password_hash.startsWith('$2')) {
-          passwordMatch = await bcrypt.compare(parsed.data.password, user.password_hash)
-        } else {
-          passwordMatch = parsed.data.password === user.password_hash
-        }
-        
+        const passwordMatch = await bcrypt.compare(parsed.data.password, user.password_hash)
         if (!passwordMatch) return null
 
         return {
