@@ -106,6 +106,8 @@ export default function Header() {
             <div className="flex w-full">
               <input
                 type="text"
+                name="search"
+                id="searchQuery"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder=""
