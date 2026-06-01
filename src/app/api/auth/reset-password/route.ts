@@ -27,15 +27,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Đường dẫn không hợp lệ hoặc đã hết hạn.' }, { status: 400 })
     }
 
-    // Mã hóa mật khẩu mới
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
-
     // Cập nhật user và xóa token
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        password_hash: hashedPassword,
+        password_hash: password,
         reset_token: null,
         reset_token_expires: null,
       },

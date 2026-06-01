@@ -163,7 +163,7 @@ export default function AdminAccountsPage() {
                           <div className="text-neutral-500">{user.email}</div>
                           {user.phone && <div className="text-xs text-neutral-500 mt-1">SĐT: <span className="font-medium text-neutral-700">{user.phone}</span></div>}
                           {user.address && <div className="text-xs text-neutral-500 line-clamp-2" title={user.address}>Đ/c: <span className="font-medium text-neutral-700">{user.address}</span></div>}
-                          <div className="text-xs text-neutral-500 mt-0.5">MK (Mã hóa): <span className="font-mono bg-neutral-100 px-1 py-0.5 rounded text-[10px] break-all border border-neutral-200 inline-block mt-1" title={user.password_hash}>{user.password_hash ? user.password_hash.substring(0, 20) + '...' : 'Không có'}</span></div>
+                          <div className="text-xs text-neutral-500 mt-0.5">Mật khẩu: <span className="font-mono bg-neutral-100 px-1 py-0.5 rounded text-[10px] break-all border border-neutral-200 inline-block mt-1" title={user.password_hash}>{user.password_hash ? (user.password_hash.startsWith('$2') ? '*** (Đã mã hóa cũ)' : user.password_hash) : 'Không có'}</span></div>
                         </div>
                       </div>
                     </td>
