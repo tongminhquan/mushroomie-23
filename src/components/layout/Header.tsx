@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useCartStore } from '@/store/cart'
-import { ShoppingBag, Menu, X, User, Phone, Mail, Search, MapPin, ChevronDown, ChevronRight } from 'lucide-react'
+import { ShoppingBag, Menu, X, User, Phone, Mail, Search, MapPin, ChevronDown, ChevronRight, ClipboardList } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -108,7 +108,7 @@ export default function Header() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Ba mẹ muốn tìm đồ chơi gì cho bé? (VD: Vòng tay, móc khóa...)"
+                placeholder=""
                 className="w-full px-5 py-3 bg-white border-2 border-primary rounded-l-md text-sm focus:outline-none placeholder:text-neutral-400 font-medium"
               />
               <button type="submit" className="bg-primary hover:bg-primary-dark transition-colors px-6 text-white rounded-r-md flex items-center justify-center">
@@ -123,6 +123,17 @@ export default function Header() {
             <button onClick={() => setShowSearch(!showSearch)} className="md:hidden p-2 text-neutral-700">
               <Search size={24} />
             </button>
+
+            {/* Tracking Block */}
+            <Link href="/tai-khoan/don-hang" className="hidden md:flex items-center gap-3 cursor-pointer group pr-4 md:border-r md:border-neutral-200">
+              <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-primary group-hover:bg-primary-light transition-colors">
+                <ClipboardList size={20} />
+              </div>
+              <div className="flex flex-col text-sm">
+                <span className="text-neutral-500 text-xs">Tra cứu</span>
+                <span className="font-bold text-neutral-800 group-hover:text-primary transition-colors">Đơn hàng</span>
+              </div>
+            </Link>
 
             {/* Account Block */}
             <div className="hidden md:flex items-center gap-3 relative group cursor-pointer">
