@@ -63,7 +63,11 @@ export default async function MyOrdersPage() {
         ) : (
           <div className="space-y-4">
             <StaggerChildren animation="fade-up" staggerDelay={100}>
-              {orders.map((order) => (
+              {orders.map((order) => {
+                const isExpired = order.payment?.status === 'EXPIRED'
+                const displayStatus = isExpired ? 'CANCELLED' : order.order_status
+                
+                return (
                 <div key={order.id} className="bg-white rounded-2xl shadow-card p-5 hover:shadow-hover transition-all">
                 <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                   <div>
@@ -71,8 +75,8 @@ export default async function MyOrdersPage() {
                     <div className="text-xs text-neutral-500 mt-0.5">{formatDate(order.created_at)}</div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[order.order_status] || 'bg-neutral-100 text-neutral-700'}`}>
-                      {statusLabels[order.order_status] || order.order_status}
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[displayStatus] || 'bg-neutral-100 text-neutral-700'}`}>
+                      {statusLabels[displayStatus] || displayStatus}
                     </span>
                   </div>
                 </div>
@@ -84,18 +88,18 @@ export default async function MyOrdersPage() {
                     className="text-primary text-sm font-semibold hover:underline">
                     Xem chi tiết →
                   </Link>
-                  {order.payment_status === 'PENDING' && (
+                  {order.payment_status === 'PENDING' && order.payment_method !== 'cod' && !isExpired && (
                     <Link href={`/thanh-toan/xac-nhan?orderCode=${order.order_code}`}
                       className="bg-primary text-white text-xs px-4 py-1.5 rounded-full font-semibold hover:bg-primary-dark transition-colors">
                       Thanh toán
                     </Link>
                   )}
-                  {order.order_status === 'COMPLETED' && !(order as any).is_reviewed && (
+                  {displayStatus === 'COMPLETED' && !(order as any).is_reviewed && (
                     <ReviewOrderModal orderId={order.id} />
                   )}
                 </div>
               </div>
-            ))}
+              )})}
             </StaggerChildren>
           </div>
         )}

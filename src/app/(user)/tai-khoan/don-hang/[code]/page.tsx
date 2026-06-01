@@ -52,6 +52,9 @@ export default async function OrderDetailsPage({ params }: { params: { code: str
     notFound()
   }
 
+  const isExpired = order.payment?.status === 'EXPIRED'
+  const displayStatus = isExpired ? 'CANCELLED' : order.order_status
+
   return (
     <div className="min-h-screen bg-secondary py-6">
       <div className="max-w-4xl mx-auto px-4">
@@ -66,8 +69,8 @@ export default async function OrderDetailsPage({ params }: { params: { code: str
             <h1 className="font-heading text-2xl font-bold">Chi tiết đơn hàng <span className="text-primary font-mono">#{order.order_code}</span></h1>
             <p className="text-sm text-neutral-500 mt-1">Đặt lúc {formatDate(order.created_at)}</p>
           </div>
-          <div className={`px-4 py-1.5 rounded-full font-bold text-sm ${statusColors[order.order_status] || 'bg-neutral-100 text-neutral-700'}`}>
-            {statusLabels[order.order_status] || order.order_status}
+          <div className={`px-4 py-1.5 rounded-full font-bold text-sm ${statusColors[displayStatus] || 'bg-neutral-100 text-neutral-700'}`}>
+            {statusLabels[displayStatus] || displayStatus}
           </div>
         </AnimateOnScroll>
 
@@ -168,7 +171,7 @@ export default async function OrderDetailsPage({ params }: { params: { code: str
                 </div>
               </div>
 
-              {order.payment_status === 'PENDING' && order.payment_method === 'bank_transfer' && (
+              {order.payment_status === 'PENDING' && order.payment_method !== 'cod' && !isExpired && (
                 <div className="mt-6">
                   <Link href={`/thanh-toan/xac-nhan?orderCode=${order.order_code}`}>
                     <button className="w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary-dark transition-colors">
@@ -178,7 +181,7 @@ export default async function OrderDetailsPage({ params }: { params: { code: str
                 </div>
               )}
 
-              {order.order_status === 'COMPLETED' && !order.is_reviewed && (
+              {displayStatus === 'COMPLETED' && !order.is_reviewed && (
                 <div className="mt-6">
                   <ReviewOrderModal orderId={order.id} />
                 </div>
