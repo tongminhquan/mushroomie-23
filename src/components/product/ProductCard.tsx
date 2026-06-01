@@ -50,7 +50,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="group bg-white rounded-lg border border-neutral-200 overflow-hidden hover:border-primary hover:shadow-lg transition-all duration-300 relative flex flex-col h-full">
-      <Link href={`/san-pham/${product.slug}`} className="block relative h-56 sm:h-64 bg-neutral-50 overflow-hidden shrink-0">
+      <Link href={`/san-pham/${product.slug}`} className="block relative aspect-[3/4] w-full bg-neutral-50 overflow-hidden shrink-0">
         <Image
           src={imageUrl}
           alt={product.name}

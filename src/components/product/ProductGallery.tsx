@@ -15,7 +15,7 @@ export default function ProductGallery({ images, productName, isCustomizable, is
 
   return (
     <div className="space-y-4">
-      <div className="relative h-96 lg:h-[500px] bg-white rounded-2xl overflow-hidden shadow-card">
+      <div className="relative aspect-[3/4] w-full bg-white rounded-2xl overflow-hidden shadow-card">
         <Image
           src={mainImage}
           alt={productName}
@@ -37,7 +37,7 @@ export default function ProductGallery({ images, productName, isCustomizable, is
             <button
               key={i}
               onClick={() => setMainImage(img)}
-              className={`relative h-20 sm:h-24 bg-white rounded-xl overflow-hidden shadow-sm border-2 transition-all ${
+              className={`relative aspect-[3/4] w-full bg-white rounded-xl overflow-hidden shadow-sm border-2 transition-all ${
                 mainImage === img ? 'border-primary ring-2 ring-primary/30' : 'border-transparent hover:border-neutral-300'
               }`}
             >

@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { X, Upload, Search, Check, ImageIcon } from 'lucide-react'
+import ImageEditorModal from './ImageEditorModal'
 
 interface MediaItem {
   id: number
@@ -64,6 +65,7 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
   const fileRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const [fileToEdit, setFileToEdit] = useState<string | null>(null)
 
   const [customImages, setCustomImages] = useState<MediaItem[]>([])
 
@@ -102,32 +104,20 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
   }
 
   const uploadFile = async (file: File) => {
-    setIsUploading(true)
-    const formData = new FormData()
-    formData.append('file', file)
-    
-    try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
-      
-      if (res.ok) {
-        const item = await res.json()
-        setCustomImages(prev => [item, ...prev])
-        setSelected(item)
-        setMeta(prev => ({ ...prev, url: item.url, seo_title: item.filename.replace(/\.\w+$/, '') }))
-        setTab('library')
-      } else {
-        alert('Có lỗi xảy ra khi tải lên!')
-      }
-    } catch (err) {
-      console.error('Upload error', err)
-      alert('Không thể tải ảnh lên, vui lòng thử lại!')
-    } finally {
-      setIsUploading(false)
-      if (fileRef.current) fileRef.current.value = '' // Reset input
+    // Thay vì tải lên ngay, tạo ObjectURL và mở modal cắt ảnh
+    const url = URL.createObjectURL(file)
+    setFileToEdit(url)
+    if (fileRef.current) fileRef.current.value = '' // Reset input
+  }
+
+  const handleCroppedSave = (url: string, itemData?: any) => {
+    if (itemData) {
+      setCustomImages(prev => [itemData, ...prev])
+      setSelected(itemData)
+      setMeta(prev => ({ ...prev, url: itemData.url, seo_title: itemData.filename.replace(/\.\w+$/, '') }))
     }
+    setFileToEdit(null)
+    setTab('library')
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -152,7 +142,15 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
   }
 
   return (
-    <div className="media-picker-modal fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
+    <>
+      {fileToEdit && (
+        <ImageEditorModal
+          src={fileToEdit}
+          onSave={handleCroppedSave}
+          onCancel={() => setFileToEdit(null)}
+        />
+      )}
+      <div className="media-picker-modal fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
@@ -237,7 +235,7 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
                       <button type="button"
                         key={img.id}
                         onClick={() => handleSelect(img)}
-                        className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${selected?.id === img.id ? 'border-primary ring-2 ring-primary/30' : 'border-transparent hover:border-neutral-300'}`}
+                        className={`relative aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all ${selected?.id === img.id ? 'border-primary ring-2 ring-primary/30' : 'border-transparent hover:border-neutral-300'}`}
                       >
                         <img src={img.url} alt={img.filename} className="w-full h-full object-cover" />
                         {selected?.id === img.id && (
@@ -351,5 +349,6 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
         </div>
       </div>
     </div>
+  </>
   )
 }

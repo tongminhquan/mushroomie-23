@@ -6,13 +6,21 @@ import { Crop, ZoomIn, ZoomOut, RotateCcw, RotateCw, Undo, Redo, X, Check } from
 
 interface ImageEditorModalProps {
   src: string
-  onSave: (newUrl: string) => void
+  onSave: (newUrl: string, itemData?: any) => void
   onCancel: () => void
 }
 
 export default function ImageEditorModal({ src, onSave, onCancel }: ImageEditorModalProps) {
   const cropperRef = useRef<ReactCropperElement>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [aspectRatio, setAspectRatio] = useState<number | undefined>(undefined)
+
+  const handleRatioChange = (ratio?: number) => {
+    setAspectRatio(ratio)
+    if (cropperRef.current) {
+      cropperRef.current.cropper.setAspectRatio(ratio === undefined ? NaN : ratio)
+    }
+  }
 
   useEffect(() => {
     const originalOverflow = document.body.style.overflow
@@ -50,7 +58,7 @@ export default function ImageEditorModal({ src, onSave, onCancel }: ImageEditorM
         })
         if (res.ok) {
           const data = await res.json()
-          onSave(data.url)
+          onSave(data.url, data)
         } else {
           alert('Lỗi khi lưu ảnh đã chỉnh sửa!')
         }
@@ -92,6 +100,12 @@ export default function ImageEditorModal({ src, onSave, onCancel }: ImageEditorM
           </div>
           
           <div className="flex gap-2 items-center mt-2 sm:mt-0">
+            <div className="flex bg-neutral-200 rounded p-1 mr-2">
+              <button onClick={() => handleRatioChange(undefined)} className={`px-2 py-1 text-xs font-semibold rounded ${aspectRatio === undefined ? 'bg-white shadow' : 'text-neutral-500 hover:text-neutral-700'}`}>Tự do</button>
+              <button onClick={() => handleRatioChange(3/4)} className={`px-2 py-1 text-xs font-semibold rounded ${aspectRatio === 3/4 ? 'bg-white shadow' : 'text-neutral-500 hover:text-neutral-700'}`}>3:4</button>
+              <button onClick={() => handleRatioChange(1)} className={`px-2 py-1 text-xs font-semibold rounded ${aspectRatio === 1 ? 'bg-white shadow' : 'text-neutral-500 hover:text-neutral-700'}`}>1:1</button>
+              <button onClick={() => handleRatioChange(16/9)} className={`px-2 py-1 text-xs font-semibold rounded ${aspectRatio === 16/9 ? 'bg-white shadow' : 'text-neutral-500 hover:text-neutral-700'}`}>16:9</button>
+            </div>
             <button onClick={onCancel} className="px-4 py-1.5 border border-neutral-300 rounded bg-white hover:bg-neutral-100 text-sm font-semibold text-neutral-600">
               Hủy chỉnh sửa
             </button>
@@ -114,6 +128,7 @@ export default function ImageEditorModal({ src, onSave, onCancel }: ImageEditorM
             background={true}
             responsive={true}
             autoCropArea={1}
+            aspectRatio={aspectRatio === undefined ? NaN : aspectRatio}
             checkOrientation={false} // https://github.com/fengyuanchen/cropperjs/issues/671
           />
         </div>
