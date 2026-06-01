@@ -63,6 +63,7 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
   })
   const fileRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
 
   const [customImages, setCustomImages] = useState<MediaItem[]>([])
 
@@ -100,6 +101,56 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
     else setSelected(prev => prev ? { ...prev, url } : null)
   }
 
+  const uploadFile = async (file: File) => {
+    setIsUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+      
+      if (res.ok) {
+        const item = await res.json()
+        setCustomImages(prev => [item, ...prev])
+        setSelected(item)
+        setMeta(prev => ({ ...prev, url: item.url, seo_title: item.filename.replace(/\.\w+$/, '') }))
+        setTab('library')
+      } else {
+        alert('Có lỗi xảy ra khi tải lên!')
+      }
+    } catch (err) {
+      console.error('Upload error', err)
+      alert('Không thể tải ảnh lên, vui lòng thử lại!')
+    } finally {
+      setIsUploading(false)
+      if (fileRef.current) fileRef.current.value = '' // Reset input
+    }
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file && file.type.startsWith('image/')) {
+      uploadFile(file)
+    } else if (file) {
+      alert('Vui lòng chọn tệp hình ảnh!')
+    }
+  }
+
   return (
     <div className="media-picker-modal fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden">
@@ -134,48 +185,28 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
             {tab === 'upload' ? (
               <div className="flex-1 flex items-center justify-center p-8">
                 <div
-                  className="border-2 border-dashed border-neutral-300 rounded-2xl p-12 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all w-full max-w-md"
+                  className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all w-full max-w-md ${
+                    isDragging 
+                      ? 'border-primary bg-primary/10' 
+                      : 'border-neutral-300 hover:border-primary hover:bg-primary/5'
+                  }`}
                   onClick={() => fileRef.current?.click()}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
                 >
-                  <Upload size={40} className="mx-auto text-neutral-400 mb-4" />
-                  <p className="font-semibold text-neutral-700 mb-1">Kéo thả tệp vào đây</p>
+                  <Upload size={40} className={`mx-auto mb-4 transition-colors ${isDragging ? 'text-primary' : 'text-neutral-400'}`} />
+                  <p className="font-semibold text-neutral-700 mb-1">{isDragging ? 'Thả tệp vào đây...' : 'Kéo thả tệp vào đây'}</p>
                   <p className="text-sm text-neutral-500 mb-4">hoặc nhấn để chọn tệp từ máy tính</p>
                   <button 
                     disabled={isUploading}
-                    className="bg-primary text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-primary text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed pointer-events-none"
                   >
                     {isUploading ? 'Đang tải lên...' : 'Chọn tệp'}
                   </button>
-                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={async e => {
+                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => {
                     const file = e.target.files?.[0]
-                    if (file) {
-                      setIsUploading(true)
-                      const formData = new FormData()
-                      formData.append('file', file)
-                      
-                      try {
-                        const res = await fetch('/api/upload', {
-                          method: 'POST',
-                          body: formData
-                        })
-                        
-                        if (res.ok) {
-                          const item = await res.json()
-                          setCustomImages(prev => [item, ...prev])
-                          setSelected(item)
-                          setMeta(prev => ({ ...prev, url: item.url, seo_title: item.filename.replace(/\.\w+$/, '') }))
-                          setTab('library')
-                        } else {
-                          alert('Có lỗi xảy ra khi tải lên!')
-                        }
-                      } catch (err) {
-                        console.error('Upload error', err)
-                        alert('Không thể tải ảnh lên, vui lòng thử lại!')
-                      } finally {
-                        setIsUploading(false)
-                        if (e.target) e.target.value = '' // Reset input
-                      }
-                    }
+                    if (file) uploadFile(file)
                   }} />
                 </div>
               </div>
