@@ -34,12 +34,17 @@ export default function Header() {
     }
   }
 
+  const productCategories = [
+    { href: '/san-pham', label: 'Tất cả sản phẩm' },
+    { href: '/san-pham?category=vong-tay', label: 'Vòng tay' },
+    { href: '/san-pham?category=moc-khoa', label: 'Móc khóa' },
+    { href: '/san-pham?category=charm', label: 'Charm' },
+    { href: '/san-pham?category=phu-kien', label: 'Phụ kiện khác' },
+  ]
+
   const navLinks = [
     { href: '/', label: 'TRANG CHỦ' },
     { href: '/gioi-thieu', label: 'GIỚI THIỆU' },
-    { href: '/san-pham', label: 'TẤT CẢ SẢN PHẨM' },
-    { href: '/san-pham?category=vong-tay', label: 'VÒNG TAY' },
-    { href: '/san-pham?category=moc-khoa', label: 'MÓC KHÓA' },
     { href: '/tin-tuc', label: 'TIN TỨC' },
     { href: '/chinh-sach-tra-gop', label: 'TRẢ GÓP' },
     { href: '/lien-he', label: 'LIÊN HỆ' },
@@ -185,10 +190,26 @@ export default function Header() {
       <nav className={`hidden md:block w-full bg-primary sticky top-[96px] z-40 shadow-sm transition-transform ${isScrolled ? '-translate-y-8' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center">
           <ul className="flex items-center h-full w-full justify-start gap-1 overflow-x-auto no-scrollbar">
-            <li className="h-full flex items-center bg-primary-dark px-4 mr-2 shrink-0">
-              <button className="flex items-center gap-2 text-white font-bold text-sm tracking-wide whitespace-nowrap">
+            <li className="h-full relative group shrink-0">
+              <button className="h-full flex items-center gap-2 bg-primary-dark px-4 mr-2 text-white font-bold text-sm tracking-wide whitespace-nowrap">
                 <Menu size={20} /> DANH MỤC SẢN PHẨM
               </button>
+              
+              {/* Dropdown Menu */}
+              <div className="absolute top-full left-0 w-56 bg-white shadow-xl border border-neutral-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-b-md overflow-hidden">
+                <ul className="flex flex-col py-1">
+                  {productCategories.map((cat, idx) => (
+                    <li key={idx}>
+                      <Link 
+                        href={cat.href}
+                        className="block px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-primary transition-colors border-b border-neutral-50 last:border-0"
+                      >
+                        {cat.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </li>
             {navLinks.map((link) => (
               <li key={link.href} className="h-full">
