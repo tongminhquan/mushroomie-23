@@ -120,10 +120,11 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
   }
 
   return (
-    <section 
-      className="relative w-full aspect-[4/3] md:aspect-[2.5/1] lg:aspect-[3/1] bg-neutral-900 flex items-center overflow-hidden group select-none cursor-grab active:cursor-grabbing"
-      onMouseEnter={stopTimer}
-      onMouseLeave={handleMouseLeave}
+    <div className="w-full bg-neutral-100 flex justify-center pb-8 pt-4">
+      <section 
+        className="relative w-full md:w-1/2 aspect-video bg-neutral-900 flex items-center overflow-hidden group select-none cursor-grab active:cursor-grabbing md:rounded-xl md:shadow-lg"
+        onMouseEnter={stopTimer}
+        onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -295,5 +296,6 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
         </div>
       )}
     </section>
+  </div>
   )
 }
