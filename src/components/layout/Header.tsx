@@ -80,7 +80,7 @@ export default function Header() {
           </div>
           <div className="flex items-center gap-4">
             <Link href="/chinh-sach-tra-gop" className="hover:text-primary transition-colors">Chính sách trả góp</Link>
-            <Link href="/chinh-sach-bao-mat" className="hover:text-primary transition-colors">Bảo hành & Đổi trả</Link>
+            <Link href="/chinh-sach-doi-tra" className="hover:text-primary transition-colors">Bảo hành & Đổi trả</Link>
             <span className="text-neutral-300">|</span>
             <a href="https://www.facebook.com/mushr00mie" target="_blank" rel="noopener noreferrer" className="hover:text-[#1877F2]">Facebook</a>
           </div>
@@ -170,7 +170,7 @@ export default function Header() {
             </div>
 
             {/* Cart Block */}
-            <div onClick={toggleCart} className="flex items-center gap-3 cursor-pointer group">
+            <button type="button" onClick={toggleCart} className="flex items-center gap-3 cursor-pointer group bg-transparent border-none outline-none text-left">
               <div className="relative w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white group-hover:bg-primary-dark transition-colors">
                 <ShoppingBag size={20} />
                 {totalItems > 0 && (
@@ -183,7 +183,7 @@ export default function Header() {
                 <span className="text-neutral-500 text-xs">Giỏ hàng</span>
                 <span className="font-bold text-neutral-800 group-hover:text-primary transition-colors">Sản phẩm</span>
               </div>
-            </div>
+            </button>
           </div>
         </div>
 

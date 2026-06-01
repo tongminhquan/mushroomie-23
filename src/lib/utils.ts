@@ -5,23 +5,17 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+import { format } from 'date-fns'
+import { vi } from 'date-fns/locale'
+
 export function formatPrice(price: number | string): string {
   const num = typeof price === 'string' ? parseFloat(price) : price
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-  }).format(num)
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " ₫"
 }
 
 export function formatDate(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date
-  return new Intl.DateTimeFormat('vi-VN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(d)
+  return format(d, 'dd/MM/yyyy HH:mm', { locale: vi })
 }
 
 export function generateSlug(text: string): string {
