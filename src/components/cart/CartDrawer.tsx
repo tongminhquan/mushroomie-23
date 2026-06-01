@@ -13,8 +13,8 @@ export default function CartDrawer() {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/40 z-40 backdrop-blur-sm" onClick={closeCart} />
-      <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col">
+      <div className="fixed inset-0 bg-black/40 z-[100] backdrop-blur-sm" onClick={closeCart} />
+      <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-[110] shadow-2xl flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-neutral-100">
           <div className="flex items-center gap-2">
             <ShoppingBag size={20} className="text-primary" />
