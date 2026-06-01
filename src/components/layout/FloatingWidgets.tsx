@@ -16,8 +16,8 @@ export default function FloatingWidgets() {
         <div className="absolute inset-0 rounded-full bg-[#0068FF] animate-ping opacity-60"></div>
         
         {/* Nút chính */}
-        <div className="relative flex items-center justify-center w-full h-full bg-[#0068FF] rounded-full shadow-lg border-2 border-white group-hover:scale-110 transition-transform duration-300">
-          <span className="text-white font-black text-lg tracking-tighter" style={{ fontFamily: 'Arial, sans-serif' }}>Zalo</span>
+        <div className="relative flex items-center justify-center w-full h-full bg-white rounded-full shadow-lg border-2 border-[#0068FF] group-hover:scale-110 transition-transform duration-300">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Logo_Zalo.svg/512px-Logo_Zalo.svg.png" alt="Zalo" className="w-10 h-10 object-contain" />
         </div>
       </Link>
 
