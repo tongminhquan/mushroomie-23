@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { MapPin, Phone, Mail, Globe } from 'lucide-react'
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
+import SafeEmail from '@/components/ui/SafeEmail'
 
 import { prisma } from '@/lib/prisma'
 
@@ -85,8 +86,7 @@ export default async function Footer() {
                     <a href="tel:+84848744060" className="hover:text-white transition-colors">+84 848 744 060</a>
                   </li>
                   <li className="flex items-center gap-3 text-sm text-white/80">
-                    <Mail size={16} className="shrink-0 text-yellow-300" />
-                    <a href="mailto:cskh@mushroomie.io.vn" className="hover:text-white transition-colors">cskh@mushroomie.io.vn</a>
+                    <SafeEmail email="cskh@mushroomie.io.vn" showIcon={true} className="hover:text-white transition-colors flex items-center gap-1.5" />
                   </li>
                   <li className="flex items-center gap-3 text-sm text-white/80">
                     <Globe size={16} className="shrink-0 text-yellow-300" />

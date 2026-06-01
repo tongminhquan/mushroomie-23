@@ -5,6 +5,7 @@ import { ShoppingBag, Menu, X, User, Phone, Mail, Search, MapPin, ChevronDown, C
 import { useState, useEffect, useRef } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import SafeEmail from '@/components/ui/SafeEmail'
 
 export default function Header() {
   const { getTotalItems, toggleCart } = useCartStore()
@@ -71,9 +72,7 @@ export default function Header() {
             <a href="tel:+84848744060" className="flex items-center gap-1.5 hover:text-primary transition-colors">
               <Phone size={12} /> Hotline: 0848 744 060
             </a>
-            <a href="mailto:cskh@mushroomie.io.vn" className="flex items-center gap-1.5 hover:text-primary transition-colors">
-              <Mail size={12} /> Email: cskh@mushroomie.io.vn
-            </a>
+            <SafeEmail email="cskh@mushroomie.io.vn" showIcon={true} className="flex items-center gap-1.5 hover:text-primary transition-colors" />
             <span className="flex items-center gap-1.5">
               <MapPin size={12} /> Hệ thống cửa hàng Mushroomie
             </span>

@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
+import SafeEmail from '@/components/ui/SafeEmail'
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' })
@@ -46,7 +47,7 @@ export default function ContactPage() {
                 <div className="space-y-3">
                   {[
                     { emoji: '📍', label: 'Địa chỉ', value: 'Hẻm 2 tổ 11, phường Trảng Dài, thành phố Đồng Nai' },
-                    { emoji: '📧', label: 'Email', value: 'cskh@mushroomie.io.vn' },
+                    { emoji: '📧', label: 'Email', value: <SafeEmail email="cskh@mushroomie.io.vn" /> },
                     { emoji: '📞', label: 'Điện thoại', value: '+84 84 874 4060' },
                     { emoji: '⏰', label: 'Giờ làm việc', value: 'T2-CN: 8:00 - 21:00' },
                     { emoji: '📷', label: 'Instagram', value: '@mushr00mie._' },
@@ -55,7 +56,7 @@ export default function ContactPage() {
                       <span className="text-xl w-8">{item.emoji}</span>
                       <div>
                         <p className="text-xs text-neutral-500">{item.label}</p>
-                        <p className="font-semibold text-sm text-neutral-900">{item.value}</p>
+                        <div className="font-semibold text-sm text-neutral-900">{item.value}</div>
                       </div>
                     </div>
                   ))}
