@@ -101,10 +101,10 @@ export default function AdminAccountsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Quản lý Tài khoản</h1>
+          <h1 className="font-heading text-2xl font-bold">Quản lý Tài khoản</h1>
           <p className="text-neutral-500 mt-1">Cấp quyền và quản lý tài khoản người dùng</p>
         </div>
       </div>
