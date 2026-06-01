@@ -201,7 +201,7 @@ export default function Header() {
       {/* 3. NAVIGATION BAR (Solid Red, Sticky) */}
       <nav className={`hidden md:block w-full bg-primary sticky top-[96px] z-40 shadow-sm transition-transform ${isScrolled ? '-translate-y-8' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center">
-          <ul className="flex items-center h-full w-full justify-start gap-1 overflow-x-auto no-scrollbar">
+          <ul className="flex items-center h-full w-full justify-start gap-1">
             <li 
               ref={categoryMenuRef}
               className="h-full relative shrink-0"
