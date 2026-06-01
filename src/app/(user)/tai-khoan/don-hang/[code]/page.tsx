@@ -31,13 +31,14 @@ const statusLabels: Record<string, string> = {
   CANCELLED: 'Đã hủy',
 }
 
-export default async function OrderDetailsPage({ params }: { params: { code: string } }) {
+export default async function OrderDetailsPage({ params }: { params: Promise<{ code: string }> }) {
   const session = await auth()
   if (!session) redirect('/tai-khoan/dang-nhap')
 
+  const { code } = await params;
   const userId = parseInt((session.user as any).id)
   const order = await prisma.order.findUnique({
-    where: { order_code: params.code },
+    where: { order_code: code },
     include: {
       items: {
         include: {
