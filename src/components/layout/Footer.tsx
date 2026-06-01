@@ -102,7 +102,7 @@ export default async function Footer() {
         <div className="bg-[#a01515] text-white/70 text-xs py-4">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
             <p>
-              © {new Date().getFullYear()} Mushroomie. designed by{' '}
+              © {new Date().getFullYear()} Mushroomie. Designed by{' '}
               <a href="https://www.facebook.com/maminhquan69" target="_blank" rel="noopener noreferrer" className="font-bold hover:text-white transition-colors">
                 MMQ
               </a>
