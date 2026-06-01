@@ -109,7 +109,12 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-50">
-              {orders.map((order) => (
+              {orders.map((order) => {
+                const isExpired = order.payment?.status === 'EXPIRED'
+                const displayOrderStatus = isExpired ? 'CANCELLED' : order.order_status
+                const displayPaymentStatus = isExpired ? 'EXPIRED' : order.payment_status
+
+                return (
                 <tr key={order.id} className="hover:bg-neutral-50 transition-colors">
                   <td className="py-3 px-4">
                     <span className="font-mono text-primary font-semibold text-xs">#{order.order_code}</span>
@@ -121,13 +126,13 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                   </td>
                   <td className="py-3 px-4 font-semibold">{formatPrice(Number(order.total))}</td>
                   <td className="py-3 px-4">
-                    <span className={`text-xs font-semibold ${paymentColors[order.payment_status] || ''}`}>
-                      {order.payment_status === 'PAID' ? '✅ Đã TT' : order.payment_status === 'PENDING' ? '⏳ Chờ' : '❌ Lỗi'}
+                    <span className={`text-xs font-semibold ${paymentColors[displayPaymentStatus] || ''}`}>
+                      {displayPaymentStatus === 'PAID' ? '✅ Đã TT' : displayPaymentStatus === 'PENDING' ? '⏳ Chờ' : displayPaymentStatus === 'EXPIRED' ? '❌ Hết hạn' : '❌ Lỗi'}
                     </span>
                   </td>
                   <td className="py-3 px-4">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors[order.order_status] || 'bg-neutral-100'}`}>
-                      {statusLabels[order.order_status] || order.order_status}
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors[displayOrderStatus] || 'bg-neutral-100'}`}>
+                      {statusLabels[displayOrderStatus] || displayOrderStatus}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-neutral-500 text-xs">{formatDate(order.created_at)}</td>
@@ -135,7 +140,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                     <Link href={`/admin/don-hang/${order.id}`} className="text-primary text-xs font-semibold hover:underline">Xem →</Link>
                   </td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
           {orders.length === 0 && (

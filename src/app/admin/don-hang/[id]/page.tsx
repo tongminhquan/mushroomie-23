@@ -39,6 +39,9 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
   })
   if (!order) notFound()
 
+  const isExpired = order.payment?.status === 'EXPIRED'
+  const displayStatus = isExpired ? 'CANCELLED' : order.order_status
+
   return (
     <div className="p-6 max-w-4xl">
       <div className="flex items-center gap-4 mb-6">
@@ -47,8 +50,8 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
           <h1 className="font-heading text-2xl font-bold">Đơn hàng #{order.order_code}</h1>
           <p className="text-neutral-500 text-sm">Tạo lúc {formatDate(order.created_at)}</p>
         </div>
-        <span className={`ml-auto px-3 py-1 rounded-full text-sm font-semibold ${statusColors[order.order_status] || 'bg-neutral-100'}`}>
-          {statusLabels[order.order_status] || order.order_status}
+        <span className={`ml-auto px-3 py-1 rounded-full text-sm font-semibold ${statusColors[displayStatus] || 'bg-neutral-100'}`}>
+          {statusLabels[displayStatus] || displayStatus}
         </span>
       </div>
 
@@ -146,8 +149,8 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-neutral-500">Trạng thái</span>
-                  <span className={`font-bold ${order.payment.status === 'PAID' ? 'text-green-600' : 'text-yellow-600'}`}>
-                    {order.payment.status === 'PAID' ? '✅ Đã thanh toán' : '⏳ Chờ thanh toán'}
+                  <span className={`font-bold ${order.payment.status === 'PAID' ? 'text-green-600' : order.payment.status === 'EXPIRED' ? 'text-neutral-500' : 'text-yellow-600'}`}>
+                    {order.payment.status === 'PAID' ? '✅ Đã thanh toán' : order.payment.status === 'EXPIRED' ? '❌ Đã hết hạn' : '⏳ Chờ thanh toán'}
                   </span>
                 </div>
                 {order.payment.bank_name && (
@@ -167,7 +170,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
           )}
 
           {/* Update status */}
-          <AdminOrderActions orderId={order.id} currentStatus={order.order_status} />
+          <AdminOrderActions orderId={order.id} currentStatus={displayStatus} />
         </div>
       </div>
     </div>

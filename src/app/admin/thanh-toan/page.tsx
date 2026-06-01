@@ -41,7 +41,7 @@ export default function AdminPaymentsPage() {
           <p className="text-neutral-500 text-sm mt-1">Lịch sử giao dịch và trạng thái thanh toán đơn hàng.</p>
         </div>
         <div className="flex gap-2 overflow-x-auto whitespace-nowrap bg-white p-1 rounded-xl shadow-sm border border-neutral-200">
-          {['ALL', 'PENDING', 'PAID', 'FAILED'].map(status => (
+          {['ALL', 'PENDING', 'PAID', 'EXPIRED', 'FAILED'].map(status => (
             <button
               key={status}
               onClick={() => setFilter(status)}
