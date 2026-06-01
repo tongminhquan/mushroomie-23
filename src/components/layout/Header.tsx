@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { useCartStore } from '@/store/cart'
 import { ShoppingBag, Menu, X, User, Phone, Mail, Search, MapPin, ChevronDown } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
@@ -16,7 +16,7 @@ export default function Header() {
   const [showSearch, setShowSearch] = useState(false)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
-  const categoryMenuRef = React.useRef<HTMLLIElement>(null)
+  const categoryMenuRef = useRef<HTMLLIElement>(null)
 
   useEffect(() => { setMounted(true) }, [])
   const totalItems = mounted ? getTotalItems() : 0
