@@ -113,13 +113,13 @@ export default function AddProductPage() {
             <div>
               <label className="block text-sm font-semibold mb-1">Tên sản phẩm *</label>
               <input name="name" value={form.name} onChange={handleChange} required
-                className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" />
+                className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none" />
             </div>
             <div>
               <label className="block text-sm font-semibold mb-1">Đường dẫn tĩnh (Slug)</label>
               <input name="slug" value={form.slug} onChange={handleChange}
                 placeholder="De-trong-de-tu-dong-tao"
-                className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" />
+                className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none" />
             </div>
           </div>
 
@@ -127,17 +127,17 @@ export default function AddProductPage() {
             <div>
               <label className="block text-sm font-semibold mb-1">Giá bán (VNĐ) *</label>
               <input name="price" type="number" value={form.price} onChange={handleChange} required min="0"
-                className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" />
+                className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none" />
             </div>
             <div>
               <label className="block text-sm font-semibold mb-1">Giá khuyến mãi (VNĐ)</label>
               <input name="sale_price" type="number" value={form.sale_price} onChange={handleChange} min="0"
-                className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" />
+                className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none" />
             </div>
             <div>
               <label className="block text-sm font-semibold mb-1">Tồn kho *</label>
               <input name="stock" type="number" value={form.stock} onChange={handleChange} required min="0"
-                className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" />
+                className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none" />
             </div>
           </div>
 
@@ -145,12 +145,12 @@ export default function AddProductPage() {
             <div>
               <label className="block text-sm font-semibold mb-1">Mã SP (SKU)</label>
               <input name="sku" value={form.sku} onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" />
+                className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none" />
             </div>
             <div>
               <label className="block text-sm font-semibold mb-1">Danh mục</label>
               <select name="category_id" value={form.category_id} onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none bg-white">
+                className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none bg-white">
                 <option value="">Chọn danh mục</option>
                 {categories.map(cat => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -160,8 +160,8 @@ export default function AddProductPage() {
             <div>
               <label className="block text-sm font-semibold mb-1">Trạng thái</label>
               <select name="status" value={form.status} onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none bg-white">
-                {statuses.length === 0 && <option value="active">--- Chọn trạng thái ---</option>}
+                className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none bg-white">
+                <option value="active">Chọn trạng thái</option>
                 {statuses.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
               </select>
             </div>
@@ -174,12 +174,12 @@ export default function AddProductPage() {
           <div>
             <label className="block text-sm font-semibold mb-1">Mô tả ngắn</label>
             <textarea name="short_description" value={form.short_description} onChange={handleChange} rows={2}
-              className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none resize-none" />
+              className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none resize-none" />
           </div>
           <div>
             <label className="block text-sm font-semibold mb-1">Mô tả chi tiết</label>
             <textarea name="description" value={form.description} onChange={handleChange} rows={5}
-              className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none resize-y" />
+              className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none resize-y" />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
