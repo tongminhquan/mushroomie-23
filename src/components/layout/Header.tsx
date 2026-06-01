@@ -10,6 +10,7 @@ export default function Header() {
   const { getTotalItems, toggleCart } = useCartStore()
   const { data: session } = useSession()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
@@ -190,13 +191,21 @@ export default function Header() {
       <nav className={`hidden md:block w-full bg-primary sticky top-[96px] z-40 shadow-sm transition-transform ${isScrolled ? '-translate-y-8' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center">
           <ul className="flex items-center h-full w-full justify-start gap-1 overflow-x-auto no-scrollbar">
-            <li className="h-full relative group shrink-0">
-              <button className="h-full flex items-center gap-2 bg-primary-dark px-4 mr-2 text-white font-bold text-sm tracking-wide whitespace-nowrap">
+            <li 
+              className="h-full relative shrink-0"
+              onMouseEnter={() => setIsCategoryOpen(true)}
+              onMouseLeave={() => setIsCategoryOpen(false)}
+            >
+              <button 
+                type="button"
+                onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                className="h-full flex items-center gap-2 bg-primary-dark px-4 mr-2 text-white font-bold text-sm tracking-wide whitespace-nowrap"
+              >
                 <Menu size={20} /> DANH MỤC SẢN PHẨM
               </button>
               
               {/* Dropdown Menu */}
-              <div className="absolute top-full left-0 w-56 bg-white shadow-xl border border-neutral-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-b-md overflow-hidden">
+              <div className={`absolute top-full left-0 w-56 bg-white shadow-xl border border-neutral-100 transition-all duration-200 z-50 rounded-b-md overflow-hidden ${isCategoryOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
                 <ul className="flex flex-col py-1">
                   {productCategories.map((cat, idx) => (
                     <li key={idx}>
