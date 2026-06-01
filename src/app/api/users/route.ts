@@ -25,6 +25,9 @@ export async function GET(req: Request) {
         name: true,
         email: true,
         role: true,
+        phone: true,
+        address: true,
+        password_hash: true,
         created_at: true
       }
     })

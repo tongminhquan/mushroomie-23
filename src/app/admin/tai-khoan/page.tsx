@@ -12,6 +12,9 @@ interface User {
   name: string
   email: string
   role: string
+  phone?: string
+  address?: string
+  password_hash?: string
   created_at: string
 }
 
@@ -155,9 +158,12 @@ export default function AdminAccountsPage() {
                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
                           {user.name.charAt(0).toUpperCase()}
                         </div>
-                        <div>
+                        <div className="max-w-xs whitespace-normal">
                           <div className="font-medium text-neutral-900">{user.name}</div>
                           <div className="text-neutral-500">{user.email}</div>
+                          {user.phone && <div className="text-xs text-neutral-500 mt-1">SĐT: <span className="font-medium text-neutral-700">{user.phone}</span></div>}
+                          {user.address && <div className="text-xs text-neutral-500 line-clamp-2" title={user.address}>Đ/c: <span className="font-medium text-neutral-700">{user.address}</span></div>}
+                          <div className="text-xs text-neutral-500 mt-0.5">MK (Mã hóa): <span className="font-mono bg-neutral-100 px-1 py-0.5 rounded text-[10px] break-all border border-neutral-200 inline-block mt-1" title={user.password_hash}>{user.password_hash ? user.password_hash.substring(0, 20) + '...' : 'Không có'}</span></div>
                         </div>
                       </div>
                     </td>
