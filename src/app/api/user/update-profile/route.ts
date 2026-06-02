@@ -7,6 +7,7 @@ const updateProfileSchema = z.object({
   name: z.string().min(2, 'Tên phải có ít nhất 2 ký tự'),
   phone: z.string().min(9, 'Số điện thoại phải từ 9 đến 11 số'),
   address: z.string().min(5, 'Địa chỉ phải có ít nhất 5 ký tự'),
+  avatar: z.string().optional(),
 })
 
 export async function PUT(request: NextRequest) {
@@ -22,11 +23,11 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 })
     }
 
-    const { name, phone, address } = parsed.data
+    const { name, phone, address, avatar } = parsed.data
 
     const updatedUser = await prisma.user.update({
       where: { email: session.user.email },
-      data: { name, phone, address },
+      data: { name, phone, address, ...(avatar !== undefined && { avatar }) },
     })
 
     return NextResponse.json({

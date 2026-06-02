@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Package, User as UserIcon, Settings, Shield } from 'lucide-react'
 import { SignOutButton } from '@/components/layout/SignOutButton'
 import { EditProfileForm } from '@/components/account/EditProfileForm'
+import { AvatarUpload } from '@/components/account/AvatarUpload'
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 
 export const metadata = {
@@ -41,14 +42,11 @@ export default async function AccountPage() {
         <div className="col-span-1">
           <AnimateOnScroll animation="fade-right">
             <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6 overflow-hidden sticky top-24">
-            <div className="flex items-center gap-4 mb-6">
-              {(user as any).avatar ? (
-                <img src={(user as any).avatar} alt={user.name} className="w-12 h-12 rounded-full object-cover border border-stone-200 shadow-sm" />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 font-bold text-xl">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <div className="flex items-center gap-4 mb-6">
+              <AvatarUpload 
+                initialAvatar={(user as any).avatar || null} 
+                userName={user.name} 
+              />
               <div className="overflow-hidden">
                 <h2 className="font-bold text-primary truncate flex items-center gap-2">
                   {user.name}

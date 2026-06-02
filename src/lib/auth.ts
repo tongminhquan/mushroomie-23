@@ -73,17 +73,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             where: { email: user.email },
           })
           if (!existingUser) {
-            await prisma.user.create({
-              data: {
-                name: user.name || 'Người dùng Google',
-                email: user.email,
-                password_hash: '', // Tài khoản OAuth không dùng password
-                role: 'user',
-                avatar: user.image || null,
-                google_id: account.providerAccountId,
-                is_email_verified: (profile?.email_verified as boolean) ?? false,
-              },
+            // Thay vì tạo user ngay, redirect sang trang hoàn tất đăng ký
+            const params = new URLSearchParams({
+              email: user.email,
+              name: user.name || '',
+              avatar: user.image || '',
+              google_id: account.providerAccountId || ''
             })
+            return `/tai-khoan/hoan-tat-dang-ky?${params.toString()}`
           } else {
             // Cập nhật thông tin Google nếu người dùng đã tồn tại
             await prisma.user.update({
