@@ -1,6 +1,7 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface Banner {
@@ -151,11 +152,13 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
               }`}
             >
               {/* Background Image */}
-              <img 
+              <Image 
                 src={banner.image_url} 
                 alt={banner.title || 'Mushroomie Banner'} 
+                fill
+                priority={index === 0}
                 style={{ filter: `brightness(${banner.brightness ?? 100}%)` }}
-                className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                className="object-cover pointer-events-none"
               />
 
               {/* Gradient Overlay (Only if there is text content to ensure readability) */}

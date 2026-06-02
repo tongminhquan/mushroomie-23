@@ -45,8 +45,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="vi" suppressHydrationWarning className={`${paytoneOne.variable} ${montserrat.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body suppressHydrationWarning className="font-body bg-secondary min-h-screen">
         <ClarityInit />

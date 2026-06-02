@@ -4,6 +4,7 @@ import { useCartStore } from '@/store/cart'
 import { ShoppingBag, Menu, X, User, Phone, Mail, Search, MapPin, ChevronDown, ChevronRight, ClipboardList } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { useSession, signOut } from 'next-auth/react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import SafeEmail from '@/components/ui/SafeEmail'
 
@@ -109,8 +110,8 @@ export default function Header() {
           </button>
 
           {/* Logo */}
-          <Link href="/" className="shrink-0 flex items-center justify-center">
-            <img src="/logo.png" alt="Mushroomie Logo" className="h-12 md:h-16 w-auto object-contain" />
+          <Link href="/" className="shrink-0 flex items-center justify-center relative h-12 w-32 md:h-16 md:w-40">
+            <Image src="/logo.png" alt="Mushroomie Logo" fill className="object-contain" priority />
           </Link>
 
           {/* Search Bar (Center, huge) */}
@@ -248,14 +249,18 @@ export default function Header() {
                         href={cat.href}
                         className="group flex items-center justify-between px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-primary transition-all duration-300 border-b border-neutral-50 last:border-0"
                       >
-                        <span className="transform transition-transform duration-300 group-hover:translate-x-1 flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                           {cat.image_url ? (
-                            <img src={cat.image_url} alt={cat.label} className="w-5 h-5 rounded object-cover" />
+                            <div className="w-5 h-5 relative">
+                              <Image src={cat.image_url} alt={cat.label} fill className="rounded object-cover" sizes="20px" />
+                            </div>
                           ) : cat.icon ? (
                             <span>{cat.icon}</span>
-                          ) : null}
+                          ) : (
+                            <div className="w-5 h-5 bg-neutral-100 rounded"></div>
+                          )}
                           {cat.label}
-                        </span>
+                        </div>
                         <ChevronRight size={16} className="opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 text-primary" />
                       </Link>
                     </li>

@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import Image from 'next/image'
 import ProductCard from '@/components/product/ProductCard'
 import PostCard from '@/components/blog/PostCard'
 import AnimateOnScroll, { StaggerChildren } from '@/components/ui/AnimateOnScroll'
@@ -38,9 +39,9 @@ export default function HomeAnimatedContent({ featuredProducts, posts, reviews, 
                 {categories.map((cat: any) => (
                   <Link key={cat.id} href={`/san-pham?category=${cat.slug}`}
                     className="group flex flex-col items-center w-20 md:w-28 flex-shrink-0 snap-start">
-                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-neutral-100 flex items-center justify-center mb-3 overflow-hidden group-hover:border-primary group-hover:shadow-md transition-all">
+                    <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-neutral-100 flex items-center justify-center mb-3 overflow-hidden group-hover:border-primary group-hover:shadow-md transition-all">
                       {cat.image_url ? (
-                         <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                         <Image src={cat.image_url} alt={cat.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" sizes="(max-width: 768px) 64px, 80px" />
                       ) : (
                         <div className="text-3xl group-hover:scale-110 transition-transform">{cat.icon || categoryIcons[cat.slug] || '💛'}</div>
                       )}

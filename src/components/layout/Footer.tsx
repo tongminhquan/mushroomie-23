@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { MapPin, Phone, Mail, Globe } from 'lucide-react'
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 import SafeEmail from '@/components/ui/SafeEmail'
@@ -21,8 +22,8 @@ export default async function Footer() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8">
               {/* Brand */}
               <div className="lg:col-span-4">
-                <Link href="/" className="inline-block mb-4">
-                  <img src="/logo.png" alt="Mushroomie" className="h-14" />
+                <Link href="/" className="inline-block mb-4 relative h-14 w-36">
+                  <Image src="/logo.png" alt="Mushroomie" fill className="object-contain" />
                 </Link>
                 <p className="text-white/80 text-sm leading-relaxed mb-5 max-w-xs">
                   Phụ kiện handmade cá nhân hóa dành cho giới trẻ. Mỗi sản phẩm là một câu chuyện, một kỷ niệm, một phần của bạn.

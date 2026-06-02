@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import Button from '@/components/ui/Button'
 import { signIn } from 'next-auth/react'
 
@@ -49,7 +50,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8 flex flex-col items-center">
-          <img src="/logo.png" alt="Mushroomie Logo" className="h-20 w-auto object-contain mb-4" />
+          <div className="relative h-20 w-48 mb-4"><Image src="/logo.png" alt="Mushroomie Logo" fill className="object-contain" priority /></div>
           <h1 className="font-heading text-2xl font-bold">Tạo tài khoản Mushroomie</h1>
           <p className="text-neutral-500 text-sm mt-1">Tham gia cộng đồng phụ kiện handmade!</p>
         </div>
