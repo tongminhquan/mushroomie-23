@@ -55,10 +55,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       .then(data => setCategories(data.categories || []))
       .catch(err => console.error('Lỗi tải danh mục:', err))
 
-    fetch('/api/categories?type=product_status')
-      .then(res => res.json())
-      .then(data => setStatuses(data.categories || []))
-      .catch(err => console.error('Lỗi tải trạng thái:', err))
 
     // Load product details
     params.then(async ({ id }) => {
@@ -361,8 +357,14 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     onChange={handleChange}
                     className="border border-neutral-200 rounded-lg px-2 py-1 text-sm focus:border-primary outline-none bg-white"
                   >
-                    {statuses.length === 0 && <option value={form.status}>{form.status}</option>}
-                    {statuses.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+                    <option value="active">Đang bán (Active)</option>
+                    <option value="inactive">Ngừng bán (Inactive)</option>
+                    <option value="draft">Bản nháp (Draft)</option>
+                    {statuses.length > 0 && (
+                      <optgroup label="Trạng thái tùy chỉnh">
+                        {statuses.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+                      </optgroup>
+                    )}
                   </select>
                 </div>
                 <div className="flex items-center justify-between text-sm">

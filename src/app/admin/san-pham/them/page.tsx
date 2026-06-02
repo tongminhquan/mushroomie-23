@@ -37,10 +37,6 @@ export default function AddProductPage() {
       .then(data => setCategories(data.categories || []))
       .catch(err => console.error(err))
       
-    fetch('/api/categories?type=product_status')
-      .then(res => res.json())
-      .then(data => setStatuses(data.categories || []))
-      .catch(err => console.error(err))
   }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -161,8 +157,14 @@ export default function AddProductPage() {
               <label className="block text-sm font-semibold mb-1">Trạng thái</label>
               <select name="status" value={form.status} onChange={handleChange}
                 className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none bg-white">
-                <option value="active">Chọn trạng thái</option>
-                {statuses.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+                <option value="active">Đang bán (Active)</option>
+                <option value="inactive">Ngừng bán (Inactive)</option>
+                <option value="draft">Bản nháp (Draft)</option>
+                {statuses.length > 0 && (
+                  <optgroup label="Trạng thái tùy chỉnh">
+                    {statuses.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+                  </optgroup>
+                )}
               </select>
             </div>
           </div>

@@ -40,6 +40,9 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
   }
   
   const getStatusLabel = (status: string) => {
+    if (status === 'active') return 'Đang bán'
+    if (status === 'inactive') return 'Ngừng bán'
+    if (status === 'draft') return 'Bản nháp'
     const custom = customStatuses.find(s => s.slug === status)
     return custom ? custom.name : status
   }
@@ -61,24 +64,28 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl p-4 shadow-card mb-6 flex flex-wrap gap-3">
-        <form className="flex-1 min-w-0">
+      <form className="bg-white rounded-2xl p-4 shadow-card mb-6 flex flex-wrap gap-3">
+        <div className="flex-1 min-w-0">
           <input
             name="search"
             defaultValue={sp.search}
             placeholder="Tìm kiếm sản phẩm..."
             className="w-full px-4 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </form>
-        <select defaultValue={sp.category} className="px-3 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+        </div>
+        <select name="category" defaultValue={sp.category} className="px-3 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary">
           <option value="">Tất cả danh mục</option>
           {categories.map((c) => <option key={c.id} value={c.slug}>{c.name}</option>)}
         </select>
-        <select defaultValue={sp.status} className="px-3 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+        <select name="status" defaultValue={sp.status} className="px-3 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary">
           <option value="">Tất cả trạng thái</option>
+          <option value="active">Đang bán</option>
+          <option value="inactive">Ngừng bán</option>
+          <option value="draft">Bản nháp</option>
           {customStatuses.map((s) => <option key={s.id} value={s.slug}>{s.name}</option>)}
         </select>
-      </div>
+        <button type="submit" className="px-4 py-2 bg-neutral-100 rounded-xl text-sm font-semibold hover:bg-neutral-200">Lọc</button>
+      </form>
 
       {/* Table */}
       <div className="bg-white rounded-2xl shadow-card overflow-hidden">
