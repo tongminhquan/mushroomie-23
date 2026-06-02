@@ -14,27 +14,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let products: MetadataRoute.Sitemap = []
   let posts: MetadataRoute.Sitemap = []
+  let categories: MetadataRoute.Sitemap = []
 
   try {
-    const [productList, postList] = await Promise.all([
+    const [productList, postList, categoryList] = await Promise.all([
       prisma.product.findMany({ where: { status: 'active' }, select: { slug: true, updated_at: true } }),
       prisma.post.findMany({ where: { status: 'published' }, select: { slug: true, updated_at: true } }),
+      prisma.category.findMany({ where: { type: 'product' }, select: { slug: true } }),
     ])
 
     products = productList.map((p) => ({
       url: `${baseUrl}/san-pham/${p.slug}`,
       lastModified: p.updated_at,
       changeFrequency: 'weekly' as const,
-      priority: 0.8,
+      priority: 0.9,
     }))
 
     posts = postList.map((p) => ({
       url: `${baseUrl}/tin-tuc/${p.slug}`,
       lastModified: p.updated_at,
       changeFrequency: 'monthly' as const,
-      priority: 0.7,
+      priority: 0.8,
+    }))
+
+    categories = categoryList.map((c) => ({
+      url: `${baseUrl}/san-pham?category=${c.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
     }))
   } catch {}
 
-  return [...staticPages, ...products, ...posts]
+  return [...staticPages, ...categories, ...products, ...posts]
 }

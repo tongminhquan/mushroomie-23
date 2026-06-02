@@ -13,13 +13,30 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const product = await prisma.product.findUnique({ where: { slug } })
   if (!product) return { title: 'Sản phẩm không tồn tại' }
   return {
-    title: `${product.name} | Mushroomie`,
+    title: `${product.name} | Mushroomie Handmade`,
     description: product.short_description || `Mua ${product.name} handmade cá nhân hóa tại Mushroomie.`,
     openGraph: {
-      title: product.name,
-      description: product.short_description || '',
-      images: product.featured_image ? [product.featured_image] : [],
+      title: `${product.name} | Mushroomie Handmade`,
+      description: product.short_description || `Mua ${product.name} handmade cá nhân hóa tại Mushroomie.`,
+      url: `${process.env.NEXT_PUBLIC_APP_URL}/san-pham/${product.slug}`,
+      siteName: 'Mushroomie Handmade',
+      images: product.featured_image ? [
+        {
+          url: product.featured_image,
+          width: 800,
+          height: 600,
+          alt: product.name,
+        }
+      ] : [],
+      locale: 'vi_VN',
+      type: 'website',
     },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${product.name} | Mushroomie Handmade`,
+      description: product.short_description || `Mua ${product.name} handmade cá nhân hóa tại Mushroomie.`,
+      images: product.featured_image ? [product.featured_image] : [],
+    }
   }
 }
 
@@ -63,8 +80,34 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const defaultImage = `https://picsum.photos/seed/${product.id}/600/600`
 
+  // Product Schema JSON-LD
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: allImages,
+    description: product.short_description || product.name,
+    sku: product.slug,
+    offers: {
+      '@type': 'Offer',
+      url: `${process.env.NEXT_PUBLIC_APP_URL}/san-pham/${product.slug}`,
+      priceCurrency: 'VND',
+      price: displayPrice,
+      availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+    },
+    ...(product.reviews.length > 0 && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: (product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length).toFixed(1),
+        reviewCount: product.reviews.length,
+      }
+    })
+  }
+
   return (
     <div className="min-h-screen bg-secondary">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Breadcrumb items={[
           { label: 'Sản phẩm', href: '/san-pham' },

@@ -122,14 +122,14 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
   }
 
   return (
-    <div className="w-full bg-neutral-100 flex justify-center pb-8 pt-4">
+    <div className="w-full bg-secondary flex flex-col items-center pb-12 pt-6 px-4 sm:px-6 lg:px-8">
       <section 
-        className="relative w-full md:w-1/2 aspect-video bg-neutral-900 flex items-center overflow-hidden group select-none cursor-grab active:cursor-grabbing md:rounded-xl md:shadow-lg"
+        className="relative w-full max-w-7xl aspect-[4/3] md:aspect-[21/9] bg-neutral-900 flex items-center overflow-hidden group select-none cursor-grab active:cursor-grabbing rounded-3xl md:rounded-[40px] shadow-strong"
         onMouseEnter={stopTimer}
         onMouseLeave={handleMouseLeave}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       onMouseDown={handleTouchStart}
       onMouseMove={handleTouchMove}
       onMouseUp={handleTouchEnd}
@@ -315,6 +315,22 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
         </div>
       )}
     </section>
-  </div>
+    
+      {/* CUTE MARQUEE */}
+      <div className="w-full max-w-7xl mt-8 overflow-hidden bg-primary-light rounded-2xl py-3 border border-primary/10">
+        <div className="whitespace-nowrap animate-[marquee_20s_linear_infinite] inline-block font-heading text-primary-dark/80 text-sm sm:text-base">
+          <span className="mx-4">🍄 HANDMADE WITH LOVE</span>
+          <span className="mx-4">✨ CÁ NHÂN HÓA THEO YÊU CẦU</span>
+          <span className="mx-4">🌸 THIẾT KẾ ĐỘC BẢN</span>
+          <span className="mx-4">🧶 CHẤT LIỆU TỰ NHIÊN</span>
+          <span className="mx-4">🍄 HANDMADE WITH LOVE</span>
+          <span className="mx-4">✨ CÁ NHÂN HÓA THEO YÊU CẦU</span>
+          <span className="mx-4">🌸 THIẾT KẾ ĐỘC BẢN</span>
+          <span className="mx-4">🧶 CHẤT LIỆU TỰ NHIÊN</span>
+          <span className="mx-4">🍄 HANDMADE WITH LOVE</span>
+          <span className="mx-4">✨ CÁ NHÂN HÓA THEO YÊU CẦU</span>
+        </div>
+      </div>
+    </div>
   )
 }
