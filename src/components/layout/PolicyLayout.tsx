@@ -10,7 +10,6 @@ const policies = [
   { name: 'Chính sách đổi trả', slug: '/chinh-sach-doi-tra' },
   { name: 'Chính sách trả góp', slug: '/chinh-sach-tra-gop' },
   { name: 'Chính sách bảo mật', slug: '/chinh-sach-bao-mat' },
-  { name: 'Hướng dẫn xóa dữ liệu', slug: '/huong-dan-xoa-du-lieu' },
 ]
 
 export default function PolicyLayout({

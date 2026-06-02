@@ -1,7 +1,6 @@
 import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import Google from 'next-auth/providers/google'
-import Facebook from 'next-auth/providers/facebook'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
@@ -33,10 +32,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-    Facebook({
-      clientId: process.env.FACEBOOK_CLIENT_ID!,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
     }),
     Credentials({
       name: 'credentials',
@@ -71,7 +66,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async signIn({ user, account }) {
       // Xử lý đăng nhập Social (Google, Facebook): tạo user mới nếu chưa tồn tại
-      if (account?.provider === 'google' || account?.provider === 'facebook') {
+      if (account?.provider === 'google') {
         if (!user.email) return false
         try {
           const existingUser = await prisma.user.findUnique({
@@ -80,7 +75,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (!existingUser) {
             await prisma.user.create({
               data: {
-                name: user.name || `Người dùng ${account.provider === 'google' ? 'Google' : 'Facebook'}`,
+                name: user.name || 'Người dùng Google',
                 email: user.email,
                 password_hash: '', // Tài khoản OAuth không dùng password
                 role: 'user',
@@ -102,8 +97,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.role = user.role
       }
 
-      // Social OAuth (Google, Facebook): lấy id và role từ database
-      if ((account?.provider === 'google' || account?.provider === 'facebook') && token.email) {
+      // Social OAuth (Google): lấy id và role từ database
+      if (account?.provider === 'google' && token.email) {
         const dbUser = await prisma.user.findUnique({
           where: { email: token.email as string },
           select: { id: true, role: true },
