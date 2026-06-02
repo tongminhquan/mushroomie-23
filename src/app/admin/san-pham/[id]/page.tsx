@@ -448,20 +448,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 <p className="text-[10px] text-neutral-400 ml-6 -mt-1 leading-normal">
                   Sẽ xuất hiện ở mục "Sản phẩm nổi bật" tại trang chủ.
                 </p>
-
-                <label className="flex items-center gap-2 cursor-pointer pt-2">
-                  <input
-                    type="checkbox"
-                    name="is_customizable"
-                    checked={form.is_customizable}
-                    onChange={handleChange}
-                    className="w-4 h-4 rounded border-neutral-300 text-primary focus:ring-primary"
-                  />
-                  <span className="text-xs font-semibold text-neutral-700">Cho phép đặt làm theo yêu cầu</span>
-                </label>
-                <p className="text-[10px] text-neutral-400 ml-6 -mt-1 leading-normal">
-                  Cho phép người mua nhập ghi chú tùy chỉnh (màu sắc, charm...) trước khi thêm vào giỏ hàng.
-                </p>
               </div>
             </div>
 

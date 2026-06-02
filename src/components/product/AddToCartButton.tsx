@@ -95,7 +95,7 @@ export default function AddToCartButton({ product }: Props) {
       })}
 
       {/* Custom note */}
-      {product.is_customizable && (
+      {true && (
         <div>
           <label className="block font-semibold text-sm text-neutral-700 mb-2">Ghi chú cá nhân (tùy chọn)</label>
           <textarea

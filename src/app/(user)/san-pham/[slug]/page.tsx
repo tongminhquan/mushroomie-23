@@ -78,7 +78,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <ProductGallery
               images={allImages.length > 0 ? allImages : [defaultImage]}
               productName={product.name}
-              isCustomizable={!!product.is_customizable}
+              isCustomizable={true}
               isOnSale={isOnSale}
             />
           </AnimateOnScroll>
