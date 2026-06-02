@@ -64,8 +64,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
-      // Xử lý đăng nhập Social (Google, Facebook): tạo user mới nếu chưa tồn tại
+    async signIn({ user, account, profile }) {
+      // Xử lý đăng nhập Social (Google): tạo user mới hoặc cập nhật thông tin Google
       if (account?.provider === 'google') {
         if (!user.email) return false
         try {
@@ -79,7 +79,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 email: user.email,
                 password_hash: '', // Tài khoản OAuth không dùng password
                 role: 'user',
+                avatar: user.image || null,
+                google_id: account.providerAccountId,
+                is_email_verified: (profile?.email_verified as boolean) ?? false,
               },
+            })
+          } else {
+            // Cập nhật thông tin Google nếu người dùng đã tồn tại
+            await prisma.user.update({
+              where: { email: user.email },
+              data: {
+                avatar: user.image || existingUser.avatar,
+                google_id: account.providerAccountId,
+                is_email_verified: (profile?.email_verified as boolean) ?? existingUser.is_email_verified,
+              }
             })
           }
           return true

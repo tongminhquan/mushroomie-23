@@ -28,7 +28,10 @@ export async function GET(req: Request) {
         phone: true,
         address: true,
         password_hash: true,
-        created_at: true
+        created_at: true,
+        avatar: true,
+        google_id: true,
+        is_email_verified: true
       }
     })
 

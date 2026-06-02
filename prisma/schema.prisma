@@ -22,6 +22,9 @@ model User {
   phone               String?
   address             String?   @db.Text
   role                String    @default("user") // "user" | "admin"
+  avatar              String?   @db.Text
+  google_id           String?   @unique
+  is_email_verified   Boolean   @default(false)
   reset_token         String?   @db.Text
   reset_token_expires DateTime?
   created_at          DateTime  @default(now())
