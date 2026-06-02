@@ -15,6 +15,7 @@ interface Banner {
   secondary_button_link: string | null
   text_position: string
   text_size: string
+  brightness: number
   sort_order: number
   status: string
 }
@@ -153,6 +154,7 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
               <img 
                 src={banner.image_url} 
                 alt={banner.title || 'Mushroomie Banner'} 
+                style={{ filter: `brightness(${banner.brightness ?? 100}%)` }}
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none"
               />
 

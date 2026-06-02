@@ -19,6 +19,7 @@ interface Banner {
   secondary_button_link: string | null
   text_position: string
   text_size: string
+  brightness: number
   sort_order: number
   status: string
 }
@@ -49,6 +50,7 @@ export default function AdminBannersPage() {
     secondary_button_link: '',
     text_position: 'bottom-left',
     text_size: 'medium',
+    brightness: 100,
     sort_order: 0,
     status: 'active'
   })
@@ -90,6 +92,7 @@ export default function AdminBannersPage() {
       secondary_button_link: '',
       text_position: 'bottom-left',
       text_size: 'medium',
+      brightness: 100,
       sort_order: banners.length > 0 ? Math.max(...banners.map(b => b.sort_order)) + 10 : 10,
       status: 'active'
     })
@@ -111,6 +114,7 @@ export default function AdminBannersPage() {
       secondary_button_link: banner.secondary_button_link || '',
       text_position: banner.text_position || 'bottom-left',
       text_size: banner.text_size || 'medium',
+      brightness: banner.brightness ?? 100,
       sort_order: banner.sort_order,
       status: banner.status
     })
@@ -149,6 +153,7 @@ export default function AdminBannersPage() {
         secondary_button_link: form.secondary_button_link || null,
         text_position: form.text_position,
         text_size: form.text_size,
+        brightness: Number(form.brightness),
       }
 
       let res
@@ -201,6 +206,7 @@ export default function AdminBannersPage() {
           secondary_button_link: banner.secondary_button_link,
           text_position: banner.text_position,
           text_size: banner.text_size,
+          brightness: banner.brightness,
           sort_order: banner.sort_order,
           status: newStatus
         })
@@ -327,6 +333,7 @@ export default function AdminBannersPage() {
                 <img 
                   src={banner.image_url} 
                   alt={banner.title || 'Banner'} 
+                  style={{ filter: `brightness(${banner.brightness ?? 100}%)` }}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-2.5 py-1 rounded-full font-bold">
@@ -647,6 +654,29 @@ export default function AdminBannersPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 border-t border-neutral-100 pt-4">
+                  <div className="col-span-2">
+                    <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-1">
+                      Độ sáng ảnh nền (Brightness): {form.brightness}%
+                    </label>
+                    <input 
+                      name="brightness" 
+                      type="range" 
+                      min="10" 
+                      max="200" 
+                      step="5"
+                      value={form.brightness} 
+                      onChange={handleChange} 
+                      className="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                    />
+                    <div className="flex justify-between text-[10px] text-neutral-400 mt-1">
+                      <span>Tối (10%)</span>
+                      <span>Bình thường (100%)</span>
+                      <span>Sáng (200%)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 border-t border-neutral-100 pt-4">
                   <div>
                     <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-1">Thứ tự hiển thị</label>
                     <input 
@@ -684,6 +714,7 @@ export default function AdminBannersPage() {
                       <img 
                         src={form.image_url} 
                         alt="Preview Background" 
+                        style={{ filter: `brightness(${form.brightness}%)` }}
                         className="w-full h-full object-cover opacity-90 transition-opacity duration-300"
                       />
                     ) : (
