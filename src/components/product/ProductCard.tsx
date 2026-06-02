@@ -62,10 +62,10 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {product.is_customizable && (
-            <span className="bg-primary text-white text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">Cá nhân hóa</span>
+            <span className="bg-accent-mint text-neutral-900 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">Cá nhân hóa</span>
           )}
           {hasSale && (
-            <span className="bg-accent-peach text-neutral-900 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">-{Math.round((1 - product.sale_price! / product.price) * 100)}%</span>
+            <span className="bg-accent-orange text-white text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">-{Math.round((1 - product.sale_price! / product.price) * 100)}%</span>
           )}
           {isOutOfStock && (
             <span className="bg-neutral-600 text-white text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">Hết hàng</span>

@@ -318,17 +318,17 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
     
       {/* CUTE MARQUEE */}
       <div className="w-full max-w-7xl mt-8 overflow-hidden bg-primary-light rounded-2xl py-3 border border-primary/10">
-        <div className="whitespace-nowrap animate-[marquee_20s_linear_infinite] inline-block font-heading text-primary-dark/80 text-sm sm:text-base">
-          <span className="mx-4">🍄 HANDMADE WITH LOVE</span>
-          <span className="mx-4">✨ CÁ NHÂN HÓA THEO YÊU CẦU</span>
-          <span className="mx-4">🌸 THIẾT KẾ ĐỘC BẢN</span>
+        <div className="whitespace-nowrap animate-[marquee_20s_linear_infinite] inline-block font-heading text-white text-sm sm:text-base">
+          <span className="mx-4">🍄 TỪ TỪNG HẠT NHỎ, TẠO PHONG CÁCH RIÊNG</span>
+          <span className="mx-4">✨ CUSTOM THEO YÊU CẦU</span>
+          <span className="mx-4">🌸 HANDMADE WITH LOVE</span>
           <span className="mx-4">🧶 CHẤT LIỆU TỰ NHIÊN</span>
-          <span className="mx-4">🍄 HANDMADE WITH LOVE</span>
-          <span className="mx-4">✨ CÁ NHÂN HÓA THEO YÊU CẦU</span>
-          <span className="mx-4">🌸 THIẾT KẾ ĐỘC BẢN</span>
+          <span className="mx-4">🍄 TỪ TỪNG HẠT NHỎ, TẠO PHONG CÁCH RIÊNG</span>
+          <span className="mx-4">✨ CUSTOM THEO YÊU CẦU</span>
+          <span className="mx-4">🌸 HANDMADE WITH LOVE</span>
           <span className="mx-4">🧶 CHẤT LIỆU TỰ NHIÊN</span>
-          <span className="mx-4">🍄 HANDMADE WITH LOVE</span>
-          <span className="mx-4">✨ CÁ NHÂN HÓA THEO YÊU CẦU</span>
+          <span className="mx-4">🍄 TỪ TỪNG HẠT NHỎ, TẠO PHONG CÁCH RIÊNG</span>
+          <span className="mx-4">✨ CUSTOM THEO YÊU CẦU</span>
         </div>
       </div>
     </div>

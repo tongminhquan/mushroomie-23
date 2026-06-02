@@ -31,7 +31,7 @@ export default function HomeAnimatedContent({ featuredProducts, posts, reviews, 
       {/* CATEGORIES */}
       <section className="py-8 bg-white border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="font-heading text-lg font-bold uppercase text-neutral-800 mb-6 text-center">Danh mục nổi bật</h2>
+          <h2 className="font-heading text-xl font-bold uppercase text-primary mb-6 text-center">Danh mục nổi bật</h2>
           {categories.length > 0 ? (
             <div className="flex flex-nowrap md:flex-wrap md:justify-center overflow-x-auto gap-4 md:gap-8 pb-4 hide-scrollbar snap-x">
               <StaggerChildren animation="zoom-in" staggerDelay={50} className="flex gap-4 md:gap-8 min-w-max md:min-w-0 px-2 md:px-0">
@@ -166,7 +166,7 @@ export default function HomeAnimatedContent({ featuredProducts, posts, reviews, 
         <section className="py-12 bg-neutral-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-heading text-xl font-bold uppercase text-neutral-800">
+              <h2 className="font-heading text-xl font-bold uppercase text-primary">
                 Tin tức & Mẹo vặt
               </h2>
               <Link href="/tin-tuc" className="text-sm font-semibold text-primary hover:underline hidden md:block">
@@ -185,7 +185,7 @@ export default function HomeAnimatedContent({ featuredProducts, posts, reviews, 
       {/* CTA */}
       <section className="bg-primary/5 py-12">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="font-heading text-2xl md:text-3xl font-bold text-neutral-800 mb-4">Bạn cần tìm phụ kiện độc đáo?</h2>
+          <h2 className="font-heading text-2xl md:text-3xl font-bold text-primary mb-4">Bạn cần tìm phụ kiện độc đáo?</h2>
           <p className="text-neutral-600 mb-6 text-sm md:text-base">Mushroomie sẽ giúp bạn thiết kế những món đồ thủ công không ai có, thật sự là của riêng bạn.</p>
           <Link href="/san-pham" className="bg-primary text-white px-8 py-3 rounded-full font-bold text-sm hover:bg-primary/90 transition-all shadow-md">
             Khám phá ngay

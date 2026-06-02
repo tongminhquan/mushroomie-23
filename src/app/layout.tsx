@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Paytone_One, Nunito } from 'next/font/google'
+import { Paytone_One, Montserrat } from 'next/font/google'
 import { GoogleTagManager } from '@next/third-parties/google'
 import ClarityInit from '@/components/analytics/ClarityInit'
 import './globals.css'
@@ -11,7 +11,7 @@ const paytoneOne = Paytone_One({
   display: 'swap',
 })
 
-const nunito = Nunito({
+const montserrat = Montserrat({
   subsets: ['latin', 'vietnamese'],
   variable: '--font-body',
   display: 'swap',
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="vi" suppressHydrationWarning className={`${paytoneOne.variable} ${nunito.variable}`}>
+    <html lang="vi" suppressHydrationWarning className={`${paytoneOne.variable} ${montserrat.variable}`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
