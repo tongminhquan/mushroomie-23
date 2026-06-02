@@ -55,7 +55,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       .then(data => setCategories(data.categories || []))
       .catch(err => console.error('Lỗi tải danh mục:', err))
 
-
+    // Load statuses
+    fetch('/api/categories?type=product_status')
+      .then(res => res.json())
+      .then(data => setStatuses(data.categories || []))
+      .catch(err => console.error('Lỗi tải trạng thái:', err))
     // Load product details
     params.then(async ({ id }) => {
       const numId = Number(id)

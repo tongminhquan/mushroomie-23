@@ -37,6 +37,10 @@ export default function AddProductPage() {
       .then(data => setCategories(data.categories || []))
       .catch(err => console.error(err))
       
+    fetch('/api/categories?type=product_status')
+      .then(res => res.json())
+      .then(data => setStatuses(data.categories || []))
+      .catch(err => console.error(err))
   }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {

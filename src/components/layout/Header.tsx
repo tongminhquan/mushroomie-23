@@ -47,13 +47,26 @@ export default function Header() {
     }
   }
 
-  const productCategories = [
-    { href: '/san-pham', label: 'Tất cả sản phẩm' },
-    { href: '/san-pham?category=vong-tay', label: 'Vòng tay' },
-    { href: '/san-pham?category=moc-khoa', label: 'Móc khóa' },
-    { href: '/san-pham?category=charm', label: 'Charm' },
-    { href: '/san-pham?category=phu-kien', label: 'Phụ kiện khác' },
-  ]
+  const [productCategories, setProductCategories] = useState<{ href: string, label: string, icon: string, image_url: string }[]>([
+    { href: '/san-pham', label: 'Tất cả sản phẩm', icon: '', image_url: '' }
+  ])
+
+  useEffect(() => {
+    fetch('/api/categories?type=product')
+      .then(res => res.json())
+      .then(data => {
+        if (data.categories) {
+          const cats = data.categories.map((c: any) => ({
+            href: `/san-pham?category=${c.slug}`,
+            label: c.name,
+            icon: c.icon || '',
+            image_url: c.image_url || ''
+          }))
+          setProductCategories([{ href: '/san-pham', label: 'Tất cả sản phẩm', icon: '', image_url: '' }, ...cats])
+        }
+      })
+      .catch(err => console.error(err))
+  }, [])
 
   const navLinks = [
     { href: '/', label: 'TRANG CHỦ' },
@@ -235,7 +248,14 @@ export default function Header() {
                         href={cat.href}
                         className="group flex items-center justify-between px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-primary transition-all duration-300 border-b border-neutral-50 last:border-0"
                       >
-                        <span className="transform transition-transform duration-300 group-hover:translate-x-1">{cat.label}</span>
+                        <span className="transform transition-transform duration-300 group-hover:translate-x-1 flex items-center gap-2">
+                          {cat.image_url ? (
+                            <img src={cat.image_url} alt={cat.label} className="w-5 h-5 rounded object-cover" />
+                          ) : cat.icon ? (
+                            <span>{cat.icon}</span>
+                          ) : null}
+                          {cat.label}
+                        </span>
                         <ChevronRight size={16} className="opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 text-primary" />
                       </Link>
                     </li>
