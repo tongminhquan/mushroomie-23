@@ -375,6 +375,8 @@ model Banner {
   button_link           String?  // /san-pham
   secondary_button_text String?  // Tự thiết kế phụ kiện
   secondary_button_link String?  // /lien-he
+  text_position         String   @default("bottom-left") // top-left, top-right, bottom-left, bottom-right, center
+  text_size             String   @default("medium") // small, medium, large
   sort_order            Int      @default(0)
   status                String   @default("active") // "active" | "hidden"
   created_at            DateTime @default(now())

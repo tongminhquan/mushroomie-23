@@ -12,6 +12,8 @@ const bannerSchema = z.object({
   button_link: z.string().optional().nullable(),
   secondary_button_text: z.string().optional().nullable(),
   secondary_button_link: z.string().optional().nullable(),
+  text_position: z.string().default('bottom-left'),
+  text_size: z.string().default('medium'),
   sort_order: z.number().int().default(0),
   status: z.string().default('active'),
 })

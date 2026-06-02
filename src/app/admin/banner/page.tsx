@@ -17,6 +17,8 @@ interface Banner {
   button_link: string | null
   secondary_button_text: string | null
   secondary_button_link: string | null
+  text_position: string
+  text_size: string
   sort_order: number
   status: string
 }
@@ -45,6 +47,8 @@ export default function AdminBannersPage() {
     button_link: '',
     secondary_button_text: '',
     secondary_button_link: '',
+    text_position: 'bottom-left',
+    text_size: 'medium',
     sort_order: 0,
     status: 'active'
   })
@@ -84,6 +88,8 @@ export default function AdminBannersPage() {
       button_link: '',
       secondary_button_text: '',
       secondary_button_link: '',
+      text_position: 'bottom-left',
+      text_size: 'medium',
       sort_order: banners.length > 0 ? Math.max(...banners.map(b => b.sort_order)) + 10 : 10,
       status: 'active'
     })
@@ -103,6 +109,8 @@ export default function AdminBannersPage() {
       button_link: banner.button_link || '',
       secondary_button_text: banner.secondary_button_text || '',
       secondary_button_link: banner.secondary_button_link || '',
+      text_position: banner.text_position || 'bottom-left',
+      text_size: banner.text_size || 'medium',
       sort_order: banner.sort_order,
       status: banner.status
     })
@@ -139,6 +147,8 @@ export default function AdminBannersPage() {
         button_link: form.button_link || null,
         secondary_button_text: form.secondary_button_text || null,
         secondary_button_link: form.secondary_button_link || null,
+        text_position: form.text_position,
+        text_size: form.text_size,
       }
 
       let res
@@ -189,6 +199,8 @@ export default function AdminBannersPage() {
           button_link: banner.button_link,
           secondary_button_text: banner.secondary_button_text,
           secondary_button_link: banner.secondary_button_link,
+          text_position: banner.text_position,
+          text_size: banner.text_size,
           sort_order: banner.sort_order,
           status: newStatus
         })
@@ -605,6 +617,37 @@ export default function AdminBannersPage() {
                 {/* Configuration */}
                 <div className="grid grid-cols-2 gap-4 border-t border-neutral-100 pt-4">
                   <div>
+                    <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-1">Vị trí chữ</label>
+                    <select 
+                      name="text_position" 
+                      value={form.text_position} 
+                      onChange={handleChange} 
+                      className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none text-sm bg-white transition-all"
+                    >
+                      <option value="top-left">Góc trên trái</option>
+                      <option value="top-right">Góc trên phải</option>
+                      <option value="center">Ở giữa trung tâm</option>
+                      <option value="bottom-left">Góc dưới trái</option>
+                      <option value="bottom-right">Góc dưới phải</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-1">Kích thước chữ</label>
+                    <select 
+                      name="text_size" 
+                      value={form.text_size} 
+                      onChange={handleChange} 
+                      className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none text-sm bg-white transition-all"
+                    >
+                      <option value="small">Nhỏ</option>
+                      <option value="medium">Vừa (Mặc định)</option>
+                      <option value="large">Lớn</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 border-t border-neutral-100 pt-4">
+                  <div>
                     <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-1">Thứ tự hiển thị</label>
                     <input 
                       name="sort_order" 
@@ -656,11 +699,24 @@ export default function AdminBannersPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
                     {/* Content overlay */}
-                    <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
-                      <div className="space-y-2">
+                    <div className={`absolute inset-0 p-6 flex flex-col text-white ${
+                      form.text_position === 'top-left' ? 'justify-start items-start text-left' :
+                      form.text_position === 'top-right' ? 'justify-start items-end text-right' :
+                      form.text_position === 'center' ? 'justify-center items-center text-center' :
+                      form.text_position === 'bottom-right' ? 'justify-end items-end text-right' :
+                      'justify-end items-start text-left'
+                    }`}>
+                      <div className={`space-y-2 max-w-[80%] ${
+                        form.text_position === 'center' ? 'flex flex-col items-center' :
+                        form.text_position?.includes('right') ? 'flex flex-col items-end' : ''
+                      }`}>
                         {/* Subtitle / Title */}
                         {(form.title || form.subtitle) ? (
-                          <h2 className="font-heading text-lg md:text-xl font-bold leading-tight">
+                          <h2 className={`font-heading font-bold leading-tight ${
+                            form.text_size === 'small' ? 'text-base md:text-lg' :
+                            form.text_size === 'large' ? 'text-xl md:text-2xl' :
+                            'text-lg md:text-xl'
+                          }`}>
                             {form.title} <span className="text-primary font-extrabold">{form.subtitle}</span>
                           </h2>
                         ) : (
@@ -669,7 +725,11 @@ export default function AdminBannersPage() {
 
                         {/* Description */}
                         {form.description ? (
-                          <p className="text-[11px] text-white/80 line-clamp-2 leading-relaxed">{form.description}</p>
+                          <p className={`text-white/80 line-clamp-2 leading-relaxed ${
+                            form.text_size === 'small' ? 'text-[10px]' :
+                            form.text_size === 'large' ? 'text-xs md:text-sm' :
+                            'text-[11px]'
+                          }`}>{form.description}</p>
                         ) : (
                           <div className="space-y-1.5">
                             <div className="h-2 w-full bg-white/25 rounded animate-pulse" />

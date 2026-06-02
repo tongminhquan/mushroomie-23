@@ -13,6 +13,8 @@ interface Banner {
   button_link: string | null
   secondary_button_text: string | null
   secondary_button_link: string | null
+  text_position: string
+  text_size: string
   sort_order: number
   status: string
 }
@@ -180,8 +182,17 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
 
               {/* Slide Content */}
               {!isPureImage && (
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-20 relative z-20 h-full flex items-center pointer-events-none">
-                  <div className="max-w-2xl text-left text-white space-y-4 sm:space-y-6">
+                <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-20 relative z-20 h-full flex pointer-events-none ${
+                  banner.text_position === 'top-left' ? 'items-start justify-start' :
+                  banner.text_position === 'top-right' ? 'items-start justify-end' :
+                  banner.text_position === 'center' ? 'items-center justify-center' :
+                  banner.text_position === 'bottom-right' ? 'items-end justify-end' :
+                  'items-end justify-start'
+                }`}>
+                  <div className={`max-w-2xl text-white space-y-4 sm:space-y-6 ${
+                    banner.text_position === 'center' ? 'text-center flex flex-col items-center' :
+                    banner.text_position?.includes('right') ? 'text-right flex flex-col items-end' : 'text-left'
+                  }`}>
                     {/* Floating pill badge */}
                     <div 
                       className={`inline-flex items-center gap-2 bg-white/20 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-semibold backdrop-blur-sm transition-all duration-700 delay-100 transform ${
@@ -193,8 +204,12 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
 
                     {/* Banner Headline */}
                     <h1 
-                      className={`font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight transition-all duration-700 delay-200 transform ${
+                      className={`font-heading font-bold leading-tight transition-all duration-700 delay-200 transform ${
                         isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+                      } ${
+                        banner.text_size === 'small' ? 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl' :
+                        banner.text_size === 'large' ? 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl' :
+                        'text-3xl sm:text-5xl md:text-6xl lg:text-7xl'
                       }`}
                     >
                       {banner.title}
@@ -209,8 +224,12 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
                     {/* Banner Description */}
                     {banner.description && (
                       <p 
-                        className={`text-white/85 text-sm sm:text-lg md:text-xl leading-relaxed transition-all duration-700 delay-300 transform ${
+                        className={`text-white/85 leading-relaxed transition-all duration-700 delay-300 transform ${
                           isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+                        } ${
+                          banner.text_size === 'small' ? 'text-xs sm:text-sm md:text-base' :
+                          banner.text_size === 'large' ? 'text-base sm:text-xl md:text-2xl' :
+                          'text-sm sm:text-lg md:text-xl'
                         }`}
                       >
                         {banner.description}
