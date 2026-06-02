@@ -10,7 +10,15 @@ import type { Metadata } from 'next'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const product = await prisma.product.findUnique({ where: { slug } })
+  const decodedSlug = decodeURIComponent(slug)
+  const product = await prisma.product.findFirst({ 
+    where: { 
+      OR: [
+        { slug: decodedSlug },
+        { slug: slug }
+      ]
+    } 
+  })
   if (!product) return { title: 'Sản phẩm không tồn tại' }
   return {
     title: `${product.name} | Mushroomie Handmade`,
@@ -42,8 +50,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const productRaw = await prisma.product.findUnique({
-    where: { slug },
+  const decodedSlug = decodeURIComponent(slug)
+  
+  const productRaw = await prisma.product.findFirst({
+    where: { 
+      OR: [
+        { slug: decodedSlug },
+        { slug: slug }
+      ]
+    },
     include: {
       category: true,
       images: { orderBy: { sort_order: 'asc' } },
