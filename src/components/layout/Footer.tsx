@@ -69,6 +69,7 @@ export default async function Footer() {
                   <li><Link href="/gioi-thieu" className="text-white/75 hover:text-white text-sm transition-colors">Về Mushroomie</Link></li>
                   <li><Link href="/tin-tuc" className="text-white/75 hover:text-white text-sm transition-colors">Tin tức</Link></li>
                   <li><Link href="/chinh-sach-bao-mat" className="text-white/75 hover:text-white text-sm transition-colors">Chính sách & Bảo mật</Link></li>
+                  <li><Link href="/huong-dan-xoa-du-lieu" className="text-white/75 hover:text-white text-sm transition-colors">Hướng dẫn xóa dữ liệu</Link></li>
                   <li><Link href="/lien-he" className="text-white/75 hover:text-white text-sm transition-colors">Liên hệ</Link></li>
                 </ul>
               </div>
