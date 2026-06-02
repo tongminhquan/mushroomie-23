@@ -83,6 +83,18 @@ export default function ManageStatusesModal() {
             </div>
 
             <div className="flex-1 overflow-y-auto mb-4 border border-neutral-100 rounded-lg">
+              <div className="flex items-center justify-between p-3 border-b border-neutral-100 bg-neutral-50/50">
+                <span className="font-medium text-sm text-neutral-600">Đang bán (Active)</span>
+                <span className="text-xs text-neutral-400 bg-neutral-200 px-2 py-1 rounded">Mặc định</span>
+              </div>
+              <div className="flex items-center justify-between p-3 border-b border-neutral-100 bg-neutral-50/50">
+                <span className="font-medium text-sm text-neutral-600">Ngừng bán (Inactive)</span>
+                <span className="text-xs text-neutral-400 bg-neutral-200 px-2 py-1 rounded">Mặc định</span>
+              </div>
+              <div className="flex items-center justify-between p-3 border-b border-neutral-100 bg-neutral-50/50">
+                <span className="font-medium text-sm text-neutral-600">Bản nháp (Draft)</span>
+                <span className="text-xs text-neutral-400 bg-neutral-200 px-2 py-1 rounded">Mặc định</span>
+              </div>
               {statuses.map(s => (
                 <div key={s.id} className="flex items-center justify-between p-3 border-b border-neutral-100 last:border-0 hover:bg-neutral-50">
                   <span className="font-medium text-sm">{s.name}</span>
