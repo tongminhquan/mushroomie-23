@@ -13,6 +13,8 @@ const loginSchema = z.object({
 declare module 'next-auth' {
   interface User {
     role?: string
+    phone?: string | null
+    address?: string | null
   }
   interface Session {
     user: {
@@ -21,6 +23,8 @@ declare module 'next-auth' {
       email?: string | null
       image?: string | null
       role?: string
+      phone?: string | null
+      address?: string | null
     }
   }
 }
@@ -107,15 +111,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.role = user.role
       }
 
-      // Social OAuth (Google): lấy id và role từ database
+      // Social OAuth (Google): lấy id, role, phone, address từ database
       if (account?.provider === 'google' && token.email) {
         const dbUser = await prisma.user.findUnique({
           where: { email: token.email as string },
-          select: { id: true, role: true },
+          select: { id: true, role: true, phone: true, address: true },
         })
         if (dbUser) {
           token.id = dbUser.id.toString()
           token.role = dbUser.role
+          token.phone = dbUser.phone
+          token.address = dbUser.address
         }
       }
 
@@ -123,14 +129,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async session({ session, token }) {
       if (session?.user?.email) {
-        // Fetch fresh user data from DB to ensure role is always up-to-date
+        // Fetch fresh user data from DB to ensure role, phone, address are always up-to-date
         const dbUser = await prisma.user.findUnique({
           where: { email: session.user.email },
-          select: { id: true, role: true },
+          select: { id: true, role: true, phone: true, address: true },
         })
         if (dbUser) {
           session.user.id = dbUser.id.toString()
           session.user.role = dbUser.role
+          session.user.phone = dbUser.phone
+          session.user.address = dbUser.address
         }
       }
       return session

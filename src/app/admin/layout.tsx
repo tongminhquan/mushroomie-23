@@ -2,6 +2,7 @@ import AdminSidebar from '@/components/layout/AdminSidebar'
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { SessionProvider } from 'next-auth/react'
+import ProfileCompletionGuard from '@/components/layout/ProfileCompletionGuard'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
@@ -13,12 +14,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <SessionProvider session={session}>
-      <div className="flex h-screen overflow-hidden bg-neutral-100">
-        <AdminSidebar />
-        <main className="flex-1 overflow-auto pt-16 md:pt-0">
-          {children}
-        </main>
-      </div>
+      <ProfileCompletionGuard>
+        <div className="flex h-screen overflow-hidden bg-neutral-100">
+          <AdminSidebar />
+          <main className="flex-1 overflow-auto pt-16 md:pt-0">
+            {children}
+          </main>
+        </div>
+      </ProfileCompletionGuard>
     </SessionProvider>
   )
 }
