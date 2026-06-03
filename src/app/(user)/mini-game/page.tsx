@@ -144,7 +144,7 @@ export default function MiniGamePage() {
 
         <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto items-start">
           {/* Game Area */}
-          <div className="flex-1 flex flex-col items-center w-full">
+          <div className="flex-1 min-w-0 flex flex-col items-center w-full">
             {/* Game Tabs */}
             <div className="flex gap-2 mb-4 p-1 rounded-2xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <button 
@@ -206,7 +206,7 @@ export default function MiniGamePage() {
           </div>
 
           {/* Points & Vouchers Sidebar */}
-          <div className="w-full lg:w-80 xl:w-96 space-y-5">
+          <div className="w-full lg:w-80 xl:w-96 flex-shrink-0 space-y-5">
             {/* Points Card */}
             <div style={glassCard} className="text-center">
               <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '2px', color: 'rgba(255,255,255,0.35)', marginBottom: '6px' }}>

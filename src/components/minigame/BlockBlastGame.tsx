@@ -1,19 +1,18 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 
 const ROWS = 8
 const COLS = 8
 
-// No glow, flat vibrant gradients
 const COLORS: Record<string, string> = {
-  '#00e5ff': 'linear-gradient(135deg, #00e5ff, #0099cc)', // cyan
-  '#b44dff': 'linear-gradient(135deg, #b44dff, #7a00cc)', // purple
-  '#ff4d6a': 'linear-gradient(135deg, #ff4d6a, #cc0033)', // pink
-  '#e41d1d': 'linear-gradient(135deg, #e41d1d, #990000)', // red
-  '#ffe14d': 'linear-gradient(135deg, #ffe14d, #cca300)', // yellow
-  '#39e75f': 'linear-gradient(135deg, #39e75f, #009933)', // green
-  '#ff8c1a': 'linear-gradient(135deg, #ff8c1a, #cc6600)', // orange
+  '#00e5ff': 'linear-gradient(135deg, #00e5ff, #0099cc)',
+  '#b44dff': 'linear-gradient(135deg, #b44dff, #7a00cc)',
+  '#ff4d6a': 'linear-gradient(135deg, #ff4d6a, #cc0033)',
+  '#e41d1d': 'linear-gradient(135deg, #e41d1d, #990000)',
+  '#ffe14d': 'linear-gradient(135deg, #ffe14d, #cca300)',
+  '#39e75f': 'linear-gradient(135deg, #39e75f, #009933)',
+  '#ff8c1a': 'linear-gradient(135deg, #ff8c1a, #cc6600)',
 }
 const COLOR_KEYS = Object.keys(COLORS)
 
@@ -45,7 +44,7 @@ function getRandomPiece(): Piece {
 }
 
 export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: number) => void }) {
-  const [cellSize, setCellSize] = useState(45) // Increased default cell size
+  const [cellSize, setCellSize] = useState(45)
   const [board, setBoard] = useState<(string | null)[][]>(Array(ROWS).fill(null).map(() => Array(COLS).fill(null)))
   const [hand, setHand] = useState<(Piece | null)[]>([getRandomPiece(), getRandomPiece(), getRandomPiece()])
   const [score, setScore] = useState(0)
@@ -56,16 +55,29 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
   
   const containerRef = useRef<HTMLDivElement>(null)
   const boardRef = useRef<HTMLDivElement>(null)
-  
+
+  // Use refs for all values needed inside global event listeners (avoid stale closures)
+  const boardStateRef = useRef(board)
+  boardStateRef.current = board
+  const scoreRef = useRef(score)
+  scoreRef.current = score
+  const linesRef = useRef(lines)
+  linesRef.current = lines
+  const comboRef = useRef(combo)
+  comboRef.current = combo
+  const handRef = useRef(hand)
+  handRef.current = hand
+  const isGameOverRef = useRef(isGameOver)
+  isGameOverRef.current = isGameOver
+  const cellSizeRef = useRef(cellSize)
+  cellSizeRef.current = cellSize
+
   const dragRef = useRef<{
     index: number;
     piece: Piece;
-    startX: number;
-    startY: number;
     offsetX: number;
     offsetY: number;
     isTouch: boolean;
-    el: HTMLDivElement | null;
   } | null>(null)
 
   const [dragRenderState, setDragRenderState] = useState<{
@@ -73,216 +85,15 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     piece: Piece;
     x: number;
     y: number;
-    offsetX: number;
-    offsetY: number;
     hoverRow: number;
     hoverCol: number;
     isValid: boolean;
   } | null>(null)
 
-  // CSS Animations state
   const [clearingCells, setClearingCells] = useState<{r: number, c: number}[]>([])
   const [placedCells, setPlacedCells] = useState<{r: number, c: number}[]>([])
 
-  const getEventXY = (e: React.PointerEvent | PointerEvent) => {
-    return { x: e.clientX, y: e.clientY }
-  }
-
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>, index: number, piece: Piece) => {
-    if (dragRef.current) return // Already dragging
-    if (isGameOver || clearingCells.length > 0) return
-    const { x, y } = getEventXY(e)
-    const el = e.currentTarget
-    
-    const isTouch = e.pointerType === 'touch' || e.pointerType === 'pen';
-    
-    const rect = el.getBoundingClientRect();
-    const relX = (x - rect.left) / rect.width;
-    const relY = (y - rect.top) / rect.height;
-    
-    const renderedWidth = piece.matrix[0].length * cellSize;
-    const renderedHeight = piece.matrix.length * cellSize;
-    
-    const touchYOffset = isTouch ? 60 : 0;
-    
-    const offsetX = relX * renderedWidth;
-    const offsetY = relY * renderedHeight + touchYOffset;
-    
-    dragRef.current = {
-      index,
-      piece,
-      startX: x,
-      startY: y,
-      offsetX,
-      offsetY,
-      isTouch,
-      el
-    }
-    
-    setDragRenderState({
-      index,
-      piece,
-      x: x - offsetX,
-      y: y - offsetY,
-      offsetX,
-      offsetY,
-      hoverRow: -1,
-      hoverCol: -1,
-      isValid: false
-    })
-    
-    el.setPointerCapture(e.pointerId)
-  }
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragRef.current || !dragRenderState) return
-    const { x, y } = getEventXY(e)
-    const piece = dragRef.current.piece
-    
-    const dragX = x - dragRef.current.offsetX;
-    const dragY = y - dragRef.current.offsetY;
-    
-    let hoverRow = -1
-    let hoverCol = -1
-    let isValid = false
-    
-    if (boardRef.current) {
-      const rect = boardRef.current.getBoundingClientRect()
-      // Board has padding:6px and gap:2px between cells
-      const BOARD_PADDING = 6
-      const CELL_STRIDE = cellSize + 2
-
-      const pieceRelX = dragX - rect.left - BOARD_PADDING
-      const pieceRelY = dragY - rect.top - BOARD_PADDING
-
-      const col = Math.round(pieceRelX / CELL_STRIDE)
-      const row = Math.round(pieceRelY / CELL_STRIDE)
-
-      if (row >= -2 && row <= ROWS + 2 && col >= -2 && col <= COLS + 2) {
-         hoverRow = row
-         hoverCol = col
-         isValid = canPlace(board, piece.matrix, row, col)
-      }
-    }
-    
-    setDragRenderState({
-      index: dragRef.current.index,
-      piece,
-      x: dragX,
-      y: dragY,
-      offsetX: dragRef.current.offsetX,
-      offsetY: dragRef.current.offsetY,
-      hoverRow,
-      hoverCol,
-      isValid
-    })
-  }
-
-  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragRef.current || !dragRenderState) return
-    const el = dragRef.current.el
-    if (el) el.releasePointerCapture(e.pointerId)
-    
-    const { piece, index, hoverRow, hoverCol, isValid } = dragRenderState
-    
-    if (isValid && canPlace(board, piece.matrix, hoverRow, hoverCol)) {
-      placePiece(piece, index, hoverRow, hoverCol)
-    }
-    
-    dragRef.current = null
-    setDragRenderState(null)
-  }
-
-  const placePiece = (piece: Piece, index: number, row: number, col: number) => {
-    const newBoard = board.map(r => [...r])
-    let blocksCount = 0
-    const newPlacedCells: {r: number, c: number}[] = []
-    
-    for (let r = 0; r < piece.matrix.length; r++) {
-      for (let c = 0; c < piece.matrix[r].length; c++) {
-        if (piece.matrix[r][c]) {
-          newBoard[row + r][col + c] = piece.color
-          newPlacedCells.push({r: row + r, c: col + c})
-          blocksCount++
-        }
-      }
-    }
-    
-    setBoard(newBoard)
-    setPlacedCells(newPlacedCells)
-    setTimeout(() => setPlacedCells([]), 300) 
-    
-    const rowsToClear: number[] = []
-    const colsToClear: number[] = []
-
-    for (let r = 0; r < ROWS; r++) {
-      if (newBoard[r].every(cell => cell !== null)) rowsToClear.push(r)
-    }
-    for (let c = 0; c < COLS; c++) {
-      if (newBoard.every(rowArr => rowArr[c] !== null)) colsToClear.push(c)
-    }
-    
-    const linesCleared = rowsToClear.length + colsToClear.length
-    
-    if (linesCleared > 0) {
-      const cellsToClear: {r: number, c: number}[] = []
-      rowsToClear.forEach(r => {
-        for (let c = 0; c < COLS; c++) {
-          if (!cellsToClear.some(cell => cell.r === r && cell.c === c)) {
-            cellsToClear.push({r, c})
-          }
-        }
-      })
-      colsToClear.forEach(c => {
-        for (let r = 0; r < ROWS; r++) {
-          if (!cellsToClear.some(cell => cell.r === r && cell.c === c)) {
-            cellsToClear.push({r, c})
-          }
-        }
-      })
-      
-      setClearingCells(cellsToClear)
-      
-      const currentCombo = linesCleared > 1 ? combo + linesCleared : combo + 1
-      const addedScore = blocksCount + (linesCleared * 10 * currentCombo)
-      const newScore = score + addedScore
-      const newLines = lines + linesCleared
-      
-      setTimeout(() => {
-        const clearedBoard = newBoard.map(r => [...r])
-        cellsToClear.forEach(({r, c}) => clearedBoard[r][c] = null)
-        setBoard(clearedBoard)
-        setClearingCells([])
-        setScore(newScore)
-        setLines(newLines)
-        setCombo(currentCombo)
-        
-        checkPostPlace(clearedBoard, index, newScore)
-      }, 400) 
-      
-    } else {
-      const newScore = score + blocksCount
-      setScore(newScore)
-      setCombo(0)
-      checkPostPlace(newBoard, index, newScore)
-    }
-  }
-
-  const checkPostPlace = (currentBoard: (string | null)[][], usedIndex: number, currentScore: number) => {
-    const newHand = [...hand]
-    newHand[usedIndex] = null
-    
-    if (newHand.every(p => p === null)) {
-      const freshHand = [getRandomPiece(), getRandomPiece(), getRandomPiece()]
-      setHand(freshHand)
-      checkGameOver(currentBoard, freshHand, currentScore)
-    } else {
-      setHand(newHand)
-      checkGameOver(currentBoard, newHand, currentScore)
-    }
-  }
-
-  const canPlace = (boardState: (string | null)[][], matrix: number[][], row: number, col: number) => {
+  const canPlace = useCallback((boardState: (string | null)[][], matrix: number[][], row: number, col: number) => {
     for (let r = 0; r < matrix.length; r++) {
       for (let c = 0; c < matrix[r].length; c++) {
         if (matrix[r][c]) {
@@ -292,9 +103,47 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       }
     }
     return true
-  }
+  }, [])
 
-  const checkGameOver = (boardState: (string | null)[][], currentHand: (Piece | null)[], currentScore: number) => {
+  const computeHoverPos = useCallback((dragX: number, dragY: number, piece: Piece) => {
+    let hoverRow = -1, hoverCol = -1, isValid = false
+    if (boardRef.current) {
+      const rect = boardRef.current.getBoundingClientRect()
+      const BOARD_PADDING = 6
+      const cs = cellSizeRef.current
+      const CELL_STRIDE = cs + 2
+      const pieceRelX = dragX - rect.left - BOARD_PADDING
+      const pieceRelY = dragY - rect.top - BOARD_PADDING
+      const col = Math.round(pieceRelX / CELL_STRIDE)
+      const row = Math.round(pieceRelY / CELL_STRIDE)
+      if (row >= -2 && row <= ROWS + 2 && col >= -2 && col <= COLS + 2) {
+        hoverRow = row
+        hoverCol = col
+        isValid = canPlace(boardStateRef.current, piece.matrix, row, col)
+      }
+    }
+    return { hoverRow, hoverCol, isValid }
+  }, [canPlace])
+
+  // Global pointer move handler — always works regardless of DOM structure
+  const onGlobalPointerMove = useCallback((e: PointerEvent) => {
+    if (!dragRef.current) return
+    const { piece, offsetX, offsetY } = dragRef.current
+    const dragX = e.clientX - offsetX
+    const dragY = e.clientY - offsetY
+    const { hoverRow, hoverCol, isValid } = computeHoverPos(dragX, dragY, piece)
+    setDragRenderState({
+      index: dragRef.current.index,
+      piece,
+      x: dragX,
+      y: dragY,
+      hoverRow,
+      hoverCol,
+      isValid,
+    })
+  }, [computeHoverPos])
+
+  const checkGameOver = useCallback((boardState: (string | null)[][], currentHand: (Piece | null)[], currentScore: number) => {
     let anyMovePossible = false
     for (let i = 0; i < currentHand.length; i++) {
       const piece = currentHand[i]
@@ -302,19 +151,162 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
           if (canPlace(boardState, piece.matrix, r, c)) {
-            anyMovePossible = true
-            break
+            anyMovePossible = true; break
           }
         }
         if (anyMovePossible) break
       }
       if (anyMovePossible) break
     }
-
     if (!anyMovePossible && currentHand.some(p => p !== null)) {
       setIsGameOver(true)
       onGameOver(currentScore)
     }
+  }, [canPlace, onGameOver])
+
+  const checkPostPlace = useCallback((currentBoard: (string | null)[][], usedIndex: number, currentScore: number) => {
+    const newHand = [...handRef.current]
+    newHand[usedIndex] = null
+    if (newHand.every(p => p === null)) {
+      const freshHand = [getRandomPiece(), getRandomPiece(), getRandomPiece()]
+      setHand(freshHand)
+      checkGameOver(currentBoard, freshHand, currentScore)
+    } else {
+      setHand(newHand)
+      checkGameOver(currentBoard, newHand, currentScore)
+    }
+  }, [checkGameOver])
+
+  const placePiece = useCallback((piece: Piece, index: number, row: number, col: number) => {
+    const currentBoard = boardStateRef.current
+    const newBoard = currentBoard.map(r => [...r])
+    let blocksCount = 0
+    const newPlacedCells: {r: number, c: number}[] = []
+    for (let r = 0; r < piece.matrix.length; r++) {
+      for (let c = 0; c < piece.matrix[r].length; c++) {
+        if (piece.matrix[r][c]) {
+          newBoard[row + r][col + c] = piece.color
+          newPlacedCells.push({r: row + r, c: col + c})
+          blocksCount++
+        }
+      }
+    }
+    setBoard(newBoard)
+    boardStateRef.current = newBoard
+    setPlacedCells(newPlacedCells)
+    setTimeout(() => setPlacedCells([]), 300)
+
+    const rowsToClear: number[] = []
+    const colsToClear: number[] = []
+    for (let r = 0; r < ROWS; r++) {
+      if (newBoard[r].every(cell => cell !== null)) rowsToClear.push(r)
+    }
+    for (let c = 0; c < COLS; c++) {
+      if (newBoard.every(rowArr => rowArr[c] !== null)) colsToClear.push(c)
+    }
+
+    const linesCleared = rowsToClear.length + colsToClear.length
+
+    if (linesCleared > 0) {
+      const cellsToClear: {r: number, c: number}[] = []
+      rowsToClear.forEach(r => {
+        for (let c = 0; c < COLS; c++) {
+          if (!cellsToClear.some(cell => cell.r === r && cell.c === c)) cellsToClear.push({r, c})
+        }
+      })
+      colsToClear.forEach(c => {
+        for (let r = 0; r < ROWS; r++) {
+          if (!cellsToClear.some(cell => cell.r === r && cell.c === c)) cellsToClear.push({r, c})
+        }
+      })
+      setClearingCells(cellsToClear)
+
+      const currentCombo = linesCleared > 1 ? comboRef.current + linesCleared : comboRef.current + 1
+      const addedScore = blocksCount + (linesCleared * 10 * currentCombo)
+      const newScore = scoreRef.current + addedScore
+      const newLines = linesRef.current + linesCleared
+
+      setTimeout(() => {
+        const clearedBoard = newBoard.map(r => [...r])
+        cellsToClear.forEach(({r, c}) => clearedBoard[r][c] = null)
+        setBoard(clearedBoard)
+        boardStateRef.current = clearedBoard
+        setClearingCells([])
+        setScore(newScore)
+        scoreRef.current = newScore
+        setLines(newLines)
+        linesRef.current = newLines
+        setCombo(currentCombo)
+        comboRef.current = currentCombo
+        checkPostPlace(clearedBoard, index, newScore)
+      }, 400)
+    } else {
+      const newScore = scoreRef.current + blocksCount
+      setScore(newScore)
+      scoreRef.current = newScore
+      setCombo(0)
+      comboRef.current = 0
+      checkPostPlace(newBoard, index, newScore)
+    }
+  }, [checkPostPlace])
+
+  // Global pointer up handler
+  const onGlobalPointerUp = useCallback((e: PointerEvent) => {
+    if (!dragRef.current) return
+    const drag = dragRef.current
+    dragRef.current = null
+
+    setDragRenderState(prev => {
+      if (prev && prev.isValid && canPlace(boardStateRef.current, prev.piece.matrix, prev.hoverRow, prev.hoverCol)) {
+        placePiece(prev.piece, drag.index, prev.hoverRow, prev.hoverCol)
+      }
+      return null
+    })
+
+    // Re-enable body scroll on touch
+    document.body.style.overflow = ''
+  }, [canPlace, placePiece])
+
+  // Attach global listeners only while dragging
+  useEffect(() => {
+    if (!dragRenderState) return
+    document.addEventListener('pointermove', onGlobalPointerMove, { passive: true })
+    document.addEventListener('pointerup', onGlobalPointerUp)
+    document.addEventListener('pointercancel', onGlobalPointerUp)
+    return () => {
+      document.removeEventListener('pointermove', onGlobalPointerMove)
+      document.removeEventListener('pointerup', onGlobalPointerUp)
+      document.removeEventListener('pointercancel', onGlobalPointerUp)
+    }
+  }, [dragRenderState !== null, onGlobalPointerMove, onGlobalPointerUp]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>, index: number, piece: Piece) => {
+    if (dragRef.current) return
+    if (isGameOverRef.current || clearingCells.length > 0) return
+    e.preventDefault()
+
+    const isTouch = e.pointerType === 'touch' || e.pointerType === 'pen'
+    const el = e.currentTarget
+    const rect = el.getBoundingClientRect()
+    const relX = (e.clientX - rect.left) / rect.width
+    const relY = (e.clientY - rect.top) / rect.height
+    const cs = cellSizeRef.current
+    const renderedWidth = piece.matrix[0].length * cs
+    const renderedHeight = piece.matrix.length * cs
+    const touchYOffset = isTouch ? cs * 1.5 : 0
+    const offsetX = relX * renderedWidth
+    const offsetY = relY * renderedHeight + touchYOffset
+
+    dragRef.current = { index, piece, offsetX, offsetY, isTouch }
+
+    // Lock scroll on touch
+    if (isTouch) document.body.style.overflow = 'hidden'
+
+    const dragX = e.clientX - offsetX
+    const dragY = e.clientY - offsetY
+    const { hoverRow, hoverCol, isValid } = computeHoverPos(dragX, dragY, piece)
+
+    setDragRenderState({ index, piece, x: dragX, y: dragY, hoverRow, hoverCol, isValid })
   }
 
   const restart = () => {
@@ -340,13 +332,12 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
   }, [])
 
-  // Auto-scale cellSize for mobile on mount to fit screen perfectly and make it large
   useEffect(() => {
     const checkSize = () => {
-       const width = window.innerWidth
-       if (width < 400) setCellSize(40)
-       else if (width < 600) setCellSize(48)
-       else setCellSize(55)
+      const width = window.innerWidth
+      if (width < 400) setCellSize(40)
+      else if (width < 600) setCellSize(48)
+      else setCellSize(55)
     }
     checkSize()
     window.addEventListener('resize', checkSize)
@@ -427,18 +418,15 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
           <div className="bb-hand">
              {hand.map((piece, i) => (
                 <div key={i} className="bb-hand-slot">
-                   {/* Keep piece in DOM during drag so pointer capture remains active;
-                       hide visually with opacity:0 instead of removing from DOM */}
                    {piece && (
                       <div 
                          className="bb-piece"
                          onPointerDown={(e) => handlePointerDown(e, i, piece)}
-                         onPointerMove={handlePointerMove}
-                         onPointerUp={handlePointerUp}
-                         onPointerCancel={handlePointerUp}
                          style={{
                             gridTemplateColumns: `repeat(${piece.matrix[0].length}, var(--hand-cell-size))`,
+                            // Hide during drag but keep in DOM (pointer capture requires element to stay in DOM)
                             opacity: dragRenderState?.index === i ? 0 : 1,
+                            cursor: dragRenderState?.index === i ? 'none' : 'grab',
                          }}
                       >
                          {piece.matrix.map((row, r) => 
@@ -499,6 +487,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
         </div>
       </div>
 
+      {/* Drag Overlay — renders dragged piece at pointer position */}
       {dragRenderState && (
          <div 
             className="bb-drag-overlay"
@@ -535,7 +524,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       )}
 
       <style>{`
-        .blockblast-game { display: flex; flex-direction: column; width: 100%; align-items: center; user-select: none; }
+        .blockblast-game { display: flex; flex-direction: column; width: 100%; align-items: center; user-select: none; touch-action: none; }
         .blockblast-game.fullscreen-mode { justify-content: center; }
         
         .bb-main { display: flex; gap: 24px; justify-content: center; align-items: stretch; width: 100%; max-width: 900px; }
@@ -584,8 +573,8 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
         .bb-hand-slot .bb-piece-cell { width: var(--hand-cell-size); height: var(--hand-cell-size); }
         
         .bb-drag-overlay {
-           position: fixed; top: 0; left: 0; z-index: 100; pointer-events: none;
-           display: grid; gap: 2px;
+           position: fixed; top: 0; left: 0; z-index: 9999; pointer-events: none;
+           display: grid; gap: 2px; will-change: transform;
         }
         .bb-block.dragging {
            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
@@ -667,7 +656,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
            .bb-hand { height: auto; padding: 10px 0; gap: 8px; margin-top: 10px; }
            .bb-hand-slot { width: auto; flex: 1; }
            
-           .bb-size-controls { display: none !important; } /* Hide on mobile to save space */
+           .bb-size-controls { display: none !important; }
            .bb-quick-actions { flex: 1; }
            .bb-action-btn { font-size: 13px; padding: 8px; }
         }

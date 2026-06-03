@@ -389,6 +389,8 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
       }
     }
     window.addEventListener('keydown', handleKey)
+    // Auto-focus game container for keyboard
+    containerRef.current?.focus()
     return () => window.removeEventListener('keydown', handleKey)
   }, [move, rotate, softDrop, hardDrop, start, togglePause])
 
@@ -456,11 +458,14 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
     <div 
       className={`tetris-game ${isFullscreen ? 'fullscreen-mode' : ''}`}
       ref={containerRef}
+      tabIndex={0}
+      onFocus={() => {}} // keep focusable
       style={{
         background: isFullscreen ? '#0a0a1a' : 'transparent',
         padding: isFullscreen ? '20px' : '0',
         height: isFullscreen ? '100vh' : 'auto',
-        justifyContent: isFullscreen ? 'center' : 'flex-start'
+        justifyContent: isFullscreen ? 'center' : 'flex-start',
+        outline: 'none',
       }}
     >
       {/* Main area: board + sidebar */}
