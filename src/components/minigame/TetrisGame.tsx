@@ -431,161 +431,99 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
   })
 
   return (
-    <div className="tetris-wrapper">
-      {/* ── DESKTOP LAYOUT (md+) ── */}
-      <div className="hidden md:flex" style={{ gap: '16px', justifyContent: 'center', alignItems: 'flex-start' }}>
+    <div className="tetris-game">
+      {/* Main area: board + sidebar */}
+      <div className="tetris-main">
         {/* Board */}
-        <div style={{ position: 'relative', flexShrink: 0 }}>
-          <div style={{
-            position: 'absolute', inset: '-3px', borderRadius: '16px', zIndex: 0,
-            background: 'conic-gradient(from 0deg, #00e5ff, #b44dff, #ff4d6a, #e41d1d, #ffe14d, #00e5ff)',
-            opacity: 0.12, filter: 'blur(6px)', animation: 'glowSpin 8s linear infinite',
-          }} />
-          <canvas ref={canvasRef} width={COLS * CELL} height={ROWS * CELL}
-            style={{
-              position: 'relative', zIndex: 1, display: 'block', borderRadius: '14px',
-              border: '2px solid rgba(255,255,255,0.1)', background: '#050510',
-              boxShadow: '0 0 40px rgba(0,229,255,0.06), inset 0 0 80px rgba(0,0,0,0.5)',
-            }}
+        <div className="tetris-board-wrap">
+          <div className="tetris-glow-ring" />
+          <canvas
+            ref={canvasRef}
+            width={COLS * CELL}
+            height={ROWS * CELL}
+            className="tetris-canvas"
           />
           {isPaused && (
-            <div style={{
-              position: 'absolute', inset: 0, zIndex: 2, borderRadius: '14px',
-              background: 'rgba(5,5,16,0.85)', display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: '8px',
-            }}>
+            <div className="tetris-pause-overlay">
               <div style={{ fontSize: '28px', fontWeight: 900, ...neonText('#ffe14d') }}>TẠM DỪNG</div>
-              <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>Nhấn P để tiếp tục</div>
+              <div className="tetris-pause-hint desktop-only">Nhấn P để tiếp tục</div>
+              <div className="tetris-pause-hint mobile-only">Nhấn nút tiếp tục</div>
             </div>
           )}
         </div>
 
-        {/* Desktop Sidebar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '160px', maxWidth: '180px' }}>
-          <div style={glassCard}>
-            <div style={labelStyle}>ĐIỂM SỐ</div>
-            <div style={{ fontSize: '30px', fontWeight: 900, ...neonText('#00e5ff'), lineHeight: 1 }}>{score.toLocaleString()}</div>
-            <div style={{ marginTop: '8px', height: '4px', borderRadius: '4px', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-              <div style={{ height: '100%', borderRadius: '4px', transition: 'width 0.5s ease', width: `${Math.min((score / 20000) * 100, 100)}%`, background: 'linear-gradient(90deg, #00e5ff, #b44dff)', boxShadow: '0 0 8px rgba(0,229,255,0.5)' }} />
+        {/* Sidebar */}
+        <div className="tetris-sidebar">
+          {/* Score */}
+          <div className="tetris-stat-card">
+            <div className="tetris-stat-label"><span className="desktop-only">ĐIỂM SỐ</span><span className="mobile-only">ĐIỂM</span></div>
+            <div className="tetris-stat-value tetris-score-val">{score.toLocaleString()}</div>
+            <div className="tetris-progress">
+              <div className="tetris-progress-fill" style={{ width: `${Math.min((score / 20000) * 100, 100)}%` }} />
             </div>
           </div>
-          <div style={glassCard}>
-            <div style={labelStyle}>HÀNG ĐÃ XÓA</div>
-            <div style={{ fontSize: '26px', fontWeight: 900, ...neonText('#39e75f'), lineHeight: 1 }}>{lines}</div>
+
+          {/* Lines + Level row */}
+          <div className="tetris-stat-row">
+            <div className="tetris-stat-card tetris-stat-half">
+              <div className="tetris-stat-label"><span className="desktop-only">HÀNG ĐÃ XÓA</span><span className="mobile-only">HÀNG</span></div>
+              <div className="tetris-stat-value tetris-lines-val">{lines}</div>
+            </div>
+            <div className="tetris-stat-card tetris-stat-half">
+              <div className="tetris-stat-label"><span className="desktop-only">CẤP ĐỘ</span><span className="mobile-only">LV</span></div>
+              <div className="tetris-stat-value tetris-level-val">{level + 1}</div>
+            </div>
           </div>
-          <div style={glassCard}>
-            <div style={labelStyle}>CẤP ĐỘ</div>
-            <div style={{ fontSize: '26px', fontWeight: 900, ...neonText('#ffe14d'), lineHeight: 1 }}>{level + 1}</div>
-          </div>
-          <div style={{ ...glassCard, textAlign: 'center' as const }}>
-            <div style={labelStyle}>KHỐI TIẾP THEO</div>
+
+          {/* Next Piece */}
+          <div className="tetris-stat-card" style={{ textAlign: 'center' }}>
+            <div className="tetris-stat-label"><span className="desktop-only">KHỐI TIẾP THEO</span><span className="mobile-only">TIẾP THEO</span></div>
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '4px' }}>
-              <canvas ref={nextCanvasRef} width={120} height={80}
-                style={{ borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}
-              />
+              <canvas ref={nextCanvasRef} width={120} height={80} className="tetris-next-canvas" />
             </div>
           </div>
-          <div style={glassCard}>
-            <div style={labelStyle}>ĐIỀU KHIỂN</div>
+
+          {/* Controls hint - desktop only */}
+          <div className="tetris-stat-card desktop-only">
+            <div className="tetris-stat-label">ĐIỀU KHIỂN</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {[['← →','Di chuyển'],['↑','Xoay'],['↓','Rơi nhanh'],['Space','Rơi liền'],['P','Tạm dừng'],['R','Chơi lại']].map(([key, desc]) => (
                 <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: '40px', padding: '2px 6px', fontSize: '10px', fontWeight: 700, color: '#00e5ff', background: 'rgba(0,229,255,0.1)', border: '1px solid rgba(0,229,255,0.2)', borderRadius: '5px', fontFamily: "'Outfit', monospace" }}>{key}</span>
-                  <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{desc}</span>
+                  <span className="tetris-key">{key}</span>
+                  <span className="tetris-key-desc">{desc}</span>
                 </div>
               ))}
             </div>
           </div>
+
+          {/* Quick action buttons - mobile only */}
+          <div className="tetris-quick-actions mobile-only">
+            <button onClick={start} className="tetris-action-btn tetris-action-restart">🔄</button>
+            <button onClick={togglePause} className="tetris-action-btn tetris-action-pause">{isPaused ? '▶' : '⏸'}</button>
+          </div>
         </div>
       </div>
 
-      {/* ── MOBILE LAYOUT (<md) ── */}
-      <div className="md:hidden" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-        {/* Board + compact sidebar row */}
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', width: '100%', justifyContent: 'center' }}>
-          {/* Board scaled for mobile */}
-          <div style={{ position: 'relative', flexShrink: 0 }}>
-            <div style={{
-              position: 'absolute', inset: '-2px', borderRadius: '12px', zIndex: 0,
-              background: 'conic-gradient(from 0deg, #00e5ff, #b44dff, #ff4d6a, #e41d1d, #ffe14d, #00e5ff)',
-              opacity: 0.1, filter: 'blur(4px)', animation: 'glowSpin 8s linear infinite',
-            }} />
-            <canvas ref={canvasRef} width={COLS * CELL} height={ROWS * CELL}
-              className="tetris-board-mobile"
-              style={{
-                position: 'relative', zIndex: 1, display: 'block', borderRadius: '10px',
-                border: '2px solid rgba(255,255,255,0.1)', background: '#050510',
-                boxShadow: '0 0 20px rgba(0,229,255,0.04), inset 0 0 40px rgba(0,0,0,0.5)',
-              }}
-            />
-            {isPaused && (
-              <div style={{
-                position: 'absolute', inset: 0, zIndex: 2, borderRadius: '10px',
-                background: 'rgba(5,5,16,0.85)', display: 'flex', flexDirection: 'column',
-                alignItems: 'center', justifyContent: 'center', gap: '4px',
-              }}>
-                <div style={{ fontSize: '20px', fontWeight: 900, ...neonText('#ffe14d') }}>TẠM DỪNG</div>
-                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>Nhấn nút tiếp tục</div>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile compact sidebar */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', minWidth: '90px', flex: '0 0 auto' }}>
-            <div style={mobileCard}>
-              <div style={mobileLabelStyle}>ĐIỂM</div>
-              <div style={{ fontSize: '20px', fontWeight: 900, ...neonText('#00e5ff'), lineHeight: 1 }}>{score.toLocaleString()}</div>
-              <div style={{ marginTop: '4px', height: '3px', borderRadius: '3px', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-                <div style={{ height: '100%', borderRadius: '3px', width: `${Math.min((score / 20000) * 100, 100)}%`, background: 'linear-gradient(90deg, #00e5ff, #b44dff)', transition: 'width 0.5s ease' }} />
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <div style={{ ...mobileCard, flex: 1 }}>
-                <div style={mobileLabelStyle}>HÀNG</div>
-                <div style={{ fontSize: '18px', fontWeight: 900, ...neonText('#39e75f'), lineHeight: 1 }}>{lines}</div>
-              </div>
-              <div style={{ ...mobileCard, flex: 1 }}>
-                <div style={mobileLabelStyle}>LV</div>
-                <div style={{ fontSize: '18px', fontWeight: 900, ...neonText('#ffe14d'), lineHeight: 1 }}>{level + 1}</div>
-              </div>
-            </div>
-            <div style={{ ...mobileCard, textAlign: 'center' as const }}>
-              <div style={mobileLabelStyle}>TIẾP THEO</div>
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2px' }}>
-                <canvas ref={nextCanvasRef} width={120} height={80}
-                  style={{ borderRadius: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)', width: '80px', height: '54px' }}
-                />
-              </div>
-            </div>
-            {/* Quick action buttons */}
-            <div style={{ display: 'flex', gap: '4px' }}>
-              <button onClick={start} style={mobileActionBtn('#00e5ff')}>🔄</button>
-              <button onClick={togglePause} style={mobileActionBtn('#ffe14d')}>{isPaused ? '▶' : '⏸'}</button>
-            </div>
-          </div>
+      {/* Mobile touch controls */}
+      <div className="tetris-touch-controls mobile-only">
+        <div className="tetris-touch-row">
+          <MobileBtn onClick={() => move(-1)} label="←">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </MobileBtn>
+          <MobileBtn onClick={rotate} label="↻" accent>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
+          </MobileBtn>
+          <MobileBtn onClick={() => move(1)} label="→">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+          </MobileBtn>
         </div>
-
-        {/* Mobile touch controls */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center', paddingTop: '2px' }}>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <MobileBtn onClick={() => move(-1)} label="←">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-            </MobileBtn>
-            <MobileBtn onClick={rotate} label="↻" accent>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
-            </MobileBtn>
-            <MobileBtn onClick={() => move(1)} label="→">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
-            </MobileBtn>
-          </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <MobileBtn onClick={softDrop} label="↓" wide>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
-            </MobileBtn>
-            <MobileBtn onClick={hardDrop} label="⏬" wide purple>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="7 13 12 18 17 13" /><polyline points="7 6 12 11 17 6" /></svg>
-            </MobileBtn>
-          </div>
+        <div className="tetris-touch-row">
+          <MobileBtn onClick={softDrop} label="↓" wide>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+          </MobileBtn>
+          <MobileBtn onClick={hardDrop} label="⏬" wide purple>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="7 13 12 18 17 13" /><polyline points="7 6 12 11 17 6" /></svg>
+          </MobileBtn>
         </div>
       </div>
 
@@ -593,15 +531,102 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
         @keyframes glowSpin {
           to { filter: blur(6px) hue-rotate(360deg); }
         }
-        .tetris-board-mobile {
-          width: min(60vw, 240px) !important;
-          height: auto !important;
-          aspect-ratio: 1/2;
+        .tetris-game { display: flex; flex-direction: column; gap: 10px; width: 100%; align-items: center; }
+
+        /* Main row */
+        .tetris-main { display: flex; gap: 16px; justify-content: center; align-items: flex-start; }
+
+        /* Board */
+        .tetris-board-wrap { position: relative; flex-shrink: 0; }
+        .tetris-glow-ring {
+          position: absolute; inset: -3px; border-radius: 16px; z-index: 0;
+          background: conic-gradient(from 0deg, #00e5ff, #b44dff, #ff4d6a, #e41d1d, #ffe14d, #00e5ff);
+          opacity: 0.12; filter: blur(6px); animation: glowSpin 8s linear infinite;
         }
-        @media (max-height: 700px) {
-          .tetris-board-mobile {
-            width: min(50vw, 200px) !important;
-          }
+        .tetris-canvas {
+          position: relative; z-index: 1; display: block; border-radius: 14px;
+          border: 2px solid rgba(255,255,255,0.1); background: #050510;
+          box-shadow: 0 0 40px rgba(0,229,255,0.06), inset 0 0 80px rgba(0,0,0,0.5);
+        }
+        .tetris-pause-overlay {
+          position: absolute; inset: 0; z-index: 2; border-radius: 14px;
+          background: rgba(5,5,16,0.85); display: flex; flex-direction: column;
+          align-items: center; justify-content: center; gap: 8px;
+        }
+        .tetris-pause-hint { font-size: 13px; color: rgba(255,255,255,0.4); }
+
+        /* Sidebar */
+        .tetris-sidebar { display: flex; flex-direction: column; gap: 10px; min-width: 160px; max-width: 180px; }
+        .tetris-stat-card {
+          background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 16px; padding: 14px 16px; backdrop-filter: blur(16px);
+        }
+        .tetris-stat-label {
+          font-size: 9px; font-weight: 700; letter-spacing: 2px;
+          color: rgba(255,255,255,0.4); margin-bottom: 4px;
+        }
+        .tetris-stat-value { font-weight: 900; line-height: 1; }
+        .tetris-score-val { font-size: 30px; color: #00e5ff; text-shadow: 0 0 10px #00e5ff, 0 0 30px #00e5ff; }
+        .tetris-lines-val { font-size: 26px; color: #39e75f; text-shadow: 0 0 10px #39e75f, 0 0 30px #39e75f; }
+        .tetris-level-val { font-size: 26px; color: #ffe14d; text-shadow: 0 0 10px #ffe14d, 0 0 30px #ffe14d; }
+
+        .tetris-stat-row { display: flex; flex-direction: column; gap: 10px; }
+        .tetris-stat-half { flex: unset; }
+
+        .tetris-progress { margin-top: 8px; height: 4px; border-radius: 4px; background: rgba(255,255,255,0.06); overflow: hidden; }
+        .tetris-progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; background: linear-gradient(90deg, #00e5ff, #b44dff); box-shadow: 0 0 8px rgba(0,229,255,0.5); }
+
+        .tetris-next-canvas { border-radius: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); }
+
+        .tetris-key {
+          display: inline-flex; align-items: center; justify-content: center;
+          min-width: 40px; padding: 2px 6px; font-size: 10px; font-weight: 700;
+          color: #00e5ff; background: rgba(0,229,255,0.1);
+          border: 1px solid rgba(0,229,255,0.2); border-radius: 5px;
+          font-family: 'Outfit', monospace;
+        }
+        .tetris-key-desc { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 500; }
+
+        /* Quick actions */
+        .tetris-quick-actions { display: flex; gap: 4px; }
+        .tetris-action-btn {
+          flex: 1; padding: 6px; border-radius: 8px; font-size: 14px;
+          font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif;
+        }
+        .tetris-action-restart { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2); color: #00e5ff; }
+        .tetris-action-pause { background: rgba(255,225,77,0.1); border: 1px solid rgba(255,225,77,0.2); color: #ffe14d; }
+
+        /* Touch controls */
+        .tetris-touch-controls { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+        .tetris-touch-row { display: flex; gap: 8px; }
+
+        /* Desktop: show/hide */
+        .mobile-only { display: none !important; }
+        .desktop-only { display: inline !important; }
+
+        /* ── MOBILE ── */
+        @media (max-width: 767px) {
+          .mobile-only { display: flex !important; }
+          .desktop-only { display: none !important; }
+          .tetris-main { gap: 8px; }
+          .tetris-canvas { width: min(60vw, 240px) !important; height: auto !important; aspect-ratio: 1/2; border-radius: 10px; }
+          .tetris-glow-ring { inset: -2px; border-radius: 12px; opacity: 0.1; filter: blur(4px); }
+          .tetris-sidebar { min-width: 90px; max-width: 120px; gap: 6px; }
+          .tetris-stat-card { border-radius: 10px; padding: 8px 10px; }
+          .tetris-stat-label { font-size: 8px; letter-spacing: 1.5px; margin-bottom: 2px; }
+          .tetris-score-val { font-size: 20px; }
+          .tetris-lines-val, .tetris-level-val { font-size: 18px; }
+          .tetris-stat-row { flex-direction: row; gap: 6px; }
+          .tetris-stat-half { flex: 1; }
+          .tetris-progress { margin-top: 4px; height: 3px; }
+          .tetris-next-canvas { width: 80px; height: 54px; border-radius: 6px; }
+          .tetris-pause-overlay { border-radius: 10px; }
+          .tetris-pause-overlay > div:first-child { font-size: 20px !important; }
+          .tetris-pause-hint { font-size: 11px; }
+          .tetris-quick-actions { display: flex !important; }
+        }
+        @media (max-width: 767px) and (max-height: 700px) {
+          .tetris-canvas { width: min(50vw, 200px) !important; }
         }
       `}</style>
     </div>
