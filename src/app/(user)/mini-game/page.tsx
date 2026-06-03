@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
+import dynamic from 'next/dynamic'
+
+const TetrisGame = dynamic(() => import('@/components/minigame/TetrisGame'), { ssr: false })
 
 const VOUCHER_TIERS = [
-  { percent: 10, points: 10000, color: 'from-cyan-500 to-blue-500', icon: '🎟️' },
-  { percent: 15, points: 15000, color: 'from-purple-500 to-pink-500', icon: '🎫' },
-  { percent: 20, points: 20000, color: 'from-orange-500 to-red-500', icon: '🏆' },
+  { percent: 10, points: 10000, icon: '🎟️', gradient: 'linear-gradient(135deg, #00e5ff, #4d7aff)' },
+  { percent: 15, points: 15000, icon: '🎫', gradient: 'linear-gradient(135deg, #b44dff, #ff4da6)' },
+  { percent: 20, points: 20000, icon: '🏆', gradient: 'linear-gradient(135deg, #ff8c1a, #e41d1d)' },
 ]
 
 export default function MiniGamePage() {
@@ -17,6 +20,7 @@ export default function MiniGamePage() {
   const [exchangeLoading, setExchangeLoading] = useState(false)
   const [error, setError] = useState('')
   const [lastScore, setLastScore] = useState<number | null>(null)
+  const [showScoreToast, setShowScoreToast] = useState(false)
 
   const fetchPoints = async () => {
     if (!session) return
@@ -39,32 +43,26 @@ export default function MiniGamePage() {
     else setLoading(false)
   }, [session])
 
-  useEffect(() => {
-    const handleMessage = async (e: MessageEvent) => {
-      if (e.data && e.data.type === 'GAME_OVER') {
-        const score = e.data.score
-        setLastScore(score)
-        if (score > 0 && session) {
-          try {
-            const res = await fetch('/api/minigame/submit-score', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ score })
-            })
-            if (res.ok) {
-              const data = await res.json()
-              setPoints(data.points)
-            }
-          } catch (err) {
-            console.error(err)
-          }
+  const handleGameOver = async (score: number) => {
+    setLastScore(score)
+    if (score > 0 && session) {
+      try {
+        const res = await fetch('/api/minigame/submit-score', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ score })
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setPoints(data.points)
+          setShowScoreToast(true)
+          setTimeout(() => setShowScoreToast(false), 4000)
         }
+      } catch (err) {
+        console.error(err)
       }
     }
-
-    window.addEventListener('message', handleMessage)
-    return () => window.removeEventListener('message', handleMessage)
-  }, [session])
+  }
 
   const handleExchange = async (percent: number) => {
     if (!session) return
@@ -80,7 +78,7 @@ export default function MiniGamePage() {
       if (!res.ok) {
         setError(data.error || 'Lỗi đổi voucher')
       } else {
-        alert(`🎉 Đổi thành công! Mã voucher của bạn là: ${data.voucher.code}`)
+        alert(`🎉 Đổi thành công! Mã voucher: ${data.voucher.code}`)
         fetchPoints()
       }
     } catch (e) {
@@ -90,19 +88,34 @@ export default function MiniGamePage() {
     }
   }
 
+  const glassCard: React.CSSProperties = {
+    background: 'rgba(255,255,255,0.04)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: '20px',
+    padding: '20px',
+    backdropFilter: 'blur(16px)',
+  }
+
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #0a0a1a 0%, #111127 50%, #0a0a1a 100%)' }}>
-      <div className="container mx-auto px-4 py-8 lg:py-12">
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(180deg, #0a0a1a 0%, #0d0d24 40%, #0a0a1a 100%)',
+      fontFamily: "'Outfit', sans-serif",
+    }}>
+      <div className="container mx-auto px-4 py-6 lg:py-10">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase mb-3"
-            style={{ background: 'rgba(228,29,29,0.15)', color: '#ff6b6b', border: '1px solid rgba(228,29,29,0.2)' }}>
+            style={{ background: 'rgba(228,29,29,0.12)', color: '#ff6b6b', border: '1px solid rgba(228,29,29,0.2)' }}>
             🎮 Mini Game
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-white mb-2" style={{ fontFamily: "'Outfit', sans-serif" }}>
-            Xếp gạch cùng <span style={{ background: 'linear-gradient(135deg, #e41d1d, #ff6b6b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Mushroomie</span>
+          <h1 className="text-3xl md:text-4xl font-black text-white mb-2">
+            Xếp gạch cùng{' '}
+            <span style={{ background: 'linear-gradient(135deg, #e41d1d, #ff6b6b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Mushroomie
+            </span>
           </h1>
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
             Chơi game • Tích điểm • Đổi voucher giảm giá
           </p>
         </div>
@@ -111,103 +124,96 @@ export default function MiniGamePage() {
         {!session && (
           <div className="max-w-xl mx-auto mb-6 text-center p-4 rounded-2xl text-sm font-medium"
             style={{ background: 'rgba(255,225,77,0.08)', border: '1px solid rgba(255,225,77,0.15)', color: '#ffe14d' }}>
-            ⚡ Vui lòng đăng nhập để có thể tích điểm và đổi voucher!
+            ⚡ Vui lòng đăng nhập để tích điểm và đổi voucher!
           </div>
         )}
 
-        <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto">
-          {/* Game Area */}
-          <div className="flex-1">
-            <div className="rounded-2xl overflow-hidden" style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              boxShadow: '0 0 60px rgba(0,0,0,0.3)'
+        {/* Score Toast */}
+        {showScoreToast && lastScore && lastScore > 0 && (
+          <div className="max-w-md mx-auto mb-4 text-center p-3 rounded-xl text-sm font-bold"
+            style={{
+              background: 'rgba(0,229,255,0.1)', border: '1px solid rgba(0,229,255,0.2)', color: '#00e5ff',
+              animation: 'fadeInUp 0.4s ease-out',
             }}>
-              <div className="flex justify-center p-3 md:p-4" style={{ minHeight: '500px' }}>
-                <iframe
-                  src="/minigame/index.html"
-                  title="Mini Game Xếp gạch"
-                  className="border-none rounded-xl"
-                  style={{ width: '100%', maxWidth: '520px', height: '640px' }}
-                  scrolling="no"
-                ></iframe>
-              </div>
-            </div>
+            🎉 +{lastScore} điểm đã được cộng vào tài khoản!
+          </div>
+        )}
 
-            {/* Last Score Toast */}
-            {lastScore !== null && lastScore > 0 && session && (
-              <div className="mt-4 text-center p-3 rounded-xl text-sm font-semibold animate-pulse"
-                style={{ background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.15)', color: '#00e5ff' }}>
-                +{lastScore} điểm đã được cộng vào tài khoản! 🎉
-              </div>
-            )}
+        <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto items-start">
+          {/* Game Area */}
+          <div className="flex-1 flex justify-center">
+            <div className="rounded-2xl p-4 md:p-5" style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.05)',
+              boxShadow: '0 0 80px rgba(0,0,0,0.4)',
+            }}>
+              <TetrisGame onGameOver={handleGameOver} />
+            </div>
           </div>
 
-          {/* Sidebar */}
+          {/* Points & Vouchers Sidebar */}
           <div className="w-full lg:w-80 xl:w-96 space-y-5">
             {/* Points Card */}
-            <div className="rounded-2xl p-5 text-center" style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(12px)'
-            }}>
-              <div className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                Điểm tích lũy
+            <div style={glassCard} className="text-center">
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '2px', color: 'rgba(255,255,255,0.35)', marginBottom: '6px' }}>
+                ĐIỂM TÍCH LŨY
               </div>
               {loading ? (
-                <div className="h-12 animate-pulse rounded-lg w-1/2 mx-auto" style={{ background: 'rgba(255,255,255,0.1)' }}></div>
+                <div className="h-12 animate-pulse rounded-lg w-1/2 mx-auto" style={{ background: 'rgba(255,255,255,0.08)' }} />
               ) : (
-                <div className="text-5xl font-black" style={{
+                <div style={{
+                  fontSize: '48px', fontWeight: 900, lineHeight: 1,
                   background: 'linear-gradient(135deg, #00e5ff, #b44dff)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
+                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                  textShadow: 'none',
                 }}>
                   {points.toLocaleString('vi-VN')}
                 </div>
               )}
               {/* Progress bar */}
-              <div className="mt-3 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                <div className="h-full rounded-full transition-all duration-700 ease-out" style={{
+              <div style={{ marginTop: '12px', height: '5px', borderRadius: '5px', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%', borderRadius: '5px', transition: 'width 0.7s ease',
                   width: `${Math.min((points / 20000) * 100, 100)}%`,
                   background: 'linear-gradient(90deg, #00e5ff, #b44dff)',
-                  boxShadow: '0 0 10px rgba(0,229,255,0.4)'
+                  boxShadow: '0 0 12px rgba(0,229,255,0.5)',
                 }} />
               </div>
-              <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                Chơi game để kiếm thêm điểm!
+              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', marginTop: '8px' }}>
+                Chơi game để tích thêm điểm!
               </p>
             </div>
 
             {/* Voucher Exchange */}
-            <div className="rounded-2xl p-5" style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(12px)'
-            }}>
-              <div className="text-xs font-bold tracking-widest uppercase mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                Đổi Voucher
+            <div style={glassCard}>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '2px', color: 'rgba(255,255,255,0.35)', marginBottom: '14px' }}>
+                ĐỔI VOUCHER
               </div>
               {error && (
-                <div className="text-sm mb-4 text-center p-2 rounded-lg" style={{ background: 'rgba(255,77,106,0.1)', border: '1px solid rgba(255,77,106,0.2)', color: '#ff4d6a' }}>
-                  {error}
-                </div>
+                <div className="text-sm mb-4 text-center p-2.5 rounded-xl" style={{
+                  background: 'rgba(255,77,106,0.1)', border: '1px solid rgba(255,77,106,0.2)', color: '#ff4d6a'
+                }}>{error}</div>
               )}
-
               <div className="space-y-3">
                 {VOUCHER_TIERS.map(tier => {
-                  const canExchange = points >= tier.points && session && !exchangeLoading
+                  const canExchange = points >= tier.points && !!session && !exchangeLoading
                   return (
-                    <div key={tier.percent} className="rounded-xl p-3 flex items-center justify-between transition-all duration-300"
-                      style={{
-                        background: canExchange ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)',
-                        border: `1px solid ${canExchange ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.05)'}`,
-                        opacity: canExchange ? 1 : 0.5
-                      }}>
+                    <div key={tier.percent} className="flex items-center justify-between rounded-xl p-3.5 transition-all duration-300" style={{
+                      background: canExchange ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)',
+                      border: `1px solid ${canExchange ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.04)'}`,
+                      opacity: canExchange ? 1 : 0.45,
+                    }}>
                       <div className="flex items-center gap-3">
-                        <div className="text-2xl">{tier.icon}</div>
+                        <div style={{
+                          width: '42px', height: '42px', borderRadius: '12px',
+                          background: tier.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '20px', boxShadow: canExchange ? `0 0 15px rgba(0,0,0,0.3)` : 'none',
+                        }}>
+                          {tier.icon}
+                        </div>
                         <div>
-                          <div className="font-bold text-white text-sm">Giảm {tier.percent}%</div>
-                          <div className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          <div style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>Giảm {tier.percent}%</div>
+                          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)' }}>
                             {tier.points.toLocaleString('vi-VN')} điểm
                           </div>
                         </div>
@@ -215,12 +221,14 @@ export default function MiniGamePage() {
                       <button
                         disabled={!canExchange}
                         onClick={() => handleExchange(tier.percent)}
-                        className="px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 disabled:cursor-not-allowed"
                         style={{
+                          padding: '8px 16px', borderRadius: '10px', fontSize: '12px', fontWeight: 700,
+                          border: 'none', cursor: canExchange ? 'pointer' : 'not-allowed',
                           background: canExchange ? 'linear-gradient(135deg, #e41d1d, #ff4d6a)' : 'rgba(255,255,255,0.06)',
-                          color: canExchange ? '#fff' : 'rgba(255,255,255,0.3)',
-                          boxShadow: canExchange ? '0 0 15px rgba(228,29,29,0.3)' : 'none',
-                          border: 'none'
+                          color: canExchange ? '#fff' : 'rgba(255,255,255,0.25)',
+                          boxShadow: canExchange ? '0 0 20px rgba(228,29,29,0.3)' : 'none',
+                          transition: 'all 0.2s ease',
+                          fontFamily: "'Outfit', sans-serif",
                         }}
                       >
                         {exchangeLoading ? '...' : 'Đổi ngay'}
@@ -233,30 +241,25 @@ export default function MiniGamePage() {
 
             {/* Voucher List */}
             {vouchers.length > 0 && (
-              <div className="rounded-2xl p-5" style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                backdropFilter: 'blur(12px)'
-              }}>
-                <div className="text-xs font-bold tracking-widest uppercase mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  Voucher của bạn
+              <div style={glassCard}>
+                <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '2px', color: 'rgba(255,255,255,0.35)', marginBottom: '14px' }}>
+                  VOUCHER CỦA BẠN
                 </div>
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-1" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.1) transparent' }}>
+                <div className="space-y-2.5 max-h-52 overflow-y-auto pr-1" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.08) transparent' }}>
                   {vouchers.map(v => (
-                    <div key={v.id} className="rounded-xl p-3 flex justify-between items-center" style={{
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.06)'
+                    <div key={v.id} className="flex justify-between items-center rounded-xl p-3" style={{
+                      background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)'
                     }}>
                       <div>
-                        <div className="font-bold text-sm" style={{ color: '#00e5ff' }}>Giảm {v.discount_percent}%</div>
-                        <div className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                        <div style={{ fontWeight: 700, fontSize: '13px', color: '#00e5ff' }}>Giảm {v.discount_percent}%</div>
+                        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)' }}>
                           {new Date(v.created_at).toLocaleDateString('vi-VN')}
                         </div>
                       </div>
-                      <div className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold select-all" style={{
-                        background: 'rgba(0,229,255,0.08)',
-                        border: '1px solid rgba(0,229,255,0.15)',
-                        color: '#00e5ff'
+                      <div className="select-all" style={{
+                        padding: '6px 12px', borderRadius: '8px', fontSize: '12px',
+                        fontFamily: "'Courier New', monospace", fontWeight: 700,
+                        background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.15)', color: '#00e5ff',
                       }}>
                         {v.code}
                       </div>
@@ -268,6 +271,14 @@ export default function MiniGamePage() {
           </div>
         </div>
       </div>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   )
 }
