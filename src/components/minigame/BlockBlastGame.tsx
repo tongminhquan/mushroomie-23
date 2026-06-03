@@ -26,6 +26,9 @@ const SHAPES = [
   [[1,1,1],[1,1,1],[1,1,1]], // 3x3
   [[1,1],[1,0]], [[1,1],[0,1]], [[1,0],[1,1]], [[0,1],[1,1]], // Small L
   [[1,0,0],[1,0,0],[1,1,1]], [[0,0,1],[0,0,1],[1,1,1]], [[1,1,1],[1,0,0],[1,0,0]], [[1,1,1],[0,0,1],[0,0,1]], // Large L
+  [[1,1,1],[0,1,0]], [[0,1,0],[1,1,1]], [[1,0],[1,1],[1,0]], [[0,1],[1,1],[0,1]], // T shapes
+  [[0,1,0],[1,1,1],[0,1,0]], // Cross +
+  [[1,1,0],[0,1,1]], [[0,1,1],[1,1,0]], [[1,0],[1,1],[0,1]], [[0,1],[1,1],[1,0]], // S/Z shapes
 ]
 
 type Piece = {
@@ -267,7 +270,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
         }
       }
 
-      let newScore = score + blocksPlaced * 10
+      let newScore = score + blocksPlaced * 1 // 1 điểm cho mỗi ô gạch đặt xuống
       
       const rowsToClear: number[] = []
       const colsToClear: number[] = []
@@ -291,7 +294,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
         // Combo multiplier
         const currentCombo = linesCleared > 1 ? combo + linesCleared : combo + 1
         setCombo(currentCombo)
-        newScore += (linesCleared * 100) * currentCombo
+        newScore += (linesCleared * 10) * currentCombo // 10 điểm cho 1 hàng/cột * hệ số combo
       } else {
         setCombo(0)
       }
