@@ -404,32 +404,50 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
     color,
   })
 
+  const labelStyle: React.CSSProperties = {
+    fontSize: '9px', fontWeight: 700, letterSpacing: '2px',
+    color: 'rgba(255,255,255,0.4)', marginBottom: '4px',
+  }
+
+  const mobileCard: React.CSSProperties = {
+    background: 'rgba(255,255,255,0.04)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: '10px',
+    padding: '8px 10px',
+    backdropFilter: 'blur(12px)',
+  }
+
+  const mobileLabelStyle: React.CSSProperties = {
+    fontSize: '8px', fontWeight: 700, letterSpacing: '1.5px',
+    color: 'rgba(255,255,255,0.35)', marginBottom: '2px',
+  }
+
+  const mobileActionBtn = (color: string): React.CSSProperties => ({
+    flex: 1, padding: '6px', borderRadius: '8px',
+    border: `1px solid ${color}33`,
+    background: `${color}15`, color, fontSize: '14px',
+    fontWeight: 700, cursor: 'pointer',
+    fontFamily: "'Outfit', sans-serif",
+  })
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
-      {/* Main area: board + sidebar */}
-      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+    <div className="tetris-wrapper">
+      {/* ── DESKTOP LAYOUT (md+) ── */}
+      <div className="hidden md:flex" style={{ gap: '16px', justifyContent: 'center', alignItems: 'flex-start' }}>
         {/* Board */}
         <div style={{ position: 'relative', flexShrink: 0 }}>
-          {/* Animated glow ring */}
           <div style={{
             position: 'absolute', inset: '-3px', borderRadius: '16px', zIndex: 0,
             background: 'conic-gradient(from 0deg, #00e5ff, #b44dff, #ff4d6a, #e41d1d, #ffe14d, #00e5ff)',
-            opacity: 0.12, filter: 'blur(6px)',
-            animation: 'glowSpin 8s linear infinite',
+            opacity: 0.12, filter: 'blur(6px)', animation: 'glowSpin 8s linear infinite',
           }} />
-          <canvas
-            ref={canvasRef}
-            width={COLS * CELL}
-            height={ROWS * CELL}
+          <canvas ref={canvasRef} width={COLS * CELL} height={ROWS * CELL}
             style={{
-              position: 'relative', zIndex: 1, display: 'block',
-              borderRadius: '14px',
-              border: '2px solid rgba(255,255,255,0.1)',
-              background: '#050510',
+              position: 'relative', zIndex: 1, display: 'block', borderRadius: '14px',
+              border: '2px solid rgba(255,255,255,0.1)', background: '#050510',
               boxShadow: '0 0 40px rgba(0,229,255,0.06), inset 0 0 80px rgba(0,0,0,0.5)',
             }}
           />
-          {/* Pause overlay */}
           {isPaused && (
             <div style={{
               position: 'absolute', inset: 0, zIndex: 2, borderRadius: '14px',
@@ -442,67 +460,37 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
           )}
         </div>
 
-        {/* Sidebar */}
+        {/* Desktop Sidebar */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '160px', maxWidth: '180px' }}>
-          {/* Score */}
           <div style={glassCard}>
-            <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '2px', color: 'rgba(255,255,255,0.4)', marginBottom: '4px' }}>ĐIỂM SỐ</div>
-            <div style={{ fontSize: '30px', fontWeight: 900, ...neonText('#00e5ff'), lineHeight: 1 }}>
-              {score.toLocaleString()}
-            </div>
-            {/* Progress bar */}
+            <div style={labelStyle}>ĐIỂM SỐ</div>
+            <div style={{ fontSize: '30px', fontWeight: 900, ...neonText('#00e5ff'), lineHeight: 1 }}>{score.toLocaleString()}</div>
             <div style={{ marginTop: '8px', height: '4px', borderRadius: '4px', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-              <div style={{
-                height: '100%', borderRadius: '4px', transition: 'width 0.5s ease',
-                width: `${Math.min((score / 20000) * 100, 100)}%`,
-                background: 'linear-gradient(90deg, #00e5ff, #b44dff)',
-                boxShadow: '0 0 8px rgba(0,229,255,0.5)',
-              }} />
+              <div style={{ height: '100%', borderRadius: '4px', transition: 'width 0.5s ease', width: `${Math.min((score / 20000) * 100, 100)}%`, background: 'linear-gradient(90deg, #00e5ff, #b44dff)', boxShadow: '0 0 8px rgba(0,229,255,0.5)' }} />
             </div>
           </div>
-
-          {/* Lines */}
           <div style={glassCard}>
-            <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '2px', color: 'rgba(255,255,255,0.4)', marginBottom: '4px' }}>HÀNG ĐÃ XÓA</div>
+            <div style={labelStyle}>HÀNG ĐÃ XÓA</div>
             <div style={{ fontSize: '26px', fontWeight: 900, ...neonText('#39e75f'), lineHeight: 1 }}>{lines}</div>
           </div>
-
-          {/* Level */}
           <div style={glassCard}>
-            <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '2px', color: 'rgba(255,255,255,0.4)', marginBottom: '4px' }}>CẤP ĐỘ</div>
+            <div style={labelStyle}>CẤP ĐỘ</div>
             <div style={{ fontSize: '26px', fontWeight: 900, ...neonText('#ffe14d'), lineHeight: 1 }}>{level + 1}</div>
           </div>
-
-          {/* Next Piece */}
           <div style={{ ...glassCard, textAlign: 'center' as const }}>
-            <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '2px', color: 'rgba(255,255,255,0.4)', marginBottom: '6px' }}>KHỐI TIẾP THEO</div>
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div style={labelStyle}>KHỐI TIẾP THEO</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '4px' }}>
               <canvas ref={nextCanvasRef} width={120} height={80}
                 style={{ borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}
               />
             </div>
           </div>
-
-          {/* Controls Hint - desktop */}
-          <div className="hidden md:block" style={glassCard}>
-            <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '2px', color: 'rgba(255,255,255,0.4)', marginBottom: '8px' }}>ĐIỀU KHIỂN</div>
+          <div style={glassCard}>
+            <div style={labelStyle}>ĐIỀU KHIỂN</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {[
-                ['← →', 'Di chuyển'],
-                ['↑', 'Xoay'],
-                ['↓', 'Rơi nhanh'],
-                ['Space', 'Rơi liền'],
-                ['P', 'Tạm dừng'],
-                ['R', 'Chơi lại'],
-              ].map(([key, desc]) => (
+              {[['← →','Di chuyển'],['↑','Xoay'],['↓','Rơi nhanh'],['Space','Rơi liền'],['P','Tạm dừng'],['R','Chơi lại']].map(([key, desc]) => (
                 <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{
-                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                    minWidth: '40px', padding: '2px 6px', fontSize: '10px', fontWeight: 700,
-                    color: '#00e5ff', background: 'rgba(0,229,255,0.1)',
-                    border: '1px solid rgba(0,229,255,0.2)', borderRadius: '5px',
-                    fontFamily: "'Outfit', monospace",
-                  }}>{key}</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: '40px', padding: '2px 6px', fontSize: '10px', fontWeight: 700, color: '#00e5ff', background: 'rgba(0,229,255,0.1)', border: '1px solid rgba(0,229,255,0.2)', borderRadius: '5px', fontFamily: "'Outfit', monospace" }}>{key}</span>
                   <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{desc}</span>
                 </div>
               ))}
@@ -511,46 +499,109 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
         </div>
       </div>
 
-      {/* Mobile touch controls */}
-      <div className="md:hidden" style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', paddingTop: '4px' }}>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <MobileBtn onClick={() => move(-1)} label="←">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-          </MobileBtn>
-          <MobileBtn onClick={rotate} label="↻" accent>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
-          </MobileBtn>
-          <MobileBtn onClick={() => move(1)} label="→">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
-          </MobileBtn>
+      {/* ── MOBILE LAYOUT (<md) ── */}
+      <div className="md:hidden" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+        {/* Board + compact sidebar row */}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', width: '100%', justifyContent: 'center' }}>
+          {/* Board scaled for mobile */}
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <div style={{
+              position: 'absolute', inset: '-2px', borderRadius: '12px', zIndex: 0,
+              background: 'conic-gradient(from 0deg, #00e5ff, #b44dff, #ff4d6a, #e41d1d, #ffe14d, #00e5ff)',
+              opacity: 0.1, filter: 'blur(4px)', animation: 'glowSpin 8s linear infinite',
+            }} />
+            <canvas ref={canvasRef} width={COLS * CELL} height={ROWS * CELL}
+              className="tetris-board-mobile"
+              style={{
+                position: 'relative', zIndex: 1, display: 'block', borderRadius: '10px',
+                border: '2px solid rgba(255,255,255,0.1)', background: '#050510',
+                boxShadow: '0 0 20px rgba(0,229,255,0.04), inset 0 0 40px rgba(0,0,0,0.5)',
+              }}
+            />
+            {isPaused && (
+              <div style={{
+                position: 'absolute', inset: 0, zIndex: 2, borderRadius: '10px',
+                background: 'rgba(5,5,16,0.85)', display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center', gap: '4px',
+              }}>
+                <div style={{ fontSize: '20px', fontWeight: 900, ...neonText('#ffe14d') }}>TẠM DỪNG</div>
+                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>Nhấn nút tiếp tục</div>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile compact sidebar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', minWidth: '90px', flex: '0 0 auto' }}>
+            <div style={mobileCard}>
+              <div style={mobileLabelStyle}>ĐIỂM</div>
+              <div style={{ fontSize: '20px', fontWeight: 900, ...neonText('#00e5ff'), lineHeight: 1 }}>{score.toLocaleString()}</div>
+              <div style={{ marginTop: '4px', height: '3px', borderRadius: '3px', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', borderRadius: '3px', width: `${Math.min((score / 20000) * 100, 100)}%`, background: 'linear-gradient(90deg, #00e5ff, #b44dff)', transition: 'width 0.5s ease' }} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <div style={{ ...mobileCard, flex: 1 }}>
+                <div style={mobileLabelStyle}>HÀNG</div>
+                <div style={{ fontSize: '18px', fontWeight: 900, ...neonText('#39e75f'), lineHeight: 1 }}>{lines}</div>
+              </div>
+              <div style={{ ...mobileCard, flex: 1 }}>
+                <div style={mobileLabelStyle}>LV</div>
+                <div style={{ fontSize: '18px', fontWeight: 900, ...neonText('#ffe14d'), lineHeight: 1 }}>{level + 1}</div>
+              </div>
+            </div>
+            <div style={{ ...mobileCard, textAlign: 'center' as const }}>
+              <div style={mobileLabelStyle}>TIẾP THEO</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2px' }}>
+                <canvas ref={nextCanvasRef} width={120} height={80}
+                  style={{ borderRadius: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)', width: '80px', height: '54px' }}
+                />
+              </div>
+            </div>
+            {/* Quick action buttons */}
+            <div style={{ display: 'flex', gap: '4px' }}>
+              <button onClick={start} style={mobileActionBtn('#00e5ff')}>🔄</button>
+              <button onClick={togglePause} style={mobileActionBtn('#ffe14d')}>{isPaused ? '▶' : '⏸'}</button>
+            </div>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <MobileBtn onClick={softDrop} label="↓" wide>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
-          </MobileBtn>
-          <MobileBtn onClick={hardDrop} label="⏬" wide purple>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="7 13 12 18 17 13" /><polyline points="7 6 12 11 17 6" /></svg>
-          </MobileBtn>
-        </div>
-        {/* Restart / Pause buttons on mobile */}
-        <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
-          <button onClick={start} style={{
-            padding: '8px 20px', borderRadius: '12px', border: '1px solid rgba(0,229,255,0.2)',
-            background: 'rgba(0,229,255,0.08)', color: '#00e5ff', fontSize: '12px', fontWeight: 700,
-            cursor: 'pointer', fontFamily: "'Outfit', sans-serif",
-          }}>🔄 Chơi lại</button>
-          <button onClick={togglePause} style={{
-            padding: '8px 20px', borderRadius: '12px', border: '1px solid rgba(255,225,77,0.2)',
-            background: 'rgba(255,225,77,0.08)', color: '#ffe14d', fontSize: '12px', fontWeight: 700,
-            cursor: 'pointer', fontFamily: "'Outfit', sans-serif",
-          }}>{isPaused ? '▶ Tiếp tục' : '⏸ Tạm dừng'}</button>
+
+        {/* Mobile touch controls */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center', paddingTop: '2px' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <MobileBtn onClick={() => move(-1)} label="←">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+            </MobileBtn>
+            <MobileBtn onClick={rotate} label="↻" accent>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
+            </MobileBtn>
+            <MobileBtn onClick={() => move(1)} label="→">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+            </MobileBtn>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <MobileBtn onClick={softDrop} label="↓" wide>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+            </MobileBtn>
+            <MobileBtn onClick={hardDrop} label="⏬" wide purple>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="7 13 12 18 17 13" /><polyline points="7 6 12 11 17 6" /></svg>
+            </MobileBtn>
+          </div>
         </div>
       </div>
 
-      {/* CSS animation */}
       <style>{`
         @keyframes glowSpin {
           to { filter: blur(6px) hue-rotate(360deg); }
+        }
+        .tetris-board-mobile {
+          width: min(60vw, 240px) !important;
+          height: auto !important;
+          aspect-ratio: 1/2;
+        }
+        @media (max-height: 700px) {
+          .tetris-board-mobile {
+            width: min(50vw, 200px) !important;
+          }
         }
       `}</style>
     </div>
