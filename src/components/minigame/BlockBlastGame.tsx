@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 
 const ROWS = 8
 const COLS = 8
@@ -45,6 +46,9 @@ function getRandomPiece(): Piece {
 
 export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: number) => void }) {
   const [cellSize, setCellSize] = useState(45)
+  const cellSizeRef = useRef(45)
+  useEffect(() => { cellSizeRef.current = cellSize }, [cellSize])
+  
   const [board, setBoard] = useState<(string | null)[][]>(Array(ROWS).fill(null).map(() => Array(COLS).fill(null)))
   const [hand, setHand] = useState<(Piece | null)[]>([getRandomPiece(), getRandomPiece(), getRandomPiece()])
   const [score, setScore] = useState(0)
@@ -55,8 +59,8 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
   
   const containerRef = useRef<HTMLDivElement>(null)
   const boardRef = useRef<HTMLDivElement>(null)
+  const overlayRef = useRef<HTMLDivElement>(null)
 
-  // Use refs for all values needed inside global event listeners (avoid stale closures)
   const boardStateRef = useRef(board)
   boardStateRef.current = board
   const scoreRef = useRef(score)
@@ -69,8 +73,6 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
   handRef.current = hand
   const isGameOverRef = useRef(isGameOver)
   isGameOverRef.current = isGameOver
-  const cellSizeRef = useRef(cellSize)
-  cellSizeRef.current = cellSize
 
   const dragRef = useRef<{
     index: number;
@@ -125,21 +127,21 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     return { hoverRow, hoverCol, isValid }
   }, [canPlace])
 
-  // Global pointer move handler — always works regardless of DOM structure
   const onGlobalPointerMove = useCallback((e: PointerEvent) => {
     if (!dragRef.current) return
     const { piece, offsetX, offsetY } = dragRef.current
     const dragX = e.clientX - offsetX
     const dragY = e.clientY - offsetY
+    
+    if (overlayRef.current) {
+      overlayRef.current.style.transform = `translate(${dragX}px, ${dragY}px)`
+    }
+    
     const { hoverRow, hoverCol, isValid } = computeHoverPos(dragX, dragY, piece)
-    setDragRenderState({
-      index: dragRef.current.index,
-      piece,
-      x: dragX,
-      y: dragY,
-      hoverRow,
-      hoverCol,
-      isValid,
+    
+    setDragRenderState(prev => {
+      if (!prev) return prev
+      return { ...prev, x: dragX, y: dragY, hoverRow, hoverCol, isValid }
     })
   }, [computeHoverPos])
 
@@ -250,7 +252,6 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     }
   }, [checkPostPlace])
 
-  // Global pointer up handler
   const onGlobalPointerUp = useCallback((e: PointerEvent) => {
     if (!dragRef.current) return
     const drag = dragRef.current
@@ -263,11 +264,9 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       return null
     })
 
-    // Re-enable body scroll on touch
     document.body.style.overflow = ''
   }, [canPlace, placePiece])
 
-  // Attach global listeners only while dragging
   useEffect(() => {
     if (!dragRenderState) return
     document.addEventListener('pointermove', onGlobalPointerMove, { passive: true })
@@ -278,7 +277,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       document.removeEventListener('pointerup', onGlobalPointerUp)
       document.removeEventListener('pointercancel', onGlobalPointerUp)
     }
-  }, [dragRenderState !== null, onGlobalPointerMove, onGlobalPointerUp]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [!!dragRenderState, onGlobalPointerMove, onGlobalPointerUp])
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>, index: number, piece: Piece) => {
     if (dragRef.current) return
@@ -298,8 +297,6 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     const offsetY = relY * renderedHeight + touchYOffset
 
     dragRef.current = { index, piece, offsetX, offsetY, isTouch }
-
-    // Lock scroll on touch
     if (isTouch) document.body.style.overflow = 'hidden'
 
     const dragX = e.clientX - offsetX
@@ -356,7 +353,6 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       } as React.CSSProperties}
     >
       <div className="bb-main">
-        {/* Main Board Area */}
         <div className="bb-board-wrap">
           <button 
              onClick={toggleFullscreen} 
@@ -424,7 +420,6 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
                          onPointerDown={(e) => handlePointerDown(e, i, piece)}
                          style={{
                             gridTemplateColumns: `repeat(${piece.matrix[0].length}, var(--hand-cell-size))`,
-                            // Hide during drag but keep in DOM (pointer capture requires element to stay in DOM)
                             opacity: dragRenderState?.index === i ? 0 : 1,
                             cursor: dragRenderState?.index === i ? 'none' : 'grab',
                          }}
@@ -450,9 +445,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
           </div>
         </div>
 
-        {/* Sidebar UI matching Tetris */}
         <div className="bb-sidebar">
-          {/* Score */}
           <div className="bb-stat-card">
             <div className="bb-stat-label"><span className="desktop-only">ĐIỂM SỐ</span><span className="mobile-only">ĐIỂM</span></div>
             <div className="bb-stat-value bb-score-val">{score.toLocaleString()}</div>
@@ -461,7 +454,6 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
             </div>
           </div>
 
-          {/* Lines & Combo row */}
           <div className="bb-stat-row">
             <div className="bb-stat-card bb-stat-half">
               <div className="bb-stat-label"><span className="desktop-only">HÀNG ĐÃ XÓA</span><span className="mobile-only">HÀNG</span></div>
@@ -487,18 +479,18 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
         </div>
       </div>
 
-      {/* Drag Overlay — renders dragged piece at pointer position */}
-      {dragRenderState && (
+      {dragRenderState && typeof document !== 'undefined' && createPortal(
          <div 
             className="bb-drag-overlay"
+            ref={overlayRef}
             style={{
                transform: `translate(${dragRenderState.x}px, ${dragRenderState.y}px)`,
-               gridTemplateColumns: `repeat(${dragRenderState.piece.matrix[0].length}, var(--cell-size))`
+               gridTemplateColumns: `repeat(${dragRenderState.piece.matrix[0].length}, ${cellSize}px)`
             }}
          >
             {dragRenderState.piece.matrix.map((row, r) => 
                row.map((val, c) => (
-                  <div key={`${r}-${c}`} className="bb-piece-cell">
+                  <div key={`${r}-${c}`} className="bb-piece-cell" style={{ width: cellSize, height: cellSize }}>
                      {val ? (
                         <div 
                            className="bb-block dragging" 
@@ -510,7 +502,8 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
                   </div>
                ))
             )}
-         </div>
+         </div>,
+         document.body
       )}
 
       {isGameOver && (
