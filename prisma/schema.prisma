@@ -34,9 +34,40 @@ model User {
   posts               Post[]
   order_status_histories OrderStatusHistory[]
   admin_logs          AdminLog[]
+  point               UserPoint?
+  vouchers            Voucher[]
 
   @@map("users")
 }
+
+// ─────────────────────────────────────────────
+// USER POINTS & VOUCHERS
+// ─────────────────────────────────────────────
+model UserPoint {
+  id         Int      @id @default(autoincrement())
+  user_id    Int      @unique
+  points     Int      @default(0)
+  updated_at DateTime @updatedAt
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_points")
+}
+
+model Voucher {
+  id               Int      @id @default(autoincrement())
+  user_id          Int?
+  code             String   @unique
+  discount_percent Int
+  status           String   @default("active") // "active" | "used" | "expired"
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  user             User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("vouchers")
+}
+
 
 // ─────────────────────────────────────────────
 // OTPS

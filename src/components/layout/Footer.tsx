@@ -69,6 +69,7 @@ export default async function Footer() {
                 <ul className="space-y-2.5">
                   <li><Link href="/gioi-thieu" className="text-white/75 hover:text-white text-sm transition-colors">Về Mushroomie</Link></li>
                   <li><Link href="/tin-tuc" className="text-white/75 hover:text-white text-sm transition-colors">Tin tức</Link></li>
+                  <li><Link href="/mini-game" className="text-white/75 hover:text-white text-sm transition-colors font-bold text-yellow-300">Mini Game</Link></li>
                   <li><Link href="/chinh-sach-bao-mat" className="text-white/75 hover:text-white text-sm transition-colors">Chính sách & Bảo mật</Link></li>
                   <li><Link href="/dieu-khoan-dich-vu" className="text-white/75 hover:text-white text-sm transition-colors">Điều khoản dịch vụ</Link></li>
                   <li><Link href="/lien-he" className="text-white/75 hover:text-white text-sm transition-colors">Liên hệ</Link></li>

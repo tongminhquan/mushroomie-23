@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Block Classic – Xếp gạch</title>
+  <link rel="stylesheet" href="xepgach/style.css">
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="board" width="300" height="600"></canvas>
+    <div id="sidebar">
+      <h2>Điểm: <span id="score">0</span></h2>
+      <h3>Hàng: <span id="lines">0</span></h3>
+      <div>
+        <p>Next:</p>
+        <canvas id="next" width="120" height="120"></canvas>
+      </div>
+      <p class="hint">
+        ← →: di chuyển<br>
+        ↑: xoay<br>
+        ↓: rơi nhanh<br>
+        Space: rơi liền<br>
+        R: chơi lại
+      </p>
+      <div id="controls">
+    <button onclick="move(-1);">◀️</button>
+    <button onclick="rotate()">🔄</button>
+    <button onclick="move(1);">▶️</button>
+    <button onclick="softDrop();">⬇️</button>
+  </div>
+    </div>
+  </div>
+  <script src="xepgach/game.js"></script>
+</body>
+</html>

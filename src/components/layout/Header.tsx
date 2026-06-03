@@ -73,6 +73,7 @@ export default function Header() {
     { href: '/', label: 'TRANG CHỦ' },
     { href: '/gioi-thieu', label: 'GIỚI THIỆU' },
     { href: '/tin-tuc', label: 'TIN TỨC' },
+    { href: '/mini-game', label: 'MINI GAME' },
     { href: '/chinh-sach-tra-gop', label: 'TRẢ GÓP' },
     { href: '/lien-he', label: 'LIÊN HỆ' },
   ]
