@@ -25,6 +25,7 @@ rm -rf .next/standalone/public
 echo "📂 Sao chép file tĩnh sang standalone..."
 cp -r .next/static .next/standalone/.next/static
 cp -r public .next/standalone/public
+cp .env .next/standalone/.env
 
 # Xóa thư mục uploads trống (nếu có) và tạo symlink
 echo "🔗 Tạo liên kết cho thư mục uploads..."
