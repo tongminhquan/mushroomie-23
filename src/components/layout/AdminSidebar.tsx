@@ -31,6 +31,7 @@ export default function AdminSidebar() {
   const { data: session } = useSession()
   const role = (session?.user as any)?.role
   const [isOpen, setIsOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   const isActive = (href: string, exact?: boolean) => {
     if (exact) return pathname === href
@@ -69,54 +70,68 @@ export default function AdminSidebar() {
 
       {/* Sidebar chính */}
       <aside className={cn(
-        "w-64 bg-neutral-900 min-h-screen flex flex-col flex-shrink-0 fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 shadow-2xl md:shadow-none",
-        isOpen ? "translate-x-0" : "-translate-x-full"
+        "bg-neutral-900 h-screen flex flex-col flex-shrink-0 fixed inset-y-0 left-0 z-50 transform transition-all duration-300 ease-in-out md:relative md:translate-x-0 shadow-2xl md:shadow-none overflow-hidden",
+        isOpen ? "translate-x-0" : "-translate-x-full",
+        isCollapsed ? "w-20" : "w-64"
       )}>
         {/* Logo */}
-        <div className="p-6 border-b border-neutral-800 flex items-center justify-between">
-          <Link href="/admin" className="flex items-center gap-3">
-            <div className="bg-white p-1.5 rounded-xl flex items-center justify-center">
+        <div className={cn("p-6 border-b border-neutral-800 flex items-center justify-between", isCollapsed ? "justify-center px-4" : "")}>
+          <Link href="/admin" className="flex items-center gap-3 overflow-hidden">
+            <div className="bg-white p-1.5 rounded-xl flex items-center justify-center flex-shrink-0">
               <img src="/logo.png" alt="Mushroomie Logo" className="h-7 w-auto object-contain" />
             </div>
-            <div className="text-neutral-500 text-xs font-semibold uppercase tracking-wider">Admin Panel</div>
+            {!isCollapsed && <div className="text-neutral-500 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Admin Panel</div>}
           </Link>
+          {!isCollapsed && (
+            <button className="hidden md:flex text-neutral-400 p-1 hover:text-white transition-colors" onClick={() => setIsCollapsed(true)}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            </button>
+          )}
+          {isCollapsed && (
+            <button className="hidden md:flex text-neutral-400 p-1 hover:text-white transition-colors absolute right-[-10px] top-7 bg-neutral-800 rounded-full border border-neutral-700 z-10" onClick={() => setIsCollapsed(false)}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </button>
+          )}
           <button className="md:hidden text-neutral-400 p-1" onClick={() => setIsOpen(false)}>
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
         {filteredNavItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
+            title={item.label}
             className={cn(
-              'flex items-center gap-3 px-4 py-3 rounded-xl transition-all group',
+              'flex items-center gap-3 py-3 rounded-xl transition-all group',
+              isCollapsed ? 'justify-center px-3' : 'px-4',
               isActive(item.href, item.exact)
                 ? 'bg-primary text-white shadow-sm'
                 : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'
             )}
           >
-            <item.icon size={18} />
-            <span className="text-sm font-medium flex-1">{item.label}</span>
-            <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+            <item.icon size={isCollapsed ? 22 : 18} className="flex-shrink-0" />
+            {!isCollapsed && <span className="text-sm font-medium flex-1 whitespace-nowrap">{item.label}</span>}
+            {!isCollapsed && <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />}
           </Link>
         ))}
       </nav>
 
       {/* Footer */}
       <div className="p-4 border-t border-neutral-800 space-y-1">
-        <Link href="/" target="_blank" className="flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-400 hover:bg-neutral-800 hover:text-white transition-all text-sm">
-          <ExternalLink size={18} />
-          Xem website
+        <Link href="/" target="_blank" title="Xem website" className={cn("flex items-center gap-3 py-3 rounded-xl text-neutral-400 hover:bg-neutral-800 hover:text-white transition-all text-sm", isCollapsed ? "justify-center px-3" : "px-4")}>
+          <ExternalLink size={isCollapsed ? 22 : 18} className="flex-shrink-0" />
+          {!isCollapsed && <span className="whitespace-nowrap">Xem website</span>}
         </Link>
         <button
           onClick={() => signOut({ callbackUrl: '/' })}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-400 hover:bg-red-900/30 hover:text-red-400 transition-all text-sm"
+          title="Đăng xuất"
+          className={cn("w-full flex items-center gap-3 py-3 rounded-xl text-neutral-400 hover:bg-red-900/30 hover:text-red-400 transition-all text-sm", isCollapsed ? "justify-center px-3" : "px-4")}
         >
-          <LogOut size={18} />
-          Đăng xuất
+          <LogOut size={isCollapsed ? 22 : 18} className="flex-shrink-0" />
+          {!isCollapsed && <span className="whitespace-nowrap">Đăng xuất</span>}
         </button>
       </div>
     </aside>
