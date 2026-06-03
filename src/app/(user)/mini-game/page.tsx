@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import dynamic from 'next/dynamic'
 
 const TetrisGame = dynamic(() => import('@/components/minigame/TetrisGame'), { ssr: false })
+const BlockBlastGame = dynamic(() => import('@/components/minigame/BlockBlastGame'), { ssr: false })
 
 const VOUCHER_TIERS = [
   { percent: 10, points: 10000, icon: '🎟️', gradient: 'linear-gradient(135deg, #00e5ff, #4d7aff)' },
@@ -14,6 +15,7 @@ const VOUCHER_TIERS = [
 
 export default function MiniGamePage() {
   const { data: session } = useSession()
+  const [activeGame, setActiveGame] = useState<'tetris' | 'blockblast'>('tetris')
   const [points, setPoints] = useState(0)
   const [vouchers, setVouchers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -141,13 +143,43 @@ export default function MiniGamePage() {
 
         <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto items-start">
           {/* Game Area */}
-          <div className="flex-1 flex justify-center">
-            <div className="rounded-2xl p-4 md:p-5" style={{
+          <div className="flex-1 flex flex-col items-center w-full">
+            {/* Game Tabs */}
+            <div className="flex gap-2 mb-4 p-1 rounded-2xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <button 
+                onClick={() => setActiveGame('tetris')}
+                className="px-6 py-2 rounded-xl text-sm font-bold transition-all"
+                style={{ 
+                  background: activeGame === 'tetris' ? 'rgba(0,229,255,0.15)' : 'transparent',
+                  color: activeGame === 'tetris' ? '#00e5ff' : 'rgba(255,255,255,0.4)',
+                  boxShadow: activeGame === 'tetris' ? '0 0 20px rgba(0,229,255,0.1)' : 'none'
+                }}
+              >
+                Tetris
+              </button>
+              <button 
+                onClick={() => setActiveGame('blockblast')}
+                className="px-6 py-2 rounded-xl text-sm font-bold transition-all"
+                style={{ 
+                  background: activeGame === 'blockblast' ? 'rgba(228,29,29,0.15)' : 'transparent',
+                  color: activeGame === 'blockblast' ? '#ff4d6a' : 'rgba(255,255,255,0.4)',
+                  boxShadow: activeGame === 'blockblast' ? '0 0 20px rgba(228,29,29,0.1)' : 'none'
+                }}
+              >
+                Block Blast
+              </button>
+            </div>
+
+            <div className="rounded-2xl p-4 md:p-5 w-full flex justify-center" style={{
               background: 'rgba(255,255,255,0.02)',
               border: '1px solid rgba(255,255,255,0.05)',
               boxShadow: '0 0 80px rgba(0,0,0,0.4)',
             }}>
-              <TetrisGame onGameOver={handleGameOver} />
+              {activeGame === 'tetris' ? (
+                <TetrisGame onGameOver={handleGameOver} />
+              ) : (
+                <BlockBlastGame onGameOver={handleGameOver} />
+              )}
             </div>
           </div>
 
