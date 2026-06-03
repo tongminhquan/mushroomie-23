@@ -165,6 +165,8 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       piece,
       x: dragX,
       y: dragY,
+      offsetX: dragRef.current.offsetX,
+      offsetY: dragRef.current.offsetY,
       hoverRow,
       hoverCol,
       isValid
