@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { Camera } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 interface AvatarUploadProps {
   initialAvatar: string | null
@@ -58,7 +59,9 @@ export function AvatarUpload({ initialAvatar, userName }: AvatarUploadProps) {
   return (
     <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
       {avatar ? (
-        <img src={avatar} alt={userName} className="w-12 h-12 rounded-full object-cover border border-stone-200 shadow-sm" />
+        <div className="relative w-12 h-12">
+          <Image src={avatar} alt={userName} fill className="rounded-full object-cover border border-stone-200 shadow-sm" sizes="48px" />
+        </div>
       ) : (
         <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 font-bold text-xl">
           {userName.charAt(0).toUpperCase()}

@@ -1,13 +1,23 @@
 'use client'
-import { useState, useEffect } from 'react'
-import { Trash2, Copy, Check, Upload, RefreshCw, FolderOpen } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Trash2, Copy, Check, Upload, RefreshCw, FolderOpen, Edit3, X, Save, Sliders, Image as ImageIcon, FileType } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
+import Cropper from 'react-cropper'
+import 'cropperjs/dist/cropper.css'
 
 export default function MediaLibrary() {
   const [images, setImages] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
+
+  // Editor states
+  const [selectedImage, setSelectedImage] = useState<any>(null)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editFormat, setEditFormat] = useState('webp')
+  const [editQuality, setEditQuality] = useState(80)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const cropperRef = useRef<HTMLImageElement>(null)
 
   const fetchImages = async () => {
     setLoading(true)
@@ -28,15 +38,19 @@ export default function MediaLibrary() {
     fetchImages()
   }, [])
 
-  const handleDelete = async (filename: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa ảnh này không?')) return
+  const handleDelete = async (filename: string, skipConfirm = false) => {
+    if (!skipConfirm && !confirm('Bạn có chắc chắn muốn xóa ảnh này không?')) return
     
     try {
       const res = await fetch(`/api/upload?filename=${encodeURIComponent(filename)}`, {
         method: 'DELETE'
       })
       if (res.ok) {
-        setImages(images.filter(img => img.filename !== filename))
+        setImages((prev) => prev.filter(img => img.filename !== filename))
+        if (selectedImage?.filename === filename) {
+          setSelectedImage(null)
+          setIsEditing(false)
+        }
       } else {
         alert('Có lỗi xảy ra khi xóa ảnh')
       }
@@ -47,8 +61,6 @@ export default function MediaLibrary() {
   }
 
   const handleCopy = (url: string, id: string) => {
-    // try to make absolute URL if needed, but relative works well for internal usage
-    // navigator.clipboard.writeText(window.location.origin + url)
     navigator.clipboard.writeText(url)
     setCopiedId(id)
     setTimeout(() => setCopiedId(null), 2000)
@@ -76,7 +88,6 @@ export default function MediaLibrary() {
       alert('Upload thất bại')
     } finally {
       setUploading(false)
-      // reset input
       e.target.value = ''
     }
   }
@@ -87,6 +98,47 @@ export default function MediaLibrary() {
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
+  const handleProcessImage = async (overwrite: boolean) => {
+    if (!selectedImage) return;
+    setIsProcessing(true);
+    let cropData = null;
+    const cropper = (cropperRef.current as any)?.cropper;
+    if (cropper && isEditing) {
+      cropData = cropper.getData();
+    }
+    
+    try {
+      const res = await fetch('/api/upload/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: selectedImage.filename,
+          format: editFormat,
+          quality: editQuality,
+          cropData: cropData,
+          overwrite: overwrite
+        })
+      });
+      if (res.ok) {
+        if (overwrite) {
+          // If overwrite, delete old file to be clean, though API might handle it.
+          // In our API, if overwrite is true we still create a new name, but let's delete old one.
+          await fetch(`/api/upload?filename=${encodeURIComponent(selectedImage.filename)}`, { method: 'DELETE' });
+        }
+        await fetchImages();
+        setIsEditing(false);
+        setSelectedImage(null);
+      } else {
+        alert('Xử lý ảnh thất bại');
+      }
+    } catch(e) {
+      console.error(e);
+      alert('Lỗi khi xử lý ảnh');
+    } finally {
+      setIsProcessing(false);
+    }
   }
 
   return (
@@ -134,7 +186,20 @@ export default function MediaLibrary() {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {images.map((image) => (
-            <div key={image.id} className="bg-white rounded-2xl shadow-card border border-neutral-100 overflow-hidden group flex flex-col">
+            <div 
+              key={image.id} 
+              className="bg-white rounded-2xl shadow-card border border-neutral-100 overflow-hidden group flex flex-col cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={() => {
+                setSelectedImage(image);
+                setIsEditing(false);
+                // Extract format from filename
+                const ext = image.filename.split('.').pop()?.toLowerCase();
+                if (ext === 'jpg') setEditFormat('jpeg');
+                else if (['jpeg', 'png', 'webp'].includes(ext)) setEditFormat(ext);
+                else setEditFormat('webp');
+                setEditQuality(80);
+              }}
+            >
               <div className="aspect-square relative bg-neutral-100 flex items-center justify-center p-2">
                 <img 
                   src={image.url} 
@@ -144,14 +209,14 @@ export default function MediaLibrary() {
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   <button 
-                    onClick={() => handleCopy(window.location.origin + image.url, image.id.toString())}
+                    onClick={(e) => { e.stopPropagation(); handleCopy(window.location.origin + image.url, image.id.toString()) }}
                     className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl backdrop-blur-sm transition-colors"
                     title="Sao chép đường dẫn tuyệt đối"
                   >
                     {copiedId === image.id.toString() ? <Check size={18} className="text-green-400" /> : <Copy size={18} />}
                   </button>
                   <button 
-                    onClick={() => handleDelete(image.filename)}
+                    onClick={(e) => { e.stopPropagation(); handleDelete(image.filename) }}
                     className="p-2 bg-red-500/80 hover:bg-red-600 text-white rounded-xl backdrop-blur-sm transition-colors"
                     title="Xóa ảnh"
                   >
@@ -168,6 +233,143 @@ export default function MediaLibrary() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Editor Modal */}
+      {selectedImage && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row animate-in fade-in zoom-in-95 duration-200">
+            {/* Left side: Image / Cropper */}
+            <div className="flex-1 bg-neutral-100 p-4 flex items-center justify-center min-h-[300px] overflow-hidden relative">
+              {isEditing ? (
+                <Cropper
+                  src={selectedImage.url}
+                  style={{ height: '100%', width: '100%' }}
+                  initialAspectRatio={NaN}
+                  guides={true}
+                  ref={cropperRef}
+                  viewMode={1}
+                  background={false}
+                  responsive={true}
+                  checkOrientation={false}
+                />
+              ) : (
+                <img 
+                  src={selectedImage.url} 
+                  alt={selectedImage.filename} 
+                  className="max-w-full max-h-[60vh] object-contain rounded-lg shadow-sm"
+                />
+              )}
+            </div>
+            
+            {/* Right side: Tools */}
+            <div className="w-full md:w-80 bg-white p-6 border-l border-neutral-100 flex flex-col gap-6 overflow-y-auto">
+              <div className="flex justify-between items-center">
+                <h2 className="font-bold text-lg">Chi tiết hình ảnh</h2>
+                <button onClick={() => setSelectedImage(null)} className="p-2 hover:bg-neutral-100 rounded-full text-neutral-500 transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="bg-neutral-50 p-3 rounded-xl text-sm break-all text-neutral-600">
+                  <p className="font-medium text-neutral-800 mb-1 break-words">{selectedImage.filename}</p>
+                  <p>Dung lượng: <span className="font-semibold">{formatBytes(selectedImage.size)}</span></p>
+                  <p>Ngày tải lên: {formatDate(selectedImage.created_at)}</p>
+                </div>
+                
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => handleCopy(window.location.origin + selectedImage.url, 'modal')}
+                    className="flex-1 py-2 px-3 bg-neutral-100 hover:bg-neutral-200 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                  >
+                    {copiedId === 'modal' ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
+                    Sao chép Link
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(selectedImage.filename)}
+                    className="flex-1 py-2 px-3 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <Trash2 size={16} />
+                    Xóa ảnh
+                  </button>
+                </div>
+              </div>
+
+              <div className="border-t border-neutral-100 pt-6 space-y-5">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold flex items-center gap-2 text-neutral-800">
+                    <Edit3 size={18} /> Chỉnh sửa
+                  </h3>
+                  <button 
+                    onClick={() => setIsEditing(!isEditing)}
+                    className={`text-sm px-3 py-1.5 rounded-lg font-medium transition-colors ${isEditing ? 'bg-primary/10 text-primary' : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'}`}
+                  >
+                    {isEditing ? 'Tắt Cắt ảnh' : 'Cắt ảnh'}
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium flex items-center gap-2 text-neutral-700">
+                      <FileType size={16} /> Định dạng xuất
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {['webp', 'jpeg', 'png'].map(fmt => (
+                        <button
+                          key={fmt}
+                          onClick={() => setEditFormat(fmt)}
+                          className={`py-2 text-sm font-medium rounded-lg uppercase border transition-colors ${editFormat === fmt ? 'bg-primary/5 border-primary text-primary' : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'}`}
+                        >
+                          {fmt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-sm font-medium flex items-center gap-2 text-neutral-700">
+                        <Sliders size={16} /> Chất lượng nén
+                      </label>
+                      <span className="text-sm font-semibold text-primary">{editQuality}%</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="1" 
+                      max="100" 
+                      value={editQuality} 
+                      onChange={(e) => setEditQuality(parseInt(e.target.value))}
+                      className="w-full accent-primary"
+                    />
+                    <div className="flex justify-between text-xs text-neutral-400">
+                      <span>Nhẹ nhất (Chất lượng thấp)</span>
+                      <span>Rõ nhất (Nặng)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 pt-2">
+                  <button 
+                    onClick={() => handleProcessImage(true)}
+                    disabled={isProcessing}
+                    className="w-full py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {isProcessing ? <RefreshCw size={18} className="animate-spin" /> : <Save size={18} />}
+                    Lưu đè ảnh cũ
+                  </button>
+                  <button 
+                    onClick={() => handleProcessImage(false)}
+                    disabled={isProcessing}
+                    className="w-full py-2.5 bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-700 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    Tạo bản sao mới
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
