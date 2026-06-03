@@ -112,6 +112,8 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       piece,
       startX: x,
       startY: y,
+      offsetX,
+      offsetY,
       isTouch,
       el
     }
