@@ -34,6 +34,7 @@ interface TetrisGameProps {
 }
 
 export default function TetrisGame({ onGameOver }: TetrisGameProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const nextCanvasRef = useRef<HTMLCanvasElement>(null)
   const gameRef = useRef<{
@@ -62,6 +63,7 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
   const [level, setLevel] = useState(0)
   const [isOver, setIsOver] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const [nextType, setNextType] = useState('')
 
   // ── Helpers ──
@@ -390,6 +392,26 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
     return () => window.removeEventListener('keydown', handleKey)
   }, [move, rotate, softDrop, hardDrop, start, togglePause])
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`)
+      })
+      setIsFullscreen(true)
+    } else {
+      document.exitFullscreen()
+      setIsFullscreen(false)
+    }
+  }
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
+  }, [])
+
   // ── Styles ──
   const glassCard = {
     background: 'rgba(255,255,255,0.04)',
@@ -431,11 +453,28 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
   })
 
   return (
-    <div className="tetris-game">
+    <div 
+      className={`tetris-game ${isFullscreen ? 'fullscreen-mode' : ''}`}
+      ref={containerRef}
+      style={{
+        background: isFullscreen ? '#0a0a1a' : 'transparent',
+        padding: isFullscreen ? '20px' : '0',
+        height: isFullscreen ? '100vh' : 'auto',
+        justifyContent: isFullscreen ? 'center' : 'flex-start'
+      }}
+    >
       {/* Main area: board + sidebar */}
       <div className="tetris-main">
         {/* Board */}
         <div className="tetris-board-wrap">
+          <button 
+            onClick={toggleFullscreen}
+            className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+            style={{ position: 'absolute', top: 8, right: 8, zIndex: 10, background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: 8, cursor: 'pointer', padding: 6 }}
+            title="Toàn màn hình"
+          >
+            {isFullscreen ? '↙️' : '↗️'}
+          </button>
           <div className="tetris-glow-ring" />
           <canvas
             ref={canvasRef}
