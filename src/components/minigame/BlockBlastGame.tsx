@@ -62,6 +62,8 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     piece: Piece;
     startX: number;
     startY: number;
+    offsetX: number;
+    offsetY: number;
     isTouch: boolean;
     el: HTMLDivElement | null;
   } | null>(null)
