@@ -167,13 +167,14 @@ export default function ConfirmPage() {
             {/* QR Code */}
             {payment?.qr_code_url && (
               <div className="text-center">
-                <Image
-                  src={payment.qr_code_url}
+                {/* Sử dụng thẻ img thường với proxy API nội bộ để tránh lỗi CORS/Adblock từ img.vietqr.io */}
+                <img
+                  src={`/api/qr?url=${encodeURIComponent(payment.qr_code_url)}`}
                   alt="QR Code chuyển khoản"
                   width={250}
                   height={250}
                   className="mx-auto rounded-2xl border-4 border-primary-light shadow-card"
-                  unoptimized
+                  referrerPolicy="no-referrer"
                 />
                 <p className="text-xs text-neutral-500 mt-2">Quét QR bằng app ngân hàng để chuyển tiền</p>
               </div>
