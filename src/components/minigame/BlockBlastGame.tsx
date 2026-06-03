@@ -306,11 +306,10 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       
       // If hand is empty, refill
       if (newHand.every(p => p === null)) {
-        newHand[0] = getRandomPiece()
-        newHand[1] = getRandomPiece()
-        newHand[2] = getRandomPiece()
+        setHand([getRandomPiece(), getRandomPiece(), getRandomPiece()])
+      } else {
+        setHand(newHand)
       }
-      setHand(newHand)
       
       // Check Game Over after state updates
       checkGameOver(newBoard, newHand)
