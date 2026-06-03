@@ -62,6 +62,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     piece: Piece;
     startX: number;
     startY: number;
+    isTouch: boolean;
     el: HTMLDivElement | null;
   } | null>(null)
 
@@ -91,11 +92,15 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     const pieceHeight = piece.matrix.length * cellSize
     const pieceWidth = piece.matrix[0].length * cellSize
     
+    const isTouch = e.pointerType === 'touch' || e.pointerType === 'pen';
+    const offsetY = isTouch ? pieceHeight + 60 : pieceHeight / 2;
+    
     dragRef.current = {
       index,
       piece,
       startX: x,
       startY: y,
+      isTouch,
       el
     }
     
@@ -103,7 +108,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       index,
       piece,
       x: x - pieceWidth / 2,
-      y: y - pieceHeight - 60, // offset well above finger to clearly see drop position
+      y: y - offsetY,
       hoverRow: -1,
       hoverCol: -1,
       isValid: false
@@ -119,8 +124,8 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     const pieceHeight = piece.matrix.length * cellSize
     const pieceWidth = piece.matrix[0].length * cellSize
     
-    const dragX = x - pieceWidth / 2
-    const dragY = y - pieceHeight - 60
+    const dragX = x - pieceWidth / 2;
+    const dragY = y - (dragRef.current.isTouch ? pieceHeight + 60 : pieceHeight / 2);
     
     let hoverRow = -1
     let hoverCol = -1
@@ -506,7 +511,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       )}
 
       <style>{`
-        .blockblast-game { display: flex; flex-direction: column; width: 100%; align-items: center; user-select: none; touch-action: none; }
+        .blockblast-game { display: flex; flex-direction: column; width: 100%; align-items: center; user-select: none; }
         .blockblast-game.fullscreen-mode { justify-content: center; }
         
         .bb-main { display: flex; gap: 24px; justify-content: center; align-items: stretch; width: 100%; max-width: 900px; }
