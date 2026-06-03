@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCartStore } from '@/store/cart'
 import { useSession } from 'next-auth/react'
 import { formatPrice } from '@/lib/utils'
@@ -20,10 +20,22 @@ export default function CheckoutPage() {
   const [form, setForm] = useState({
     customer_name: (session?.user?.name as string) || '',
     customer_email: (session?.user?.email as string) || '',
-    customer_phone: '',
-    shipping_address: '',
+    customer_phone: (session?.user as any)?.phone || '',
+    shipping_address: (session?.user as any)?.address || '',
     note: '',
   })
+
+  useEffect(() => {
+    if (session?.user) {
+      setForm(prev => ({
+        ...prev,
+        customer_name: prev.customer_name || (session.user?.name as string) || '',
+        customer_email: prev.customer_email || (session.user?.email as string) || '',
+        customer_phone: prev.customer_phone || (session.user as any)?.phone || '',
+        shipping_address: prev.shipping_address || (session.user as any)?.address || '',
+      }))
+    }
+  }, [session])
 
   const subtotal = getTotalPrice()
   const shippingFee = 30000

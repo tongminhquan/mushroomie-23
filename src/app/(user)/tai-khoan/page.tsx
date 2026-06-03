@@ -47,7 +47,7 @@ export default async function AccountPage() {
                 initialAvatar={(user as any).avatar || null} 
                 userName={user.name} 
               />
-              <div className="overflow-hidden">
+              <div className="flex-1 min-w-0">
                 <h2 className="font-bold text-primary truncate flex items-center gap-2">
                   {user.name}
                   {(user as any).google_id && (

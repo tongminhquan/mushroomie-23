@@ -75,22 +75,22 @@ export default function AdminSidebar() {
         isCollapsed ? "w-20" : "w-64"
       )}>
         {/* Logo */}
-        <div className={cn("p-6 border-b border-neutral-800 flex items-center justify-between transition-all duration-300", isCollapsed ? "px-4" : "")}>
-          <Link href="/admin" className="flex items-center gap-3 overflow-hidden">
+        <div className={cn("h-[77px] border-b border-neutral-800 flex items-center transition-all duration-300", isCollapsed ? "justify-center" : "justify-between px-6")}>
+          <Link href="/admin" className={cn("flex items-center gap-3 overflow-hidden", isCollapsed ? "hidden" : "flex")}>
             <div className="bg-white p-1.5 rounded-xl flex items-center justify-center flex-shrink-0">
               <img src="/logo.png" alt="Mushroomie Logo" className="h-7 w-auto object-contain" />
             </div>
-            <div className={cn("text-neutral-500 text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all duration-300", isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100")}>
+            <div className="text-neutral-500 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">
               Admin Panel
             </div>
           </Link>
           <button 
-            className="hidden md:flex text-neutral-400 p-1 hover:text-white transition-colors" 
+            className="hidden md:flex text-neutral-400 p-2 hover:text-white transition-colors" 
             onClick={() => setIsCollapsed(!isCollapsed)}
           >
             <svg className={cn("w-5 h-5 transition-transform duration-300", isCollapsed ? "rotate-180" : "")} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
-          <button className="md:hidden text-neutral-400 p-1" onClick={() => setIsOpen(false)}>
+          <button className="md:hidden text-neutral-400 p-1 mr-4" onClick={() => setIsOpen(false)}>
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
