@@ -310,8 +310,6 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       } else {
         setHand(newHand)
       }
-      
-      checkGameOver(newBoard, newHand)
     }
     
     setDragState(null)
@@ -327,28 +325,6 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       }
     }
     return true
-  }
-
-  const checkGameOver = (currentBoard: (string | null)[][], currentHand: (Piece | null)[]) => {
-    for (let i = 0; i < currentHand.length; i++) {
-      const piece = currentHand[i]
-      if (!piece) continue
-
-      let canFit = false
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          if (canPlace(currentBoard, piece.matrix, r, c)) {
-            canFit = true
-            break
-          }
-        }
-        if (canFit) break
-      }
-      if (canFit) return
-    }
-
-    setIsGameOver(true)
-    onGameOver(score)
   }
 
   const restart = () => {
