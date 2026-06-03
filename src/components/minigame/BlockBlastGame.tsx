@@ -89,6 +89,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
   }
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>, index: number, piece: Piece) => {
+    if (dragRef.current) return // Already dragging
     if (isGameOver || clearingCells.length > 0) return
     const { x, y } = getEventXY(e)
     const el = e.currentTarget
@@ -147,13 +148,17 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     
     if (boardRef.current) {
       const rect = boardRef.current.getBoundingClientRect()
-      const blockCenterX = dragX + cellSize / 2
-      const blockCenterY = dragY + cellSize / 2
-      
-      const col = Math.round((blockCenterX - rect.left) / cellSize)
-      const row = Math.round((blockCenterY - rect.top) / cellSize)
-      
-      if (row >= -2 && row <= ROWS + 2 && col >= -2 && col <= COLS + 2) { 
+      // Board has padding:6px and gap:2px between cells
+      const BOARD_PADDING = 6
+      const CELL_STRIDE = cellSize + 2
+
+      const pieceRelX = dragX - rect.left - BOARD_PADDING
+      const pieceRelY = dragY - rect.top - BOARD_PADDING
+
+      const col = Math.round(pieceRelX / CELL_STRIDE)
+      const row = Math.round(pieceRelY / CELL_STRIDE)
+
+      if (row >= -2 && row <= ROWS + 2 && col >= -2 && col <= COLS + 2) {
          hoverRow = row
          hoverCol = col
          isValid = canPlace(board, piece.matrix, row, col)
@@ -422,7 +427,9 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
           <div className="bb-hand">
              {hand.map((piece, i) => (
                 <div key={i} className="bb-hand-slot">
-                   {piece && dragRenderState?.index !== i && (
+                   {/* Keep piece in DOM during drag so pointer capture remains active;
+                       hide visually with opacity:0 instead of removing from DOM */}
+                   {piece && (
                       <div 
                          className="bb-piece"
                          onPointerDown={(e) => handlePointerDown(e, i, piece)}
@@ -430,7 +437,8 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
                          onPointerUp={handlePointerUp}
                          onPointerCancel={handlePointerUp}
                          style={{
-                            gridTemplateColumns: `repeat(${piece.matrix[0].length}, var(--hand-cell-size))`
+                            gridTemplateColumns: `repeat(${piece.matrix[0].length}, var(--hand-cell-size))`,
+                            opacity: dragRenderState?.index === i ? 0 : 1,
                          }}
                       >
                          {piece.matrix.map((row, r) => 
