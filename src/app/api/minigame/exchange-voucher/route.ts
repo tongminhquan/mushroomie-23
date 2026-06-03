@@ -8,9 +8,9 @@ const exchangeSchema = z.object({
 })
 
 const VOUCHER_RATES: Record<number, number> = {
-  10: 1000,
-  15: 2000,
-  20: 3000
+  10: 10000,
+  15: 15000,
+  20: 20000
 }
 
 export async function POST(request: NextRequest) {

@@ -125,10 +125,10 @@ export default function MiniGamePage() {
             <div className="border border-stone-200 rounded-xl p-4 flex items-center justify-between">
               <div>
                 <div className="font-bold text-lg">Giảm 10%</div>
-                <div className="text-sm text-stone-500">1000 điểm</div>
+                <div className="text-sm text-stone-500">10000 điểm</div>
               </div>
               <button 
-                disabled={points < 1000 || exchangeLoading || !session}
+                disabled={points < 10000 || exchangeLoading || !session}
                 onClick={() => handleExchange(10)}
                 className="px-4 py-2 bg-primary text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
               >
@@ -139,10 +139,10 @@ export default function MiniGamePage() {
             <div className="border border-stone-200 rounded-xl p-4 flex items-center justify-between">
               <div>
                 <div className="font-bold text-lg">Giảm 15%</div>
-                <div className="text-sm text-stone-500">2000 điểm</div>
+                <div className="text-sm text-stone-500">15000 điểm</div>
               </div>
               <button 
-                disabled={points < 2000 || exchangeLoading || !session}
+                disabled={points < 15000 || exchangeLoading || !session}
                 onClick={() => handleExchange(15)}
                 className="px-4 py-2 bg-primary text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
               >
@@ -153,10 +153,10 @@ export default function MiniGamePage() {
             <div className="border border-stone-200 rounded-xl p-4 flex items-center justify-between">
               <div>
                 <div className="font-bold text-lg">Giảm 20%</div>
-                <div className="text-sm text-stone-500">3000 điểm</div>
+                <div className="text-sm text-stone-500">20000 điểm</div>
               </div>
               <button 
-                disabled={points < 3000 || exchangeLoading || !session}
+                disabled={points < 20000 || exchangeLoading || !session}
                 onClick={() => handleExchange(20)}
                 className="px-4 py-2 bg-primary text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
               >
