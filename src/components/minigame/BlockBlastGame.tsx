@@ -71,6 +71,8 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     piece: Piece;
     x: number;
     y: number;
+    offsetX: number;
+    offsetY: number;
     hoverRow: number;
     hoverCol: number;
     isValid: boolean;
@@ -89,11 +91,19 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     const { x, y } = getEventXY(e)
     const el = e.currentTarget
     
-    const pieceHeight = piece.matrix.length * cellSize
-    const pieceWidth = piece.matrix[0].length * cellSize
-    
     const isTouch = e.pointerType === 'touch' || e.pointerType === 'pen';
-    const offsetY = isTouch ? pieceHeight + 60 : pieceHeight / 2;
+    
+    const rect = el.getBoundingClientRect();
+    const relX = (x - rect.left) / rect.width;
+    const relY = (y - rect.top) / rect.height;
+    
+    const renderedWidth = piece.matrix[0].length * cellSize;
+    const renderedHeight = piece.matrix.length * cellSize;
+    
+    const touchYOffset = isTouch ? 60 : 0;
+    
+    const offsetX = relX * renderedWidth;
+    const offsetY = relY * renderedHeight + touchYOffset;
     
     dragRef.current = {
       index,
@@ -107,8 +117,10 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     setDragRenderState({
       index,
       piece,
-      x: x - pieceWidth / 2,
+      x: x - offsetX,
       y: y - offsetY,
+      offsetX,
+      offsetY,
       hoverRow: -1,
       hoverCol: -1,
       isValid: false
@@ -118,14 +130,12 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
   }
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragRef.current) return
+    if (!dragRef.current || !dragRenderState) return
     const { x, y } = getEventXY(e)
     const piece = dragRef.current.piece
-    const pieceHeight = piece.matrix.length * cellSize
-    const pieceWidth = piece.matrix[0].length * cellSize
     
-    const dragX = x - pieceWidth / 2;
-    const dragY = y - (dragRef.current.isTouch ? pieceHeight + 60 : pieceHeight / 2);
+    const dragX = x - dragRef.current.offsetX;
+    const dragY = y - dragRef.current.offsetY;
     
     let hoverRow = -1
     let hoverCol = -1
@@ -414,7 +424,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
                          onPointerUp={handlePointerUp}
                          onPointerCancel={handlePointerUp}
                          style={{
-                            gridTemplateColumns: `repeat(${piece.matrix[0].length}, var(--cell-size))`
+                            gridTemplateColumns: `repeat(${piece.matrix[0].length}, var(--hand-cell-size))`
                          }}
                       >
                          {piece.matrix.map((row, r) => 
@@ -545,24 +555,26 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
         .bb-hand {
            display: flex; justify-content: center; gap: 16px; margin-top: 30px;
            height: calc(var(--cell-size) * 4); align-items: center; width: 100%;
+           --hand-cell-size: calc(var(--cell-size) * 0.55);
         }
         .bb-hand-slot {
-           width: calc(var(--cell-size) * 3); height: 100%;
+           flex: 1; height: 100%;
            display: flex; justify-content: center; align-items: center;
         }
         .bb-piece {
            display: grid; gap: 2px; touch-action: none; cursor: grab;
-           transform: scale(0.85); transition: transform 0.2s;
+           transition: transform 0.2s;
         }
         .bb-piece:active { cursor: grabbing; transform: scale(0.95); }
         .bb-piece-cell { width: var(--cell-size); height: var(--cell-size); }
+        .bb-hand-slot .bb-piece-cell { width: var(--hand-cell-size); height: var(--hand-cell-size); }
         
         .bb-drag-overlay {
            position: fixed; top: 0; left: 0; z-index: 100; pointer-events: none;
            display: grid; gap: 2px;
         }
         .bb-block.dragging {
-           transform: scale(1.05); box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+           box-shadow: 0 10px 25px rgba(0,0,0,0.6);
         }
 
         /* Sidebar similar to Tetris */
