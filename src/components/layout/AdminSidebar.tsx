@@ -75,30 +75,28 @@ export default function AdminSidebar() {
         isCollapsed ? "w-20" : "w-64"
       )}>
         {/* Logo */}
-        <div className={cn("p-6 border-b border-neutral-800 flex items-center justify-between", isCollapsed ? "justify-center px-4" : "")}>
+        <div className={cn("p-6 border-b border-neutral-800 flex items-center justify-between transition-all duration-300", isCollapsed ? "px-4" : "")}>
           <Link href="/admin" className="flex items-center gap-3 overflow-hidden">
             <div className="bg-white p-1.5 rounded-xl flex items-center justify-center flex-shrink-0">
               <img src="/logo.png" alt="Mushroomie Logo" className="h-7 w-auto object-contain" />
             </div>
-            {!isCollapsed && <div className="text-neutral-500 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Admin Panel</div>}
+            <div className={cn("text-neutral-500 text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all duration-300", isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100")}>
+              Admin Panel
+            </div>
           </Link>
-          {!isCollapsed && (
-            <button className="hidden md:flex text-neutral-400 p-1 hover:text-white transition-colors" onClick={() => setIsCollapsed(true)}>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-            </button>
-          )}
-          {isCollapsed && (
-            <button className="hidden md:flex text-neutral-400 p-1 hover:text-white transition-colors absolute right-[-10px] top-7 bg-neutral-800 rounded-full border border-neutral-700 z-10" onClick={() => setIsCollapsed(false)}>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            </button>
-          )}
+          <button 
+            className="hidden md:flex text-neutral-400 p-1 hover:text-white transition-colors" 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+          >
+            <svg className={cn("w-5 h-5 transition-transform duration-300", isCollapsed ? "rotate-180" : "")} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          </button>
           <button className="md:hidden text-neutral-400 p-1" onClick={() => setIsOpen(false)}>
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar overflow-x-hidden">
         {filteredNavItems.map((item) => (
           <Link
             key={item.href}
@@ -112,9 +110,11 @@ export default function AdminSidebar() {
                 : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'
             )}
           >
-            <item.icon size={isCollapsed ? 22 : 18} className="flex-shrink-0" />
-            {!isCollapsed && <span className="text-sm font-medium flex-1 whitespace-nowrap">{item.label}</span>}
-            {!isCollapsed && <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />}
+            <item.icon size={isCollapsed ? 22 : 18} className="flex-shrink-0 transition-all duration-300" />
+            <span className={cn("text-sm font-medium whitespace-nowrap transition-all duration-300", isCollapsed ? "w-0 opacity-0 overflow-hidden" : "flex-1 opacity-100")}>
+              {item.label}
+            </span>
+            <ChevronRight size={14} className={cn("transition-all duration-300 flex-shrink-0", isCollapsed ? "w-0 opacity-0" : "w-auto opacity-0 group-hover:opacity-100")} />
           </Link>
         ))}
       </nav>
