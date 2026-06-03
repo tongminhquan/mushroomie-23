@@ -23,31 +23,46 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Mã OTP đã hết hạn. Vui lòng gửi lại' }, { status: 400 })
     }
 
-    // Verify successful -> Create user
+    // Verify successful -> Create or update user
     // Double check existing user
     const existingUser = await prisma.user.findUnique({ where: { email } })
-    if (existingUser) {
-      return NextResponse.json({ error: 'Tài khoản đã tồn tại' }, { status: 400 })
-    }
+    
+    let userId;
 
-    const newUser = await prisma.user.create({
-      data: {
-        email,
-        name: name || 'Người dùng Google',
-        password_hash: '', // No password for OAuth
-        phone,
-        address,
-        avatar: avatar || null,
-        google_id: google_id || null,
-        is_email_verified: true, // Verified via OTP
-        role: 'user',
-      }
-    })
+    if (existingUser) {
+      const updatedUser = await prisma.user.update({
+        where: { email },
+        data: {
+          name: name || existingUser.name,
+          phone,
+          address,
+          avatar: avatar || existingUser.avatar,
+          google_id: google_id || existingUser.google_id,
+          is_email_verified: true,
+        }
+      })
+      userId = updatedUser.id;
+    } else {
+      const newUser = await prisma.user.create({
+        data: {
+          email,
+          name: name || 'Người dùng Google',
+          password_hash: '', // No password for OAuth
+          phone,
+          address,
+          avatar: avatar || null,
+          google_id: google_id || null,
+          is_email_verified: true, // Verified via OTP
+          role: 'user',
+        }
+      })
+      userId = newUser.id;
+    }
 
     // Delete OTP
     await prisma.otp.delete({ where: { email } })
 
-    return NextResponse.json({ success: true, message: 'Đăng ký thành công', userId: newUser.id })
+    return NextResponse.json({ success: true, message: 'Đăng ký/Cập nhật thành công', userId })
   } catch (error) {
     console.error('Verify and register error:', error)
     return NextResponse.json({ error: 'Có lỗi xảy ra trong quá trình đăng ký' }, { status: 500 })
