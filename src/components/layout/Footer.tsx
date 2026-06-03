@@ -82,7 +82,7 @@ export default async function Footer() {
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3 text-sm text-white/80">
                     <MapPin size={16} className="mt-0.5 shrink-0 text-yellow-300" />
-                    Hẻm 2 tổ 11, phường Trảng Dài, thành phố Biên Hòa, tỉnh Đồng Nai
+                    Hẻm 2 tổ 11, Phường Trảng Dài, Thành Phố Đồng Nai
                   </li>
                   <li className="flex items-center gap-3 text-sm text-white/80">
                     <Phone size={16} className="shrink-0 text-yellow-300" />

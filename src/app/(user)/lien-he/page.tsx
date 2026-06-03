@@ -46,7 +46,7 @@ export default function ContactPage() {
                 <h2 className="font-heading font-bold text-xl mb-4">Thông tin liên hệ</h2>
                 <div className="space-y-3">
                   {[
-                    { emoji: '📍', label: 'Địa chỉ', value: 'Hẻm 2 tổ 11, phường Trảng Dài, thành phố Đồng Nai' },
+                    { emoji: '📍', label: 'Địa chỉ', value: 'Hẻm 2 tổ 11, Phường Trảng Dài, Thành Phố Đồng Nai' },
                     { emoji: '📧', label: 'Email', value: <SafeEmail email="cskh@mushroomie.io.vn" /> },
                     { emoji: '📞', label: 'Điện thoại', value: '+84 84 874 4060' },
                     { emoji: '⏰', label: 'Giờ làm việc', value: 'T2-CN: 8:00 - 21:00' },

@@ -13,7 +13,7 @@ export default function DeliveryPolicyPage() {
         <p>Vì các sản phẩm của Mushroomie là đồ thủ công (handmade) và có thể tùy chỉnh theo yêu cầu cá nhân, thời gian chuẩn bị hàng thường kéo dài từ 1 đến 3 ngày làm việc trước khi giao cho đơn vị vận chuyển.</p>
         <h3 className="text-lg font-bold text-neutral-800 mt-6">2. Thời gian giao hàng</h3>
         <ul className="list-disc pl-5 space-y-2">
-          <li><strong>Nội thành Biên Hòa:</strong> 1 - 2 ngày làm việc.</li>
+          <li><strong>Nội thành Thành Phố Đồng Nai:</strong> 1 - 2 ngày làm việc.</li>
           <li><strong>Các tỉnh thành khác:</strong> 3 - 5 ngày làm việc tùy khu vực.</li>
         </ul>
         <h3 className="text-lg font-bold text-neutral-800 mt-6">3. Phí vận chuyển</h3>
