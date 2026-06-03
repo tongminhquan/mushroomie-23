@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 
 const TetrisGame = dynamic(() => import('@/components/minigame/TetrisGame'), { ssr: false })
 const BlockBlastGame = dynamic(() => import('@/components/minigame/BlockBlastGame'), { ssr: false })
@@ -174,8 +175,29 @@ export default function MiniGamePage() {
               background: 'rgba(255,255,255,0.02)',
               border: '1px solid rgba(255,255,255,0.05)',
               boxShadow: '0 0 80px rgba(0,0,0,0.4)',
+              minHeight: '500px',
+              alignItems: 'center'
             }}>
-              {activeGame === 'tetris' ? (
+              {!session ? (
+                <div className="flex flex-col items-center justify-center p-10 text-center">
+                  <div className="text-5xl mb-4">🔒</div>
+                  <h3 className="text-2xl font-bold text-white mb-3">Yêu cầu đăng nhập</h3>
+                  <p className="text-base mb-6" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    Bạn cần đăng nhập để tham gia chơi game và tích điểm đổi voucher nhé!
+                  </p>
+                  <Link 
+                    href="/tai-khoan/dang-nhap?callbackUrl=/mini-game" 
+                    className="px-8 py-3 rounded-xl font-bold transition-transform hover:scale-105" 
+                    style={{ 
+                      background: 'linear-gradient(135deg, #e41d1d, #ff4d6a)', 
+                      color: '#fff',
+                      boxShadow: '0 0 20px rgba(228,29,29,0.3)'
+                    }}
+                  >
+                    Đăng nhập ngay
+                  </Link>
+                </div>
+              ) : activeGame === 'tetris' ? (
                 <TetrisGame onGameOver={handleGameOver} />
               ) : (
                 <BlockBlastGame onGameOver={handleGameOver} />
