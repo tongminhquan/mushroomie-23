@@ -268,7 +268,6 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
   }, [canPlace, placePiece])
 
   useEffect(() => {
-    if (!dragRenderState) return
     document.addEventListener('pointermove', onGlobalPointerMove, { passive: true })
     document.addEventListener('pointerup', onGlobalPointerUp)
     document.addEventListener('pointercancel', onGlobalPointerUp)
@@ -277,7 +276,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       document.removeEventListener('pointerup', onGlobalPointerUp)
       document.removeEventListener('pointercancel', onGlobalPointerUp)
     }
-  }, [!!dragRenderState, onGlobalPointerMove, onGlobalPointerUp])
+  }, [onGlobalPointerMove, onGlobalPointerUp])
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>, index: number, piece: Piece) => {
     if (dragRef.current) return
@@ -292,7 +291,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     const cs = cellSizeRef.current
     const renderedWidth = piece.matrix[0].length * cs
     const renderedHeight = piece.matrix.length * cs
-    const touchYOffset = isTouch ? cs * 1.5 : 0
+    const touchYOffset = isTouch ? cs * 2.5 : 0
     const offsetX = relX * renderedWidth
     const offsetY = relY * renderedHeight + touchYOffset
 
@@ -302,7 +301,6 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     const dragX = e.clientX - offsetX
     const dragY = e.clientY - offsetY
     const { hoverRow, hoverCol, isValid } = computeHoverPos(dragX, dragY, piece)
-
     setDragRenderState({ index, piece, x: dragX, y: dragY, hoverRow, hoverCol, isValid })
   }
 
