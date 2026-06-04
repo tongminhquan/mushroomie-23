@@ -1,5 +1,6 @@
 import { PayOS } from '@payos/node'
 import { IPaymentProvider, CreatePaymentInput, PaymentResult, WebhookVerifyResult, PaymentStatus } from '../types'
+import { buildVietQRUrl } from '../qr-generator'
 
 /**
  * PayOS Provider
@@ -17,38 +18,55 @@ export class PayOSProvider implements IPaymentProvider {
     })
   }
 
+  // Bank info from env (used to generate VietQR image)
+  private get bankBin() { return process.env.BANK_BIN || '970422' }
+  private get bankAccount() { return process.env.BANK_ACCOUNT_NUMBER || '' }
+  private get accountName() { return process.env.BANK_ACCOUNT_NAME || '' }
+  private get bankName() { return process.env.BANK_NAME || 'MB Bank' }
+
   async createPayment(input: CreatePaymentInput): Promise<PaymentResult> {
-    const domain = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const transferContent = input.orderCode
 
-    // PayOS yêu cầu orderCode là number và duy nhất
-    const timeInSeconds = Math.floor(Date.now() / 1000)
-    const payosOrderCode = Number(`${timeInSeconds}${input.orderId}`)
-
-    const paymentLinkData = {
-      orderCode: payosOrderCode,
+    // Always generate a proper VietQR image URL from env bank config
+    // This is a real image URL that <img> can render
+    const qrCodeUrl = buildVietQRUrl({
+      bankBin: this.bankBin,
+      bankAccount: this.bankAccount,
       amount: input.amount,
-      description: `Thanh toan don ${input.orderCode}`.substring(0, 25), // PayOS giới hạn 25 ký tự
-      cancelUrl: `${domain}/checkout`, // Chuyển hướng khi hủy
-      returnUrl: `${domain}/thanh-toan-thanh-cong`, // Chuyển hướng khi thành công
+      addInfo: transferContent,
+      accountName: this.accountName,
+    })
+
+    // Also try PayOS payment link for redirect-based flow (optional)
+    let paymentUrl = ''
+    try {
+      const domain = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      const timeInSeconds = Math.floor(Date.now() / 1000)
+      const payosOrderCode = Number(`${timeInSeconds}${input.orderId}`)
+
+      const paymentLinkData = {
+        orderCode: payosOrderCode,
+        amount: input.amount,
+        description: `Thanh toan don ${input.orderCode}`.substring(0, 25),
+        cancelUrl: `${domain}/checkout`,
+        returnUrl: `${domain}/thanh-toan-thanh-cong`,
+      }
+
+      const paymentLink = await this.payos.paymentRequests.create(paymentLinkData)
+      paymentUrl = paymentLink.checkoutUrl || ''
+    } catch (error) {
+      // PayOS link creation failed - that's OK, we still have VietQR image
+      console.warn('[PAYOS] Failed to create payment link, using VietQR only:', error)
     }
 
-    try {
-      const paymentLink = await this.payos.paymentRequests.create(paymentLinkData)
-
-      return {
-        providerPaymentId: String(paymentLink.paymentLinkId),
-        qrCodeUrl: paymentLink.checkoutUrl, // Trả về link checkout của PayOS để dùng làm URL hoặc hiển thị QR
-        paymentUrl: paymentLink.checkoutUrl,
-        transferContent: transferContent, 
-        bankName: paymentLink.bin || '', // PayOS hiện tại trả về qua webhook, ở lúc tạo chưa chắc có đủ detail
-        bankAccount: paymentLink.accountNumber || '',
-        accountName: paymentLink.accountName || '',
-        bankBin: paymentLink.bin || '',
-      }
-    } catch (error) {
-      console.error('[PAYOS ERROR] Lỗi tạo payment link:', error)
-      throw new Error('Không thể tạo liên kết thanh toán PayOS')
+    return {
+      qrCodeUrl,          // VietQR image URL (always works)
+      paymentUrl,         // PayOS checkout URL (optional redirect)
+      transferContent,
+      bankName: this.bankName,
+      bankAccount: this.bankAccount,
+      accountName: this.accountName,
+      bankBin: this.bankBin,
     }
   }
 

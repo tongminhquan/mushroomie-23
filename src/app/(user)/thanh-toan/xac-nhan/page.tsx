@@ -1,11 +1,10 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
-import Image from 'next/image'
-import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
-import { CheckCircle, Clock, XCircle, RefreshCw } from 'lucide-react'
+import { CheckCircle, Clock, XCircle, RefreshCw, AlertTriangle } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import Link from 'next/link'
 
 interface Payment {
   status: string
@@ -26,6 +25,34 @@ interface PaymentStatusData {
   paidAt?: string
 }
 
+/**
+ * Build a VietQR image URL client-side from payment bank info.
+ * This is the fallback when the server-provided qr_code_url is invalid or missing.
+ */
+function buildClientQrUrl(payment: Payment): string {
+  const bankBin = payment.bank_name // may be BIN code like "970422"
+  const accountNo = payment.bank_account
+  const amount = Math.round(Number(payment.amount)) // integer VND, no decimals
+  const addInfo = encodeURIComponent(payment.transfer_content || '')
+  const accountName = encodeURIComponent(payment.account_name || '')
+
+  return `https://img.vietqr.io/image/${bankBin}-${accountNo}-compact2.png?amount=${amount}&addInfo=${addInfo}&accountName=${accountName}`
+}
+
+/**
+ * Check if a URL looks like a valid image URL (not an HTML page).
+ */
+function isImageUrl(url: string): boolean {
+  if (!url) return false
+  // PayOS checkoutUrl looks like https://pay.payos.vn/web/xxx — NOT an image
+  if (url.includes('payos.vn')) return false
+  // VietQR image URL contains img.vietqr.io and ends with .png
+  if (url.includes('img.vietqr.io')) return true
+  // Generic check: ends with image extension
+  if (/\.(png|jpg|jpeg|gif|webp|svg)(\?|$)/i.test(url)) return true
+  return false
+}
+
 export default function ConfirmPage() {
   const searchParams = useSearchParams()
   const orderCode = searchParams.get('orderCode') || ''
@@ -35,6 +62,7 @@ export default function ConfirmPage() {
   const [polling, setPolling] = useState(false)
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const [orderInfo, setOrderInfo] = useState<any>(null)
+  const [qrStatus, setQrStatus] = useState<'loading' | 'loaded' | 'error'>('loading')
 
   const fetchData = useCallback(async () => {
     if (!orderCode) return
@@ -79,6 +107,31 @@ export default function ConfirmPage() {
     const timer = setInterval(() => setTimeLeft((t) => (t !== null ? Math.max(0, t - 1) : null)), 1000)
     return () => clearInterval(timer)
   }, [timeLeft])
+
+  // Compute the best QR image URL
+  const qrImageUrl = useMemo(() => {
+    if (!payment) return ''
+
+    // If server provided a valid image URL, use it (via proxy to avoid CORS)
+    if (payment.qr_code_url && isImageUrl(payment.qr_code_url)) {
+      return `/api/qr?url=${encodeURIComponent(payment.qr_code_url)}`
+    }
+
+    // Fallback: build VietQR image URL from payment bank info
+    if (payment.bank_account && payment.amount) {
+      const directUrl = buildClientQrUrl(payment)
+      return `/api/qr?url=${encodeURIComponent(directUrl)}`
+    }
+
+    return ''
+  }, [payment])
+
+  // Reset QR status when URL changes
+  useEffect(() => {
+    if (qrImageUrl) {
+      setQrStatus('loading')
+    }
+  }, [qrImageUrl])
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60)
@@ -165,20 +218,50 @@ export default function ConfirmPage() {
 
           <div className="p-6 space-y-5">
             {/* QR Code */}
-            {payment?.qr_code_url && (
+            {qrImageUrl ? (
               <div className="text-center">
-                {/* Sử dụng thẻ img thường với proxy API nội bộ để tránh lỗi CORS/Adblock từ img.vietqr.io */}
+                {/* Loading state */}
+                {qrStatus === 'loading' && (
+                  <div className="mx-auto w-[280px] h-[280px] rounded-2xl border-4 border-primary-light bg-neutral-50 flex items-center justify-center">
+                    <div className="text-center">
+                      <RefreshCw size={24} className="animate-spin text-primary mx-auto mb-2" />
+                      <p className="text-xs text-neutral-500">Đang tạo mã QR...</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* QR image */}
                 <img
-                  src={`/api/qr?url=${encodeURIComponent(payment.qr_code_url)}`}
+                  src={qrImageUrl}
                   alt="QR Code chuyển khoản"
-                  width={250}
-                  height={250}
-                  className="mx-auto rounded-2xl border-4 border-primary-light shadow-card"
+                  width={280}
+                  height={280}
+                  className={`mx-auto rounded-2xl border-4 border-primary-light shadow-card ${qrStatus !== 'loaded' ? 'hidden' : ''}`}
                   referrerPolicy="no-referrer"
+                  onLoad={() => setQrStatus('loaded')}
+                  onError={() => setQrStatus('error')}
                 />
-                <p className="text-xs text-neutral-500 mt-2">Quét QR bằng app ngân hàng để chuyển tiền</p>
+
+                {/* Error state */}
+                {qrStatus === 'error' && (
+                  <div className="mx-auto w-[280px] rounded-2xl border-2 border-dashed border-orange-300 bg-orange-50 p-6 flex flex-col items-center justify-center">
+                    <AlertTriangle size={32} className="text-orange-500 mb-2" />
+                    <p className="text-sm font-semibold text-orange-700 mb-1">Không thể tải mã QR</p>
+                    <p className="text-xs text-orange-600">Vui lòng chuyển khoản thủ công theo thông tin bên dưới</p>
+                  </div>
+                )}
+
+                {qrStatus === 'loaded' && (
+                  <p className="text-xs text-neutral-500 mt-2">Quét QR bằng app ngân hàng để chuyển tiền</p>
+                )}
               </div>
-            )}
+            ) : payment ? (
+              <div className="text-center mx-auto w-[280px] rounded-2xl border-2 border-dashed border-orange-300 bg-orange-50 p-6">
+                <AlertTriangle size={32} className="text-orange-500 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-orange-700 mb-1">Mã QR không khả dụng</p>
+                <p className="text-xs text-orange-600">Vui lòng chuyển khoản thủ công theo thông tin bên dưới</p>
+              </div>
+            ) : null}
 
             {/* Bank info */}
             {payment && (
