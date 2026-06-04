@@ -12,6 +12,10 @@ git pull origin main
 echo "📦 Cài đặt dependencies..."
 npm install --legacy-peer-deps
 
+echo "🛠️ Cập nhật database và Prisma Client..."
+npx prisma db push
+npx prisma generate
+
 # Build dự án
 echo "🏗️ Đang build Next.js app..."
 npm run build
