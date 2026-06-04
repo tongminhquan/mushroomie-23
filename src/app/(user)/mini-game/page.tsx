@@ -107,20 +107,64 @@ export default function MiniGamePage() {
     }}>
       <div className="container mx-auto px-4 py-6 lg:py-10">
         {/* Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase mb-3"
-            style={{ background: 'rgba(228,29,29,0.12)', color: '#ff6b6b', border: '1px solid rgba(228,29,29,0.2)' }}>
-            🎮 Mini Game
+        <div style={{
+          textAlign: 'center',
+          padding: 'clamp(40px, 6vw, 64px) 16px clamp(24px, 4vw, 40px)',
+          background: 'radial-gradient(ellipse at center top, rgba(228,29,29,0.18), transparent 50%)',
+          marginBottom: '8px',
+          overflow: 'hidden',
+        }}>
+          <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
+            {/* Badge */}
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 22px',
+              borderRadius: '999px',
+              background: 'rgba(228,29,29,0.12)',
+              border: '1px solid rgba(228,29,29,0.35)',
+              color: '#ff5a5a',
+              fontSize: '12px',
+              fontWeight: 800,
+              letterSpacing: '2px',
+              textTransform: 'uppercase' as const,
+              marginBottom: '20px',
+            }}>
+              🎮 Mini Game
+            </div>
+
+            {/* Title */}
+            <h1 style={{
+              fontSize: 'clamp(36px, 7vw, 72px)',
+              fontWeight: 900,
+              lineHeight: 1.05,
+              color: '#ffffff',
+              letterSpacing: '-0.03em',
+              margin: '0 0 14px 0',
+              textWrap: 'balance' as any,
+            }}>
+              Xếp gạch cùng{' '}
+              <span style={{
+                background: 'linear-gradient(135deg, #e41d1d, #ff6b6b)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>
+                Mushroomie
+              </span>
+            </h1>
+
+            {/* Subtitle */}
+            <p style={{
+              fontSize: 'clamp(15px, 2.2vw, 20px)',
+              fontWeight: 600,
+              color: '#c9cad8',
+              lineHeight: 1.5,
+              margin: 0,
+            }}>
+              Chơi game • Tích điểm • Đổi voucher giảm giá
+            </p>
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-white mb-2">
-            Xếp gạch cùng{' '}
-            <span style={{ background: 'linear-gradient(135deg, #e41d1d, #ff6b6b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Mushroomie
-            </span>
-          </h1>
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Chơi game • Tích điểm • Đổi voucher giảm giá
-          </p>
         </div>
 
         {/* Login Notice */}

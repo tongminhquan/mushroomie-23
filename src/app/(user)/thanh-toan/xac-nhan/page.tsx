@@ -303,12 +303,17 @@ export default function ConfirmPage() {
               Hệ thống tự động kiểm tra thanh toán mỗi 5 giây
             </div>
 
-            <div className="bg-primary-light rounded-xl p-4 text-sm">
-              <p className="font-semibold text-primary mb-1">📌 Lưu ý quan trọng:</p>
-              <ul className="text-xs space-y-1 text-neutral-600">
-                <li>• Chuyển đúng số tiền và nội dung bên trên</li>
-                <li>• Đơn hàng tự động xác nhận sau 1-5 phút</li>
-                <li>• Không đóng trang này trước khi chuyển khoản</li>
+            <div style={{
+              background: '#fff7f2',
+              border: '1px solid #ffd6d6',
+              borderRadius: '18px',
+              padding: '20px 24px',
+            }}>
+              <p style={{ fontWeight: 700, fontSize: '15px', color: '#e41d1d', marginBottom: '10px' }}>📌 Lưu ý quan trọng:</p>
+              <ul style={{ fontSize: '14px', lineHeight: 1.7, color: '#444', paddingLeft: '18px', margin: 0, listStyle: 'none' }}>
+                <li style={{ marginBottom: '4px' }}>• Chuyển đúng số tiền và nội dung bên trên</li>
+                <li style={{ marginBottom: '4px' }}>• Đơn hàng tự động xác nhận sau 1-5 phút</li>
+                <li style={{ marginBottom: '4px' }}>• Không đóng trang này trước khi chuyển khoản</li>
                 <li>• Bạn sẽ nhận email xác nhận sau khi thanh toán</li>
               </ul>
             </div>
