@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 
 const ROWS = 8
@@ -18,25 +18,21 @@ const COLORS: Record<string, string> = {
 const COLOR_KEYS = Object.keys(COLORS)
 
 const SHAPES = [
-  [[1]], // 1x1
-  [[1,1]], [[1],[1]], // 2x1, 1x2
-  [[1,1,1]], [[1],[1],[1]], // 3x1, 1x3
-  [[1,1,1,1]], [[1],[1],[1],[1]], // 4x1, 1x4
-  [[1,1,1,1,1]], [[1],[1],[1],[1],[1]], // 5x1, 1x5
-  [[1,1],[1,1]], // 2x2
-  [[1,1,1],[1,1,1],[1,1,1]], // 3x3
-  [[1,1],[1,0]], [[1,1],[0,1]], [[1,0],[1,1]], [[0,1],[1,1]], // Small L
-  [[1,0,0],[1,0,0],[1,1,1]], [[0,0,1],[0,0,1],[1,1,1]], [[1,1,1],[1,0,0],[1,0,0]], [[1,1,1],[0,0,1],[0,0,1]], // Large L
-  [[1,1,1],[0,1,0]], [[0,1,0],[1,1,1]], [[1,0],[1,1],[1,0]], [[0,1],[1,1],[0,1]], // T shapes
-  [[0,1,0],[1,1,1],[0,1,0]], // Cross +
-  [[1,1,0],[0,1,1]], [[0,1,1],[1,1,0]], [[1,0],[1,1],[0,1]], [[0,1],[1,1],[1,0]], // S/Z shapes
+  [[1]],
+  [[1,1]], [[1],[1]],
+  [[1,1,1]], [[1],[1],[1]],
+  [[1,1,1,1]], [[1],[1],[1],[1]],
+  [[1,1,1,1,1]], [[1],[1],[1],[1],[1]],
+  [[1,1],[1,1]],
+  [[1,1,1],[1,1,1],[1,1,1]],
+  [[1,1],[1,0]], [[1,1],[0,1]], [[1,0],[1,1]], [[0,1],[1,1]],
+  [[1,0,0],[1,0,0],[1,1,1]], [[0,0,1],[0,0,1],[1,1,1]], [[1,1,1],[1,0,0],[1,0,0]], [[1,1,1],[0,0,1],[0,0,1]],
+  [[1,1,1],[0,1,0]], [[0,1,0],[1,1,1]], [[1,0],[1,1],[1,0]], [[0,1],[1,1],[0,1]],
+  [[0,1,0],[1,1,1],[0,1,0]],
+  [[1,1,0],[0,1,1]], [[0,1,1],[1,1,0]], [[1,0],[1,1],[0,1]], [[0,1],[1,1],[1,0]],
 ]
 
-type Piece = {
-  id: string
-  matrix: number[][]
-  color: string
-}
+type Piece = { id: string; matrix: number[][]; color: string }
 
 function getRandomPiece(): Piece {
   const matrix = SHAPES[Math.floor(Math.random() * SHAPES.length)]
@@ -44,12 +40,21 @@ function getRandomPiece(): Piece {
   return { id: Math.random().toString(36).substring(2, 9), matrix, color }
 }
 
+// ─── Drag state lives entirely in refs (never causes re-renders) ─────────────
+type DragState = {
+  index: number
+  piece: Piece
+  isTouch: boolean
+}
+
 export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: number) => void }) {
   const [cellSize, setCellSize] = useState(45)
   const cellSizeRef = useRef(45)
   useEffect(() => { cellSizeRef.current = cellSize }, [cellSize])
 
-  const [board, setBoard] = useState<(string | null)[][]>(Array(ROWS).fill(null).map(() => Array(COLS).fill(null)))
+  const [board, setBoard] = useState<(string | null)[][]>(
+    Array(ROWS).fill(null).map(() => Array(COLS).fill(null))
+  )
   const [hand, setHand] = useState<(Piece | null)[]>([getRandomPiece(), getRandomPiece(), getRandomPiece()])
   const [score, setScore] = useState(0)
   const [lines, setLines] = useState(0)
@@ -57,8 +62,25 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
   const [isGameOver, setIsGameOver] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
+  // Board highlight state (React state - OK to have slight lag)
+  const [dragHighlight, setDragHighlight] = useState<{
+    index: number
+    piece: Piece
+    hoverRow: number
+    hoverCol: number
+    isValid: boolean
+  } | null>(null)
+
   const containerRef = useRef<HTMLDivElement>(null)
   const boardRef = useRef<HTMLDivElement>(null)
+  // Overlay element ref - we position it imperatively via style.left / style.top
+  const overlayRef = useRef<HTMLDivElement>(null)
+  // Drag state ref - no re-renders needed for position tracking
+  const dragStateRef = useRef<DragState | null>(null)
+  // Last cursor position
+  const cursorRef = useRef({ x: 0, y: 0 })
+  // rAF id for throttling board highlight updates
+  const rafRef = useRef(0)
 
   const boardStateRef = useRef(board)
   boardStateRef.current = board
@@ -73,34 +95,12 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
   const isGameOverRef = useRef(isGameOver)
   isGameOverRef.current = isGameOver
 
-  // dragState stored in a ref to avoid stale closures in event handlers
-  // cursorX/cursorY = actual pointer position (e.clientX, e.clientY)
-  // isTouch = whether it's a touch/pen event (affects overlay offset)
-  const dragRef = useRef<{
-    index: number
-    piece: Piece
-    isTouch: boolean
-    cursorX: number
-    cursorY: number
-  } | null>(null)
-
-  // dragRenderState drives React render — updated via setState for board highlights
-  const [dragRenderState, setDragRenderState] = useState<{
-    index: number
-    piece: Piece
-    cursorX: number
-    cursorY: number
-    hoverRow: number
-    hoverCol: number
-    isValid: boolean
-  } | null>(null)
-  const dragRenderRef = useRef(dragRenderState)
-  dragRenderRef.current = dragRenderState
-
-  const [clearingCells, setClearingCells] = useState<{r: number, c: number}[]>([])
-  const [placedCells, setPlacedCells] = useState<{r: number, c: number}[]>([])
-
-  const canPlace = useCallback((boardState: (string | null)[][], matrix: number[][], row: number, col: number) => {
+  const canPlace = useCallback((
+    boardState: (string | null)[][],
+    matrix: number[][],
+    row: number,
+    col: number
+  ) => {
     for (let r = 0; r < matrix.length; r++) {
       for (let c = 0; c < matrix[r].length; c++) {
         if (matrix[r][c]) {
@@ -113,9 +113,14 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
   }, [])
 
   /**
-   * Compute which board cell the cursor is hovering over.
-   * cursorX/cursorY = actual pointer position (e.clientX / e.clientY).
-   * We snap to the nearest cell such that the piece top-left lands there.
+   * Compute which board cell (row, col) the cursor is over,
+   * so that the piece is CENTERED under the cursor.
+   *
+   * The board cell `col` has its left edge at:
+   *   rect.left + BOARD_PADDING + col * CELL_STRIDE
+   *
+   * We want the overlay left edge (= cursor - pieceWidth/2) to align with that cell, so:
+   *   col = (cursorX - rect.left - BOARD_PADDING) / CELL_STRIDE - pieceCols / 2
    */
   const computeHoverPos = useCallback((cursorX: number, cursorY: number, piece: Piece) => {
     let hoverRow = -1, hoverCol = -1, isValid = false
@@ -123,18 +128,13 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       const rect = boardRef.current.getBoundingClientRect()
       const BOARD_PADDING = 6
       const cs = cellSizeRef.current
-      const CELL_STRIDE = cs + 2 // cell size + gap
+      const CELL_STRIDE = cs + 2
 
-      // Convert cursor to board-relative coordinates
       const relX = cursorX - rect.left - BOARD_PADDING
       const relY = cursorY - rect.top - BOARD_PADDING
 
-      // Snap cursor to nearest cell center, then adjust so piece is centered on cursor
-      const halfPieceCols = piece.matrix[0].length / 2
-      const halfPieceRows = piece.matrix.length / 2
-
-      const col = Math.round(relX / CELL_STRIDE - halfPieceCols)
-      const row = Math.round(relY / CELL_STRIDE - halfPieceRows)
+      const col = Math.round(relX / CELL_STRIDE - piece.matrix[0].length / 2)
+      const row = Math.round(relY / CELL_STRIDE - piece.matrix.length / 2)
 
       hoverRow = row
       hoverCol = col
@@ -143,20 +143,45 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     return { hoverRow, hoverCol, isValid }
   }, [canPlace])
 
-  const checkGameOver = useCallback((boardState: (string | null)[][], currentHand: (Piece | null)[], currentScore: number) => {
+  /**
+   * Position the overlay DIRECTLY via DOM style - no React re-render.
+   * This is what makes the overlay follow the cursor smoothly.
+   */
+  const applyOverlayPosition = useCallback((cursorX: number, cursorY: number) => {
+    const drag = dragStateRef.current
+    const el = overlayRef.current
+    if (!drag || !el) return
+
+    const cs = cellSizeRef.current
+    const CELL_STRIDE = cs + 2
+    const pieceCols = drag.piece.matrix[0].length
+    const pieceRows = drag.piece.matrix.length
+    const touchLift = drag.isTouch ? cs * 2.5 : 0
+
+    const left = cursorX - (pieceCols * CELL_STRIDE) / 2
+    const top = cursorY - (pieceRows * CELL_STRIDE) / 2 - touchLift
+
+    el.style.left = `${left}px`
+    el.style.top = `${top}px`
+    el.style.visibility = 'visible'
+  }, [])
+
+  const [clearingCells, setClearingCells] = useState<{ r: number; c: number }[]>([])
+  const [placedCells, setPlacedCells] = useState<{ r: number; c: number }[]>([])
+
+  const checkGameOver = useCallback((
+    boardState: (string | null)[][],
+    currentHand: (Piece | null)[],
+    currentScore: number
+  ) => {
     let anyMovePossible = false
-    for (let i = 0; i < currentHand.length; i++) {
-      const piece = currentHand[i]
+    outer: for (const piece of currentHand) {
       if (!piece) continue
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
-          if (canPlace(boardState, piece.matrix, r, c)) {
-            anyMovePossible = true; break
-          }
+          if (canPlace(boardState, piece.matrix, r, c)) { anyMovePossible = true; break outer }
         }
-        if (anyMovePossible) break
       }
-      if (anyMovePossible) break
     }
     if (!anyMovePossible && currentHand.some(p => p !== null)) {
       setIsGameOver(true)
@@ -164,7 +189,11 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     }
   }, [canPlace, onGameOver])
 
-  const checkPostPlace = useCallback((currentBoard: (string | null)[][], usedIndex: number, currentScore: number) => {
+  const checkPostPlace = useCallback((
+    currentBoard: (string | null)[][],
+    usedIndex: number,
+    currentScore: number
+  ) => {
     const newHand = [...handRef.current]
     newHand[usedIndex] = null
     if (newHand.every(p => p === null)) {
@@ -181,16 +210,18 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     const currentBoard = boardStateRef.current
     const newBoard = currentBoard.map(r => [...r])
     let blocksCount = 0
-    const newPlacedCells: {r: number, c: number}[] = []
+    const newPlacedCells: { r: number; c: number }[] = []
+
     for (let r = 0; r < piece.matrix.length; r++) {
       for (let c = 0; c < piece.matrix[r].length; c++) {
         if (piece.matrix[r][c]) {
           newBoard[row + r][col + c] = piece.color
-          newPlacedCells.push({r: row + r, c: col + c})
+          newPlacedCells.push({ r: row + r, c: col + c })
           blocksCount++
         }
       }
     }
+
     setBoard(newBoard)
     boardStateRef.current = newBoard
     setPlacedCells(newPlacedCells)
@@ -206,83 +237,95 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     }
 
     const linesCleared = rowsToClear.length + colsToClear.length
-
     if (linesCleared > 0) {
-      const cellsToClear: {r: number, c: number}[] = []
+      const cellsToClear: { r: number; c: number }[] = []
       rowsToClear.forEach(r => {
         for (let c = 0; c < COLS; c++) {
-          if (!cellsToClear.some(cell => cell.r === r && cell.c === c)) cellsToClear.push({r, c})
+          if (!cellsToClear.some(x => x.r === r && x.c === c)) cellsToClear.push({ r, c })
         }
       })
       colsToClear.forEach(c => {
         for (let r = 0; r < ROWS; r++) {
-          if (!cellsToClear.some(cell => cell.r === r && cell.c === c)) cellsToClear.push({r, c})
+          if (!cellsToClear.some(x => x.r === r && x.c === c)) cellsToClear.push({ r, c })
         }
       })
       setClearingCells(cellsToClear)
 
       const currentCombo = linesCleared > 1 ? comboRef.current + linesCleared : comboRef.current + 1
-      const addedScore = blocksCount + (linesCleared * 10 * currentCombo)
+      const addedScore = blocksCount + linesCleared * 10 * currentCombo
       const newScore = scoreRef.current + addedScore
       const newLines = linesRef.current + linesCleared
 
       setTimeout(() => {
         const clearedBoard = newBoard.map(r => [...r])
-        cellsToClear.forEach(({r, c}) => clearedBoard[r][c] = null)
+        cellsToClear.forEach(({ r, c }) => { clearedBoard[r][c] = null })
         setBoard(clearedBoard)
         boardStateRef.current = clearedBoard
         setClearingCells([])
-        setScore(newScore)
-        scoreRef.current = newScore
-        setLines(newLines)
-        linesRef.current = newLines
-        setCombo(currentCombo)
-        comboRef.current = currentCombo
+        setScore(newScore); scoreRef.current = newScore
+        setLines(newLines); linesRef.current = newLines
+        setCombo(currentCombo); comboRef.current = currentCombo
         checkPostPlace(clearedBoard, index, newScore)
       }, 400)
     } else {
       const newScore = scoreRef.current + blocksCount
-      setScore(newScore)
-      scoreRef.current = newScore
-      setCombo(0)
-      comboRef.current = 0
+      setScore(newScore); scoreRef.current = newScore
+      setCombo(0); comboRef.current = 0
       checkPostPlace(newBoard, index, newScore)
     }
   }, [checkPostPlace])
 
+  // ─── Global pointer move: imperative DOM update (zero React overhead) ───────
   const onGlobalPointerMove = useCallback((e: PointerEvent) => {
-    if (!dragRef.current) return
-    const { piece } = dragRef.current
-    const cursorX = e.clientX
-    const cursorY = e.clientY
+    if (!dragStateRef.current) return
 
-    dragRef.current.cursorX = cursorX
-    dragRef.current.cursorY = cursorY
+    cursorRef.current = { x: e.clientX, y: e.clientY }
 
-    const { hoverRow, hoverCol, isValid } = computeHoverPos(cursorX, cursorY, piece)
+    // 1. Update overlay position DIRECTLY (no React, no lag)
+    applyOverlayPosition(e.clientX, e.clientY)
 
-    setDragRenderState(prev => {
-      if (!prev) return prev
-      return { ...prev, cursorX, cursorY, hoverRow, hoverCol, isValid }
+    // 2. Update board highlight via rAF (throttled, slight lag is OK)
+    cancelAnimationFrame(rafRef.current)
+    rafRef.current = requestAnimationFrame(() => {
+      const drag = dragStateRef.current
+      if (!drag) return
+      const { hoverRow, hoverCol, isValid } = computeHoverPos(
+        cursorRef.current.x,
+        cursorRef.current.y,
+        drag.piece
+      )
+      setDragHighlight(prev => {
+        if (!prev) return prev
+        if (prev.hoverRow === hoverRow && prev.hoverCol === hoverCol && prev.isValid === isValid) return prev
+        return { ...prev, hoverRow, hoverCol, isValid }
+      })
     })
-  }, [computeHoverPos])
+  }, [applyOverlayPosition, computeHoverPos])
 
-  const onGlobalPointerUp = useCallback((e: PointerEvent) => {
-    if (!dragRef.current) return
-    const { index } = dragRef.current
-    dragRef.current = null
+  // ─── Global pointer up: place piece ─────────────────────────────────────────
+  const onGlobalPointerUp = useCallback(() => {
+    const drag = dragStateRef.current
+    if (!drag) return
+    dragStateRef.current = null
+    cancelAnimationFrame(rafRef.current)
     document.body.style.overflow = ''
 
-    setDragRenderState(prev => {
-      if (prev && prev.isValid && canPlace(boardStateRef.current, prev.piece.matrix, prev.hoverRow, prev.hoverCol)) {
-        placePiece(prev.piece, index, prev.hoverRow, prev.hoverCol)
+    setDragHighlight(prev => {
+      if (
+        prev &&
+        prev.isValid &&
+        canPlace(boardStateRef.current, prev.piece.matrix, prev.hoverRow, prev.hoverCol)
+      ) {
+        placePiece(prev.piece, drag.index, prev.hoverRow, prev.hoverCol)
       }
       return null
     })
   }, [canPlace, placePiece])
 
+  // Attach global pointer listeners once (always on)
   useEffect(() => {
-    document.addEventListener('pointermove', onGlobalPointerMove, { passive: true })
+    // passive: false on move so we CAN call preventDefault if needed (e.g. iOS)
+    document.addEventListener('pointermove', onGlobalPointerMove, { passive: false })
     document.addEventListener('pointerup', onGlobalPointerUp)
     document.addEventListener('pointercancel', onGlobalPointerUp)
     return () => {
@@ -292,80 +335,67 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     }
   }, [onGlobalPointerMove, onGlobalPointerUp])
 
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>, index: number, piece: Piece) => {
-    if (dragRef.current) return
+  // ─── After overlay is first rendered, position it immediately ────────────────
+  useLayoutEffect(() => {
+    if (dragHighlight) {
+      applyOverlayPosition(cursorRef.current.x, cursorRef.current.y)
+    }
+  }, [!!dragHighlight, applyOverlayPosition])
+
+  // ─── Pointer down: start drag ────────────────────────────────────────────────
+  const handlePointerDown = (
+    e: React.PointerEvent<HTMLDivElement>,
+    index: number,
+    piece: Piece
+  ) => {
+    if (dragStateRef.current) return
     if (isGameOverRef.current || clearingCells.length > 0) return
     e.preventDefault()
 
     const isTouch = e.pointerType === 'touch' || e.pointerType === 'pen'
-    const cursorX = e.clientX
-    const cursorY = e.clientY
-
     if (isTouch) document.body.style.overflow = 'hidden'
 
-    dragRef.current = { index, piece, isTouch, cursorX, cursorY }
+    cursorRef.current = { x: e.clientX, y: e.clientY }
+    dragStateRef.current = { index, piece, isTouch }
 
-    const { hoverRow, hoverCol, isValid } = computeHoverPos(cursorX, cursorY, piece)
-    setDragRenderState({ index, piece, cursorX, cursorY, hoverRow, hoverCol, isValid })
+    const { hoverRow, hoverCol, isValid } = computeHoverPos(e.clientX, e.clientY, piece)
+    // Show overlay (React render) - position will be applied in useLayoutEffect above
+    setDragHighlight({ index, piece, hoverRow, hoverCol, isValid })
   }
 
   const restart = () => {
     setBoard(Array(ROWS).fill(null).map(() => Array(COLS).fill(null)))
     setHand([getRandomPiece(), getRandomPiece(), getRandomPiece()])
-    setScore(0)
-    setLines(0)
-    setCombo(0)
-    setIsGameOver(false)
+    setScore(0); setLines(0); setCombo(0); setIsGameOver(false)
   }
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen().catch(e => console.error(e))
+      containerRef.current?.requestFullscreen().catch(console.error)
     } else {
       document.exitFullscreen()
     }
   }
 
   useEffect(() => {
-    const onFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement)
-    document.addEventListener('fullscreenchange', onFullscreenChange)
-    return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', onChange)
+    return () => document.removeEventListener('fullscreenchange', onChange)
   }, [])
 
   useEffect(() => {
     const checkSize = () => {
-      const width = window.innerWidth
-      if (width < 400) setCellSize(36)
-      else if (width < 600) setCellSize(44)
-      else setCellSize(52)
+      const w = window.innerWidth
+      const newSize = w < 400 ? 36 : w < 600 ? 44 : 52
+      setCellSize(newSize)
+      cellSizeRef.current = newSize
     }
     checkSize()
     window.addEventListener('resize', checkSize)
     return () => window.removeEventListener('resize', checkSize)
   }, [])
 
-  // Calculate overlay position: centered on cursor, lifted up for touch
-  const getOverlayStyle = () => {
-    if (!dragRenderState) return {}
-    const cs = cellSizeRef.current
-    const { cursorX, cursorY, piece, isValid } = dragRenderState
-    const isTouch = dragRef.current?.isTouch ?? false
-    const pieceCols = piece.matrix[0].length
-    const pieceRows = piece.matrix.length
-
-    // Center piece horizontally on cursor; for touch, lift it above finger
-    const overlayLeft = cursorX - (pieceCols * (cs + 2)) / 2
-    const touchLift = isTouch ? cs * 2.5 : 0
-    const overlayTop = cursorY - (pieceRows * (cs + 2)) / 2 - touchLift
-
-    return {
-      left: overlayLeft,
-      top: overlayTop,
-      opacity: isValid ? 1 : 0.65,
-      filter: isValid ? 'none' : 'saturate(0.4)',
-    }
-  }
-
+  // ─── Render ──────────────────────────────────────────────────────────────────
   return (
     <div
       className={`blockblast-game ${isFullscreen ? 'fullscreen-mode' : ''}`}
@@ -378,101 +408,94 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       } as React.CSSProperties}
     >
       <div className="bb-main">
+        {/* Board */}
         <div className="bb-board-wrap">
           <button
-             onClick={toggleFullscreen}
-             className="absolute top-2 right-2 z-10 p-1.5 rounded-lg hover:bg-white/10 transition-colors"
-             style={{ background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer' }}
-             title="Toàn màn hình"
+            onClick={toggleFullscreen}
+            className="absolute top-2 right-2 z-10 p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+            style={{ background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer' }}
+            title="Toàn màn hình"
           >
-             {isFullscreen ? '↙️' : '↗️'}
+            {isFullscreen ? '↙️' : '↗️'}
           </button>
 
-          <div className="bb-size-controls hidden md:flex absolute top-2 left-2 z-10">
-             <span className="text-xs text-white/50 mr-2 self-center">Kích thước:</span>
-             {[36, 44, 52].map(s => (
-                <button
-                   key={s}
-                   onClick={() => { setCellSize(s); cellSizeRef.current = s }}
-                   className={`bb-size-btn ${cellSize === s ? 'active' : ''}`}
-                >
-                   {s}
-                </button>
-             ))}
-          </div>
-
           <div className="bb-board" ref={boardRef}>
-            {board.map((row, r) => (
+            {board.map((row, r) =>
               row.map((cellColor, c) => {
-                const isHover = dragRenderState?.isValid &&
-                                r >= dragRenderState.hoverRow &&
-                                r < dragRenderState.hoverRow + dragRenderState.piece.matrix.length &&
-                                c >= dragRenderState.hoverCol &&
-                                c < dragRenderState.hoverCol + dragRenderState.piece.matrix[0].length &&
-                                dragRenderState.piece.matrix[r - dragRenderState.hoverRow]?.[c - dragRenderState.hoverCol]
+                const isHover =
+                  dragHighlight?.isValid &&
+                  r >= dragHighlight.hoverRow &&
+                  r < dragHighlight.hoverRow + dragHighlight.piece.matrix.length &&
+                  c >= dragHighlight.hoverCol &&
+                  c < dragHighlight.hoverCol + dragHighlight.piece.matrix[0].length &&
+                  !!dragHighlight.piece.matrix[r - dragHighlight.hoverRow]?.[c - dragHighlight.hoverCol]
 
-                const isClearing = clearingCells.some(cell => cell.r === r && cell.c === c)
-                const isPlaced = placedCells.some(cell => cell.r === r && cell.c === c)
+                const isClearing = clearingCells.some(x => x.r === r && x.c === c)
+                const isPlaced = placedCells.some(x => x.r === r && x.c === c)
 
                 return (
                   <div
                     key={`${r}-${c}`}
-                    className={`bb-cell ${isClearing ? 'anim-clear' : ''} ${isPlaced ? 'anim-place' : ''}`}
+                    className={`bb-cell${isClearing ? ' anim-clear' : ''}${isPlaced ? ' anim-place' : ''}`}
                   >
                     {(cellColor || isHover) && (
                       <div
                         className="bb-block"
                         style={{
-                           background: cellColor ? COLORS[cellColor] : COLORS[dragRenderState!.piece.color],
-                           opacity: cellColor ? 1 : 0.45,
+                          background: cellColor
+                            ? COLORS[cellColor]
+                            : COLORS[dragHighlight!.piece.color],
+                          opacity: cellColor ? 1 : 0.45,
                         }}
                       >
-                         <div className="bb-block-inner" />
+                        <div className="bb-block-inner" />
                       </div>
                     )}
                   </div>
                 )
               })
-            ))}
+            )}
           </div>
 
+          {/* Hand */}
           <div className="bb-hand">
-             {hand.map((piece, i) => (
-                <div key={i} className="bb-hand-slot">
-                   {piece && (
-                      <div
-                         className="bb-piece"
-                         onPointerDown={(e) => handlePointerDown(e, i, piece)}
-                         style={{
-                            gridTemplateColumns: `repeat(${piece.matrix[0].length}, var(--hand-cell-size))`,
-                            opacity: dragRenderState?.index === i ? 0 : 1,
-                            cursor: dragRenderState?.index === i ? 'none' : 'grab',
-                         }}
-                      >
-                         {piece.matrix.map((row, r) =>
-                            row.map((val, c) => (
-                               <div key={`${r}-${c}`} className="bb-piece-cell">
-                                  {val ? (
-                                     <div
-                                        className="bb-block"
-                                        style={{ background: COLORS[piece.color] }}
-                                     >
-                                        <div className="bb-block-inner" />
-                                     </div>
-                                  ) : null}
-                               </div>
-                            ))
-                         )}
-                      </div>
-                   )}
-                </div>
-             ))}
+            {hand.map((piece, i) => (
+              <div key={i} className="bb-hand-slot">
+                {piece && (
+                  <div
+                    className="bb-piece"
+                    onPointerDown={e => handlePointerDown(e, i, piece)}
+                    style={{
+                      gridTemplateColumns: `repeat(${piece.matrix[0].length}, var(--hand-cell-size))`,
+                      opacity: dragHighlight?.index === i ? 0 : 1,
+                      cursor: dragHighlight?.index === i ? 'none' : 'grab',
+                    }}
+                  >
+                    {piece.matrix.map((row, r) =>
+                      row.map((val, c) => (
+                        <div key={`${r}-${c}`} className="bb-piece-cell">
+                          {val ? (
+                            <div className="bb-block" style={{ background: COLORS[piece.color] }}>
+                              <div className="bb-block-inner" />
+                            </div>
+                          ) : null}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
+        {/* Sidebar */}
         <div className="bb-sidebar">
           <div className="bb-stat-card">
-            <div className="bb-stat-label"><span className="desktop-only">ĐIỂM SỐ</span><span className="mobile-only">ĐIỂM</span></div>
+            <div className="bb-stat-label">
+              <span className="desktop-only">ĐIỂM SỐ</span>
+              <span className="mobile-only">ĐIỂM</span>
+            </div>
             <div className="bb-stat-value bb-score-val">{score.toLocaleString()}</div>
             <div className="bb-progress">
               <div className="bb-progress-fill" style={{ width: `${Math.min((score / 20000) * 100, 100)}%` }} />
@@ -481,21 +504,27 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
 
           <div className="bb-stat-row">
             <div className="bb-stat-card bb-stat-half">
-              <div className="bb-stat-label"><span className="desktop-only">HÀNG ĐÃ XÓA</span><span className="mobile-only">HÀNG</span></div>
+              <div className="bb-stat-label">
+                <span className="desktop-only">HÀNG ĐÃ XÓA</span>
+                <span className="mobile-only">HÀNG</span>
+              </div>
               <div className="bb-stat-value bb-lines-val">{lines}</div>
             </div>
             <div className="bb-stat-card bb-stat-half">
-              <div className="bb-stat-label"><span className="desktop-only">COMBO</span><span className="mobile-only">CB</span></div>
+              <div className="bb-stat-label">
+                <span className="desktop-only">COMBO</span>
+                <span className="mobile-only">CB</span>
+              </div>
               <div className="bb-stat-value bb-combo-val">{combo}</div>
             </div>
           </div>
 
           <div className="bb-stat-card desktop-only" style={{ textAlign: 'center' }}>
-             <div className="bb-stat-label">HƯỚNG DẪN</div>
-             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px', lineHeight: 1.4 }}>
-                Kéo và thả các khối vào bàn cờ. Điền đầy một hàng hoặc một cột để xóa chúng và ghi điểm.
-                <br/><br/>Trò chơi kết thúc khi không còn chỗ trống.
-             </p>
+            <div className="bb-stat-label">HƯỚNG DẪN</div>
+            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px', lineHeight: 1.4 }}>
+              Kéo và thả các khối vào bàn cờ. Điền đầy một hàng hoặc cột để xóa và ghi điểm.
+              <br /><br />Trò chơi kết thúc khi không còn chỗ trống.
+            </p>
           </div>
 
           <div className="bb-quick-actions mobile-only">
@@ -504,103 +533,101 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
         </div>
       </div>
 
-      {/* Drag overlay — rendered at fixed position via left/top, NOT transform */}
-      {dragRenderState && typeof document !== 'undefined' && createPortal(
-         <div
-            className="bb-drag-overlay"
-            style={{
-               ...getOverlayStyle(),
-               gridTemplateColumns: `repeat(${dragRenderState.piece.matrix[0].length}, ${cellSizeRef.current}px)`,
-            }}
-         >
-            {dragRenderState.piece.matrix.map((row, r) =>
-               row.map((val, c) => (
-                  <div key={`${r}-${c}`} className="bb-piece-cell" style={{ width: cellSizeRef.current, height: cellSizeRef.current }}>
-                     {val ? (
-                        <div
-                           className="bb-block dragging"
-                           style={{ background: COLORS[dragRenderState.piece.color] }}
-                        >
-                           <div className="bb-block-inner" />
-                        </div>
-                     ) : null}
+      {/* ─── Drag Overlay: rendered via portal, positioned imperatively ─── */}
+      {dragHighlight && typeof document !== 'undefined' && createPortal(
+        <div
+          ref={overlayRef}
+          className="bb-drag-overlay"
+          style={{
+            // Start invisible - useLayoutEffect will position & show it
+            visibility: 'hidden',
+            gridTemplateColumns: `repeat(${dragHighlight.piece.matrix[0].length}, ${cellSize}px)`,
+          }}
+        >
+          {dragHighlight.piece.matrix.map((row, r) =>
+            row.map((val, c) => (
+              <div key={`${r}-${c}`} className="bb-piece-cell" style={{ width: cellSize, height: cellSize }}>
+                {val ? (
+                  <div className="bb-block dragging" style={{ background: COLORS[dragHighlight.piece.color] }}>
+                    <div className="bb-block-inner" />
                   </div>
-               ))
-            )}
-         </div>,
-         document.body
+                ) : null}
+              </div>
+            ))
+          )}
+        </div>,
+        document.body
       )}
 
       {isGameOver && (
-         <div className="bb-gameover">
-            <div className="bb-gameover-content">
-               <h2>HẾT CHỖ!</h2>
-               <p>Tổng điểm: {score}</p>
-               <button onClick={restart} className="bb-restart-btn">Chơi Lại</button>
-            </div>
-         </div>
+        <div className="bb-gameover">
+          <div className="bb-gameover-content">
+            <h2>HẾT CHỖ!</h2>
+            <p>Tổng điểm: {score}</p>
+            <button onClick={restart} className="bb-restart-btn">Chơi Lại</button>
+          </div>
+        </div>
       )}
 
       <style>{`
-        .blockblast-game { display: flex; flex-direction: column; width: 100%; align-items: center; user-select: none; touch-action: none; }
+        .blockblast-game {
+          display: flex; flex-direction: column; width: 100%; align-items: center;
+          user-select: none; touch-action: none;
+        }
         .blockblast-game.fullscreen-mode { justify-content: center; }
-
         .bb-main { display: flex; gap: 24px; justify-content: center; align-items: stretch; width: 100%; max-width: 900px; }
-
-        /* Board Area */
         .bb-board-wrap { position: relative; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
-
         .bb-board {
-           display: grid; grid-template-columns: repeat(8, var(--cell-size));
-           grid-template-rows: repeat(8, var(--cell-size));
-           background: #050510; border-radius: 12px; padding: 6px;
-           border: 2px solid rgba(255,255,255,0.08); box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
-           gap: 2px;
+          display: grid;
+          grid-template-columns: repeat(8, var(--cell-size));
+          grid-template-rows: repeat(8, var(--cell-size));
+          background: #050510; border-radius: 12px; padding: 6px;
+          border: 2px solid rgba(255,255,255,0.08);
+          box-shadow: inset 0 0 40px rgba(0,0,0,0.8); gap: 2px;
         }
         .bb-cell {
-           width: var(--cell-size); height: var(--cell-size);
-           background: rgba(255,255,255,0.02); border-radius: 6px;
-           box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+          width: var(--cell-size); height: var(--cell-size);
+          background: rgba(255,255,255,0.02); border-radius: 6px;
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
         }
         .bb-block {
-           width: 100%; height: 100%; border-radius: 6px;
-           box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2), 0 2px 5px rgba(0,0,0,0.4);
-           position: relative; overflow: hidden;
+          width: 100%; height: 100%; border-radius: 6px;
+          box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2), 0 2px 5px rgba(0,0,0,0.4);
+          position: relative; overflow: hidden;
         }
         .bb-block-inner {
-           position: absolute; top: 12%; left: 12%; right: 12%; bottom: 12%;
-           border-radius: 3px; background: rgba(255,255,255,0.18);
-           box-shadow: inset 0 1px 3px rgba(255,255,255,0.5);
+          position: absolute; top: 12%; left: 12%; right: 12%; bottom: 12%;
+          border-radius: 3px; background: rgba(255,255,255,0.18);
+          box-shadow: inset 0 1px 3px rgba(255,255,255,0.5);
         }
-
         .bb-hand {
-           display: flex; justify-content: center; gap: 16px; margin-top: 30px;
-           height: calc(var(--cell-size) * 4); align-items: center; width: 100%;
-           --hand-cell-size: calc(var(--cell-size) * 0.55);
+          display: flex; justify-content: center; gap: 16px; margin-top: 30px;
+          height: calc(var(--cell-size) * 4); align-items: center; width: 100%;
+          --hand-cell-size: calc(var(--cell-size) * 0.55);
         }
-        .bb-hand-slot {
-           flex: 1; height: 100%;
-           display: flex; justify-content: center; align-items: center;
-        }
+        .bb-hand-slot { flex: 1; height: 100%; display: flex; justify-content: center; align-items: center; }
         .bb-piece {
-           display: grid; gap: 2px; touch-action: none; cursor: grab;
-           transition: transform 0.15s;
+          display: grid; gap: 2px; touch-action: none; cursor: grab;
+          transition: transform 0.15s;
         }
         .bb-piece:hover { transform: scale(1.08); }
         .bb-piece-cell { width: var(--cell-size); height: var(--cell-size); }
         .bb-hand-slot .bb-piece-cell { width: var(--hand-cell-size); height: var(--hand-cell-size); }
 
-        /* Drag overlay: positioned with left/top, NOT transform, to avoid coordinate confusion */
+        /* ─── Overlay: position: fixed, left/top managed imperatively ─── */
         .bb-drag-overlay {
-           position: fixed; top: 0; left: 0; z-index: 9999; pointer-events: none;
-           display: grid; gap: 2px;
-           transition: opacity 0.1s, filter 0.1s;
+          position: fixed;
+          top: 0; left: 0;        /* initial values - overwritten by JS */
+          z-index: 9999;
+          pointer-events: none;
+          display: grid; gap: 2px;
+          will-change: left, top;
         }
         .bb-block.dragging {
-           box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 0 2px rgba(255,255,255,0.15);
+          box-shadow: 0 12px 30px rgba(0,0,0,0.7), 0 0 0 2px rgba(255,255,255,0.2);
+          transform: scale(1.05);
         }
 
-        /* Sidebar */
         .bb-sidebar { display: flex; flex-direction: column; gap: 12px; min-width: 180px; max-width: 220px; }
         .bb-stat-card {
           background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
@@ -614,85 +641,68 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
         .bb-score-val { font-size: 34px; color: #00e5ff; text-shadow: 0 0 10px #00e5ff, 0 0 30px #00e5ff; }
         .bb-lines-val { font-size: 28px; color: #39e75f; text-shadow: 0 0 10px #39e75f, 0 0 30px #39e75f; }
         .bb-combo-val { font-size: 28px; color: #ffe14d; text-shadow: 0 0 10px #ffe14d, 0 0 30px #ffe14d; }
-
         .bb-stat-row { display: flex; flex-direction: column; gap: 12px; }
         .bb-stat-half { flex: unset; }
-
         .bb-progress { margin-top: 12px; height: 5px; border-radius: 5px; background: rgba(255,255,255,0.06); overflow: hidden; }
-        .bb-progress-fill { height: 100%; border-radius: 5px; transition: width 0.5s ease; background: linear-gradient(90deg, #00e5ff, #b44dff); box-shadow: 0 0 8px rgba(0,229,255,0.5); }
-
-        .bb-size-controls { display: flex; }
-        .bb-size-btn {
-           background: rgba(255,255,255,0.05); border: 1px solid transparent; color: rgba(255,255,255,0.5);
-           border-radius: 6px; padding: 4px 8px; margin: 0 4px; cursor: pointer; transition: 0.2s; font-size: 11px;
+        .bb-progress-fill {
+          height: 100%; border-radius: 5px; transition: width 0.5s ease;
+          background: linear-gradient(90deg, #00e5ff, #b44dff);
+          box-shadow: 0 0 8px rgba(0,229,255,0.5);
         }
-        .bb-size-btn.active {
-           background: rgba(0,229,255,0.15); color: #00e5ff; border-color: rgba(0,229,255,0.3);
-        }
-
         .bb-quick-actions { display: flex; gap: 8px; }
         .bb-action-btn {
           flex: 1; padding: 10px; border-radius: 12px; font-size: 14px;
           font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif;
         }
         .bb-action-restart { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2); color: #00e5ff; }
-
-        /* Game Over */
         .bb-gameover {
-           position: absolute; inset: 0; background: rgba(0,0,0,0.85); border-radius: 12px;
-           display: flex; justify-content: center; align-items: center; z-index: 200;
-           backdrop-filter: blur(8px);
+          position: absolute; inset: 0; background: rgba(0,0,0,0.85);
+          border-radius: 12px; display: flex; justify-content: center; align-items: center;
+          z-index: 200; backdrop-filter: blur(8px);
         }
         .bb-gameover-content { text-align: center; }
         .bb-gameover h2 { color: #ff4d6a; font-size: 42px; margin-bottom: 12px; text-shadow: 0 0 20px rgba(255,77,106,0.6); font-weight: 900; }
         .bb-gameover p { color: rgba(255,255,255,0.8); font-size: 18px; margin-bottom: 24px; font-weight: 600; }
         .bb-restart-btn {
-           background: linear-gradient(135deg, #e41d1d, #ff4d6a); border: none;
-           padding: 14px 36px; border-radius: 14px; color: white; font-size: 18px; font-weight: 800;
-           cursor: pointer; transition: 0.2s; box-shadow: 0 5px 20px rgba(228,29,29,0.4);
-           font-family: 'Outfit', sans-serif;
+          background: linear-gradient(135deg, #e41d1d, #ff4d6a); border: none;
+          padding: 14px 36px; border-radius: 14px; color: white; font-size: 18px; font-weight: 800;
+          cursor: pointer; transition: 0.2s; box-shadow: 0 5px 20px rgba(228,29,29,0.4);
+          font-family: 'Outfit', sans-serif;
         }
         .bb-restart-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 8px 25px rgba(228,29,29,0.6); }
 
-        /* Mobile specific hiding */
         .mobile-only { display: none !important; }
         .desktop-only { display: inline !important; }
 
         @media (max-width: 800px) {
-           .mobile-only { display: flex !important; }
-           .desktop-only { display: none !important; }
-
-           .bb-main { flex-direction: column; gap: 16px; align-items: center; }
-           .bb-sidebar { flex-direction: row; min-width: 100%; max-width: 100%; gap: 10px; justify-content: center; padding: 0 10px; }
-           .bb-stat-card { padding: 10px; border-radius: 12px; flex: 1; display: flex; flex-direction: column; align-items: center; }
-           .bb-stat-row { flex-direction: row; gap: 10px; flex: 1.5; }
-           .bb-stat-half { flex: 1; }
-
-           .bb-stat-label { font-size: 9px; letter-spacing: 1px; margin-bottom: 4px; }
-           .bb-score-val { font-size: 24px; }
-           .bb-lines-val, .bb-combo-val { font-size: 20px; }
-           .bb-progress { margin-top: 6px; height: 3px; }
-
-           .bb-hand { height: auto; padding: 10px 0; gap: 8px; margin-top: 10px; }
-           .bb-hand-slot { width: auto; flex: 1; }
-
-           .bb-size-controls { display: none !important; }
-           .bb-quick-actions { flex: 1; }
-           .bb-action-btn { font-size: 13px; padding: 8px; }
+          .mobile-only { display: flex !important; }
+          .desktop-only { display: none !important; }
+          .bb-main { flex-direction: column; gap: 16px; align-items: center; }
+          .bb-sidebar { flex-direction: row; min-width: 100%; max-width: 100%; gap: 10px; justify-content: center; padding: 0 10px; }
+          .bb-stat-card { padding: 10px; border-radius: 12px; flex: 1; display: flex; flex-direction: column; align-items: center; }
+          .bb-stat-row { flex-direction: row; gap: 10px; flex: 1.5; }
+          .bb-stat-half { flex: 1; }
+          .bb-stat-label { font-size: 9px; letter-spacing: 1px; margin-bottom: 4px; }
+          .bb-score-val { font-size: 24px; }
+          .bb-lines-val, .bb-combo-val { font-size: 20px; }
+          .bb-progress { margin-top: 6px; height: 3px; }
+          .bb-hand { height: auto; padding: 10px 0; gap: 8px; margin-top: 10px; }
+          .bb-hand-slot { width: auto; flex: 1; }
+          .bb-quick-actions { flex: 1; }
+          .bb-action-btn { font-size: 13px; padding: 8px; }
         }
 
-        /* Animations */
         @keyframes popIn {
-           0% { transform: scale(0.5); opacity: 0; }
-           70% { transform: scale(1.1); }
-           100% { transform: scale(1); opacity: 1; }
+          0% { transform: scale(0.5); opacity: 0; }
+          70% { transform: scale(1.1); }
+          100% { transform: scale(1); opacity: 1; }
         }
         .anim-place .bb-block { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
         @keyframes popOut {
-           0% { transform: scale(1); opacity: 1; }
-           50% { transform: scale(1.2); opacity: 0.8; filter: brightness(1.5); }
-           100% { transform: scale(0); opacity: 0; }
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.2); opacity: 0.8; filter: brightness(1.5); }
+          100% { transform: scale(0); opacity: 0; }
         }
         .anim-clear .bb-block { animation: popOut 0.4s ease-out forwards; }
       `}</style>
