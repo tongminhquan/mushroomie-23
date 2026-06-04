@@ -71,6 +71,56 @@ function BlockCell({ color, opacity = 1 }: { color: string; opacity?: number }) 
   )
 }
 
+// ─── Audio System ──────────────────────────────────────────────────────────────
+const playSound = (type: 'move' | 'drop' | 'invalid' | 'clear', combo: number = 0) => {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+
+    const now = ctx.currentTime
+    if (type === 'move') {
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(300, now)
+      osc.frequency.exponentialRampToValueAtTime(600, now + 0.1)
+      gain.gain.setValueAtTime(0, now)
+      gain.gain.linearRampToValueAtTime(0.1, now + 0.05)
+      gain.gain.linearRampToValueAtTime(0, now + 0.1)
+      osc.start(now)
+      osc.stop(now + 0.1)
+    } else if (type === 'drop') {
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(150, now)
+      osc.frequency.exponentialRampToValueAtTime(50, now + 0.1)
+      gain.gain.setValueAtTime(0.2, now)
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1)
+      osc.start(now)
+      osc.stop(now + 0.1)
+    } else if (type === 'invalid') {
+      osc.type = 'sawtooth'
+      osc.frequency.setValueAtTime(150, now)
+      osc.frequency.linearRampToValueAtTime(100, now + 0.15)
+      gain.gain.setValueAtTime(0.1, now)
+      gain.gain.linearRampToValueAtTime(0, now + 0.15)
+      osc.start(now)
+      osc.stop(now + 0.15)
+    } else if (type === 'clear') {
+      osc.type = 'square'
+      const baseFreq = 400 + Math.min(combo * 50, 600)
+      osc.frequency.setValueAtTime(baseFreq, now)
+      osc.frequency.exponentialRampToValueAtTime(baseFreq * 2, now + 0.2)
+      gain.gain.setValueAtTime(0.1, now)
+      gain.gain.linearRampToValueAtTime(0, now + 0.2)
+      osc.start(now)
+      osc.stop(now + 0.2)
+    }
+  } catch (e) {
+    // Ignore audio errors
+  }
+}
+
 // ─── Main Game ──────────────────────────────────────────────────────────────────
 export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: number) => void }) {
   // ── Cell size (responsive) ──────────────────────────────────────────────────
@@ -143,15 +193,16 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
 
   /**
    * Convert the overlay's current TOP-LEFT position into a board cell (row, col).
-   * Uses the overlay's visual centre to find the nearest grid cell.
+   * Uses the overlay's visual centre to find the nearest grid cell, accounting for scale(1.1).
    */
   const overlayToCell = useCallback((overlayLeft: number, overlayTop: number, piece: Piece) => {
     const el = boardElRef.current
     if (!el) return { row: -99, col: -99 }
     const rect = el.getBoundingClientRect()
     const stride = csRef.current + GAP
-    const pieceCenterX = overlayLeft + (piece.matrix[0].length * stride) / 2
-    const pieceCenterY = overlayTop  + (piece.matrix.length    * stride) / 2
+    const scale = 1.1
+    const pieceCenterX = overlayLeft + (piece.matrix[0].length * stride * scale) / 2
+    const pieceCenterY = overlayTop  + (piece.matrix.length    * stride * scale) / 2
     const col = Math.round((pieceCenterX - rect.left - PAD - csRef.current / 2) / stride)
     const row = Math.round((pieceCenterY - rect.top  - PAD - csRef.current / 2) / stride)
     return { row, col }
@@ -159,12 +210,8 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
 
   /**
    * EXACT blockblast-game.io formula:
-   *   piece.X = cursor.X + grabOffsetX   ← grab-point preservation (horizontal only)
-   *   piece.Y = cursor.Y - fixedLift      ← FIXED lift (NOT grab-point for Y)
-   *
-   * This means no matter where on the piece you press, it always floats
-   * a constant distance above the finger, while staying horizontally
-   * aligned to where you grabbed it.
+   *   piece.X = cursor.X - (width/2)   ← centered horizontally
+   *   piece.Y = cursor.Y - fixedLift   ← FIXED lift above finger
    */
   const moveOverlay = useCallback((cx: number, cy: number): { left: number; top: number } => {
     const el = overlayRef.current
@@ -214,6 +261,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     }
 
     if (lc > 0) {
+      playSound('clear', comboRef.current)
       const toClear: Cell[] = []
       fullRows.forEach(r => { for (let c = 0; c < COLS; c++) toClear.push({ r, c }) })
       fullCols.forEach(c => { for (let r = 0; r < ROWS; r++) if (!toClear.some(x => x.r === r && x.c === c)) toClear.push({ r, c }) })
@@ -232,6 +280,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
         finish(cb, ns, newCombo)
       }, 400)
     } else {
+      playSound('drop')
       const ns = scoreRef.current + count
       setScore(ns); scoreRef.current = ns
       setCombo(0); comboRef.current = 0
@@ -250,7 +299,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     el.style.display = 'grid'
     el.style.gridTemplateColumns = `repeat(${piece.matrix[0].length},${cellSize}px)`
     el.style.gap = `${GAP}px`
-    el.style.filter = 'drop-shadow(0 8px 24px rgba(0,0,0,.7))'
+    el.style.gap = `${GAP}px`
 
     piece.matrix.forEach(row => row.forEach(val => {
       const cell = document.createElement('div')
@@ -283,23 +332,14 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     const stride = cellSize + GAP
     const overlayW = piece.matrix[0].length * stride
 
-    // ── X: grab-point (blockblast-game.io formula: DX = ShapesParent.X - Touch.AbsoluteX) ──
-    // We record where horizontally the user touched the piece,
-    // scaled up from hand-size (0.5×cs) to full drag-size (1×cs)
-    const handEl = handRefs.current[idx]
-    let grabOffsetX: number
-    if (handEl) {
-      const handRect = handEl.getBoundingClientRect()
-      const relX = e.clientX - handRect.left
-      const scale = cellSize / (cellSize * 0.5)   // 2× scale up
-      grabOffsetX = Math.max(0, Math.min(relX * scale, overlayW))
-    } else {
-      grabOffsetX = overlayW / 2   // fallback: centre
-    }
+    // ── X: Center horizontally on cursor ──
+    const grabOffsetX = overlayW / 2
 
-    // ── Y: FIXED lift (blockblast-game.io formula: ShapesParent.Y = Touch.AbsoluteY - 200) ──
-    // No grab-point for Y — always floats a constant distance above the finger
-    const fixedLift = getFixedLift(isTouch)
+    // ── Y: Lift so the BOTTOM of the piece is slightly above the cursor ──
+    const overlayH = piece.matrix.length * stride
+    const fixedLift = (isTouch ? cellSize * 1.5 : cellSize * 0.5) + overlayH
+
+    playSound('move')
 
     dragging.current = { idx, piece, isTouch, grabOffsetX, fixedLift }
 
@@ -361,7 +401,11 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
 
     const { row, col } = overlayToCell(left, top, drag.piece)
     const ok = canPlace(boardRef.current, drag.piece.matrix, row, col)
-    if (ok) placePiece(drag.piece, drag.idx, row, col)
+    if (ok) {
+      placePiece(drag.piece, drag.idx, row, col)
+    } else {
+      playSound('invalid')
+    }
 
     setHl(null)
   }, [overlayToCell, canPlace, placePiece])
