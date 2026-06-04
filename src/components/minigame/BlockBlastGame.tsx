@@ -479,16 +479,22 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     const el = overlayRef.current
     if (el) { el.style.visibility = 'hidden'; el.style.opacity = '0'; el.innerHTML = '' }
 
-    // Use the exact same visual position formula as moveOverlay
-    const { vx, vy } = getVisualPos(e.clientX, e.clientY)
+    // CRITICAL: compute visual position from the SAVED drag state (local variable),
+    // NOT from getVisualPos() which reads dragging.current (already null above).
+    const vx = e.clientX - drag.grabOffsetX
+    const vy = e.clientY - drag.grabOffsetY - drag.fixedLift
+
     const { row, col } = overlayToCell(vx, vy)
     const ok = canPlace(boardRef.current, drag.piece.matrix, row, col)
 
     if (DEBUG_DRAG) {
       console.log('[endDrag]', {
         clientX: e.clientX, clientY: e.clientY,
+        grabOffsetX: drag.grabOffsetX, grabOffsetY: drag.grabOffsetY,
+        fixedLift: drag.fixedLift,
         vx: vx.toFixed(1), vy: vy.toFixed(1),
         row, col, ok,
+        piece: drag.piece.id, idx: drag.idx,
       })
     }
 
@@ -499,7 +505,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     }
 
     setHl(null)
-  }, [getVisualPos, overlayToCell, canPlace, placePiece])
+  }, [overlayToCell, canPlace, placePiece])
 
   // ── RESTART ─────────────────────────────────────────────────────────────────
   const restart = () => {
