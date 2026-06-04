@@ -133,8 +133,8 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       const halfPieceCols = piece.matrix[0].length / 2
       const halfPieceRows = piece.matrix.length / 2
 
-      const col = Math.round(relX / CELL_STRIDE - halfPieceCols + 0.5)
-      const row = Math.round(relY / CELL_STRIDE - halfPieceRows + 0.5)
+      const col = Math.round(relX / CELL_STRIDE - halfPieceCols)
+      const row = Math.round(relY / CELL_STRIDE - halfPieceRows)
 
       hoverRow = row
       hoverCol = col
