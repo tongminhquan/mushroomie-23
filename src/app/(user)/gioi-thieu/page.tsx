@@ -186,10 +186,10 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StaggerChildren animation="zoom-in" staggerDelay={100}>
               {[
-                { name: 'Vòng tay thủ công', desc: 'Hạt cườm pastel, tết dây cá tính.', icon: '📿', color: 'bg-blue-50', link: '/san-pham?category=vong-tay' },
-                { name: 'Dây chuyền / Vòng cổ', desc: 'Điểm nhấn pha lê, hoa rực rỡ.', icon: '✨', color: 'bg-rose-50', link: '/san-pham?category=phu-kien' },
-                { name: 'Móc khóa', desc: 'Dango anh đào, thú cưng nhỏ xinh.', icon: '🔑', color: 'bg-amber-50', link: '/san-pham?category=moc-khoa' },
-                { name: 'Dây treo điện thoại', desc: 'Phong cách Y2K, Sóng xanh hút mắt.', icon: '📱', color: 'bg-emerald-50', link: '/san-pham?category=phu-kien' },
+                { name: 'Vòng tay', desc: 'Hạt cườm pastel, vòng tết và charm phối theo cá tính.', icon: '📿', color: 'bg-blue-50', link: '/san-pham?category=vong-tay' },
+                { name: 'Charm', desc: 'Nhiều mẫu charm nhỏ xinh để mix theo mood riêng.', icon: '✨', color: 'bg-rose-50', link: '/san-pham?category=charm' },
+                { name: 'Móc khóa', desc: 'Móc khóa handmade dễ thương, phù hợp làm quà tặng.', icon: '🔑', color: 'bg-amber-50', link: '/san-pham?category=moc-khoa' },
+                { name: 'Vòng cổ', desc: 'Phụ kiện cổ nhẹ nhàng, nổi bật với hạt và charm.', icon: '💎', color: 'bg-emerald-50', link: '/san-pham?category=vong-co' },
               ].map((prod, idx) => (
                 <Link href={prod.link} key={idx} className={`${prod.color} block p-8 rounded-3xl border border-black/5 hover:scale-[1.02] transition-transform duration-300 cursor-pointer`}>
                   <div className="text-4xl mb-4 bg-white/60 w-14 h-14 flex items-center justify-center rounded-full shadow-sm">{prod.icon}</div>
