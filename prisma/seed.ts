@@ -35,6 +35,19 @@ async function main() {
 
   console.log('✅ Users created')
 
+  const superAdminPassword = await bcrypt.hash('SuperAdmin@123', 12)
+  await prisma.user.upsert({
+    where: { email: 'quantmtb01641@gmail.com' },
+    update: { role: 'super_admin' },
+    create: {
+      name: 'Super Admin',
+      email: 'quantmtb01641@gmail.com',
+      password_hash: superAdminPassword,
+      role: 'super_admin',
+    },
+  })
+  console.log('✅ Super Admin created/updated')
+
   // ─── CATEGORIES ───────────────────────────────────────────
   const categories = await Promise.all([
     prisma.category.upsert({

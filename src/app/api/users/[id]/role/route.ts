@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { logAdminAction } from '@/lib/admin-logger'
+import { PROTECTED_SUPER_ADMIN_EMAIL, PROTECTED_SUPER_ADMIN_ROLE } from '@/lib/constants'
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -21,6 +22,25 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     // Prevent removing admin from oneself
     if (userId === parseInt(session.user.id as string) && role !== 'super_admin') {
       return NextResponse.json({ error: 'Cannot remove your own admin rights' }, { status: 400 })
+    }
+
+    const targetUser = await prisma.user.findUnique({ where: { id: userId } })
+    if (!targetUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    if (
+      targetUser.email.toLowerCase() === PROTECTED_SUPER_ADMIN_EMAIL.toLowerCase() &&
+      role !== PROTECTED_SUPER_ADMIN_ROLE
+    ) {
+      await logAdminAction({
+        userId: Number(session.user.id),
+        action: 'UPDATE',
+        entity: 'USER',
+        details: { targetEmail: targetUser.email, newRole: role, reason: 'SECURITY: Attempted to demote protected super admin' },
+        ipAddress: req.headers.get('x-forwarded-for') || undefined
+      })
+      return NextResponse.json({ error: 'Không được phép hạ quyền tài khoản super admin gốc.' }, { status: 403 })
     }
 
     const user = await prisma.user.update({

@@ -2,13 +2,30 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import AnimateOnScroll, { StaggerChildren } from '@/components/ui/AnimateOnScroll'
+import { prisma } from '@/lib/prisma'
+import CategoryIcon from '@/components/ui/CategoryIcon'
 
 export const metadata: Metadata = {
   title: 'Giới thiệu | Mushroomie',
   description: 'Từ từng hạt nhỏ, tạo phong cách riêng. Khám phá câu chuyện thương hiệu Mushroomie - không gian phụ kiện handmade cá nhân hóa dành cho Gen Z.',
 }
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const targetSlugs = ['vong-tay', 'charm', 'moc-khoa', 'vong-co'];
+  const dbCategories = await prisma.category.findMany({
+    where: { slug: { in: targetSlugs }, type: 'product' },
+  });
+
+  const orderedCategories = targetSlugs.map(slug => 
+    dbCategories.find(c => c.slug === slug)
+  ).filter(Boolean) as typeof dbCategories;
+
+  const bgColors: Record<string, string> = {
+    'vong-tay': 'bg-blue-50',
+    'charm': 'bg-rose-50',
+    'moc-khoa': 'bg-amber-50',
+    'vong-co': 'bg-emerald-50',
+  };
   return (
     <div className="min-h-screen bg-[#FDFBF7] overflow-hidden">
       {/* 1. Hero Section - Premium & Dreamy */}
@@ -185,18 +202,21 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StaggerChildren animation="zoom-in" staggerDelay={100}>
-              {[
-                { name: 'Vòng tay', desc: 'Hạt cườm pastel, vòng tết và charm phối theo cá tính.', icon: '💛', color: 'bg-blue-50', link: '/san-pham?category=vong-tay' },
-                { name: 'Charm', desc: 'Nhiều mẫu charm nhỏ xinh để mix theo mood riêng.', icon: '✨', color: 'bg-rose-50', link: '/san-pham?category=charm' },
-                { name: 'Móc khóa', desc: 'Móc khóa handmade dễ thương, phù hợp làm quà tặng.', icon: '🔑', color: 'bg-amber-50', link: '/san-pham?category=moc-khoa' },
-                { name: 'Vòng cổ', desc: 'Phụ kiện cổ nhẹ nhàng, nổi bật với hạt và charm.', icon: '🌈', color: 'bg-emerald-50', link: '/san-pham?category=vong-co' },
-              ].map((prod, idx) => (
-                <Link href={prod.link} key={idx} className={`${prod.color} block p-8 rounded-3xl border border-black/5 hover:scale-[1.02] transition-transform duration-300 cursor-pointer`}>
-                  <div className="text-4xl mb-4 bg-white/60 w-14 h-14 flex items-center justify-center rounded-full shadow-sm">{prod.icon}</div>
+              {orderedCategories.map((prod, idx) => {
+                const color = bgColors[prod.slug] || 'bg-neutral-50';
+                const link = `/san-pham?category=${prod.slug}`;
+                const iconSrc = prod.icon || prod.image_url || null;
+
+                return (
+                <Link href={link} key={idx} className={`${color} block p-8 rounded-3xl border border-black/5 hover:scale-[1.02] transition-transform duration-300 cursor-pointer`}>
+                  <div className="mb-4 bg-white/60 w-16 h-16 flex items-center justify-center rounded-full shadow-sm">
+                    <CategoryIcon iconSrc={iconSrc} name={prod.name} />
+                  </div>
                   <h3 className="font-heading font-bold text-lg text-neutral-900 mb-2">{prod.name}</h3>
-                  <p className="text-neutral-600 text-sm">{prod.desc}</p>
+                  <p className="text-neutral-600 text-sm">{prod.description || 'Khám phá bộ sưu tập phụ kiện độc đáo từ Mushroomie.'}</p>
                 </Link>
-              ))}
+                );
+              })}
             </StaggerChildren>
           </div>
         </div>

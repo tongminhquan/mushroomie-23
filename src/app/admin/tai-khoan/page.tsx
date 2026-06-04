@@ -6,6 +6,7 @@ import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { PROTECTED_SUPER_ADMIN_EMAIL } from '@/lib/constants'
 
 interface User {
   id: number
@@ -166,8 +167,13 @@ export default function AdminAccountsPage() {
                           </div>
                         )}
                         <div className="max-w-xs whitespace-normal">
-                          <div className="font-medium text-neutral-900 flex items-center gap-1.5">
+                          <div className="font-medium text-neutral-900 flex items-center gap-1.5 flex-wrap">
                             {user.name}
+                            {user.email.toLowerCase() === PROTECTED_SUPER_ADMIN_EMAIL.toLowerCase() && (
+                              <span className="bg-red-100 text-red-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide whitespace-nowrap">
+                                Super Admin được bảo vệ
+                              </span>
+                            )}
                             {user.google_id && (
                               <span title="Tài khoản liên kết Google" className="flex items-center justify-center bg-white border border-neutral-200 rounded-full p-0.5">
                                 <svg className="w-3 h-3" viewBox="0 0 24 24">
@@ -207,15 +213,15 @@ export default function AdminAccountsPage() {
                         <select
                           value={user.role}
                           onChange={(e) => handleUpdateRole(user.id, e.target.value)}
-                          disabled={updatingId === user.id}
-                          className="bg-neutral-50 border border-neutral-200 text-neutral-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-32 p-2 disabled:opacity-50"
+                          disabled={updatingId === user.id || user.email.toLowerCase() === PROTECTED_SUPER_ADMIN_EMAIL.toLowerCase()}
+                          className="bg-neutral-50 border border-neutral-200 text-neutral-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-32 p-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <option value="user">User</option>
                           <option value="viewer">Viewer</option>
                           <option value="admin">Admin</option>
                           <option value="super_admin">Chủ hệ thống</option>
                         </select>
-                        {user.id !== (session?.user as any)?.id && (
+                        {user.id !== (session?.user as any)?.id && user.email.toLowerCase() !== PROTECTED_SUPER_ADMIN_EMAIL.toLowerCase() && (
                           <button
                             onClick={() => handleDeleteUser(user.id)}
                             className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
