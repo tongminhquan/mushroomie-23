@@ -127,7 +127,7 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
   return (
     <div className="w-full bg-secondary flex flex-col items-center pb-12 pt-6 px-4 sm:px-6 lg:px-8">
       <section 
-        className="relative w-full max-w-7xl aspect-[4/3] md:aspect-[21/9] bg-neutral-900 flex items-center overflow-hidden group select-none cursor-grab active:cursor-grabbing rounded-3xl md:rounded-[40px] shadow-strong"
+        className="relative w-full max-w-7xl aspect-[16/9] bg-[#fff7f2] flex items-center overflow-hidden group select-none cursor-grab active:cursor-grabbing rounded-3xl md:rounded-[40px] shadow-strong"
         onMouseEnter={stopTimer}
         onMouseLeave={handleMouseLeave}
         onTouchStart={handleTouchStart}
@@ -159,17 +159,15 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
                 fill
                 priority={index === 0}
                 style={{ filter: `brightness(${banner.brightness ?? 100}%)` }}
-                className="object-cover pointer-events-none"
+                className="object-contain pointer-events-none"
               />
 
               {/* Gradient Overlay (Only if there is text content to ensure readability) */}
-              <div 
-                className={`absolute inset-0 transition-opacity duration-700 pointer-events-none ${
-                  isPureImage 
-                    ? 'bg-black/10' // Subtle darkening even for pure images
-                    : 'bg-gradient-to-tr from-black/85 via-black/45 to-black/10 lg:from-black/75 lg:via-black/35 lg:to-transparent'
-                }`}
-              />
+              {!isPureImage && (
+                <div 
+                  className="absolute inset-0 transition-opacity duration-700 pointer-events-none bg-gradient-to-tr from-black/85 via-black/45 to-black/10 lg:from-black/75 lg:via-black/35 lg:to-transparent"
+                />
+              )}
 
               {/* Float emojis overlay (Only if there is text) */}
               {!isPureImage && (
