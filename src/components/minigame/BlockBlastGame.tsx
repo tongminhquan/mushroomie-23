@@ -133,13 +133,20 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
    *
    * => col = (cursorX - rect.left - BOARD_PAD) / stride - pieceCols/2
    */
-  const cursorToCell = useCallback((cx: number, cy: number, piece: Piece) => {
+  const getLift = (isTouch: boolean) => isTouch ? 80 : 40
+
+  const cursorToCell = useCallback((cx: number, cy: number, piece: Piece, isTouch: boolean) => {
     const el = boardElRef.current
     if (!el) return { row: -99, col: -99 }
     const rect = el.getBoundingClientRect()
     const stride = csRef.current + GAP
-    const col = Math.round((cx - rect.left - BOARD_PAD) / stride - piece.matrix[0].length / 2)
-    const row = Math.round((cy - rect.top  - BOARD_PAD) / stride - piece.matrix.length    / 2)
+    
+    // Virtual center of the piece
+    const pieceCenterX = cx
+    const pieceCenterY = cy - getLift(isTouch)
+
+    const col = Math.round((pieceCenterX - rect.left - BOARD_PAD) / stride - piece.matrix[0].length / 2)
+    const row = Math.round((pieceCenterY - rect.top  - BOARD_PAD) / stride - piece.matrix.length    / 2)
     return { row, col }
   }, [])
 
@@ -155,10 +162,10 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     const stride = csRef.current + GAP
     const pw = drag.piece.matrix[0].length * stride
     const ph = drag.piece.matrix.length    * stride
-    const lift = drag.isTouch ? csRef.current * 2.5 : 0
+    const lift = getLift(drag.isTouch)
     const x = cx - pw / 2
     const y = cy - ph / 2 - lift
-    el.style.transform = `translate3d(${x}px,${y}px,0)`
+    el.style.transform = `translate3d(${x}px,${y}px,0) scale(1.15)`
     el.style.visibility = 'visible'
   }, [])
 
@@ -170,7 +177,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     rafRef.current = requestAnimationFrame(() => {
       const drag = dragging.current
       if (!drag) return
-      const { row, col } = cursorToCell(cx, cy, drag.piece)
+      const { row, col } = cursorToCell(cx, cy, drag.piece, drag.isTouch)
       const ok = canPlace(boardRef.current, drag.piece.matrix, row, col)
       setHl(prev => {
         if (prev && prev.row === row && prev.col === col && prev.ok === ok) return prev
@@ -282,7 +289,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     }
 
     // React state for board highlight only
-    const { row, col } = cursorToCell(e.clientX, e.clientY, piece)
+    const { row, col } = cursorToCell(e.clientX, e.clientY, piece, isTouch)
     const ok = canPlace(boardRef.current, piece.matrix, row, col)
     setHl({ piece, row, col, ok })
   }, [clearing.length, moveOverlay, cursorToCell, canPlace])
@@ -307,7 +314,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     if (el) { el.style.visibility = 'hidden'; el.innerHTML = '' }
 
     // Place piece if valid
-    const { row, col } = cursorToCell(e.clientX, e.clientY, drag.piece)
+    const { row, col } = cursorToCell(e.clientX, e.clientY, drag.piece, drag.isTouch)
     const ok = canPlace(boardRef.current, drag.piece.matrix, row, col)
     if (ok) placePiece(drag.piece, drag.idx, row, col)
 
