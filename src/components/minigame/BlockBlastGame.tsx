@@ -3,10 +3,13 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
+const DEBUG_DRAG = false // Set true to log drag coordinates to console
 const ROWS = 8
 const COLS = 8
 const GAP = 2       // px gap between cells
 const PAD = 6       // board padding
+const BOARD_BORDER = 2 // board border width in px
+const OVERLAY_SCALE = 1.1 // visual scale of the dragged piece (purely cosmetic)
 
 const COLORS: Record<string, string> = {
   '#00e5ff': 'linear-gradient(135deg,#00e5ff 0%,#0099cc 100%)',
@@ -43,7 +46,6 @@ type Cell  = { r: number; c: number }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 function normalizeShape(matrix: number[][]): number[][] {
-  // Find bounds
   let minR = matrix.length, maxR = -1, minC = matrix[0].length, maxC = -1
   for (let r = 0; r < matrix.length; r++) {
     for (let c = 0; c < matrix[r].length; c++) {
@@ -55,8 +57,7 @@ function normalizeShape(matrix: number[][]): number[][] {
       }
     }
   }
-  // Crop
-  if (minR > maxR) return [[1]] // fallback for completely empty shape
+  if (minR > maxR) return [[1]]
   const res: number[][] = []
   for (let r = minR; r <= maxR; r++) {
     const row: number[] = []
@@ -168,20 +169,21 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
   // ── Board hover highlight ───────────────────────────────────────────────────
   const [hl, setHl] = useState<{ piece: Piece; row: number; col: number; ok: boolean } | null>(null)
 
-  // ── Drag state (all in refs – zero React re-renders per frame) ──────────────
-  // grabOffsetX/Y = where INSIDE the full-size overlay the pointer clicked
-  // This ensures the piece doesn't jump on pickup - it stays exactly under the finger
+  // ── Drag state ──────────────────────────────────────────────────────────────
+  // grabOffsetX/Y: distance from pointer to the top-left of the piece (at full/overlay size)
+  // fixedLift: how many px the overlay floats ABOVE the pointer (so finger doesn't cover it)
+  // All coordinates are in clientX/clientY space (viewport-relative, no scroll offsets).
   const dragging = useRef<{
     idx: number
     piece: Piece
     isTouch: boolean
-    grabOffsetX: number  // horizontal grab-point
-    grabOffsetY: number  // vertical grab-point
-    fixedLift: number    // FIXED vertical lift above cursor
+    grabOffsetX: number
+    grabOffsetY: number
+    fixedLift: number
   } | null>(null)
 
-  const overlayRef   = useRef<HTMLDivElement>(null)   // floating piece DOM node
-  const boardElRef   = useRef<HTMLDivElement>(null)   // 8×8 grid DOM node
+  const overlayRef   = useRef<HTMLDivElement>(null)
+  const boardElRef   = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const handRefs     = useRef<(HTMLDivElement | null)[]>([null, null, null])
   const rafRef       = useRef(0)
@@ -213,48 +215,86 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     return true
   }, [])
 
-  // Fixed Y lift: piece floats this many px ABOVE the finger/cursor (never changes during drag)
-  // Based on blockblast-game.io source: ShapesParent.Y = Touch.AbsoluteY - 200 game units
-  // 200 game units × 0.45625 CSS/game ≈ 91px in original; we scale relative to cellSize
-  const getFixedLift = (isTouch: boolean) => csRef.current * (isTouch ? 2.2 : 1.1)
+  /**
+   * Compute the visual top-left of the overlay from the current pointer position.
+   * This is the UNSCALED top-left — the point that `translate3d` moves the overlay to.
+   * scale(1.1) with transform-origin:top-left only expands right/down, so
+   * the visual top-left corner of the overlay IS this point.
+   */
+  const getVisualPos = useCallback((clientX: number, clientY: number) => {
+    const drag = dragging.current
+    if (!drag) return { vx: 0, vy: 0 }
+    const vx = clientX - drag.grabOffsetX
+    const vy = clientY - drag.grabOffsetY - drag.fixedLift
+    return { vx, vy }
+  }, [])
 
   /**
-   * Convert the overlay's current TOP-LEFT visual position into a board cell (row, col).
+   * Convert the overlay's visual top-left (vx, vy) into board cell (row, col).
+   *
+   * KEY INSIGHT: The board element has border (BOARD_BORDER) + padding (PAD).
+   * getBoundingClientRect() includes border+padding in its left/top.
+   * The first cell (0,0) starts at rect.left + BOARD_BORDER + PAD.
+   * Each cell occupies (cellSize + GAP) px of stride.
+   *
+   * We use Math.round so the piece "snaps" to the nearest cell when the
+   * overlay's top-left is within half a stride of a cell origin.
    */
-  const overlayToCell = useCallback((visualLeft: number, visualTop: number) => {
+  const overlayToCell = useCallback((vx: number, vy: number) => {
     const el = boardElRef.current
     if (!el) return { row: -99, col: -99 }
     const rect = el.getBoundingClientRect()
-    
-    // Cell dimension including gap
+
+    // Where cell (0,0) starts inside the board element
+    const gridOriginX = rect.left + BOARD_BORDER + PAD
+    const gridOriginY = rect.top  + BOARD_BORDER + PAD
+
     const stride = csRef.current + GAP
-    
-    // Map visual top-left directly to row/col
-    const col = Math.round((visualLeft - rect.left - PAD) / stride)
-    const row = Math.round((visualTop - rect.top - PAD) / stride)
-    
+
+    const col = Math.round((vx - gridOriginX) / stride)
+    const row = Math.round((vy - gridOriginY) / stride)
+
+    if (DEBUG_DRAG) {
+      console.log('[overlayToCell]', {
+        vx: vx.toFixed(1), vy: vy.toFixed(1),
+        gridOriginX: gridOriginX.toFixed(1), gridOriginY: gridOriginY.toFixed(1),
+        stride, row, col,
+        cellSize: csRef.current,
+        rectLeft: rect.left.toFixed(1), rectTop: rect.top.toFixed(1),
+      })
+    }
+
     return { row, col }
   }, [])
 
   /**
-   * Determine visual position of the overlay.
+   * Move the overlay DOM element to follow the pointer.
+   * Returns the UNSCALED visual top-left position used for cell detection.
    */
-  const moveOverlay = useCallback((cx: number, cy: number): { left: number; top: number } => {
+  const moveOverlay = useCallback((clientX: number, clientY: number): { vx: number; vy: number } => {
     const el = overlayRef.current
     const drag = dragging.current
-    if (!el || !drag) return { left: 0, top: 0 }
+    if (!el || !drag) return { vx: 0, vy: 0 }
 
-    // X: visual left
-    const left = cx - drag.grabOffsetX
-    // Y: visual top (grab offset + fixed lift)
-    const top  = cy - drag.grabOffsetY - drag.fixedLift
+    const { vx, vy } = getVisualPos(clientX, clientY)
 
-    el.style.transform  = `translate3d(${left}px,${top}px,0) scale(1.1)`
+    // translate3d positions the unscaled top-left; scale expands right+down only
+    el.style.transform  = `translate3d(${vx}px,${vy}px,0) scale(${OVERLAY_SCALE})`
     el.style.visibility = 'visible'
     el.style.opacity    = '1'
 
-    return { left, top }
-  }, [])
+    if (DEBUG_DRAG) {
+      console.log('[moveOverlay]', {
+        clientX, clientY,
+        grabOffsetX: drag.grabOffsetX.toFixed(1),
+        grabOffsetY: drag.grabOffsetY.toFixed(1),
+        fixedLift: drag.fixedLift.toFixed(1),
+        vx: vx.toFixed(1), vy: vy.toFixed(1),
+      })
+    }
+
+    return { vx, vy }
+  }, [getVisualPos])
 
   // ── Piece placement ──────────────────────────────────────────────────────────
   const checkGameOver = useCallback((b: (string|null)[][], h: (Piece|null)[], sc: number) => {
@@ -325,7 +365,6 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     el.style.display = 'grid'
     el.style.gridTemplateColumns = `repeat(${piece.matrix[0].length},${cellSize}px)`
     el.style.gap = `${GAP}px`
-    el.style.gap = `${GAP}px`
 
     piece.matrix.forEach(row => row.forEach(val => {
       const cell = document.createElement('div')
@@ -359,19 +398,29 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     const overlayW = piece.matrix[0].length * stride
     const overlayH = piece.matrix.length * stride
 
-    // Find the bounding box of the dragged element (the piece in hand)
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-    
-    // Calculate percentage of where the user clicked inside the tray piece
-    const percentX = (e.clientX - rect.left) / rect.width
-    const percentY = (e.clientY - rect.top) / rect.height
-    
-    // Apply that percentage to the full-size overlay to get exact visual grab offset
+    // ── Compute grab offset ──
+    // The tray piece is rendered at handCellSize (50% of cellSize).
+    // We need to map the click position within the tray piece to the
+    // corresponding position within the full-size overlay.
+    const pieceRect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    const percentX = (e.clientX - pieceRect.left) / pieceRect.width
+    const percentY = (e.clientY - pieceRect.top)  / pieceRect.height
     const grabOffsetX = overlayW * percentX
     const grabOffsetY = overlayH * percentY
 
-    // ── Y: Lift so the piece is clearly visible above the finger ──
+    // ── Fixed lift: piece floats above the finger/cursor ──
     const fixedLift = isTouch ? cellSize * 1.5 : cellSize * 0.5
+
+    if (DEBUG_DRAG) {
+      console.log('[startDrag]', {
+        clientX: e.clientX, clientY: e.clientY,
+        pieceRect: { left: pieceRect.left.toFixed(1), top: pieceRect.top.toFixed(1), w: pieceRect.width.toFixed(1), h: pieceRect.height.toFixed(1) },
+        percentX: percentX.toFixed(3), percentY: percentY.toFixed(3),
+        grabOffsetX: grabOffsetX.toFixed(1), grabOffsetY: grabOffsetY.toFixed(1),
+        overlayW, overlayH, fixedLift,
+        isTouch,
+      })
+    }
 
     playSound('move')
 
@@ -389,10 +438,10 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     overlayRef.current!.style.transformOrigin = 'top left'
 
     // Position overlay immediately
-    const { left, top } = moveOverlay(e.clientX, e.clientY)
+    const { vx, vy } = moveOverlay(e.clientX, e.clientY)
 
     // Board highlight
-    const { row, col } = overlayToCell(left, top)
+    const { row, col } = overlayToCell(vx, vy)
     const ok = canPlace(boardRef.current, piece.matrix, row, col)
     setHl({ piece, row, col, ok })
   }, [clearing.length, buildOverlay, moveOverlay, overlayToCell, canPlace])
@@ -402,14 +451,14 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     if (!dragging.current) return
     e.preventDefault()
 
-    const { left, top } = moveOverlay(e.clientX, e.clientY)
+    const { vx, vy } = moveOverlay(e.clientX, e.clientY)
 
     // Throttle board highlight to requestAnimationFrame
     cancelAnimationFrame(rafRef.current)
     rafRef.current = requestAnimationFrame(() => {
       const drag = dragging.current
       if (!drag) return
-      const { row, col } = overlayToCell(left, top)
+      const { row, col } = overlayToCell(vx, vy)
       const ok = canPlace(boardRef.current, drag.piece.matrix, row, col)
       setHl(prev => {
         if (prev && prev.row === row && prev.col === col && prev.ok === ok) return prev
@@ -430,11 +479,19 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     const el = overlayRef.current
     if (el) { el.style.visibility = 'hidden'; el.style.opacity = '0'; el.innerHTML = '' }
 
-    const left = e.clientX - drag.grabOffsetX
-    const top  = e.clientY - drag.grabOffsetY - drag.fixedLift
-
-    const { row, col } = overlayToCell(left, top)
+    // Use the exact same visual position formula as moveOverlay
+    const { vx, vy } = getVisualPos(e.clientX, e.clientY)
+    const { row, col } = overlayToCell(vx, vy)
     const ok = canPlace(boardRef.current, drag.piece.matrix, row, col)
+
+    if (DEBUG_DRAG) {
+      console.log('[endDrag]', {
+        clientX: e.clientX, clientY: e.clientY,
+        vx: vx.toFixed(1), vy: vy.toFixed(1),
+        row, col, ok,
+      })
+    }
+
     if (ok) {
       placePiece(drag.piece, drag.idx, row, col)
     } else {
@@ -442,7 +499,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     }
 
     setHl(null)
-  }, [overlayToCell, canPlace, placePiece])
+  }, [getVisualPos, overlayToCell, canPlace, placePiece])
 
   // ── RESTART ─────────────────────────────────────────────────────────────────
   const restart = () => {
@@ -499,7 +556,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
               padding: PAD,
               background: '#050510',
               borderRadius: 14,
-              border: '2px solid rgba(255,255,255,.08)',
+              border: `${BOARD_BORDER}px solid rgba(255,255,255,.08)`,
               boxShadow: 'inset 0 0 50px rgba(0,0,0,.9)',
             }}
           >
