@@ -122,9 +122,6 @@ function sfxGameOver(ctx: AudioContext) {
   })
 }
 
-// ── Auto-rotation interval ──
-const AUTO_ROTATE_INTERVAL = 1000 // ms
-
 export default function TetrisGame({ onGameOver }: TetrisGameProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
@@ -145,8 +142,6 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
     paused: boolean
     animFrame: number | null
     flashTimer: number
-    // Auto-rotate
-    autoRotateAcc: number
     // Line-clear animation
     lineClearAnim: LineClearAnim | null
     // Particle effects
@@ -156,7 +151,6 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
     score: 0, lines: 0, level: 0,
     dropInterval: 1000, last: 0, acc: 0,
     over: false, paused: false, animFrame: null, flashTimer: 0,
-    autoRotateAcc: 0,
     lineClearAnim: null,
     particles: [],
   })
@@ -429,7 +423,6 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
     const type = g.nextType || randomType()
     g.nextType = randomType()
     g.cur = { type, x: 3, y: 0, cells: SHAPES[type].map(([x, y]) => ({ x, y })) }
-    g.autoRotateAcc = 0   // reset auto-rotate timer on new piece
     setNextType(g.nextType)
     drawNextPiece()
     if (collide(0, 0, g.cur.cells, g.cur, g.grid)) gameOver()
@@ -574,7 +567,7 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
     g.score = 0; g.lines = 0; g.level = 0
     g.over = false; g.paused = false
     g.dropInterval = 1000; g.last = 0; g.acc = 0
-    g.flashTimer = 0; g.autoRotateAcc = 0
+    g.flashTimer = 0;
     g.lineClearAnim = null; g.particles = []
     setIsOver(false); setIsPaused(false)
     syncHUD()
@@ -602,17 +595,10 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
       g.last = t
 
       if (!g.over && !g.paused) {
-        // Skip drop/auto-rotate while line-clear animation is playing
+        // Skip drop while line-clear animation is playing
         if (!g.lineClearAnim) {
           g.acc += framedt
           if (g.acc > g.dropInterval) { softDrop(); g.acc = 0 }
-
-          // ── Auto-rotate every AUTO_ROTATE_INTERVAL ms ──
-          g.autoRotateAcc += framedt
-          if (g.autoRotateAcc >= AUTO_ROTATE_INTERVAL) {
-            g.autoRotateAcc = 0
-            rotate()
-          }
         }
         drawBoard(dt)
       }
@@ -724,14 +710,6 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
             <div className="tetris-stat-label"><span className="desktop-only">KHỐI TIẾP THEO</span><span className="mobile-only">TIẾP THEO</span></div>
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '4px' }}>
               <canvas ref={nextCanvasRef} width={120} height={80} className="tetris-next-canvas" />
-            </div>
-          </div>
-
-          {/* Auto-rotate badge */}
-          <div className="tetris-stat-card" style={{ textAlign: 'center' }}>
-            <div className="tetris-stat-label">CHẾ ĐỘ</div>
-            <div style={{ fontSize: '11px', color: '#ffe14d', fontWeight: 700, letterSpacing: 1 }}>
-              🔄 TỰ XOAY 1s
             </div>
           </div>
 
