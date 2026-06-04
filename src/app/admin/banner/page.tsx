@@ -17,6 +17,7 @@ interface Banner {
   button_link: string | null
   secondary_button_text: string | null
   secondary_button_link: string | null
+  link: string | null
   text_position: string
   text_size: string
   brightness: number
@@ -48,6 +49,7 @@ export default function AdminBannersPage() {
     button_link: '',
     secondary_button_text: '',
     secondary_button_link: '',
+    link: '',
     text_position: 'bottom-left',
     text_size: 'medium',
     brightness: 100,
@@ -90,6 +92,7 @@ export default function AdminBannersPage() {
       button_link: '',
       secondary_button_text: '',
       secondary_button_link: '',
+      link: '',
       text_position: 'bottom-left',
       text_size: 'medium',
       brightness: 100,
@@ -112,6 +115,7 @@ export default function AdminBannersPage() {
       button_link: banner.button_link || '',
       secondary_button_text: banner.secondary_button_text || '',
       secondary_button_link: banner.secondary_button_link || '',
+      link: banner.link || '',
       text_position: banner.text_position || 'bottom-left',
       text_size: banner.text_size || 'medium',
       brightness: banner.brightness ?? 100,
@@ -151,6 +155,7 @@ export default function AdminBannersPage() {
         button_link: form.button_link || null,
         secondary_button_text: form.secondary_button_text || null,
         secondary_button_link: form.secondary_button_link || null,
+        link: form.link || null,
         text_position: form.text_position,
         text_size: form.text_size,
         brightness: Number(form.brightness),
@@ -204,6 +209,7 @@ export default function AdminBannersPage() {
           button_link: banner.button_link,
           secondary_button_text: banner.secondary_button_text,
           secondary_button_link: banner.secondary_button_link,
+          link: banner.link,
           text_position: banner.text_position,
           text_size: banner.text_size,
           brightness: banner.brightness,
@@ -545,6 +551,18 @@ export default function AdminBannersPage() {
                       className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none text-sm transition-all"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-1">Liên kết toàn Banner (Tuỳ chọn)</label>
+                  <input 
+                    name="link" 
+                    value={form.link} 
+                    onChange={handleChange} 
+                    placeholder="Ví dụ: /san-pham/bo-suu-tap-moi" 
+                    className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none text-sm transition-all font-mono"
+                  />
+                  <p className="text-[10px] text-neutral-500 mt-1">Khi khách hàng click vào bất kỳ đâu trên banner, sẽ chuyển hướng đến link này.</p>
                 </div>
 
                 <div>

@@ -14,6 +14,7 @@ interface Banner {
   button_link: string | null
   secondary_button_text: string | null
   secondary_button_link: string | null
+  link: string | null
   text_position: string
   text_size: string
   brightness: number
@@ -270,8 +271,12 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
                 </div>
               )}
 
-              {/* If it's a pure image, make the entire slide a clickable link if button_link is specified */}
-              {isPureImage && banner.button_link && (
+              {/* If banner.link is provided, make the entire slide a clickable link */}
+              {banner.link && (
+                <Link href={banner.link} className="absolute inset-0 z-20 w-full h-full cursor-pointer pointer-events-auto" />
+              )}
+              {/* If it's a pure image without banner.link, fallback to button_link */}
+              {!banner.link && isPureImage && banner.button_link && (
                 <Link href={banner.button_link} className="absolute inset-0 z-20 w-full h-full cursor-pointer pointer-events-auto" />
               )}
             </div>

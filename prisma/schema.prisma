@@ -425,6 +425,7 @@ model Banner {
   text_position         String   @default("bottom-left") // top-left, top-right, bottom-left, bottom-right, center
   text_size             String   @default("medium") // small, medium, large
   brightness            Int      @default(100)      // 0-200%
+  link                  String?  @db.Text
   sort_order            Int      @default(0)
   status                String   @default("active") // "active" | "hidden"
   created_at            DateTime @default(now())
