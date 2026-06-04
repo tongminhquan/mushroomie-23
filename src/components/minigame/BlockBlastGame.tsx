@@ -99,9 +99,8 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     idx: number
     piece: Piece
     isTouch: boolean
-    grabOffsetX: number   // pointer position relative to overlay top-left at pickup
-    grabOffsetY: number
-    touchLift: number     // extra upward shift for touch so finger doesn't block view
+    grabOffsetX: number  // horizontal grab-point (where user pressed the piece, scaled to full size)
+    fixedLift: number    // FIXED vertical lift above cursor (never changes; same formula as blockblast-game.io)
   } | null>(null)
 
   const overlayRef   = useRef<HTMLDivElement>(null)   // floating piece DOM node
@@ -137,51 +136,54 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     return true
   }, [])
 
+  // Fixed Y lift: piece floats this many px ABOVE the finger/cursor (never changes during drag)
+  // Based on blockblast-game.io source: ShapesParent.Y = Touch.AbsoluteY - 200 game units
+  // 200 game units × 0.45625 CSS/game ≈ 91px in original; we scale relative to cellSize
+  const getFixedLift = (isTouch: boolean) => csRef.current * (isTouch ? 2.2 : 1.1)
+
   /**
-   * Convert the overlay's current TOP-LEFT position (overlayLeft, overlayTop)
-   * into a board cell (row, col).
-   *
-   * The overlay is rendered at full cell size (csRef.current px per cell).
-   * overlayLeft = clientX - grabOffsetX + touchLift_adjustedX
-   * overlayTop  = clientY - grabOffsetY - touchLift
-   *
-   * Board cell origin = boardRect.left + PAD + col * stride
-   * => col = (overlayLeft - boardRect.left - PAD) / stride   (then round)
+   * Convert the overlay's current TOP-LEFT position into a board cell (row, col).
+   * Uses the overlay's visual centre to find the nearest grid cell.
    */
   const overlayToCell = useCallback((overlayLeft: number, overlayTop: number, piece: Piece) => {
     const el = boardElRef.current
     if (!el) return { row: -99, col: -99 }
     const rect = el.getBoundingClientRect()
     const stride = csRef.current + GAP
-    // Centre of the piece overlay
     const pieceCenterX = overlayLeft + (piece.matrix[0].length * stride) / 2
     const pieceCenterY = overlayTop  + (piece.matrix.length    * stride) / 2
-    // Which cell would that land on?
     const col = Math.round((pieceCenterX - rect.left - PAD - csRef.current / 2) / stride)
     const row = Math.round((pieceCenterY - rect.top  - PAD - csRef.current / 2) / stride)
     return { row, col }
   }, [])
 
   /**
-   * Move the overlay so it follows the pointer with the correct grab-point offset.
-   * Returns the overlay's new top-left position so we can also update the board highlight.
+   * EXACT blockblast-game.io formula:
+   *   piece.X = cursor.X + grabOffsetX   ← grab-point preservation (horizontal only)
+   *   piece.Y = cursor.Y - fixedLift      ← FIXED lift (NOT grab-point for Y)
+   *
+   * This means no matter where on the piece you press, it always floats
+   * a constant distance above the finger, while staying horizontally
+   * aligned to where you grabbed it.
    */
   const moveOverlay = useCallback((cx: number, cy: number): { left: number; top: number } => {
     const el = overlayRef.current
     const drag = dragging.current
     if (!el || !drag) return { left: 0, top: 0 }
 
+    // X: grab-point (horizontal position preserved from pickup)
     const left = cx - drag.grabOffsetX
-    const top  = cy - drag.grabOffsetY - drag.touchLift
+    // Y: FIXED lift above cursor — NOT grab-point
+    const top  = cy - drag.fixedLift
 
-    el.style.transform   = `translate3d(${left}px,${top}px,0) scale(1.1)`
-    el.style.visibility  = 'visible'
-    el.style.opacity     = '1'
+    el.style.transform  = `translate3d(${left}px,${top}px,0) scale(1.1)`
+    el.style.visibility = 'visible'
+    el.style.opacity    = '1'
 
     return { left, top }
   }, [])
 
-  // ── Piece placement ─────────────────────────────────────────────────────────
+  // ── Piece placement ──────────────────────────────────────────────────────────
   const checkGameOver = useCallback((b: (string|null)[][], h: (Piece|null)[], sc: number) => {
     const any = h.some(p => p && Array.from({ length: ROWS }, (_, r) =>
       Array.from({ length: COLS }, (_, c) => canPlace(b, p.matrix, r, c))
@@ -277,45 +279,29 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     e.stopPropagation()
 
     const isTouch = e.pointerType === 'touch' || e.pointerType === 'pen'
-
-    // The hand piece is rendered at HALF cell size (0.5 * cs)
-    // The overlay will be rendered at FULL cell size (cs)
-    // We need to compute where within the FULL-SIZE overlay the pointer clicked.
-    //
-    // Step 1: find the hand piece element's bounding rect
-    const handEl = handRefs.current[idx]
     const cellSize = csRef.current
     const stride = cellSize + GAP
     const overlayW = piece.matrix[0].length * stride
-    const overlayH = piece.matrix.length * stride
 
+    // ── X: grab-point (blockblast-game.io formula: DX = ShapesParent.X - Touch.AbsoluteX) ──
+    // We record where horizontally the user touched the piece,
+    // scaled up from hand-size (0.5×cs) to full drag-size (1×cs)
+    const handEl = handRefs.current[idx]
     let grabOffsetX: number
-    let grabOffsetY: number
-
     if (handEl) {
       const handRect = handEl.getBoundingClientRect()
-      // Position of pointer relative to the hand piece element
       const relX = e.clientX - handRect.left
-      const relY = e.clientY - handRect.top
-      // Scale factor: hand piece uses 0.5*cs per cell, overlay uses cs per cell
-      const scale = cellSize / (cellSize * 0.5)
-      // Where in the overlay (full-size) does this correspond to?
-      grabOffsetX = relX * scale
-      grabOffsetY = relY * scale
-      // Clamp to overlay bounds
-      grabOffsetX = Math.max(0, Math.min(grabOffsetX, overlayW))
-      grabOffsetY = Math.max(0, Math.min(grabOffsetY, overlayH))
+      const scale = cellSize / (cellSize * 0.5)   // 2× scale up
+      grabOffsetX = Math.max(0, Math.min(relX * scale, overlayW))
     } else {
-      // Fallback: centre of piece
-      grabOffsetX = overlayW / 2
-      grabOffsetY = overlayH / 2
+      grabOffsetX = overlayW / 2   // fallback: centre
     }
 
-    // For touch: lift the piece above the finger so the user can see it
-    // For mouse: no lift (piece stays exactly where grabbed)
-    const touchLift = isTouch ? cellSize * 1.5 : 0
+    // ── Y: FIXED lift (blockblast-game.io formula: ShapesParent.Y = Touch.AbsoluteY - 200) ──
+    // No grab-point for Y — always floats a constant distance above the finger
+    const fixedLift = getFixedLift(isTouch)
 
-    dragging.current = { idx, piece, isTouch, grabOffsetX, grabOffsetY, touchLift }
+    dragging.current = { idx, piece, isTouch, grabOffsetX, fixedLift }
 
     // Capture all pointer events to this element
     ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
@@ -327,7 +313,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     overlayRef.current!.style.visibility = 'hidden'
     overlayRef.current!.style.opacity = '0'
 
-    // Position it immediately
+    // Position overlay immediately
     const { left, top } = moveOverlay(e.clientX, e.clientY)
 
     // Board highlight
@@ -369,16 +355,9 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     const el = overlayRef.current
     if (el) { el.style.visibility = 'hidden'; el.style.opacity = '0'; el.innerHTML = '' }
 
-    // Calculate final position and place if valid
-    const { left, top } = (() => {
-      const cellSize = csRef.current
-      const stride = cellSize + GAP
-      const overlayW = drag.piece.matrix[0].length * stride
-      const overlayH = drag.piece.matrix.length * stride
-      const left = e.clientX - drag.grabOffsetX
-      const top  = e.clientY - drag.grabOffsetY - drag.touchLift
-      return { left, top }
-    })()
+    // Same formula as moveOverlay: X = grab-point, Y = fixed lift
+    const left = e.clientX - drag.grabOffsetX
+    const top  = e.clientY - drag.fixedLift
 
     const { row, col } = overlayToCell(left, top, drag.piece)
     const ok = canPlace(boardRef.current, drag.piece.matrix, row, col)
