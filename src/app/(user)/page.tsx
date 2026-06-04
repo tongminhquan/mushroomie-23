@@ -80,20 +80,28 @@ export default async function HomePage() {
     image: `${process.env.NEXT_PUBLIC_APP_URL}/logo.png`,
     '@id': `${process.env.NEXT_PUBLIC_APP_URL}`,
     url: `${process.env.NEXT_PUBLIC_APP_URL}`,
-    telephone: '+84901234567',
+    telephone: '+84848744060',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: '123 Đường Bấm, Phường Mềm',
-      addressLocality: 'Hồ Chí Minh',
-      addressRegion: 'HCM',
-      postalCode: '700000',
+      streetAddress: 'Hẻm 2 tổ 11, Phường Trảng Dài',
+      addressLocality: 'Biên Hòa',
+      addressRegion: 'Đồng Nai',
       addressCountry: 'VN'
     }
+  }
+
+  const webSiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Mushroomie',
+    alternateName: ['Mushroomie Handmade'],
+    url: `${process.env.NEXT_PUBLIC_APP_URL}/`
   }
 
   return (
     <div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }} />
       <HomeHeroCarousel banners={banners} fallbackHero={fallbackHero} />
       <HomeAnimatedContent
         featuredProducts={JSON.parse(JSON.stringify(featuredProducts))}
