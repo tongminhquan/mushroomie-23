@@ -449,3 +449,13 @@ model AdminLog {
 
   @@map("admin_logs")
 }
+
+// ─────────────────────────────────────────────
+// SETTINGS
+// ─────────────────────────────────────────────
+model Setting {
+  key   String @id
+  value String @db.Text
+
+  @@map("settings")
+}

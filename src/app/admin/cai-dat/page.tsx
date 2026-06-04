@@ -1,10 +1,59 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Button from '@/components/ui/Button'
-import { AlertCircle, CreditCard, Mail, Globe, Save } from 'lucide-react'
+import { AlertCircle, CreditCard, Mail, Globe, Save, Loader2 } from 'lucide-react'
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('payment')
+  
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [webhookUrl, setWebhookUrl] = useState('')
+  const [settings, setSettings] = useState({
+    brand_name: 'Mushroomie',
+    hotline: '+84 84 874 4060',
+    support_email: 'cskh@mushroomie.io.vn'
+  })
+
+  useEffect(() => {
+    setWebhookUrl(window.location.origin + '/api/webhooks/payment')
+    fetch('/api/admin/settings')
+      .then(res => res.json())
+      .then(res => {
+        setData(res)
+        if (res.settings && Object.keys(res.settings).length > 0) {
+          setSettings(prev => ({ ...prev, ...res.settings }))
+        }
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error(err)
+        setLoading(false)
+      })
+  }, [])
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settings })
+      })
+      if (res.ok) alert('Đã lưu thành công!')
+      else alert('Lỗi khi lưu cài đặt!')
+    } catch (err) {
+      alert('Đã xảy ra lỗi!')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleCopyWebhook = () => {
+    navigator.clipboard.writeText(webhookUrl)
+    alert('Đã copy webhook URL: ' + webhookUrl)
+  }
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -69,17 +118,17 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-semibold mb-1 text-neutral-700">Ngân hàng thụ hưởng</label>
-                    <input disabled value="Đang lấy từ file .env" className="w-full px-4 py-2 border rounded-xl bg-neutral-50 text-neutral-500 cursor-not-allowed" />
+                    <input disabled value={loading ? 'Đang tải...' : (data?.env?.bank_name || 'Đang lấy từ file .env')} className="w-full px-4 py-2 border rounded-xl bg-neutral-50 text-neutral-500 cursor-not-allowed" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold mb-1 text-neutral-700">Số tài khoản</label>
-                    <input disabled value="Đang lấy từ file .env" className="w-full px-4 py-2 border rounded-xl bg-neutral-50 text-neutral-500 cursor-not-allowed" />
+                    <input disabled value={loading ? 'Đang tải...' : (data?.env?.bank_account || 'Đang lấy từ file .env')} className="w-full px-4 py-2 border rounded-xl bg-neutral-50 text-neutral-500 cursor-not-allowed font-mono" />
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold mb-1 text-neutral-700">Webhook URL (Dành cho Casso/SePay)</label>
                     <div className="flex">
-                      <input readOnly value="https://domain-cua-ban.com/api/webhooks/payment" className="w-full px-4 py-2 border rounded-l-xl bg-neutral-50 font-mono text-sm text-neutral-600 outline-none" />
-                      <button className="px-4 bg-neutral-200 border-y border-r rounded-r-xl text-sm font-semibold hover:bg-neutral-300">Copy</button>
+                      <input readOnly value={webhookUrl} className="w-full px-4 py-2 border rounded-l-xl bg-neutral-50 font-mono text-sm text-neutral-600 outline-none" />
+                      <button onClick={handleCopyWebhook} className="px-4 bg-neutral-200 border-y border-r rounded-r-xl text-sm font-semibold hover:bg-neutral-300">Copy</button>
                     </div>
                   </div>
                 </div>
@@ -96,11 +145,11 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-semibold mb-1 text-neutral-700">Nhà cung cấp Email (SMTP)</label>
-                    <input disabled value="Đang lấy từ file .env" className="w-full px-4 py-2 border rounded-xl bg-neutral-50 text-neutral-500 cursor-not-allowed" />
+                    <input disabled value={loading ? 'Đang tải...' : (data?.env?.email_provider || 'Đang lấy từ file .env')} className="w-full px-4 py-2 border rounded-xl bg-neutral-50 text-neutral-500 cursor-not-allowed font-mono" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold mb-1 text-neutral-700">Địa chỉ Email người gửi</label>
-                    <input disabled value="Đang lấy từ file .env" className="w-full px-4 py-2 border rounded-xl bg-neutral-50 text-neutral-500 cursor-not-allowed" />
+                    <input disabled value={loading ? 'Đang tải...' : (data?.env?.email_sender || 'Đang lấy từ file .env')} className="w-full px-4 py-2 border rounded-xl bg-neutral-50 text-neutral-500 cursor-not-allowed font-mono" />
                   </div>
                 </div>
               </div>
@@ -116,18 +165,33 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-semibold mb-1 text-neutral-700">Tên thương hiệu</label>
-                    <input defaultValue="Mushroomie" className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" />
+                    <input 
+                      value={settings.brand_name} 
+                      onChange={e => setSettings({...settings, brand_name: e.target.value})}
+                      className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" 
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold mb-1 text-neutral-700">Số điện thoại Hotline</label>
-                    <input defaultValue="+84 84 874 4060" className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" />
+                    <input 
+                      value={settings.hotline}
+                      onChange={e => setSettings({...settings, hotline: e.target.value})}
+                      className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" 
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold mb-1 text-neutral-700">Email hỗ trợ</label>
-                    <input defaultValue="cskh@mushroomie.io.vn" className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" />
+                    <input 
+                      value={settings.support_email}
+                      onChange={e => setSettings({...settings, support_email: e.target.value})}
+                      className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" 
+                    />
                   </div>
                   <div className="pt-4 flex justify-end">
-                    <Button className="flex items-center gap-2"><Save size={18} /> Lưu thay đổi</Button>
+                    <Button onClick={handleSave} disabled={saving} className="flex items-center gap-2">
+                      {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                      {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                    </Button>
                   </div>
                 </div>
               </div>
