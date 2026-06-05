@@ -158,6 +158,7 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
                 alt={banner.title || 'Mushroomie Banner'} 
                 fill
                 priority={index === 0}
+                unoptimized
                 style={{ filter: `brightness(${banner.brightness ?? 100}%)` }}
                 className="object-contain pointer-events-none"
               />

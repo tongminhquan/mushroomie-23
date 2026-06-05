@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { z } from 'zod'
+import { revalidatePath } from 'next/cache'
 
 const bannerSchema = z.object({
   image_url: z.string().min(1),
@@ -38,6 +39,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       where: { id: Number(id) },
       data: parsed.data,
     })
+    
+    revalidatePath('/')
+    
     return NextResponse.json(banner)
   } catch (error) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
@@ -55,6 +59,9 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     await prisma.banner.delete({
       where: { id: Number(id) },
     })
+    
+    revalidatePath('/')
+    
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
