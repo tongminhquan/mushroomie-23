@@ -344,6 +344,24 @@ model Post {
   created_at                DateTime  @default(now())
   updated_at                DateTime  @updatedAt
 
+  // Social / Open Graph
+  og_title                  String?
+  og_description            String?   @db.Text
+  og_image                  String?   @db.Text
+  // Twitter Card
+  twitter_title             String?
+  twitter_description       String?   @db.Text
+  twitter_image             String?   @db.Text
+  // Technical SEO
+  canonical_url             String?   @db.Text
+  robots_index              Boolean   @default(true)
+  robots_follow             Boolean   @default(true)
+  schema_type               String    @default("BlogPosting")
+  // Additional metrics
+  secondary_keywords        String?   @db.Text
+  reading_time              Int?
+  word_count                Int?
+
   category                  Category? @relation(fields: [category_id], references: [id])
   author                    User?     @relation(fields: [author_id], references: [id])
   tags                      PostTagMap[]

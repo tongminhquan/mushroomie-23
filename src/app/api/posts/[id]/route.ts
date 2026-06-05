@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { generateSlug } from '@/lib/utils'
 import { logAdminAction } from '@/lib/admin-logger'
+import { sanitizeHtml, calculateReadingTime, calculateWordCount } from '@/lib/sanitize'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -27,16 +28,37 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
     const { id } = await params
     const body = await request.json()
-    // Only pick known Prisma fields
     const {
       title, slug, excerpt, content, featured_image,
       featured_image_alt, featured_image_caption, featured_image_description,
       status, category_id, seo_title, meta_description, focus_keyword,
+      og_title, og_description, og_image,
+      twitter_title, twitter_description, twitter_image,
+      canonical_url, robots_index, robots_follow, schema_type,
+      secondary_keywords,
     } = body
+
+    const sanitizedContent = content ? sanitizeHtml(content) : content
+    const readingTime = sanitizedContent ? calculateReadingTime(sanitizedContent) : undefined
+    const wordCount = sanitizedContent ? calculateWordCount(sanitizedContent) : undefined
+
     const data: any = {
-      title, excerpt, content, featured_image,
+      title, excerpt, content: sanitizedContent, featured_image,
       featured_image_alt, featured_image_caption, featured_image_description,
       seo_title, meta_description, focus_keyword,
+      og_title: og_title || null,
+      og_description: og_description || null,
+      og_image: og_image || null,
+      twitter_title: twitter_title || null,
+      twitter_description: twitter_description || null,
+      twitter_image: twitter_image || null,
+      canonical_url: canonical_url || null,
+      robots_index: robots_index ?? true,
+      robots_follow: robots_follow ?? true,
+      schema_type: schema_type || 'BlogPosting',
+      secondary_keywords: Array.isArray(secondary_keywords) ? JSON.stringify(secondary_keywords) : (secondary_keywords || null),
+      reading_time: readingTime,
+      word_count: wordCount,
       status: status || 'draft',
       category_id: category_id ? Number(category_id) : null,
     }

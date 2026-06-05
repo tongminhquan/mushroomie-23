@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { generateSlug } from '@/lib/utils'
 import { logAdminAction } from '@/lib/admin-logger'
+import { sanitizeHtml, calculateReadingTime, calculateWordCount } from '@/lib/sanitize'
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || 'published'
 
     const session = await auth()
-    const isAdmin = (session?.user as any)?.role === 'admin'
+    const isAdmin = (session?.user as any)?.role === 'admin' || (session?.user as any)?.role === 'super_admin'
 
     const where: any = {}
     if (!isAdmin) where.status = 'published'
@@ -47,7 +48,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, slug, excerpt, content, featured_image, status, category_id, seo_title, meta_description, focus_keyword, tags } = body
+    const {
+      title, slug, excerpt, content, featured_image,
+      featured_image_alt, featured_image_caption, featured_image_description,
+      status, category_id, seo_title, meta_description, focus_keyword,
+      og_title, og_description, og_image,
+      twitter_title, twitter_description, twitter_image,
+      canonical_url, robots_index, robots_follow, schema_type,
+      secondary_keywords,
+    } = body
+
+    const sanitizedContent = content ? sanitizeHtml(content) : content
+    const readingTime = sanitizedContent ? calculateReadingTime(sanitizedContent) : null
+    const wordCount = sanitizedContent ? calculateWordCount(sanitizedContent) : null
 
     const postSlug = slug || generateSlug(title)
     const post = await prisma.post.create({
@@ -55,13 +68,29 @@ export async function POST(request: NextRequest) {
         title,
         slug: postSlug,
         excerpt,
-        content,
+        content: sanitizedContent,
         featured_image,
+        featured_image_alt,
+        featured_image_caption,
+        featured_image_description,
         status: status || 'draft',
-        category_id: category_id || null,
+        category_id: category_id ? Number(category_id) : null,
         seo_title,
         meta_description,
         focus_keyword,
+        og_title: og_title || null,
+        og_description: og_description || null,
+        og_image: og_image || null,
+        twitter_title: twitter_title || null,
+        twitter_description: twitter_description || null,
+        twitter_image: twitter_image || null,
+        canonical_url: canonical_url || null,
+        robots_index: robots_index ?? true,
+        robots_follow: robots_follow ?? true,
+        schema_type: schema_type || 'BlogPosting',
+        secondary_keywords: Array.isArray(secondary_keywords) ? JSON.stringify(secondary_keywords) : (secondary_keywords || null),
+        reading_time: readingTime,
+        word_count: wordCount,
         author_id: Number((session.user as any).id),
         published_at: status === 'published' ? new Date() : null,
       },
