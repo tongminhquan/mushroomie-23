@@ -6,7 +6,7 @@ import AddToCartButton from '@/components/product/AddToCartButton'
 import ProductGallery from '@/components/product/ProductGallery'
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 import { formatPrice } from '@/lib/utils'
-import { toAbsoluteUrl } from '@/lib/url'
+import { toAbsoluteUrl, toPublicImageUrl } from '@/lib/url'
 import type { Metadata } from 'next'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -31,12 +31,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       siteName: 'Mushroomie Handmade',
       images: product.featured_image ? [
         {
-          url: toAbsoluteUrl(product.featured_image),
+          url: toPublicImageUrl(product.featured_image),
           width: 800,
           height: 600,
           alt: product.name,
         }
-      ] : [{ url: toAbsoluteUrl(), width: 800, height: 600, alt: 'Mushroomie Default OG' }],
+      ] : [{ url: toPublicImageUrl(), width: 800, height: 600, alt: 'Mushroomie Default OG' }],
       locale: 'vi_VN',
       type: 'website',
     },
@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       card: 'summary_large_image',
       title: `${product.name} | Mushroomie Handmade`,
       description: product.short_description || `Mua ${product.name} handmade cá nhân hóa tại Mushroomie.`,
-      images: product.featured_image ? [toAbsoluteUrl(product.featured_image)] : [toAbsoluteUrl()],
+      images: product.featured_image ? [toPublicImageUrl(product.featured_image)] : [toPublicImageUrl()],
     }
   }
 }
@@ -85,9 +85,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   }))).catch(() => [])
 
   const allImages = [
-    ...(product.featured_image ? [product.featured_image] : []),
-    ...product.images.map((i) => i.image_url),
-  ]
+    ...(product.featured_image ? [toPublicImageUrl(product.featured_image)] : []),
+    ...product.images.map((i) => toPublicImageUrl(i.image_url)),
+  ].filter(Boolean)
 
   const price = Number(product.price)
   const salePrice = product.sale_price ? Number(product.sale_price) : null

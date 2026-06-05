@@ -1,6 +1,5 @@
 'use client'
-import { useState } from 'react'
-import Image from 'next/image'
+import { useState, useEffect } from 'react'
 import Badge from '@/components/ui/Badge'
 
 interface ProductGalleryProps {
@@ -10,21 +9,42 @@ interface ProductGalleryProps {
   isOnSale: boolean
 }
 
+const FALLBACK_IMAGE = '/logo.png'
+
 export default function ProductGallery({ images, productName, isCustomizable, isOnSale }: ProductGalleryProps) {
-  const [mainImage, setMainImage] = useState(images[0])
+  const [mainImage, setMainImage] = useState(images[0] || FALLBACK_IMAGE)
+  const [hasError, setHasError] = useState(false)
+
+  // Reset main image when images prop changes
+  useEffect(() => {
+    setMainImage(images[0] || FALLBACK_IMAGE)
+    setHasError(false)
+  }, [images])
+
+  const handleImageError = () => {
+    if (!hasError) {
+      setHasError(true)
+      setMainImage(FALLBACK_IMAGE)
+    }
+  }
 
   return (
     <div className="space-y-4">
-      <div className="relative aspect-[3/4] w-full bg-white rounded-2xl overflow-hidden shadow-card">
-        <Image
+      <div className="relative w-full aspect-square bg-white rounded-2xl overflow-hidden shadow-card flex flex-col items-center justify-center p-4">
+        {hasError && (
+          <div className="absolute inset-0 z-0 flex flex-col items-center justify-center text-neutral-400 bg-neutral-50/50">
+            <span className="text-sm font-medium mt-16">Ảnh đang được cập nhật</span>
+          </div>
+        )}
+        <img
           src={mainImage}
-          alt={productName}
-          fill
-          className="object-cover"
-          priority
-          unoptimized={true}
+          alt={hasError ? 'Ảnh đang được cập nhật' : productName}
+          className="w-full h-full object-contain relative z-10"
+          loading="eager"
+          decoding="async"
+          onError={handleImageError}
         />
-        <div className="absolute top-4 left-4 flex flex-col gap-2">
+        <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
           {isCustomizable && <Badge variant="custom">Cá nhân hóa</Badge>}
           {isOnSale && <Badge variant="sale">Sale</Badge>}
           <Badge variant="handmade">🧶 Handmade</Badge>
@@ -36,17 +56,22 @@ export default function ProductGallery({ images, productName, isCustomizable, is
           {images.map((img, i) => (
             <button
               key={i}
-              onClick={() => setMainImage(img)}
-              className={`relative aspect-[3/4] w-full bg-white rounded-xl overflow-hidden shadow-sm border-2 transition-all ${
-                mainImage === img ? 'border-primary ring-2 ring-primary/30' : 'border-transparent hover:border-neutral-300'
+              onClick={() => {
+                setMainImage(img)
+                setHasError(false)
+              }}
+              className={`relative aspect-square w-full bg-white rounded-xl overflow-hidden shadow-sm border-2 transition-all p-1 ${
+                mainImage === img && !hasError ? 'border-primary ring-2 ring-primary/30' : 'border-transparent hover:border-neutral-300'
               }`}
             >
-              <Image 
+              <img 
                 src={img} 
                 alt={`${productName} thumbnail ${i + 1}`} 
-                fill 
-                className="object-cover" 
-                unoptimized={true} 
+                className="w-full h-full object-contain" 
+                loading="lazy"
+                onError={(e) => {
+                  e.currentTarget.src = FALLBACK_IMAGE;
+                }}
               />
             </button>
           ))}

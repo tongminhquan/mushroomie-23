@@ -25,3 +25,22 @@ export function sanitizeCallbackUrl(url?: string | null): string {
   }
   return url.startsWith('/') ? url : `/${url}`
 }
+
+export function toPublicImageUrl(pathOrUrl?: string | null): string {
+  if (!pathOrUrl) return '/logo.png'; // Fallback Mushroomie placeholder
+
+  if (pathOrUrl.startsWith('http://localhost') || pathOrUrl.startsWith('http://127.0.0.1')) {
+    try {
+      const url = new URL(pathOrUrl);
+      return `${SITE_URL}${url.pathname}${url.search}`;
+    } catch {
+      return SITE_URL;
+    }
+  }
+
+  if (pathOrUrl.startsWith('https://') || pathOrUrl.startsWith('http://')) {
+    return pathOrUrl;
+  }
+
+  return `${SITE_URL}${pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`}`;
+}
