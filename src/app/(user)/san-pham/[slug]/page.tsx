@@ -6,6 +6,7 @@ import AddToCartButton from '@/components/product/AddToCartButton'
 import ProductGallery from '@/components/product/ProductGallery'
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 import { formatPrice } from '@/lib/utils'
+import { toAbsoluteUrl } from '@/lib/url'
 import type { Metadata } from 'next'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -26,16 +27,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     openGraph: {
       title: `${product.name} | Mushroomie Handmade`,
       description: product.short_description || `Mua ${product.name} handmade cá nhân hóa tại Mushroomie.`,
-      url: `${process.env.NEXT_PUBLIC_APP_URL}/san-pham/${product.slug}`,
+      url: toAbsoluteUrl(`/san-pham/${product.slug}`),
       siteName: 'Mushroomie Handmade',
       images: product.featured_image ? [
         {
-          url: product.featured_image,
+          url: toAbsoluteUrl(product.featured_image),
           width: 800,
           height: 600,
           alt: product.name,
         }
-      ] : [],
+      ] : [{ url: toAbsoluteUrl(), width: 800, height: 600, alt: 'Mushroomie Default OG' }],
       locale: 'vi_VN',
       type: 'website',
     },
@@ -43,7 +44,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       card: 'summary_large_image',
       title: `${product.name} | Mushroomie Handmade`,
       description: product.short_description || `Mua ${product.name} handmade cá nhân hóa tại Mushroomie.`,
-      images: product.featured_image ? [product.featured_image] : [],
+      images: product.featured_image ? [toAbsoluteUrl(product.featured_image)] : [toAbsoluteUrl()],
     }
   }
 }
@@ -93,7 +94,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const displayPrice = salePrice || price
   const isOnSale = !!salePrice && salePrice < price
 
-  const defaultImage = `https://picsum.photos/seed/${product.id}/600/600`
+  const defaultImage = `/logo.png`
 
   // Product Schema JSON-LD
   const productSchema = {
@@ -105,7 +106,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     sku: product.slug,
     offers: {
       '@type': 'Offer',
-      url: `${process.env.NEXT_PUBLIC_APP_URL}/san-pham/${product.slug}`,
+      url: toAbsoluteUrl(`/san-pham/${product.slug}`),
       priceCurrency: 'VND',
       price: displayPrice,
       availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',

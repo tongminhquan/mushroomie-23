@@ -40,7 +40,9 @@ export class PayOSProvider implements IPaymentProvider {
     // Also try PayOS payment link for redirect-based flow (optional)
     let paymentUrl = ''
     try {
-      const domain = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      const domain = process.env.NEXT_PUBLIC_APP_URL || 'https://mushroomie.io.vn'
+      const returnUrl = `${domain}/thanh-toan/xac-nhan?orderCode=${input.orderCode}&status=success`
+      const cancelUrl = `${domain}/thanh-toan/xac-nhan?orderCode=${input.orderCode}&status=cancelled`
       const timeInSeconds = Math.floor(Date.now() / 1000)
       const payosOrderCode = Number(`${timeInSeconds}${input.orderId}`)
 
@@ -48,8 +50,8 @@ export class PayOSProvider implements IPaymentProvider {
         orderCode: payosOrderCode,
         amount: input.amount,
         description: `Thanh toan don ${input.orderCode}`.substring(0, 25),
-        cancelUrl: `${domain}/checkout`,
-        returnUrl: `${domain}/thanh-toan-thanh-cong`,
+        returnUrl: returnUrl,
+        cancelUrl: cancelUrl,
       }
 
       const paymentLink = await this.payos.paymentRequests.create(paymentLinkData)

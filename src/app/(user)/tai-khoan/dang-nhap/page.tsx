@@ -5,11 +5,12 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import Button from '@/components/ui/Button'
+import { sanitizeCallbackUrl } from '@/lib/url'
 
 export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') || '/'
+  const callbackUrl = sanitizeCallbackUrl(searchParams.get('callbackUrl'))
 
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')

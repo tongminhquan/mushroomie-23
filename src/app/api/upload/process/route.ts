@@ -63,11 +63,11 @@ export async function POST(request: Request) {
         newFilename = `${baseName}.${newExt}`
       }
     } else {
-      newFilename = `${baseName}_copy_${Date.now()}.${newExt}`
+      newFilename = `${crypto.randomUUID()}.${newExt}`
     }
 
     // Write to a temporary file first because sharp cannot overwrite its input file directly
-    const tempFilename = `temp_${Date.now()}_${newFilename}`
+    const tempFilename = `temp_${crypto.randomUUID()}_${newFilename}`
     const tempOutputPath = join(uploadDir, tempFilename)
 
     await pipeline.toFile(tempOutputPath)

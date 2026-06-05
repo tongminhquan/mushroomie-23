@@ -3,8 +3,13 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { z } from 'zod'
 
+import crypto from 'crypto'
+
+const SECRET = process.env.NEXTAUTH_SECRET || 'mushroomie-secret-fallback'
+
 const scoreSchema = z.object({
-  score: z.number().int().nonnegative()
+  score: z.number().int().nonnegative(),
+  token: z.string().optional()
 })
 
 export async function POST(request: NextRequest) {
@@ -18,14 +23,39 @@ export async function POST(request: NextRequest) {
     const parsed = scoreSchema.safeParse(body)
     
     if (!parsed.success) {
-      return NextResponse.json({ error: 'Điểm số không hợp lệ' }, { status: 400 })
+      return NextResponse.json({ error: 'Dữ liệu không hợp lệ' }, { status: 400 })
     }
 
-    const { score } = parsed.data
+    const { score, token } = parsed.data
     
     if (score === 0) {
-       // Không cần cộng điểm
        return NextResponse.json({ success: true })
+    }
+
+    if (!token) {
+       return NextResponse.json({ error: 'Thiếu token xác thực' }, { status: 403 })
+    }
+
+    const [payload, signature] = token.split('.')
+    if (!payload || !signature) {
+       return NextResponse.json({ error: 'Token không hợp lệ' }, { status: 403 })
+    }
+
+    const expectedSignature = crypto.createHmac('sha256', SECRET).update(payload).digest('hex')
+    if (signature !== expectedSignature) {
+       return NextResponse.json({ error: 'Sai chữ ký token' }, { status: 403 })
+    }
+
+    const [userId, startTimeStr] = payload.split(':')
+    if (userId !== session.user.id) {
+       return NextResponse.json({ error: 'Token không thuộc về user này' }, { status: 403 })
+    }
+
+    const elapsed = Date.now() - parseInt(startTimeStr)
+    // Giả sử mỗi điểm cần ít nhất 100ms để đạt được (chống hack điểm quá cao trong thời gian quá ngắn)
+    // Nếu điểm > 100 và điểm > (elapsed / 100), nghi ngờ gian lận
+    if (score > 100 && score > elapsed / 50) {
+       return NextResponse.json({ error: 'Phát hiện bất thường trong quá trình chơi' }, { status: 403 })
     }
 
     // Upsert UserPoint

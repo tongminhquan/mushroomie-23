@@ -25,7 +25,7 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { addItem, openCart } = useCartStore()
   const [added, setAdded] = useState(false)
-  const imageUrl = product.featured_image || product.images?.[0]?.image_url || `https://picsum.photos/seed/${product.id}/400/400`
+  const imageUrl = product.featured_image || product.images?.[0]?.image_url || `/logo.png`
   const isOutOfStock = product.stock !== undefined && product.stock <= 0
   const hasSale = product.sale_price && product.sale_price < product.price
   const displayPrice = hasSale ? product.sale_price! : product.price

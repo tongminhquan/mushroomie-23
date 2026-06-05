@@ -52,10 +52,21 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Generate unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    const originalName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '')
-    const filename = `${uniqueSuffix}-${originalName}`
+    // Secure MIME check
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    if (!allowedMimeTypes.includes(file.type)) {
+      return NextResponse.json({ error: 'Invalid file type. Only JPG, PNG, WEBP, GIF are allowed.' }, { status: 400 })
+    }
+
+    // Generate unique filename using crypto
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'bin'
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif']
+    if (!allowedExtensions.includes(fileExt)) {
+      return NextResponse.json({ error: 'Invalid file extension.' }, { status: 400 })
+    }
+
+    const uniqueSuffix = crypto.randomUUID()
+    const filename = `${uniqueSuffix}.${fileExt}`
     
     const path = join(uploadDir, filename)
     

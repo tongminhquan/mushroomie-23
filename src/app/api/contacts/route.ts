@@ -8,6 +8,7 @@ const contactSchema = z.object({
   email: z.string().email('Email không hợp lệ'),
   phone: z.string().optional(),
   message: z.string().min(10, 'Nội dung ít nhất 10 ký tự'),
+  website: z.string().optional(), // Honeypot field
 })
 
 export async function POST(request: NextRequest) {
@@ -17,7 +18,15 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 })
     }
-    const contact = await prisma.contact.create({ data: parsed.data })
+    
+    // Honeypot check: If bot fills this invisible field, we silently "accept" it
+    if (parsed.data.website) {
+      console.log('Spam detected via honeypot', parsed.data.email)
+      return NextResponse.json({ success: true, id: -1 }, { status: 201 })
+    }
+
+    const { website, ...dataToSave } = parsed.data
+    const contact = await prisma.contact.create({ data: dataToSave })
     return NextResponse.json({ success: true, id: contact.id }, { status: 201 })
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })

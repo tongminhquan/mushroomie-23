@@ -118,6 +118,20 @@ export default function ContactPage() {
                       {errors[f.name] && <p className="text-red-500 text-xs mt-1">{errors[f.name][0]}</p>}
                     </div>
                   ))}
+                  
+                  {/* Honeypot field (invisible) */}
+                  <div className="absolute opacity-0 -z-50 h-0 w-0 overflow-hidden" aria-hidden="true">
+                    <label htmlFor="website">Website</label>
+                    <input
+                      type="text"
+                      id="website"
+                      name="website"
+                      value={(form as any).website || ''}
+                      onChange={(e) => setForm((p) => ({ ...p, website: e.target.value }))}
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
+                  </div>
                   <div>
                     <label className="block text-sm font-semibold mb-1">Nội dung *</label>
                     <textarea

@@ -35,7 +35,7 @@ interface MediaPickerProps {
 // Simulated media library from picsum
 const DEMO_IMAGES: MediaItem[] = Array.from({ length: 30 }, (_, i) => ({
   id: i + 1,
-  url: `https://picsum.photos/seed/${i + 10}/400/300`,
+  url: `/logo.png`,
   filename: `image-${i + 1}.jpg`,
   alt_text: '',
   caption: '',

@@ -32,7 +32,7 @@ export async function POST(req: Request) {
       },
     })
 
-    const domain = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const domain = process.env.NEXT_PUBLIC_APP_URL || 'https://mushroomie.io.vn'
     const resetUrl = `${domain}/tai-khoan/dat-lai-mat-khau?token=${resetToken}`
 
     // Gửi email

@@ -25,6 +25,8 @@ export default function MiniGamePage() {
   const [lastScore, setLastScore] = useState<number | null>(null)
   const [showScoreToast, setShowScoreToast] = useState(false)
 
+  const [gameToken, setGameToken] = useState<string>('')
+
   const fetchPoints = async () => {
     if (!session) return
     try {
@@ -41,10 +43,29 @@ export default function MiniGamePage() {
     }
   }
 
+  const startGameSession = async () => {
+    if (!session) return
+    try {
+      const res = await fetch('/api/minigame/start', { method: 'POST' })
+      const data = await res.json()
+      if (data.token) setGameToken(data.token)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
   useEffect(() => {
-    if (session) fetchPoints()
-    else setLoading(false)
+    if (session) {
+      fetchPoints()
+      startGameSession()
+    } else {
+      setLoading(false)
+    }
   }, [session])
+
+  useEffect(() => {
+    startGameSession()
+  }, [activeGame])
 
   const handleGameOver = async (score: number) => {
     setLastScore(score)
@@ -53,14 +74,19 @@ export default function MiniGamePage() {
         const res = await fetch('/api/minigame/submit-score', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ score })
+          body: JSON.stringify({ score, token: gameToken })
         })
         if (res.ok) {
           const data = await res.json()
           setPoints(data.points)
           setShowScoreToast(true)
           setTimeout(() => setShowScoreToast(false), 4000)
+        } else {
+          console.error(await res.text())
+          alert('Không thể lưu điểm, có thể do token hết hạn hoặc lỗi kết nối. Đang tải lại game...')
         }
+        // Luôn làm mới token sau mỗi lần submit để chống replay attack
+        startGameSession()
       } catch (err) {
         console.error(err)
       }

@@ -17,14 +17,14 @@ export default function PrivacyPolicyPage() {
 
         <section>
           <h3 className="flex items-center gap-2 text-lg font-bold text-neutral-800 mb-3">
-            <Database className="w-5 h-5 text-primary" /> Mục đích thu thập
+            <Database className="w-5 h-5 text-primary" /> Mục đích và Dữ liệu thu thập
           </h3>
-          <p className="mb-2">Mushroomie thu thập thông tin cá nhân của bạn (bao gồm: Tên, Số điện thoại, Email, Địa chỉ) nhằm mục đích:</p>
+          <p className="mb-2">Mushroomie thu thập thông tin cá nhân của bạn nhằm các mục đích cụ thể sau:</p>
           <ul className="list-disc pl-5 space-y-1 text-neutral-600">
-            <li>Xử lý đơn đặt hàng và giao hàng nhanh chóng.</li>
-            <li>Hỗ trợ khách hàng và giải đáp thắc mắc.</li>
-            <li>Gửi thông báo về các chương trình khuyến mãi (nếu bạn đồng ý).</li>
-            <li>Ngăn ngừa gian lận và bảo vệ tài khoản của bạn.</li>
+            <li><strong>Thông tin đặt hàng:</strong> Tên, Số điện thoại, Email, Địa chỉ để xử lý và giao đơn hàng.</li>
+            <li><strong>Thông tin thanh toán:</strong> Lịch sử giao dịch (không lưu trữ số thẻ tín dụng hay mật khẩu ngân hàng).</li>
+            <li><strong>Thông tin sử dụng & Cookie:</strong> Dữ liệu duyệt web, lịch sử chơi Mini Game để tối ưu hóa trải nghiệm và chống gian lận.</li>
+            <li><strong>Hỗ trợ:</strong> Email và thông tin liên hệ khi bạn gửi thắc mắc hoặc yêu cầu hỗ trợ.</li>
           </ul>
         </section>
 

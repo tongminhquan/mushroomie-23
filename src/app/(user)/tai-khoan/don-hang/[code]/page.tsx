@@ -31,12 +31,13 @@ const statusLabels: Record<string, string> = {
   CANCELLED: 'Đã hủy',
 }
 
-export default async function OrderDetailsPage({ params }: { params: Promise<{ code: string }> }) {
+export default async function OrderDetailsPage({ params, searchParams }: { params: Promise<{ code: string }>, searchParams: Promise<{ phone?: string, email?: string }> }) {
   const session = await auth()
-  if (!session) redirect('/tai-khoan/dang-nhap')
+  const { code } = await params
+  const { phone, email } = await searchParams
 
-  const { code } = await params;
-  const userId = parseInt((session.user as any).id)
+  const userId = session ? parseInt((session.user as any).id) : null
+
   const order = await prisma.order.findUnique({
     where: { order_code: code },
     include: {
@@ -49,8 +50,23 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ c
     },
   })
 
-  if (!order || order.user_id !== userId) {
+  if (!order) {
     notFound()
+  }
+
+  // Nếu user đã đăng nhập, phải là chủ đơn hàng
+  if (userId) {
+    if (order.user_id !== userId) notFound()
+  } else {
+    // Nếu chưa đăng nhập (khách vãng lai), phải cung cấp phone hoặc email đúng với đơn hàng
+    if (!phone && !email) {
+      redirect(`/tai-khoan/dang-nhap?callbackUrl=/tai-khoan/don-hang/${code}`)
+    }
+    const matchPhone = phone && order.customer_phone === phone
+    const matchEmail = email && order.customer_email === email
+    if (!matchPhone && !matchEmail) {
+      notFound()
+    }
   }
 
   const isExpired = order.payment?.status === 'EXPIRED'
@@ -81,7 +97,7 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ c
               <h2 className="font-heading font-bold text-lg mb-4">Sản phẩm đã đặt</h2>
               <div className="space-y-4">
                 {order.items.map((item) => {
-                  const imageUrl = item.product?.featured_image || `https://picsum.photos/seed/${item.id}/400`
+                  const imageUrl = item.product?.featured_image || '/logo.png'
                   const safeImageUrl = imageUrl.startsWith('http') || imageUrl.startsWith('/') || imageUrl.startsWith('data:') ? imageUrl : '/' + imageUrl
 
                   return (
