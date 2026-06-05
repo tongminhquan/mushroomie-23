@@ -122,11 +122,6 @@ export default function MediaLibrary() {
         })
       });
       if (res.ok) {
-        if (overwrite) {
-          // If overwrite, delete old file to be clean, though API might handle it.
-          // In our API, if overwrite is true we still create a new name, but let's delete old one.
-          await fetch(`/api/upload?filename=${encodeURIComponent(selectedImage.filename)}`, { method: 'DELETE' });
-        }
         await fetchImages();
         setIsEditing(false);
         setSelectedImage(null);
@@ -202,7 +197,7 @@ export default function MediaLibrary() {
             >
               <div className="aspect-square relative bg-neutral-100 flex items-center justify-center p-2">
                 <img 
-                  src={image.url} 
+                  src={`${image.url}?v=${image.id}`} 
                   alt={image.filename}
                   className="max-w-full max-h-full object-contain rounded-lg shadow-sm"
                   loading="lazy"
@@ -244,7 +239,7 @@ export default function MediaLibrary() {
             <div className="flex-1 bg-neutral-100 p-4 flex items-center justify-center min-h-[300px] overflow-hidden relative">
               {isEditing ? (
                 <Cropper
-                  src={selectedImage.url}
+                  src={`${selectedImage.url}?v=${selectedImage.id}`}
                   style={{ height: '100%', width: '100%' }}
                   initialAspectRatio={NaN}
                   guides={true}
@@ -256,7 +251,7 @@ export default function MediaLibrary() {
                 />
               ) : (
                 <img 
-                  src={selectedImage.url} 
+                  src={`${selectedImage.url}?v=${selectedImage.id}`} 
                   alt={selectedImage.filename} 
                   className="max-w-full max-h-[60vh] object-contain rounded-lg shadow-sm"
                 />
