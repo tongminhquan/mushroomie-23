@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: 'Phụ kiện handmade cá nhân hóa dành cho giới trẻ. Vòng tay, móc khóa, charm và phụ kiện nhỏ xinh được làm thủ công 100%.',
 }
 
+export const revalidate = 3600 // Revalidate every hour
+
 export default async function HomePage() {
   const [featuredProducts, posts, reviews, categories, banners] = await Promise.all([
     prisma.product.findMany({
@@ -16,21 +18,32 @@ export default async function HomePage() {
       include: { category: true, images: { orderBy: { sort_order: 'asc' }, take: 1 } },
       take: 8,
     }).then(products => products.map(p => ({
-      ...p,
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
       price: Number(p.price),
-      sale_price: p.sale_price ? Number(p.sale_price) : null
+      sale_price: p.sale_price ? Number(p.sale_price) : null,
+      featured_image: p.featured_image,
+      is_customizable: p.is_customizable,
+      stock: p.stock,
+      category: p.category ? { name: p.category.name, slug: p.category.slug } : null,
+      images: p.images.map(img => ({ image_url: img.image_url }))
     }))).catch(() => []),
     prisma.post.findMany({
       where: { status: 'published' },
-      include: { category: true },
+      select: { id: true, title: true, slug: true, excerpt: true, featured_image: true, published_at: true, category: { select: { name: true, slug: true } } },
       orderBy: { published_at: 'desc' },
       take: 3,
     }).catch(() => []),
     prisma.review.findMany({
       where: { status: 'approved', is_featured: true },
+      select: { id: true, rating: true, content: true, name: true },
       take: 6,
     }).catch(() => []),
-    prisma.category.findMany({ where: { type: 'product' } }).catch(() => []),
+    prisma.category.findMany({ 
+      where: { type: 'product' },
+      select: { id: true, name: true, slug: true, image_url: true, icon: true }
+    }).catch(() => []),
     prisma.banner.findMany({
       where: { status: 'active' },
       orderBy: { sort_order: 'asc' }

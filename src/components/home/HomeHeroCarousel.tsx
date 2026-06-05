@@ -157,10 +157,11 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
                 src={banner.image_url} 
                 alt={banner.title || 'Mushroomie Banner'} 
                 fill
+                sizes="100vw"
                 priority={index === 0}
-                unoptimized
-                style={{ filter: `brightness(${banner.brightness ?? 100}%)` }}
-                className="object-contain pointer-events-none"
+                loading={index === 0 ? undefined : "lazy"}
+                style={{ filter: `brightness(${banner.brightness ?? 100}%)`, objectFit: 'cover' }}
+                className="pointer-events-none"
               />
 
               {/* Gradient Overlay (Only if there is text content to ensure readability) */}
