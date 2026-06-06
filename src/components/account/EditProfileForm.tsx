@@ -63,27 +63,27 @@ export function EditProfileForm({
       <div className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-stone-500 mb-1">Họ và tên</label>
-            <div className="p-3 bg-stone-50 rounded-xl border border-stone-100 text-stone-800 font-medium">
+            <label className="block text-sm font-medium text-neutral-500 mb-1">Họ và tên</label>
+            <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-neutral-800 font-medium">
               {form.name}
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-stone-500 mb-1">Email</label>
-            <div className="p-3 bg-stone-50 rounded-xl border border-stone-100 text-stone-800 font-medium">
+            <label className="block text-sm font-medium text-neutral-500 mb-1">Email</label>
+            <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-neutral-800 font-medium">
               {initialEmail}
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-stone-500 mb-1">Số điện thoại</label>
-            <div className="p-3 bg-stone-50 rounded-xl border border-stone-100 text-stone-800 font-medium">
-              {form.phone || <span className="text-stone-400 italic font-normal">Chưa cập nhật</span>}
+            <label className="block text-sm font-medium text-neutral-500 mb-1">Số điện thoại</label>
+            <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-neutral-800 font-medium">
+              {form.phone || <span className="text-neutral-400 italic font-normal">Chưa cập nhật</span>}
             </div>
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-stone-500 mb-1">Địa chỉ nhận hàng</label>
-            <div className="p-3 bg-stone-50 rounded-xl border border-stone-100 text-stone-800 font-medium">
-              {form.address || <span className="text-stone-400 italic font-normal">Chưa cập nhật</span>}
+            <label className="block text-sm font-medium text-neutral-500 mb-1">Địa chỉ nhận hàng</label>
+            <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-neutral-800 font-medium">
+              {form.address || <span className="text-neutral-400 italic font-normal">Chưa cập nhật</span>}
             </div>
           </div>
         </div>
@@ -94,7 +94,7 @@ export function EditProfileForm({
           </div>
         )}
 
-        <div className="pt-6 mt-6 border-t border-stone-100 flex justify-end">
+        <div className="pt-6 mt-6 border-t border-neutral-100 flex justify-end">
           <Button type="button" onClick={() => setIsEditing(true)} size="md">
             Chỉnh sửa thông tin
           </Button>
@@ -107,7 +107,7 @@ export function EditProfileForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-semibold text-stone-700 mb-1">Họ và tên *</label>
+          <label className="block text-sm font-semibold text-neutral-700 mb-1">Họ và tên *</label>
           <input
             type="text"
             required
@@ -122,7 +122,7 @@ export function EditProfileForm({
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-stone-500 mb-1">Email (Không thể thay đổi)</label>
+          <label className="block text-sm font-semibold text-neutral-500 mb-1">Email (Không thể thay đổi)</label>
           <input
             type="email"
             disabled
@@ -132,7 +132,7 @@ export function EditProfileForm({
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-stone-700 mb-1">Số điện thoại *</label>
+          <label className="block text-sm font-semibold text-neutral-700 mb-1">Số điện thoại *</label>
           <input
             type="tel"
             required
@@ -147,7 +147,7 @@ export function EditProfileForm({
         </div>
 
         <div className="sm:col-span-2">
-          <label className="block text-sm font-semibold text-stone-700 mb-1">Địa chỉ nhận hàng *</label>
+          <label className="block text-sm font-semibold text-neutral-700 mb-1">Địa chỉ nhận hàng *</label>
           <textarea
             required
             rows={3}
@@ -162,7 +162,7 @@ export function EditProfileForm({
         </div>
       </div>
 
-      <div className="pt-6 mt-6 border-t border-stone-100 flex justify-end gap-3">
+      <div className="pt-6 mt-6 border-t border-neutral-100 flex justify-end gap-3">
         <Button
           type="button"
           variant="outline"

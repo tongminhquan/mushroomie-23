@@ -49,19 +49,22 @@ export default function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <div className="group bg-white rounded-[24px] border border-neutral-100 hover:border-primary-light overflow-hidden hover:shadow-hover hover:-translate-y-2 transition-all duration-300 relative flex flex-col h-full">
-      <Link href={`/san-pham/${product.slug}`} className="block relative aspect-[3/4] w-full bg-neutral-50 overflow-hidden shrink-0">
+    <div className="group bg-white rounded-[24px] border border-neutral-100 hover:border-accent-peach overflow-hidden hover:shadow-hover hover:-translate-y-1 transition-all duration-300 relative flex flex-col h-full">
+      <Link href={`/san-pham/${product.slug}`} className="block relative aspect-[3/4] w-full bg-secondary overflow-hidden shrink-0">
         <Image
           src={imageUrl}
           alt={product.name}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+          className="object-contain p-2 group-hover:scale-105 transition-transform duration-500 ease-out"
         />
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {product.is_customizable && (
-            <span className="bg-accent-mint text-neutral-900 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">Cá nhân hóa</span>
+            <span className="bg-accent-mint text-neutral-900 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">✨ Cá nhân hóa</span>
+          )}
+          {!product.is_customizable && !isOutOfStock && (
+            <span className="bg-accent-peach text-neutral-700 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">🧵 Handmade</span>
           )}
           {hasSale && (
             <span className="bg-accent-orange text-white text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">-{Math.round((1 - product.sale_price! / product.price) * 100)}%</span>
