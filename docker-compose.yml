@@ -6,8 +6,9 @@ services:
       context: .
       network: host
     container_name: mushroomie_web
-    restart: always
+    restart: unless-stopped
     network_mode: "host"
     env_file:
       - .env
-
+    volumes:
+      - ./public/uploads:/app/public/uploads
