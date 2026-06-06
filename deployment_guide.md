@@ -86,30 +86,42 @@ docker compose logs -f --tail=100
 
 Để tránh rủi ro mất mát dữ liệu, thư mục backup đã được thiết lập tại `backups/`. Đảm bảo thư mục này luôn được đưa vào `.gitignore` để không push nhầm dữ liệu nhạy cảm lên GitHub.
 
-### 5.1. Backup Uploads (Media/Images)
+### 5.1. Auto Backup bằng Cron
+Hệ thống đã được thiết lập chạy backup tự động mỗi ngày thông qua crontab. Các bản backup cũ (quá 30 ngày) sẽ tự động bị xóa.
+Logs của cron chạy nằm tại `backups/logs/backup.log`.
 
-Tất cả ảnh sản phẩm và banner được lưu tại `public/uploads`. Tạo một bản nén `.tar.gz` để lưu trữ:
-
+### 5.2. Backup Manual
+Bạn có thể gọi script backup thủ công bất cứ lúc nào bằng lệnh:
 ```bash
-mkdir -p backups/uploads
-tar -czf backups/uploads/uploads-$(date +%F-%H%M%S).tar.gz public/uploads
+./scripts/backup-production.sh
 ```
-
-### 5.2. Backup Database (MySQL)
-
-Dự án dùng MySQL trực tiếp trên máy chủ. Thực hiện dump dữ liệu bằng lệnh sau (thay thế `<db_user>` và `<db_name>` tương ứng, ví dụ user là `mushroomie_user` và DB là `mushroomie`):
-
-```bash
-mkdir -p backups/db
-mysqldump -u <db_user> -p <db_name> | gzip > backups/db/mysql-$(date +%F-%H%M%S).sql.gz
-```
-*(Hệ thống sẽ yêu cầu nhập mật khẩu của database user để bảo mật, không nên ghi sẵn mật khẩu vào lệnh).*
 
 ---
 
-## Cảnh Báo Tuyệt Đối ⚠️
+## 6. Hướng dẫn Khôi phục Sơ bộ (Restore Guide)
+
+Nếu cần khôi phục dữ liệu từ các bản backup trong thư mục `backups/`, hãy làm theo hướng dẫn sau:
+
+### 6.1. Restore Uploads (Media)
+Xả nén đè lại thư mục `public/uploads`:
+```bash
+tar -xzf backups/uploads/uploads-YYYY-MM-DD-HHMMSS.tar.gz -C /var/www/mushroomie
+```
+
+### 6.2. Restore Database
+Giải nén và bơm ngược dữ liệu vào MySQL:
+```bash
+gunzip -c backups/db/mysql-YYYY-MM-DD-HHMMSS.sql.gz | mysql -u <db_user> -p <db_name>
+```
+
+---
+
+## 7. Cảnh Báo Tuyệt Đối (Critical Warnings) ⚠️
 - **Không xóa thư mục `public/uploads`** trên máy host.
 - **Không xóa cấu hình volume mapping** trong `docker-compose.yml`.
-- **Không thêm lại service `db`** vào docker-compose nếu bạn vẫn đang dùng MySQL gốc trên VPS.
+- **Không đưa MySQL container dư thừa vào lại** docker-compose nếu bạn vẫn đang dùng MySQL gốc trên VPS.
 - **Không đổi `network_mode: "host"`** trừ khi bạn có kế hoạch cấu hình lại kết nối DB.
-- **Luôn backup** Database và Uploads trước khi thực hiện bất kỳ thay đổi lớn nào trên production.
+- **Không commit `.env`** lên GitHub.
+- **Không commit backup** (file `.tar.gz`, `.sql.gz`).
+- **Không deploy nếu build fail**.
+- **Không xóa cache Cloudflare tùy tiện** nếu chưa cần, nhưng được phép purge cache nếu static chunk gặp lỗi.
