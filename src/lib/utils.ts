@@ -41,3 +41,39 @@ export function truncate(str: string, length: number): string {
   if (str.length <= length) return str
   return str.substring(0, length) + '...'
 }
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || 'https://mushroomie.io.vn';
+
+export function getPublicImageUrl(pathOrUrl?: string | null, type: 'product' | 'banner' | 'user' = 'product'): string {
+  const fallback = type === 'banner' 
+    ? '/images/banner-placeholder.png' 
+    : type === 'user' 
+      ? '/images/avatar-placeholder.png' 
+      : '/images/product-placeholder.png';
+  
+  if (!pathOrUrl || typeof pathOrUrl !== 'string') return fallback;
+  
+  const value = pathOrUrl.trim();
+  if (!value) return fallback;
+
+  // Handle localhost links generated in local DB
+  if (value.startsWith('http://localhost') || value.startsWith('https://localhost') || value.startsWith('http://127.0.0.1')) {
+    try {
+      const url = new URL(value);
+      return url.pathname;
+    } catch {
+      return fallback;
+    }
+  }
+  
+  // Convert absolute internal URLs to relative to use Next.js image optimization properly
+  if (value.startsWith(SITE_URL)) {
+    return value.replace(SITE_URL, '');
+  }
+
+  // Already a full absolute remote URL or relative URL
+  if (value.startsWith('http')) return value;
+  if (value.startsWith('/')) return value;
+
+  return `/${value}`;
+}

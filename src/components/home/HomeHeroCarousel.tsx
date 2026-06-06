@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { getPublicImageUrl } from '@/lib/utils'
 
 interface Banner {
   id: number
@@ -154,37 +155,15 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
             >
               {/* Background Image */}
               <Image 
-                src={banner.image_url} 
+                src={getPublicImageUrl(banner.image_url, 'banner')} 
                 alt={banner.title || 'Mushroomie Banner'} 
                 fill
                 sizes="100vw"
                 priority={index === 0}
                 loading={index === 0 ? undefined : "lazy"}
-                style={{ filter: `brightness(${banner.brightness ?? 100}%)`, objectFit: 'cover' }}
+                style={{ objectFit: 'contain' }}
                 className="pointer-events-none"
               />
-
-              {/* Gradient Overlay (Only if there is text content to ensure readability) */}
-              {!isPureImage && (
-                <div 
-                  className="absolute inset-0 transition-opacity duration-700 pointer-events-none bg-gradient-to-tr from-black/85 via-black/45 to-black/10 lg:from-black/75 lg:via-black/35 lg:to-transparent"
-                />
-              )}
-
-              {/* Float emojis overlay (Only if there is text) */}
-              {!isPureImage && (
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                  {['top-10 left-10', 'top-1/4 right-20', 'bottom-20 left-1/4', 'bottom-10 right-10', 'top-1/2 left-1/3'].map((pos, i) => (
-                    <div 
-                      key={i} 
-                      className={`absolute ${pos} text-5xl opacity-15`} 
-                      style={{ animation: `bounce 2s ease-in-out ${i * 0.5}s infinite` }}
-                    >
-                      {['🍄', '✨', '💛', '🌸', '🧶'][i % 5]}
-                    </div>
-                  ))}
-                </div>
-              )}
 
               {/* Slide Content */}
               {!isPureImage && (

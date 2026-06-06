@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ShoppingBag, Check } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, getPublicImageUrl } from '@/lib/utils'
 import { useState } from 'react'
 
 interface ProductCardProps {
@@ -25,7 +25,7 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { addItem, openCart } = useCartStore()
   const [added, setAdded] = useState(false)
-  const imageUrl = product.featured_image || product.images?.[0]?.image_url || `/logo.png`
+  const imageUrl = getPublicImageUrl(product.featured_image || product.images?.[0]?.image_url, 'product')
   const isOutOfStock = product.stock !== undefined && product.stock <= 0
   const hasSale = product.sale_price && product.sale_price < product.price
   const displayPrice = hasSale ? product.sale_price! : product.price

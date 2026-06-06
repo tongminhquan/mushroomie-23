@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Calendar } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
+import { formatDate, getPublicImageUrl } from '@/lib/utils'
 
 interface PostCardProps {
   post: {
@@ -21,7 +21,7 @@ export default function PostCard({ post }: PostCardProps) {
       <article className="bg-white rounded-xl overflow-hidden shadow-[0_4px_15px_rgba(64,64,64,0.12)] hover:shadow-[0_8px_30px_rgba(228,29,29,0.18)] transition-all duration-300 hover:-translate-y-1 h-full">
         <div className="relative h-48 overflow-hidden bg-neutral-50">
           {post.featured_image ? (
-            <Image src={post.featured_image} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 33vw" />
+            <Image src={getPublicImageUrl(post.featured_image)} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 33vw" />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-primary-light to-accent-mint flex items-center justify-center"><span className="text-4xl">🍄</span></div>
           )}
