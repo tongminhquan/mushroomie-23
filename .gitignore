@@ -52,3 +52,8 @@ deploy-temp/
 test-v*-extract/
 *.bak
 
+
+backups/
+*.tar.gz
+*.sql
+*.dump
