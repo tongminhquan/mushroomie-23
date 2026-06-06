@@ -49,7 +49,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 RUN chmod +x ./start.sh
 
 # Cài đặt prisma CLI vào node_modules cục bộ để start.sh có thể chạy lệnh
-RUN npm install prisma@5.22.0
+RUN npm install prisma@5.22.0 --legacy-peer-deps
 
 # Chuyển quyền thư mục /app cho user nextjs (để prisma có thể tạo client trong node_modules)
 RUN chown -R nextjs:nodejs /app
