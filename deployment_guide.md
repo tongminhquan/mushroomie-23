@@ -1,49 +1,47 @@
-# Hướng dẫn deploy Website Next.js (Mushroomie) lên VPS Ubuntu 24.04 LTS bằng Docker
+# Hướng dẫn deploy Website Next.js (Mushroomie) lên VPS Ubuntu 24.04 LTS bằng PM2
 
 **Địa chỉ IP VPS:** `103.173.226.86`
 **Domain:** `https://mushroomie.io.vn`
 
-Tài liệu này ghi nhận cấu hình hiện tại và hướng dẫn bạn chi tiết từng bước để quản lý, cập nhật (deploy) mã nguồn Next.js đã được Docker hóa.
+Tài liệu này ghi nhận cấu hình hiện tại và hướng dẫn bạn chi tiết từng bước để quản lý, cập nhật (deploy) mã nguồn Next.js đã được cấu hình chạy trực tiếp trên VPS thông qua PM2. Phương pháp này giúp tối ưu hóa dung lượng ổ cứng (tránh lỗi full disk do Docker layer cache).
 
 ---
 
 ## 1. Kiến trúc Deploy Hiện Tại
 
-- **Máy chủ Database:** MySQL được cài đặt trực tiếp trên VPS host (port `3306`), giữ nguyên toàn bộ dữ liệu từ hồi chạy PM2.
-- **Web App:** Next.js chạy trong Docker container (`mushroomie_web`), sử dụng `network_mode: "host"` để truy cập trực tiếp MySQL và lắng nghe trên port `3000` của host.
-- **Reverse Proxy:** Nginx (cài trên VPS) proxy request từ port 80/443 vào `http://localhost:3000`. Điều này xử lý triệt để lỗi MIME Type (`text/plain`) và 404 static chunks mà PM2 từng gặp phải.
-- **Quản lý Process:** Docker Daemon (thay thế cho PM2).
+- **Máy chủ Database:** MySQL được cài đặt trực tiếp trên VPS host (port `3306`).
+- **Web App:** Next.js chạy Standalone server thông qua Node.js.
+- **Quản lý Process:** PM2 quản lý tiến trình web app (tên app: `mushroomie_pm2`), lắng nghe trên port `3001`.
+- **Reverse Proxy:** Nginx proxy request từ port 80/443 vào `http://127.0.0.1:3001`.
 
 ---
 
-## 2. Cấu hình Docker Compose Chuẩn
+## 2. Cấu hình PM2 Chuẩn
 
-Dưới đây là cấu hình `docker-compose.yml` chuẩn nhất đã được thiết lập để đảm bảo **không xung đột port**, **không mất ảnh upload** và **tự động khởi động lại**:
+Dự án sử dụng file `ecosystem.config.js` nằm tại thư mục gốc của dự án (`/var/www/mushroomie/ecosystem.config.js`) với nội dung:
 
-```yaml
-version: '3.8'
-
-services:
-  web:
-    build:
-      context: .
-      network: host # Quan trọng: Cho phép quá trình build Next.js (Prisma) truy cập MySQL host
-    container_name: mushroomie_web
-    restart: unless-stopped # Quan trọng: Tự khởi động lại khi crash hoặc VPS reboot
-    network_mode: "host" # Container dùng chung mạng với VPS, truy cập localhost bình thường
-    env_file:
-      - .env
-    volumes:
-      - ./public/uploads:/app/public/uploads # Quan trọng: Map thư mục upload ra ngoài host để không bị mất ảnh khi deploy lại
+```javascript
+module.exports = {
+  apps: [
+    {
+      name: 'mushroomie_pm2',
+      script: 'server.js',
+      cwd: '/var/www/mushroomie/.next/standalone',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3001,
+        HOSTNAME: '127.0.0.1',
+      },
+    },
+  ],
+};
 ```
-
-*(Lưu ý: Không thêm container `db` vào đây vì dự án đang xài MySQL gốc của VPS, nếu thêm sẽ gây lỗi conflict port 3306).*
 
 ---
 
 ## 3. Quy trình Cập nhật Code (Deploy)
 
-Khi bạn có thay đổi code và đã push lên GitHub nhánh `main`, hãy SSH vào VPS và làm theo 3 bước sau:
+Khi bạn có thay đổi code và đã push lên GitHub nhánh `main`, hãy SSH vào VPS và làm theo các bước sau:
 
 1. **Di chuyển vào thư mục dự án:**
    ```bash
@@ -55,73 +53,66 @@ Khi bạn có thay đổi code và đã push lên GitHub nhánh `main`, hãy SSH
    git pull origin main
    ```
 
-3. **Build lại image và khởi động lại container:**
+3. **Cập nhật thư viện và Build lại dự án:**
    ```bash
-   docker compose up -d --build
+   npm ci
+   npx prisma generate
+   npm run build
    ```
 
-Lệnh trên sẽ tự động:
-- Xóa container cũ.
-- Tải lại các dependency mới (nếu có).
-- Chạy `npx prisma generate` và `npm run build` sinh ra static chunks mới nhất.
-- Chạy container mới (các ảnh upload cũ vẫn được giữ nguyên nhờ mount volume).
+4. **Copy các file tĩnh (Bắt buộc cho Next.js Standalone):**
+   ```bash
+   cp -r public .next/standalone/
+   cp -r .next/static .next/standalone/.next/
+   cp .env .next/standalone/
+   ```
+
+5. **Khởi động lại PM2:**
+   ```bash
+   pm2 restart mushroomie_pm2
+   pm2 save
+   ```
 
 **Để xem log nếu có lỗi xảy ra:**
 ```bash
-docker compose logs -f --tail=100
+pm2 logs mushroomie_pm2
 ```
 
 ---
 
 ## 4. Các Lưu Ý Vận Hành Quan Trọng (Hậu Kiểm)
 
-1. **Upload Media:** File ảnh được upload qua admin sẽ lưu vào thư mục `./public/uploads` trên VPS. Nếu bạn cần backup dữ liệu, chỉ cần nén thư mục này lại.
-2. **React Email:** Các package `@react-email` (components, render,...) đã được gỡ bỏ hoàn toàn khỏi `package.json` vì dự án sử dụng HTML string thuần túy trong `src/lib/payment/email/templates.ts`. Nếu sau này bạn cần dùng email UI component, hãy cài các thư viện tương thích với Next.js 15+ hoặc tiếp tục dùng HTML string.
-3. **Nginx:** Không cần trỏ Nginx root vào thư mục `.next/static`. Cấu hình `proxy_pass http://localhost:3000;` là đủ vì Next.js Standalone server đã tự động xử lý static files đúng MIME type khi chạy bằng Docker.
-4. **Bảo trì PM2:** Dịch vụ PM2 cũ đã bị tắt và xóa. Xin đừng dùng lệnh `pm2 start` nữa để tránh tranh chấp port 3000. Mọi thứ được Docker lo liệu.
+1. **Upload Media:** File ảnh được upload qua admin sẽ lưu vào thư mục `public/uploads` trong thư mục dự án. Nhờ lệnh `cp -r public .next/standalone/`, ảnh mới được server nhận diện. API upload được thiết lập ghi thẳng vào thư mục gốc `public/uploads` để lưu trữ lâu dài.
+2. **Nginx:** Cấu hình proxy trỏ vào `http://127.0.0.1:3001`. Mọi routing và file tĩnh đều được PM2 xử lý chính xác MIME Type.
+3. **Bảo trì Docker:** Hệ thống KHÔNG CÒN sử dụng Docker. Các lệnh `docker compose` sẽ không còn tác dụng. Điều này giúp giải phóng hơn 50% dung lượng VPS (từ ~82% xuống ~49%).
 
 ---
 
 ## 5. Quy trình Backup An Toàn
 
-Để tránh rủi ro mất mát dữ liệu, thư mục backup đã được thiết lập tại `backups/`. Đảm bảo thư mục này luôn được đưa vào `.gitignore` để không push nhầm dữ liệu nhạy cảm lên GitHub.
+Thư mục backup nằm tại `/var/www/mushroomie/backups/`. Đảm bảo thư mục này luôn được đưa vào `.gitignore`.
 
-### 5.1. Auto Backup bằng Cron
-Hệ thống đã được thiết lập chạy backup tự động mỗi ngày thông qua crontab. Các bản backup cũ (quá 30 ngày) sẽ tự động bị xóa.
-Logs của cron chạy nằm tại `backups/logs/backup.log`.
+### 5.1. Backup Uploads (Media/Images)
 
-### 5.2. Backup Manual
-Bạn có thể gọi script backup thủ công bất cứ lúc nào bằng lệnh:
+Tất cả ảnh sản phẩm được lưu tại `public/uploads`.
 ```bash
-./scripts/backup-production.sh
+mkdir -p backups/uploads
+tar -czf backups/uploads/uploads-$(date +%F-%H%M%S).tar.gz public/uploads
 ```
+
+### 5.2. Backup Database (MySQL)
+
+Thực hiện dump dữ liệu:
+```bash
+mkdir -p backups/db
+mysqldump -u <db_user> -p <db_name> | gzip > backups/db/mysql-$(date +%F-%H%M%S).sql.gz
+```
+
+Hệ thống có sẵn cronjob chạy script `./scripts/backup-production.sh` hằng ngày lúc 02:30 sáng.
 
 ---
 
-## 6. Hướng dẫn Khôi phục Sơ bộ (Restore Guide)
-
-Nếu cần khôi phục dữ liệu từ các bản backup trong thư mục `backups/`, hãy làm theo hướng dẫn sau:
-
-### 6.1. Restore Uploads (Media)
-Xả nén đè lại thư mục `public/uploads`:
-```bash
-tar -xzf backups/uploads/uploads-YYYY-MM-DD-HHMMSS.tar.gz -C /var/www/mushroomie
-```
-
-### 6.2. Restore Database
-Giải nén và bơm ngược dữ liệu vào MySQL:
-```bash
-gunzip -c backups/db/mysql-YYYY-MM-DD-HHMMSS.sql.gz | mysql -u <db_user> -p <db_name>
-```
-
----
-
-## 7. Cảnh Báo Tuyệt Đối (Critical Warnings) ⚠️
-- **Không xóa thư mục `public/uploads`** trên máy host.
-- **Không xóa cấu hình volume mapping** trong `docker-compose.yml`.
-- **Không đưa MySQL container dư thừa vào lại** docker-compose nếu bạn vẫn đang dùng MySQL gốc trên VPS.
-- **Không đổi `network_mode: "host"`** trừ khi bạn có kế hoạch cấu hình lại kết nối DB.
-- **Không commit `.env`** lên GitHub.
-- **Không commit backup** (file `.tar.gz`, `.sql.gz`).
-- **Không deploy nếu build fail**.
-- **Không xóa cache Cloudflare tùy tiện** nếu chưa cần, nhưng được phép purge cache nếu static chunk gặp lỗi.
+## Cảnh Báo Tuyệt Đối ⚠️
+- **Không xóa thư mục `public/uploads`**, `.env`, `backups` trên máy host.
+- **Không dùng lại Docker** cho ứng dụng này trên VPS 20GB để tránh lỗi full disk tái diễn.
+- **Luôn backup** Database và Uploads trước khi thực hiện deploy thay đổi lớn trên production.
