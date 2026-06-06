@@ -12,3 +12,9 @@ services:
       - .env
     volumes:
       - ./public/uploads:/app/public/uploads
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

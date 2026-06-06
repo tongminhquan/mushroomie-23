@@ -2,10 +2,11 @@
 
 ## Hằng ngày
 - [ ] Website homepage HTTP 200.
+- [ ] Endpoint `/api/health` trả về `status: "ok"`.
 - [ ] Trang sản phẩm load được.
 - [ ] Admin login được.
-- [ ] Container `mushroomie_web` Up.
-- [ ] Disk không đầy (kiểm tra bằng `df -h`).
+- [ ] Container `mushroomie_web` Up và trạng thái là `healthy`.
+- [ ] Disk không đầy (chạy `./scripts/check-disk.sh` hoặc `df -h`).
 - [ ] Backup chạy thành công (kiểm tra file backup mới nhất trong `backups/`).
 
 ## Hằng tuần

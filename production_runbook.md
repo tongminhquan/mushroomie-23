@@ -80,29 +80,74 @@ gunzip -c backups/db/mysql-YYYY-MM-DD-HHMMSS.sql.gz | mysql -u <db_user> -p <db_
 4. Xác minh hệ thống.
 5. Sau khi xử lý xong, revert thay đổi trên GitHub rồi pull lại nhánh main.
 
-## 10. Đề xuất Backup Offsite (Đang thiếu)
-**Rủi ro:** Hiện tại toàn bộ backup chỉ lưu trên cùng một VPS. Nếu VPS hỏng phần cứng hoặc bị xóa nhầm máy ảo, toàn bộ mã nguồn và backup sẽ mất trắng.
-**Giải pháp:** Cần thiết lập rclone đẩy dữ liệu lên S3, Google Drive hoặc Cloudflare R2 định kỳ mỗi tuần. (Lưu ý: Không lưu credentials của Rclone vào GitHub repository).
+## 10. Đề xuất Backup Offsite
+Hiện tại backup chỉ nằm trong VPS. Điều này bảo vệ được lỗi deploy, lỗi thao tác, nhưng không bảo vệ được trường hợp VPS hỏng ổ cứng, mất server hoặc nhà cung cấp lỗi nặng.
 
-## 11. Đề xuất Monitor & Healthcheck
-**Rủi ro:** Hệ thống có thể sập nhưng Docker không tự restart nếu Next.js bị kẹt node process thay vì crash hẳn.
-**Giải pháp:** Cần phát triển một route `/api/health` trong Next.js:
+**Các phương án đề xuất:**
+1. Cloudflare R2 (Khuyến nghị vì rẻ, dễ cấu hình chung với Cloudflare).
+2. Google Drive qua rclone (Dễ tải thủ công).
+3. AWS S3.
+
+**Hướng dẫn rclone mẫu (nếu đã có credential):**
+```bash
+rclone config
+rclone copy /var/www/mushroomie/backups remote-name:mushroomie-backups --progress
+```
+*Lưu ý: Không commit file config rclone, không lưu credential vào GitHub.*
+
+**Cron offsite đề xuất (chỉ bật khi đã có credential):**
+```cron
+0 3 * * * rclone copy /var/www/mushroomie/backups <remote>:mushroomie-backups >> /var/www/mushroomie/backups/logs/offsite-backup.log 2>&1
+```
+
+## 11. Monitor & Healthcheck
+Hệ thống cung cấp endpoint healthcheck tại:
+```txt
+GET https://mushroomie.io.vn/api/health
+```
+Response mẫu:
 ```json
-{ "status": "ok", "time": "ISO_DATE", "database": "ok" }
-```
-Sau đó thêm Docker Healthcheck vào `docker-compose.yml`:
-```yaml
-healthcheck:
-  test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3000/api/health"]
-  interval: 30s
-  timeout: 10s
-  retries: 3
-  start_period: 30s
+{
+  "status": "ok",
+  "time": "ISO_DATE",
+  "service": "mushroomie",
+  "database": "ok",
+  "uptime": 12345
+}
 ```
 
-## 12. Các lỗi thường gặp và cách xử lý
+### 11.1. Uptime Monitoring
+Sử dụng UptimeRobot (hoặc Uptime Kuma) để giám sát hệ thống.
+- **Monitor URL:** `https://mushroomie.io.vn/api/health`
+- **Check interval:** 5 phút.
+- **Timeout:** 30 giây.
+- **Điều kiện down:** HTTP status không phải 200.
+
+### 11.2. Docker Healthcheck
+Docker Daemon sẽ tự động `wget` vào endpoint `/api/health` mỗi 30s để kiểm tra trạng thái app và ghi nhận vào cột STATUS (`healthy` / `unhealthy`). 
+*Lưu ý:* Nếu healthcheck liên tục báo lỗi do query Prisma quá tải, có thể tạm thời tháo bỏ trong `docker-compose.yml`.
+
+## 12. Quản lý dung lượng (Disk)
+Kiểm tra dung lượng disk thủ công:
+```bash
+./scripts/check-disk.sh
+df -h
+du -sh backups public/uploads
+docker system df
+```
+Dọn dẹp an toàn (KHÔNG tự xóa volume):
+```bash
+docker builder prune
+docker image prune
+```
+
+## 13. Security Headers
+Hệ thống đã bật sẵn `Strict-Transport-Security`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, và `Content-Security-Policy`.
+Mọi header bảo mật đều đạt chuẩn.
+
+## 14. Các lỗi thường gặp và cách xử lý
 - **Website trắng (ChunkLoadError):** Lỗi Nginx đọc sai đường dẫn static. Sửa bằng cách proxy_pass hoàn toàn vào `http://localhost:3000`.
 - **Lỗi CSS/JS trả về text/plain:** Tương tự như trên.
 - **Upload ảnh xong bị mất sau deploy:** Chưa có volume mapping. Sửa bằng `./public/uploads:/app/public/uploads`.
 - **Xung đột MySQL Port 3306:** Bỏ container `db` trong docker-compose, dùng `network_mode: "host"` để truy cập MySQL trực tiếp.
-- **Disk đầy:** Chạy `docker image prune -a` hoặc xóa bớt backup cũ. (Hiện VPS còn trống khoảng 5GB, mỗi 30 ngày backup tốn ~1GB, nên cân nhắc giảm retention xuống 14 ngày nếu thấy thiếu dung lượng).
+- **Disk đầy:** Chạy `./scripts/check-disk.sh`. Dọn dẹp cache bằng `docker builder prune`.

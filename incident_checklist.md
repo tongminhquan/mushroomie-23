@@ -73,17 +73,21 @@ docker logs mushroomie_web --tail=100 | grep -i mysql
 ## 6. Disk đầy (Hết dung lượng VPS)
 Nếu ổ cứng trên 95%, hệ thống sẽ treo.
 ```bash
-# B1: Xem tổng quan disk
+# B1: Chạy script kiểm tra
+./scripts/check-disk.sh
+
+# B2: Xem tổng quan disk
 df -h
 
-# B2: Quét dung lượng các thư mục nặng
+# B3: Quét dung lượng các thư mục nặng
 du -sh public/uploads backups .next node_modules
 
-# B3: Kiểm tra dung lượng do Docker chiếm dụng
+# B4: Kiểm tra dung lượng do Docker chiếm dụng
 docker system df
 
-# B4: Dọn rác an toàn (Xóa các container/image cũ)
-docker image prune -a
+# B5: Dọn rác an toàn (Xóa các image cũ)
+docker image prune
+docker builder prune
 ```
 
 ## 7. Backup lỗi (Không tự động sinh file)
@@ -101,6 +105,13 @@ ls -lh backups/db | tail
 
 ## 8. Admin không đăng nhập được
 - Kiểm tra log ứng dụng (`docker logs mushroomie_web --tail=100`).
-- Đảm bảo database vẫn sống và Next.js connect được.
+- Đảm bảo database vẫn sống và Next.js connect được (`curl https://mushroomie.io.vn/api/health`).
 - Đảm bảo biến `<secret>` cho phiên đăng nhập (như `NEXTAUTH_SECRET`) trong file `.env` không bị mất.
 - Không được tự ý reset hoặc cập nhật DB bằng tay nếu chưa dump toàn bộ CSDL ra ngoài dự phòng.
+
+## 9. Container Restart Loop (Do Docker Healthcheck)
+Nếu container liên tục báo `unhealthy` và bị restart loop:
+- B1: Kiểm tra endpoint `/api/health` có trả về 500/503 không.
+- B2: Tạm thời tháo block `healthcheck:` ra khỏi `docker-compose.yml`.
+- B3: Chạy `docker compose up -d` để tắt vòng lặp restart.
+- B4: Khắc phục lỗi Prisma/Database connection sau đó mới bật lại.
