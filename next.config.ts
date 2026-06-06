@@ -1,4 +1,9 @@
 import type { NextConfig } from 'next'
+import withBundleAnalyzer from '@next/bundle-analyzer'
+
+const analyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+})
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -19,6 +24,7 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
+    optimizePackageImports: ['lucide-react', 'date-fns'],
     serverActions: { allowedOrigins: ['localhost:3000', 'mushroomie.io.vn', '*.mushroomie.io.vn'] },
   },
   async headers() {
@@ -52,4 +58,4 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+export default analyzer(nextConfig)

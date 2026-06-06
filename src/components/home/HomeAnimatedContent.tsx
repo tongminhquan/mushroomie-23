@@ -1,10 +1,14 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import { Truck, Gem, Palette, CreditCard } from 'lucide-react'
 import ProductCard from '@/components/product/ProductCard'
-import PostCard from '@/components/blog/PostCard'
 import AnimateOnScroll, { StaggerChildren } from '@/components/ui/AnimateOnScroll'
+
+const PostCard = dynamic(() => import('@/components/blog/PostCard'), {
+  ssr: true,
+})
 
 interface HomeContentProps {
   featuredProducts: any[]

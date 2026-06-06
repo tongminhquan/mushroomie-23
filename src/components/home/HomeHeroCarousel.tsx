@@ -160,6 +160,7 @@ export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCaro
                 fill
                 sizes="100vw"
                 priority={index === 0}
+                fetchPriority={index === 0 ? "high" : "auto"}
                 loading={index === 0 ? undefined : "lazy"}
                 style={{ objectFit: 'contain' }}
                 className="pointer-events-none"
