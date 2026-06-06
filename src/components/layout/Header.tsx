@@ -106,7 +106,7 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 md:h-24 flex items-center justify-between gap-4 md:gap-8">
           
           {/* Mobile Menu Button */}
-          <button className="md:hidden p-2 text-neutral-700" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button aria-label={isMenuOpen ? "Đóng menu" : "Mở menu"} className="md:hidden p-2 text-neutral-700" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
@@ -127,7 +127,7 @@ export default function Header() {
                 placeholder=""
                 className="w-full px-5 py-3 bg-white border-2 border-primary rounded-l-md text-sm focus:outline-none placeholder:text-neutral-400 font-medium"
               />
-              <button type="submit" className="bg-primary hover:bg-primary-dark transition-colors px-6 text-white rounded-r-md flex items-center justify-center">
+              <button type="submit" aria-label="Tìm kiếm" className="bg-primary hover:bg-primary-dark transition-colors px-6 text-white rounded-r-md flex items-center justify-center">
                 <Search size={20} />
               </button>
             </div>
@@ -136,7 +136,7 @@ export default function Header() {
           {/* Right Action Icons (Account, Cart) */}
           <div className="flex items-center gap-2 md:gap-6 shrink-0">
             {/* Mobile Search Toggle */}
-            <button onClick={() => setShowSearch(!showSearch)} className="md:hidden p-2 text-neutral-700">
+            <button aria-label="Mở tìm kiếm" onClick={() => setShowSearch(!showSearch)} className="md:hidden p-2 text-neutral-700">
               <Search size={24} />
             </button>
 
@@ -216,7 +216,7 @@ export default function Header() {
                   className="w-full px-4 py-2 bg-neutral-50 border border-neutral-200 rounded-l-md text-sm focus:outline-none focus:border-primary"
                   autoFocus
                 />
-                <button type="submit" className="bg-primary px-4 text-white rounded-r-md flex items-center justify-center">
+                <button type="submit" aria-label="Tìm kiếm" className="bg-primary px-4 text-white rounded-r-md flex items-center justify-center">
                   <Search size={18} />
                 </button>
               </div>
@@ -303,7 +303,7 @@ export default function Header() {
                   </Link>
                 )}
               </div>
-              <button onClick={() => setIsMenuOpen(false)} className="p-2 bg-white rounded-full border border-neutral-200 text-neutral-500"><X size={16} /></button>
+              <button aria-label="Đóng menu" onClick={() => setIsMenuOpen(false)} className="p-2 bg-white rounded-full border border-neutral-200 text-neutral-500"><X size={16} /></button>
             </div>
             <div className="overflow-y-auto flex-1 py-2">
               {navLinks.map((link) => (
