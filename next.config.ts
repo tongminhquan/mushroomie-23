@@ -13,10 +13,13 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.amazonaws.com' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
       { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
+      { protocol: 'https', hostname: 'mushroomie.io.vn' },
+      { protocol: 'https', hostname: 'down-vn.img.susercontent.com' },
+      { protocol: 'https', hostname: 'cf.shopee.vn' },
     ],
   },
   experimental: {
-    serverActions: { allowedOrigins: ['localhost:3000', 'mushroomie.io.vn', '*.mushroomie.io.vn'] }, // update origins accordingly later
+    serverActions: { allowedOrigins: ['localhost:3000', 'mushroomie.io.vn', '*.mushroomie.io.vn'] },
   },
   async headers() {
     return [
@@ -27,11 +30,26 @@ const nextConfig: NextConfig = {
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' },
-          { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://res.cloudinary.com https://img.vietqr.io https://lh3.googleusercontent.com https://avatars.githubusercontent.com; font-src 'self' https://fonts.gstatic.com; frame-src 'self' https://www.google.com/maps/; connect-src 'self' https://pay.payos.vn;" }
-        ]
-      }
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com https://www.clarity.ms https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/",
+              "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com https://www.clarity.ms https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "img-src 'self' data: blob: https:",
+              "font-src 'self' https://fonts.gstatic.com",
+              "frame-src 'self' https://www.google.com/maps/ https://www.google.com/recaptcha/",
+              "connect-src 'self' https://pay.payos.vn https://www.google-analytics.com https://region1.google-analytics.com https://static.cloudflareinsights.com https://cloudflareinsights.com https://www.clarity.ms",
+              "frame-ancestors 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+            ].join('; '),
+          },
+        ],
+      },
     ]
-  }
+  },
 }
 
 export default nextConfig

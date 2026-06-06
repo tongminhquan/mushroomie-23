@@ -26,6 +26,11 @@ export const metadata: Metadata = {
   keywords: ['phụ kiện handmade', 'vòng tay', 'móc khóa', 'charm', 'cá nhân hóa', 'Mushroomie'],
   authors: [{ name: 'Mushroomie' }],
   creator: 'Mushroomie',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/icon.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'vi_VN',
