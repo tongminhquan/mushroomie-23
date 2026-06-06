@@ -3,6 +3,7 @@ import Link from 'next/link'
 import HomeHeroCarousel from '@/components/home/HomeHeroCarousel'
 import HomeAnimatedContent from '@/components/home/HomeAnimatedContent'
 import type { Metadata } from 'next'
+import Image from 'next/image'
 
 export const metadata: Metadata = {
   title: 'Mushroomie — Phụ kiện Handmade Cá nhân hóa',
@@ -51,36 +52,31 @@ export default async function HomePage() {
   ])
 
   const fallbackHero = (
-    <section className="relative min-h-[50vh] lg:min-h-[60vh] gradient-primary flex items-center overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-96 h-96 bg-white/5 rounded-full" />
-        <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-white/5 rounded-full" />
-        {['top-10 left-10', 'top-1/4 right-20', 'bottom-20 left-1/4', 'bottom-10 right-10', 'top-1/2 left-1/3'].map((pos, i) => (
-          <div key={i} className={`absolute ${pos} text-5xl opacity-20 animate-float`} style={{ animationDelay: `${i * 0.5}s` }}>
-            {['🍄', '✨', '💛', '🌸', '🧶'][i]}
-          </div>
-        ))}
-      </div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
-        <div className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 bg-white/20 text-white px-5 py-2.5 rounded-full text-sm font-semibold mb-6 backdrop-blur-sm shadow-lg animate-[fadeInDown_0.8s_ease-out]">
-            <span>🍄</span> Handmade với tình yêu thương
-          </div>
-          <h1 className="font-heading text-5xl md:text-7xl font-bold text-white leading-tight mb-6 animate-[fadeInUp_0.8s_ease-out_0.2s_both]">
-            Phụ kiện nhỏ,<br />
-            <span className="text-yellow-300">cảm xúc lớn</span>
+    <section className="bg-secondary py-4 md:py-6">
+      <div className="brand-container grid min-h-[460px] overflow-hidden rounded-[18px] border border-neutral-200 bg-primary shadow-strong lg:min-h-[520px] lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="relative z-10 flex min-w-0 flex-col justify-center overflow-hidden px-5 py-8 text-white sm:px-10 lg:px-14 lg:py-12">
+          <p className="mb-5 text-xs font-extrabold uppercase tracking-[0.12em] text-yellow">Mushroomie handmade</p>
+          <h1 className="text-balance break-words font-heading text-[2rem] leading-[1.08] sm:text-5xl lg:text-6xl">
+            Từ từng hạt nhỏ, tạo phong cách riêng.
           </h1>
-          <p className="text-white/85 text-lg md:text-xl leading-relaxed mb-8 animate-[fadeInUp_0.8s_ease-out_0.4s_both]">
-            Mỗi sản phẩm Mushroomie được làm thủ công 100%, cá nhân hóa theo phong cách, cảm xúc và câu chuyện riêng của bạn.
+          <p className="mt-5 max-w-xl text-sm leading-7 text-white/78 sm:text-base">
+            Vòng tay, charm và móc khóa được làm thủ công, phối theo sở thích và câu chuyện riêng của bạn.
           </p>
-          <div className="flex flex-wrap gap-4 animate-[fadeInUp_0.8s_ease-out_0.6s_both]">
-            <Link href="/san-pham" className="bg-white text-primary px-8 py-4 rounded-full font-bold text-base hover:bg-yellow-50 transition-all shadow-lg hover:shadow-xl active:scale-95">
-              Khám phá ngay →
-            </Link>
-            <Link href="/lien-he" className="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-base hover:bg-white hover:text-primary transition-all">
-              Tự thiết kế phụ kiện
-            </Link>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link href="/san-pham" className="rounded-xl bg-white px-5 py-3 text-center text-sm font-extrabold text-primary shadow-card hover:bg-yellow hover:text-text">Khám phá sản phẩm</Link>
+            <Link href="/lien-he" className="rounded-xl border border-white/60 px-5 py-3 text-center text-sm font-extrabold text-white hover:bg-white hover:text-primary">Custom món riêng</Link>
           </div>
+        </div>
+        <div className="relative hidden min-h-full bg-pink lg:block">
+          <Image
+            src="/logo.png"
+            alt="Logo Mushroomie"
+            fill
+            priority
+            fetchPriority="high"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="object-contain p-12 sm:p-20"
+          />
         </div>
       </div>
     </section>

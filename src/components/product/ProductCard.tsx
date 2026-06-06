@@ -3,8 +3,10 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ShoppingBag, Check } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
-import { formatPrice, getPublicImageUrl } from '@/lib/utils'
+import { getPublicImageUrl } from '@/lib/utils'
 import { useState } from 'react'
+import BrandBadge from '@/components/ui/BrandBadge'
+import PriceText from '@/components/ui/PriceText'
 
 interface ProductCardProps {
   product: {
@@ -49,67 +51,63 @@ export default function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <div className="group bg-white rounded-[24px] border border-neutral-100 hover:border-accent-peach overflow-hidden hover:shadow-hover hover:-translate-y-1 transition-all duration-300 relative flex flex-col h-full">
-      <Link href={`/san-pham/${product.slug}`} className="block relative aspect-[3/4] w-full bg-secondary overflow-hidden shrink-0">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-[18px] border border-neutral-200 bg-white transition duration-200 hover:-translate-y-1 hover:border-pink hover:shadow-hover">
+      <Link href={`/san-pham/${product.slug}`} className="relative block aspect-square w-full shrink-0 overflow-hidden bg-secondary">
         <Image
           src={imageUrl}
           alt={product.name}
           fill
+          unoptimized={imageUrl.startsWith('/uploads/')}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="object-contain p-2 group-hover:scale-105 transition-transform duration-500 ease-out"
+          className="object-contain p-3 transition-transform duration-500 ease-out group-hover:scale-[1.035]"
         />
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
+        <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
           {product.is_customizable && (
-            <span className="bg-accent-mint text-neutral-900 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">✨ Cá nhân hóa</span>
+            <BrandBadge tone="yellow">Cá nhân hóa</BrandBadge>
           )}
           {!product.is_customizable && !isOutOfStock && (
-            <span className="bg-accent-peach text-neutral-700 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">🧵 Handmade</span>
+            <BrandBadge tone="pink">Handmade</BrandBadge>
           )}
           {hasSale && (
-            <span className="bg-accent-orange text-white text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">-{Math.round((1 - product.sale_price! / product.price) * 100)}%</span>
+            <BrandBadge tone="red">-{Math.round((1 - product.sale_price! / product.price) * 100)}%</BrandBadge>
           )}
           {isOutOfStock && (
-            <span className="bg-neutral-600 text-white text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">Hết hàng</span>
+            <BrandBadge tone="neutral">Hết hàng</BrandBadge>
           )}
         </div>
       </Link>
 
       {/* Info */}
-      <div className="p-4 sm:p-5 flex flex-col flex-1">
+      <div className="flex flex-1 flex-col p-3.5 sm:p-4">
         {product.category && (
-          <p className="text-[10px] sm:text-xs font-bold text-neutral-400 uppercase tracking-widest mb-1.5">{product.category.name}</p>
+          <p className="mb-1.5 text-[10px] font-extrabold uppercase tracking-[0.08em] text-kraft">{product.category.name}</p>
         )}
         <Link href={`/san-pham/${product.slug}`} className="block mb-3 flex-1">
-          <h3 className="font-heading font-bold text-sm sm:text-base text-neutral-800 group-hover:text-primary transition-colors line-clamp-2 leading-snug">{product.name}</h3>
+          <h3 className="line-clamp-2 text-sm font-extrabold leading-snug text-text transition-colors group-hover:text-primary sm:text-[15px]">{product.name}</h3>
         </Link>
         <div className="flex flex-col gap-1 mt-auto">
-          <div className="flex items-end gap-2 flex-wrap mb-1">
-            <span className="font-bold text-lg sm:text-xl text-primary">{formatPrice(displayPrice)}</span>
-            {hasSale && (
-              <span className="text-xs text-neutral-400 line-through mb-1">{formatPrice(product.price)}</span>
-            )}
-          </div>
+          <PriceText price={displayPrice} originalPrice={hasSale ? product.price : null} />
           <button
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className={`w-full mt-2 py-2.5 sm:py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 ${
-              added ? 'bg-accent-mint text-neutral-900 shadow-md' : isOutOfStock ? 'bg-neutral-200 text-neutral-500 cursor-not-allowed' : 'bg-primary text-white hover:bg-primary-dark shadow-sm hover:shadow-md hover:-translate-y-0.5'
+            className={`mt-2 flex min-h-10 w-full items-center justify-center gap-2 rounded-xl px-3 text-xs font-extrabold transition duration-200 active:translate-y-px ${
+              added ? 'bg-yellow text-text' : isOutOfStock ? 'cursor-not-allowed bg-neutral-200 text-neutral-500' : 'bg-text text-white hover:bg-primary'
             }`}
             aria-label="Thêm vào giỏ"
           >
             {added ? (
               <>
-                <Check size={18} /> ĐÃ THÊM
+                <Check size={16} /> Đã thêm
               </>
             ) : (
               <>
-                <ShoppingBag size={18} /> CHỌN MUA
+                <ShoppingBag size={16} /> Chọn mua
               </>
             )}
           </button>
         </div>
       </div>
-    </div>
+    </article>
   )
 }

@@ -1,323 +1,259 @@
 'use client'
-import Link from 'next/link'
-import { useCartStore } from '@/store/cart'
-import { ShoppingBag, Menu, X, User, Phone, Mail, Search, MapPin, ChevronDown, ChevronRight, ClipboardList } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
-import { useSession, signOut } from 'next-auth/react'
+
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
-import SafeEmail from '@/components/ui/SafeEmail'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
+import {
+  ChevronDown,
+  ClipboardList,
+  Menu,
+  Search,
+  ShoppingBag,
+  User,
+  X,
+} from 'lucide-react'
+import { useCartStore } from '@/store/cart'
+
+interface CategoryLink {
+  href: string
+  label: string
+}
+
+const navLinks = [
+  { href: '/', label: 'Trang chủ' },
+  { href: '/san-pham', label: 'Sản phẩm' },
+  { href: '/gioi-thieu', label: 'Câu chuyện' },
+  { href: '/tin-tuc', label: 'Góc handmade' },
+  { href: '/mini-game', label: 'Mini game' },
+  { href: '/lien-he', label: 'Liên hệ' },
+]
 
 export default function Header() {
-  const { getTotalItems, toggleCart } = useCartStore()
-  const { data: session } = useSession()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [showSearch, setShowSearch] = useState(false)
-  const [mounted, setMounted] = useState(false)
+  const pathname = usePathname()
   const router = useRouter()
-  const categoryMenuRef = useRef<HTMLLIElement>(null)
+  const { data: session } = useSession()
+  const { getTotalItems, toggleCart } = useCartStore()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [categories, setCategories] = useState<CategoryLink[]>([])
 
-  useEffect(() => { setMounted(true) }, [])
-  const totalItems = mounted ? getTotalItems() : 0
+  const hydrated = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false,
+  )
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 40)
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    const controller = new AbortController()
+    fetch('/api/categories?type=product', { signal: controller.signal })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!Array.isArray(data.categories)) return
+        setCategories(data.categories.map((category: { slug: string; name: string }) => ({
+          href: `/san-pham?category=${category.slug}`,
+          label: category.name,
+        })))
+      })
+      .catch((error) => {
+        if (error instanceof Error && error.name !== 'AbortError') console.error(error)
+      })
+    return () => controller.abort()
   }, [])
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (categoryMenuRef.current && !categoryMenuRef.current.contains(event.target as Node)) {
-        setIsCategoryOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      router.push(`/san-pham?search=${encodeURIComponent(searchQuery.trim())}`)
-      setSearchQuery('')
-      setShowSearch(false)
-    }
+  const submitSearch = (event: React.FormEvent) => {
+    event.preventDefault()
+    const query = searchQuery.trim()
+    if (!query) return
+    router.push(`/san-pham?search=${encodeURIComponent(query)}`)
+    setSearchOpen(false)
+    setSearchQuery('')
   }
 
-  const [productCategories, setProductCategories] = useState<{ href: string, label: string, icon: string, image_url: string }[]>([
-    { href: '/san-pham', label: 'Tất cả sản phẩm', icon: '', image_url: '' }
-  ])
-
-  useEffect(() => {
-    fetch('/api/categories?type=product')
-      .then(res => res.json())
-      .then(data => {
-        if (data.categories) {
-          const cats = data.categories.map((c: any) => ({
-            href: `/san-pham?category=${c.slug}`,
-            label: c.name,
-            icon: c.icon || '',
-            image_url: c.image_url || ''
-          }))
-          setProductCategories([{ href: '/san-pham', label: 'Tất cả sản phẩm', icon: '', image_url: '' }, ...cats])
-        }
-      })
-      .catch(err => console.error(err))
-  }, [])
-
-  const navLinks = [
-    { href: '/', label: 'TRANG CHỦ' },
-    { href: '/gioi-thieu', label: 'GIỚI THIỆU' },
-    { href: '/tin-tuc', label: 'TIN TỨC' },
-    { href: '/mini-game', label: 'MINI GAME' },
-    { href: '/chinh-sach-tra-gop', label: 'TRẢ GÓP' },
-    { href: '/lien-he', label: 'LIÊN HỆ' },
-  ]
+  const role = (session?.user as { role?: string } | undefined)?.role
+  const isAdmin = role && ['super_admin', 'admin', 'viewer'].includes(role)
+  const totalItems = hydrated ? getTotalItems() : 0
 
   return (
-    <header className="w-full font-body">
-      {/* 1. TOP BAR (Light Gray) */}
-      <div className={`bg-neutral-100 text-neutral-600 text-xs hidden md:block border-b border-neutral-200 transition-all duration-300 ${isScrolled ? 'hidden' : 'block'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-8 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <a href="tel:+84848744060" className="flex items-center gap-1.5 hover:text-primary transition-colors">
-              <Phone size={12} /> Hotline: 0848 744 060
-            </a>
-            <SafeEmail email="cskh@mushroomie.io.vn" showIcon={true} className="flex items-center gap-1.5 hover:text-primary transition-colors" />
-            <span className="flex items-center gap-1.5">
-              <MapPin size={12} /> Hệ thống cửa hàng Mushroomie
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/chinh-sach-tra-gop" className="hover:text-primary transition-colors">Chính sách trả góp</Link>
-            <Link href="/chinh-sach-doi-tra" className="hover:text-primary transition-colors">Bảo hành & Đổi trả</Link>
-            <span className="text-neutral-300">|</span>
-            <a href="https://www.facebook.com/mushr00mie" target="_blank" rel="noopener noreferrer" className="hover:text-[#1877F2]">Facebook</a>
+    <header className="relative z-50 border-b border-neutral-200/80 bg-white">
+      <div className="hidden bg-text text-white md:block">
+        <div className="brand-container flex h-9 items-center justify-between text-[11px] font-semibold">
+          <p>Từ từng hạt nhỏ, tạo phong cách riêng.</p>
+          <div className="flex items-center gap-5 text-white/70">
+            <a href="tel:+84848744060" className="hover:text-white">0848 744 060</a>
+            <Link href="/chinh-sach-doi-tra" className="hover:text-white">Đổi trả & bảo hành</Link>
           </div>
         </div>
       </div>
 
-      {/* 2. MAIN HEADER (White, Sticky) */}
-      <div className={`bg-white sticky top-0 z-50 transition-shadow ${isScrolled ? 'shadow-md' : ''}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 md:h-24 flex items-center justify-between gap-4 md:gap-8">
-          
-          {/* Mobile Menu Button */}
-          <button aria-label={isMenuOpen ? "Đóng menu" : "Mở menu"} className="md:hidden p-2 text-neutral-700" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      <div className="sticky top-0 border-b border-neutral-100 bg-white/95 backdrop-blur-md">
+        <div className="brand-container flex h-[74px] items-center gap-3 md:h-[82px] md:gap-6">
+          <button
+            type="button"
+            aria-label={menuOpen ? 'Đóng menu' : 'Mở menu'}
+            onClick={() => setMenuOpen((value) => !value)}
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-neutral-200 text-text md:hidden"
+          >
+            {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
 
-          {/* Logo */}
-          <Link href="/" className="shrink-0 flex items-center justify-center relative h-12 w-32 md:h-16 md:w-40">
-            <Image src="/logo.png" alt="Mushroomie Logo" fill className="object-contain" priority />
+          <Link href="/" className="relative h-11 w-28 shrink-0 md:h-14 md:w-36" aria-label="Mushroomie - Trang chủ">
+            <Image src="/logo.png" alt="Mushroomie" fill priority sizes="144px" className="object-contain" />
           </Link>
 
-          {/* Search Bar (Center, huge) */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl mx-auto">
-            <div className="flex w-full">
+          <form onSubmit={submitSearch} className="hidden flex-1 md:block">
+            <div className="relative mx-auto max-w-xl">
+              <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" size={18} />
               <input
-                type="text"
-                name="search"
-                id="searchQuery"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder=""
-                className="w-full px-5 py-3 bg-white border-2 border-primary rounded-l-md text-sm focus:outline-none placeholder:text-neutral-400 font-medium"
+                onChange={(event) => setSearchQuery(event.target.value)}
+                aria-label="Tìm sản phẩm"
+                placeholder="Tìm vòng tay, móc khóa, charm..."
+                className="h-11 w-full rounded-xl border border-neutral-200 bg-neutral-100/60 pl-11 pr-24 text-sm outline-none transition focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
               />
-              <button type="submit" aria-label="Tìm kiếm" className="bg-primary hover:bg-primary-dark transition-colors px-6 text-white rounded-r-md flex items-center justify-center">
-                <Search size={20} />
+              <button className="absolute right-1.5 top-1.5 h-8 rounded-lg bg-primary px-4 text-xs font-bold text-white hover:bg-primary-dark">
+                Tìm kiếm
               </button>
             </div>
           </form>
 
-          {/* Right Action Icons (Account, Cart) */}
-          <div className="flex items-center gap-2 md:gap-6 shrink-0">
-            {/* Mobile Search Toggle */}
-            <button aria-label="Mở tìm kiếm" onClick={() => setShowSearch(!showSearch)} className="md:hidden p-2 text-neutral-700">
-              <Search size={24} />
+          <div className="ml-auto flex items-center gap-1.5 md:gap-2">
+            <button
+              type="button"
+              aria-label="Mở tìm kiếm"
+              onClick={() => setSearchOpen((value) => !value)}
+              className="grid h-10 w-10 place-items-center rounded-xl text-text hover:bg-neutral-100 md:hidden"
+            >
+              <Search size={20} />
             </button>
-
-            {/* Tracking Block */}
-            <Link href="/tai-khoan/don-hang" className="hidden md:flex items-center gap-3 cursor-pointer group pr-4 md:border-r md:border-neutral-200">
-              <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-primary group-hover:bg-primary-light transition-colors">
-                <ClipboardList size={20} />
-              </div>
-              <div className="flex flex-col text-sm">
-                <span className="text-neutral-500 text-xs">Tra cứu</span>
-                <span className="font-bold text-neutral-800 group-hover:text-primary transition-colors">Đơn hàng</span>
-              </div>
+            <Link
+              href="/tai-khoan/don-hang"
+              aria-label="Đơn hàng"
+              className="hidden h-10 items-center gap-2 rounded-xl px-3 text-sm font-bold text-text hover:bg-neutral-100 lg:flex"
+            >
+              <ClipboardList size={19} className="text-primary" />
+              Đơn hàng
             </Link>
-
-            {/* Account Block */}
-            <div className="hidden md:flex items-center gap-3 relative group cursor-pointer">
-              <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-primary group-hover:bg-primary-light transition-colors">
-                <User size={20} />
-              </div>
-              <div className="flex flex-col text-sm">
-                <span className="text-neutral-500 text-xs">Tài khoản</span>
-                <div className="font-bold text-neutral-800 flex items-center gap-1 group-hover:text-primary transition-colors">
-                  {session ? session.user?.name?.split(' ')[0] : 'Đăng nhập'} <ChevronDown size={14} />
-                </div>
-              </div>
-              
-              {/* Dropdown menu */}
-              <div className="absolute right-0 top-full pt-4 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="bg-white rounded-md shadow-xl border border-neutral-100 py-2">
+            <div className="group relative hidden md:block">
+              <Link
+                href={session ? '/tai-khoan' : '/tai-khoan/dang-nhap'}
+                className="flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-bold text-text hover:bg-neutral-100"
+              >
+                <User size={19} className="text-primary" />
+                <span className="max-w-24 truncate">{session?.user?.name?.split(' ')[0] || 'Tài khoản'}</span>
+                <ChevronDown size={14} />
+              </Link>
+              <div className="invisible absolute right-0 top-full w-52 translate-y-2 pt-2 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                <div className="rounded-xl border border-neutral-200 bg-white p-2 shadow-strong">
                   {session ? (
                     <>
-                      <Link href="/tai-khoan" className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary">Tài khoản của tôi</Link>
-                      <Link href="/tai-khoan/don-hang" className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary">Đơn hàng của tôi</Link>
-                      {['super_admin', 'admin', 'viewer'].includes((session.user as any)?.role) && (
-                        <Link href="/admin" className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary font-bold">Quản trị viên</Link>
-                      )}
-                      <button onClick={() => signOut({ callbackUrl: '/' })} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 mt-1 border-t border-neutral-100 pt-2">Đăng xuất</button>
+                      <Link href="/tai-khoan" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-neutral-100">Hồ sơ của tôi</Link>
+                      <Link href="/tai-khoan/don-hang" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-neutral-100">Đơn hàng của tôi</Link>
+                      {isAdmin && <Link href="/admin" className="block rounded-lg px-3 py-2 text-sm font-semibold text-primary hover:bg-primary-light">Trang quản trị</Link>}
+                      <button onClick={() => signOut({ callbackUrl: '/' })} className="mt-1 w-full border-t border-neutral-100 px-3 pt-3 text-left text-sm font-semibold text-red-600">Đăng xuất</button>
                     </>
                   ) : (
                     <>
-                      <Link href="/tai-khoan/dang-nhap" className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary">Đăng nhập</Link>
-                      <Link href="/tai-khoan/dang-ky" className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary">Đăng ký tài khoản</Link>
+                      <Link href="/tai-khoan/dang-nhap" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-neutral-100">Đăng nhập</Link>
+                      <Link href="/tai-khoan/dang-ky" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-neutral-100">Tạo tài khoản</Link>
                     </>
                   )}
                 </div>
               </div>
             </div>
-
-            {/* Cart Block */}
-            <button type="button" onClick={toggleCart} className="flex items-center gap-3 cursor-pointer group bg-transparent border-none outline-none text-left">
-              <div className="relative w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white group-hover:bg-primary-dark transition-colors">
-                <ShoppingBag size={20} />
-                {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#FFB347] text-white text-[11px] font-bold rounded-full flex items-center justify-center shadow-sm border-2 border-white">
-                    {totalItems}
-                  </span>
-                )}
-              </div>
-              <div className="hidden md:flex flex-col text-sm">
-                <span className="text-neutral-500 text-xs">Giỏ hàng</span>
-                <span className="font-bold text-neutral-800 group-hover:text-primary transition-colors">Sản phẩm</span>
-              </div>
+            <button
+              type="button"
+              onClick={toggleCart}
+              aria-label={`Giỏ hàng, ${totalItems} sản phẩm`}
+              className="relative grid h-11 w-11 place-items-center rounded-xl bg-primary text-white shadow-[0_7px_16px_rgba(228,29,29,0.2)] hover:bg-primary-dark"
+            >
+              <ShoppingBag size={20} />
+              {totalItems > 0 && (
+                <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-md bg-yellow px-1 text-[10px] font-black text-text ring-2 ring-white">
+                  {totalItems}
+                </span>
+              )}
             </button>
           </div>
         </div>
 
-        {/* Mobile Search Bar Expand */}
-        {showSearch && (
-          <div className="md:hidden px-4 pb-4 border-t border-neutral-100 bg-white">
-            <form onSubmit={handleSearch} className="flex mt-3">
-              <div className="flex w-full">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Tìm kiếm sản phẩm..."
-                  className="w-full px-4 py-2 bg-neutral-50 border border-neutral-200 rounded-l-md text-sm focus:outline-none focus:border-primary"
-                  autoFocus
-                />
-                <button type="submit" aria-label="Tìm kiếm" className="bg-primary px-4 text-white rounded-r-md flex items-center justify-center">
-                  <Search size={18} />
-                </button>
-              </div>
-            </form>
-          </div>
+        {searchOpen && (
+          <form onSubmit={submitSearch} className="brand-container pb-3 md:hidden">
+            <div className="flex gap-2">
+              <input
+                autoFocus
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Tìm sản phẩm..."
+                className="h-11 flex-1 rounded-xl border border-neutral-200 px-4 text-sm outline-none focus:border-primary"
+              />
+              <button className="rounded-xl bg-primary px-4 font-bold text-white" aria-label="Tìm kiếm"><Search size={18} /></button>
+            </div>
+          </form>
         )}
       </div>
 
-      {/* 3. NAVIGATION BAR (Solid Red, Sticky) */}
-      <nav className={`hidden md:block w-full bg-primary sticky top-[96px] z-40 shadow-sm transition-transform ${isScrolled ? '-translate-y-8' : ''}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center">
-          <ul className="flex items-center h-full w-full justify-start gap-1">
-            <li 
-              ref={categoryMenuRef}
-              className="h-full relative shrink-0"
-            >
-              <button 
-                type="button"
-                onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                className="h-full flex items-center gap-2 bg-primary-dark px-4 mr-2 text-white font-bold text-sm tracking-wide whitespace-nowrap"
-              >
-                <Menu size={20} /> DANH MỤC SẢN PHẨM
-              </button>
-              
-              {/* Dropdown Menu */}
-              <div className={`absolute top-full left-0 w-56 bg-white shadow-xl border border-neutral-100 transition-all duration-200 z-50 rounded-b-md overflow-hidden ${isCategoryOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
-                <ul className="flex flex-col py-1">
-                  {productCategories.map((cat, idx) => (
-                    <li key={idx}>
-                      <Link 
-                        href={cat.href}
-                        className="group flex items-center justify-between px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-primary transition-all duration-300 border-b border-neutral-50 last:border-0"
-                      >
-                        <div className="flex items-center gap-3">
-                          {cat.image_url ? (
-                            <div className="w-5 h-5 relative">
-                              <Image src={cat.image_url} alt={cat.label} fill className="rounded object-cover" sizes="20px" />
-                            </div>
-                          ) : cat.icon ? (
-                            <span>{cat.icon}</span>
-                          ) : (
-                            <div className="w-5 h-5 bg-neutral-100 rounded"></div>
-                          )}
-                          {cat.label}
-                        </div>
-                        <ChevronRight size={16} className="opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 text-primary" />
-                      </Link>
-                    </li>
+      <nav aria-label="Điều hướng chính" className="hidden bg-white md:block">
+        <div className="brand-container flex h-12 items-center gap-1">
+          <div className="group relative mr-2 h-full">
+            <Link href="/san-pham" className="flex h-full items-center gap-2 border-b-2 border-primary px-3 text-sm font-extrabold text-primary">
+              <Menu size={17} />
+              Danh mục
+            </Link>
+            {categories.length > 0 && (
+              <div className="invisible absolute left-0 top-full w-60 translate-y-2 pt-2 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                <div className="rounded-xl border border-neutral-200 bg-white p-2 shadow-strong">
+                  <Link href="/san-pham" className="block rounded-lg px-3 py-2.5 text-sm font-bold hover:bg-neutral-100">Tất cả sản phẩm</Link>
+                  {categories.map((category) => (
+                    <Link key={category.href} href={category.href} className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-primary-light hover:text-primary">
+                      {category.label}
+                    </Link>
                   ))}
-                </ul>
+                </div>
               </div>
-            </li>
-            {navLinks.map((link) => (
-              <li key={link.href} className="h-full">
-                <Link 
-                  href={link.href} 
-                  className="h-full px-4 lg:px-6 flex items-center text-white text-sm font-bold tracking-wide hover:bg-primary-dark transition-colors whitespace-nowrap"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+            )}
+          </div>
+          {navLinks.filter((link) => link.href !== '/san-pham').map((link) => {
+            const active = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href)
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                aria-current={active ? 'page' : undefined}
+                className={`flex h-full items-center border-b-2 px-3 text-sm font-bold transition ${
+                  active ? 'border-primary text-primary' : 'border-transparent text-neutral-700 hover:text-primary'
+                }`}
+              >
+                {link.label}
+              </Link>
+            )
+          })}
         </div>
       </nav>
 
-      {/* Mobile Menu Overlay */}
-      {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-[100] bg-black/50" onClick={() => setIsMenuOpen(false)}>
-          <div className="w-[280px] h-full bg-white flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="p-4 border-b border-neutral-100 flex items-center justify-between bg-neutral-50">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-600">
-                  <User size={20} />
-                </div>
-                {session ? (
-                  <div className="flex flex-col">
-                    <span className="font-bold text-sm">{session.user?.name}</span>
-                    <button onClick={() => signOut()} className="text-xs text-red-500 text-left">Đăng xuất</button>
-                  </div>
-                ) : (
-                  <Link href="/tai-khoan/dang-nhap" className="font-bold text-sm text-primary" onClick={() => setIsMenuOpen(false)}>
-                    Đăng nhập / Đăng ký
-                  </Link>
-                )}
-              </div>
-              <button aria-label="Đóng menu" onClick={() => setIsMenuOpen(false)} className="p-2 bg-white rounded-full border border-neutral-200 text-neutral-500"><X size={16} /></button>
+      {menuOpen && (
+        <div className="fixed inset-0 z-[120] bg-black/35 md:hidden" onClick={() => setMenuOpen(false)}>
+          <nav className="h-full w-[84%] max-w-sm bg-white p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <div className="mb-6 flex items-center justify-between">
+              <Image src="/logo.png" width={128} height={52} alt="Mushroomie" className="h-auto w-28" />
+              <button aria-label="Đóng menu" onClick={() => setMenuOpen(false)} className="grid h-10 w-10 place-items-center rounded-xl bg-neutral-100"><X size={20} /></button>
             </div>
-            <div className="overflow-y-auto flex-1 py-2">
+            <div className="space-y-1">
               {navLinks.map((link) => (
-                <Link 
-                  key={link.href} 
-                  href={link.href} 
-                  className="block px-6 py-3.5 text-sm font-bold text-neutral-700 hover:bg-neutral-50 hover:text-primary transition-colors border-b border-neutral-50" 
-                  onClick={() => setIsMenuOpen(false)}
-                >
+                <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} className="block rounded-xl px-4 py-3 text-sm font-extrabold text-text hover:bg-primary-light hover:text-primary">
                   {link.label}
                 </Link>
               ))}
+              <div className="my-3 border-t border-neutral-200" />
+              <Link href={session ? '/tai-khoan' : '/tai-khoan/dang-nhap'} className="block rounded-xl px-4 py-3 text-sm font-bold">
+                {session ? 'Tài khoản của tôi' : 'Đăng nhập / Đăng ký'}
+              </Link>
+              <Link href="/tai-khoan/don-hang" className="block rounded-xl px-4 py-3 text-sm font-bold">Tra cứu đơn hàng</Link>
             </div>
-          </div>
+          </nav>
         </div>
       )}
     </header>

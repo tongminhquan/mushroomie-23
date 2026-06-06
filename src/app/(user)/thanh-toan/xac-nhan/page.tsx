@@ -2,9 +2,10 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { formatPrice } from '@/lib/utils'
-import { CheckCircle, Clock, XCircle, RefreshCw, AlertTriangle } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Clock, Landmark, RefreshCw, XCircle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Payment {
   status: string
@@ -23,6 +24,11 @@ interface PaymentStatusData {
   paymentStatus: string
   expiresAt?: string
   paidAt?: string
+}
+
+interface OrderInfo {
+  payment_method?: 'bank_transfer' | 'cod'
+  payment?: Payment | null
 }
 
 /**
@@ -61,7 +67,7 @@ export default function ConfirmPage() {
   const [loading, setLoading] = useState(true)
   const [polling, setPolling] = useState(false)
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
-  const [orderInfo, setOrderInfo] = useState<any>(null)
+  const [orderInfo, setOrderInfo] = useState<OrderInfo | null>(null)
   const [qrStatus, setQrStatus] = useState<'loading' | 'loaded' | 'error'>('loading')
 
   const fetchData = useCallback(async () => {
@@ -87,7 +93,10 @@ export default function ConfirmPage() {
     }
   }, [orderCode])
 
-  useEffect(() => { fetchData() }, [fetchData])
+  useEffect(() => {
+    const timer = window.setTimeout(() => void fetchData(), 0)
+    return () => window.clearTimeout(timer)
+  }, [fetchData])
 
   // Poll every 5s if pending (only for bank transfer)
   useEffect(() => {
@@ -99,7 +108,7 @@ export default function ConfirmPage() {
       setPolling(false)
     }, 5000)
     return () => clearInterval(interval)
-  }, [paymentStatus?.status, fetchData])
+  }, [paymentStatus?.status, fetchData, orderInfo?.payment_method])
 
   // Countdown timer
   useEffect(() => {
@@ -129,7 +138,7 @@ export default function ConfirmPage() {
   // Reset QR status when URL changes
   useEffect(() => {
     if (qrImageUrl) {
-      setQrStatus('loading')
+      queueMicrotask(() => setQrStatus('loading'))
     }
   }, [qrImageUrl])
 
@@ -141,9 +150,9 @@ export default function ConfirmPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-secondary flex items-center justify-center">
+      <div className="flex min-h-[60vh] items-center justify-center bg-secondary">
         <div className="text-center">
-          <div className="text-4xl mb-4">⏳</div>
+          <RefreshCw className="mx-auto mb-4 animate-spin text-primary" size={32} />
           <p className="text-neutral-500">Đang tải thông tin thanh toán...</p>
         </div>
       </div>
@@ -153,11 +162,11 @@ export default function ConfirmPage() {
   if (paymentStatus?.status === 'PAID') {
     return (
       <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 text-center">
+        <div className="w-full max-w-md rounded-[18px] border border-neutral-200 bg-white p-8 text-center shadow-strong">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h1 className="font-heading text-2xl font-bold text-neutral-900 mb-2">Thanh toán thành công! 🎉</h1>
+          <h1 className="mb-2 font-heading text-2xl text-neutral-900">Thanh toán thành công</h1>
           <p className="text-neutral-500 mb-2">Mã đơn hàng: <strong>#{orderCode}</strong></p>
-          <p className="text-neutral-500 text-sm mb-6">Mushroomie đã nhận được thanh toán và sẽ bắt đầu làm sản phẩm ngay cho bạn! 💛</p>
+          <p className="mb-6 text-sm text-neutral-500">Mushroomie đã nhận được thanh toán và sẽ bắt đầu làm sản phẩm cho bạn.</p>
           <div className="space-y-3">
             <Link href={`/tai-khoan/don-hang/${orderCode}`}>
               <Button className="w-full">Xem chi tiết đơn hàng</Button>
@@ -174,11 +183,11 @@ export default function ConfirmPage() {
   if (orderInfo?.payment_method === 'cod') {
     return (
       <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 text-center">
+        <div className="w-full max-w-md rounded-[18px] border border-neutral-200 bg-white p-8 text-center shadow-strong">
           <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-          <h1 className="font-heading text-2xl font-bold text-neutral-900 mb-2">Đặt hàng thành công! 🎉</h1>
+          <h1 className="mb-2 font-heading text-2xl text-neutral-900">Đặt hàng thành công</h1>
           <p className="text-neutral-500 mb-2">Mã đơn hàng: <strong>#{orderCode}</strong></p>
-          <p className="text-neutral-500 text-sm mb-6">Mushroomie sẽ liên hệ và giao hàng đến bạn trong thời gian sớm nhất. Bạn sẽ thanh toán khi nhận hàng nhé! 📦💛</p>
+          <p className="mb-6 text-sm text-neutral-500">Mushroomie sẽ liên hệ và giao hàng đến bạn trong thời gian sớm nhất. Bạn thanh toán khi nhận hàng.</p>
           <div className="space-y-3">
             <Link href={`/tai-khoan/don-hang/${orderCode}`}>
               <Button className="w-full">Xem chi tiết đơn hàng</Button>
@@ -195,7 +204,7 @@ export default function ConfirmPage() {
   if (paymentStatus?.status === 'EXPIRED') {
     return (
       <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 text-center">
+        <div className="w-full max-w-md rounded-[18px] border border-neutral-200 bg-white p-8 text-center shadow-strong">
           <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h1 className="font-heading text-2xl font-bold text-neutral-900 mb-2">Đã hết hạn thanh toán</h1>
           <p className="text-neutral-500 mb-6">Thời gian thanh toán đã hết hạn. Vui lòng đặt lại đơn hàng.</p>
@@ -206,13 +215,13 @@ export default function ConfirmPage() {
   }
 
   return (
-    <div className="min-h-screen bg-secondary py-8">
+    <div className="min-h-screen bg-secondary py-6 md:py-10">
       <div className="max-w-xl mx-auto px-4">
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+        <div className="overflow-hidden rounded-[18px] border border-neutral-200 bg-white shadow-strong">
           {/* Header */}
-          <div className="bg-primary text-white p-6 text-center">
-            <div className="text-3xl mb-2">🏦</div>
-            <h1 className="font-heading text-xl font-bold">Chuyển khoản ngân hàng</h1>
+          <div className="bg-primary p-6 text-center text-white">
+            <Landmark className="mx-auto mb-3" size={28} />
+            <h1 className="font-heading text-xl">Chuyển khoản ngân hàng</h1>
             <p className="text-white/80 text-sm mt-1">Mã đơn: <strong>#{orderCode}</strong></p>
           </div>
 
@@ -231,11 +240,12 @@ export default function ConfirmPage() {
                 )}
 
                 {/* QR image */}
-                <img
+                <Image
                   src={qrImageUrl}
                   alt="QR Code chuyển khoản"
                   width={280}
                   height={280}
+                  unoptimized
                   className={`mx-auto rounded-2xl border-4 border-primary-light shadow-card ${qrStatus !== 'loaded' ? 'hidden' : ''}`}
                   referrerPolicy="no-referrer"
                   onLoad={() => setQrStatus('loaded')}
@@ -303,18 +313,13 @@ export default function ConfirmPage() {
               Hệ thống tự động kiểm tra thanh toán mỗi 5 giây
             </div>
 
-            <div style={{
-              background: '#fff7f2',
-              border: '1px solid #ffd6d6',
-              borderRadius: '18px',
-              padding: '20px 24px',
-            }}>
-              <p style={{ fontWeight: 700, fontSize: '15px', color: '#e41d1d', marginBottom: '10px' }}>📌 Lưu ý quan trọng:</p>
-              <ul style={{ fontSize: '14px', lineHeight: 1.7, color: '#444', paddingLeft: '18px', margin: 0, listStyle: 'none' }}>
-                <li style={{ marginBottom: '4px' }}>• Chuyển đúng số tiền và nội dung bên trên</li>
-                <li style={{ marginBottom: '4px' }}>• Đơn hàng tự động xác nhận sau 1-5 phút</li>
-                <li style={{ marginBottom: '4px' }}>• Không đóng trang này trước khi chuyển khoản</li>
-                <li>• Bạn sẽ nhận email xác nhận sau khi thanh toán</li>
+            <div className="rounded-[18px] border border-pink bg-secondary px-5 py-4">
+              <p className="mb-2 text-sm font-extrabold text-primary">Lưu ý quan trọng</p>
+              <ul className="space-y-1.5 text-sm leading-6 text-neutral-700">
+                <li>Chuyển đúng số tiền và nội dung bên trên.</li>
+                <li>Đơn hàng tự động xác nhận sau 1-5 phút.</li>
+                <li>Không đóng trang này trước khi chuyển khoản.</li>
+                <li>Bạn sẽ nhận email xác nhận sau khi thanh toán.</li>
               </ul>
             </div>
           </div>

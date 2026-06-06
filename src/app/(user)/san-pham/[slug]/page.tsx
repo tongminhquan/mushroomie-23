@@ -4,11 +4,13 @@ import Breadcrumb from '@/components/layout/Breadcrumb'
 import ProductCard from '@/components/product/ProductCard'
 import AddToCartButton from '@/components/product/AddToCartButton'
 import ProductGallery from '@/components/product/ProductGallery'
-import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
-import { formatPrice } from '@/lib/utils'
 import { toAbsoluteUrl } from '@/lib/url'
 import { getPublicImageUrl } from '@/lib/utils'
 import type { Metadata } from 'next'
+import Link from 'next/link'
+import BrandContainer from '@/components/ui/BrandContainer'
+import PriceText from '@/components/ui/PriceText'
+import SectionHeader from '@/components/ui/SectionHeader'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -123,59 +125,54 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   }
 
   return (
-    <div className="min-h-screen bg-secondary">
+    <div className="min-h-screen bg-secondary py-5 md:py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <BrandContainer>
         <Breadcrumb items={[
           { label: 'Sản phẩm', href: '/san-pham' },
           ...(product.category ? [{ label: product.category.name, href: `/san-pham?category=${product.category.slug}` }] : []),
           { label: product.name },
         ]} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-4">
+        <div className="mt-5 grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
           {/* Gallery */}
-          <AnimateOnScroll animation="fade-right">
+          <div>
             <ProductGallery
               images={allImages.length > 0 ? allImages : [defaultImage]}
               productName={product.name}
-              isCustomizable={true}
+              isCustomizable={product.is_customizable}
               isOnSale={isOnSale}
             />
-          </AnimateOnScroll>
+          </div>
 
           {/* Product info */}
-          <AnimateOnScroll animation="fade-left">
-            <div className="space-y-6">
+          <div className="lg:pt-4">
+            <div className="space-y-5">
               {product.category && (
-                <p className="text-primary text-sm font-semibold">{product.category.name}</p>
+                <Link href={`/san-pham?category=${product.category.slug}`} className="brand-kicker">{product.category.name}</Link>
               )}
-              <h1 className="font-heading text-3xl font-bold text-neutral-900">{product.name}</h1>
+              <h1 className="text-balance font-heading text-3xl leading-[1.08] text-text md:text-5xl">{product.name}</h1>
 
-              <div className="flex items-center gap-3">
-                <span className="font-bold text-3xl text-primary">{formatPrice(displayPrice)}</span>
-                {isOnSale && (
-                  <span className="text-lg text-neutral-400 line-through">{formatPrice(price)}</span>
-                )}
-              </div>
+              <PriceText price={displayPrice} originalPrice={isOnSale ? price : null} className="[&_strong]:text-3xl" />
 
               {product.short_description && (
-                <p className="text-neutral-600 leading-relaxed">{product.short_description}</p>
+                <p className="max-w-xl text-sm leading-7 text-neutral-600 md:text-base">{product.short_description}</p>
               )}
 
-              <AddToCartButton product={product as any} />
+              <div className="rounded-[18px] border border-neutral-200 bg-white p-5 shadow-card">
+                <AddToCartButton product={product} />
+              </div>
 
-              <AnimateOnScroll animation="fade-up">
-                {product.description && (
-                  <div className="bg-white rounded-2xl p-6 shadow-card">
-                    <h2 className="font-heading font-bold text-lg mb-3">Mô tả chi tiết</h2>
-                    <div className="prose prose-sm text-neutral-600 max-w-none" dangerouslySetInnerHTML={{ __html: product.description }} />
-                  </div>
-                )}
-              </AnimateOnScroll>
+              {product.description && (
+                <section className="rounded-[18px] border border-neutral-200 bg-white p-6">
+                  <h2 className="mb-4 font-heading text-xl text-text">Mô tả chi tiết</h2>
+                  <div className="prose prose-sm max-w-none text-neutral-600 prose-headings:font-heading prose-headings:text-text prose-a:text-primary" dangerouslySetInnerHTML={{ __html: product.description }} />
+                </section>
+              )}
 
               {product.reviews.length > 0 && (
-                <div className="bg-white rounded-2xl p-6 shadow-card">
-                  <h2 className="font-heading font-bold text-lg mb-4">Đánh giá ({product.reviews.length})</h2>
+                <section className="rounded-[18px] border border-neutral-200 bg-white p-6">
+                  <h2 className="mb-4 font-heading text-xl text-text">Đánh giá ({product.reviews.length})</h2>
                   <div className="space-y-4">
                     {product.reviews.map((review) => (
                       <div key={review.id} className="border-b border-neutral-100 pb-4 last:border-0">
@@ -187,24 +184,22 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                       </div>
                     ))}
                   </div>
-                </div>
+                </section>
               )}
             </div>
-          </AnimateOnScroll>
+          </div>
         </div>
 
         {/* Related */}
         {relatedProducts.length > 0 && (
-          <AnimateOnScroll animation="fade-up">
-            <section className="mt-16">
-              <h2 className="font-heading text-2xl font-bold text-neutral-900 mb-6">Sản phẩm liên quan</h2>
+            <section className="mt-16 border-t border-neutral-200 pt-12">
+              <SectionHeader eyebrow="Có thể bạn sẽ thích" title="Sản phẩm liên quan" />
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {relatedProducts.map((p) => <ProductCard key={p.id} product={p as any} />)}
+                {relatedProducts.map((p) => <ProductCard key={p.id} product={p} />)}
               </div>
             </section>
-          </AnimateOnScroll>
         )}
-      </div>
+      </BrandContainer>
     </div>
   )
 }

@@ -2,8 +2,7 @@
 import { useState } from 'react'
 import { useCartStore } from '@/store/cart'
 import Button from '@/components/ui/Button'
-import { ShoppingBag, CheckCircle } from 'lucide-react'
-import Link from 'next/link'
+import { CheckCircle, Minus, Plus, ShoppingBag } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface ProductOption {
@@ -95,7 +94,7 @@ export default function AddToCartButton({ product }: Props) {
       })}
 
       {/* Custom note */}
-      {true && (
+      {product.is_customizable && (
         <div>
           <label className="block font-semibold text-sm text-neutral-700 mb-2">Ghi chú cá nhân (tùy chọn)</label>
           <textarea
@@ -103,7 +102,7 @@ export default function AddToCartButton({ product }: Props) {
             onChange={(e) => setCustomNote(e.target.value)}
             placeholder="Ví dụ: Tên viết trên sản phẩm, màu yêu thích, phong cách..."
             rows={3}
-            className="w-full px-4 py-3 border-2 border-neutral-200 rounded-2xl text-sm focus:outline-none focus:border-primary resize-none transition-colors"
+            className="w-full resize-none rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
           />
         </div>
       )}
@@ -112,9 +111,9 @@ export default function AddToCartButton({ product }: Props) {
       <div>
         <label className="block font-semibold text-sm text-neutral-700 mb-2">Số lượng</label>
         <div className="flex items-center gap-3">
-          <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-9 h-9 rounded-full bg-neutral-100 flex items-center justify-center font-bold hover:bg-neutral-200 transition-colors">−</button>
+          <button aria-label="Giảm số lượng" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="grid h-10 w-10 place-items-center rounded-xl border border-neutral-200 bg-white hover:border-primary hover:text-primary"><Minus size={16} /></button>
           <span className="w-10 text-center font-bold text-lg">{quantity}</span>
-          <button onClick={() => setQuantity(Math.min(product.stock, quantity + 1))} className="w-9 h-9 rounded-full bg-neutral-100 flex items-center justify-center font-bold hover:bg-neutral-200 transition-colors">+</button>
+          <button aria-label="Tăng số lượng" onClick={() => setQuantity(Math.min(product.stock, quantity + 1))} className="grid h-10 w-10 place-items-center rounded-xl border border-neutral-200 bg-white hover:border-primary hover:text-primary"><Plus size={16} /></button>
           <span className="text-sm text-neutral-500">Còn {product.stock} sản phẩm</span>
         </div>
       </div>

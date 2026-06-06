@@ -1,8 +1,9 @@
 'use client'
-import { useState, useEffect, useRef, useCallback } from 'react'
-import Link from 'next/link'
+
 import Image from 'next/image'
+import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { getPublicImageUrl } from '@/lib/utils'
 
 interface Banner {
@@ -23,304 +24,88 @@ interface Banner {
   status: string
 }
 
-interface HomeHeroCarouselProps {
+export default function HomeHeroCarousel({
+  banners,
+  fallbackHero,
+}: {
   banners: Banner[]
   fallbackHero: React.ReactNode
-}
-
-export default function HomeHeroCarousel({ banners, fallbackHero }: HomeHeroCarouselProps) {
-  if (!banners || banners.length === 0) {
-    return <>{fallbackHero}</>
-  }
-
+}) {
   const [current, setCurrent] = useState(0)
-  const [isAnimating, setIsAnimating] = useState(false)
-  const [touchStart, setTouchStart] = useState<number | null>(null)
-  const [touchEnd, setTouchEnd] = useState<number | null>(null)
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Auto sliding interval: 5 seconds
-  const startTimer = () => {
-    stopTimer()
-    timerRef.current = setInterval(() => {
-      handleNext()
-    }, 5000)
-  }
-
-  const stopTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-      timerRef.current = null
-    }
-  }
+  const [paused, setPaused] = useState(false)
+  const hasBanners = banners.length > 0
 
   useEffect(() => {
-    startTimer()
-    return () => stopTimer()
-  }, [current, banners.length])
+    if (!hasBanners || banners.length < 2 || paused) return
+    const timer = window.setInterval(() => {
+      setCurrent((value) => (value + 1) % banners.length)
+    }, 6500)
+    return () => window.clearInterval(timer)
+  }, [banners.length, hasBanners, paused])
 
-  const handleNext = () => {
-    if (isAnimating) return
-    setIsAnimating(true)
-    setCurrent(prev => (prev === banners.length - 1 ? 0 : prev + 1))
-    setTimeout(() => setIsAnimating(false), 600) // Match transition duration
-  }
+  if (!hasBanners) return <>{fallbackHero}</>
 
-  const handlePrev = () => {
-    if (isAnimating) return
-    setIsAnimating(true)
-    setCurrent(prev => (prev === 0 ? banners.length - 1 : prev - 1))
-    setTimeout(() => setIsAnimating(false), 600) // Match transition duration
-  }
-
-  const handleDotClick = (index: number) => {
-    if (isAnimating || index === current) return
-    setIsAnimating(true)
-    setCurrent(index)
-    setTimeout(() => setIsAnimating(false), 600)
-  }
-
-  const minSwipeDistance = 50
-
-  const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
-    setTouchEnd(null)
-    if ('touches' in e) {
-      setTouchStart(e.targetTouches[0].clientX)
-    } else {
-      setTouchStart(e.clientX)
-    }
-    stopTimer() // Pause timer while dragging
-  }
-
-  const handleTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
-    if ('touches' in e) {
-      setTouchEnd(e.targetTouches[0].clientX)
-    } else {
-      if (touchStart !== null) {
-        setTouchEnd(e.clientX)
-      }
-    }
-  }
-
-  const handleTouchEnd = () => {
-    startTimer() // Resume timer after drag
-    if (touchStart === null || touchEnd === null) return
-    const distance = touchStart - touchEnd
-    const isLeftSwipe = distance > minSwipeDistance
-    const isRightSwipe = distance < -minSwipeDistance
-    if (isLeftSwipe) {
-      handleNext()
-    }
-    if (isRightSwipe) {
-      handlePrev()
-    }
-    setTouchStart(null)
-    setTouchEnd(null)
-  }
-
-  const handleMouseLeave = () => {
-    startTimer()
-    if (touchStart !== null) {
-      handleTouchEnd()
-    }
-  }
+  const previous = () => setCurrent((value) => (value - 1 + banners.length) % banners.length)
+  const next = () => setCurrent((value) => (value + 1) % banners.length)
 
   return (
-    <div className="w-full bg-secondary flex flex-col items-center pb-12 pt-6 px-4 sm:px-6 lg:px-8">
-      <section 
-        className="relative w-full max-w-7xl aspect-[16/9] bg-[#fff7f2] flex items-center overflow-hidden group select-none cursor-grab active:cursor-grabbing rounded-3xl md:rounded-[40px] shadow-strong"
-        onMouseEnter={stopTimer}
-        onMouseLeave={handleMouseLeave}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      onMouseDown={handleTouchStart}
-      onMouseMove={handleTouchMove}
-      onMouseUp={handleTouchEnd}
-    >
-      {/* Slides Container */}
-      <div className="absolute inset-0 w-full h-full">
+    <section className="bg-secondary py-4 md:py-6" aria-roledescription="carousel" aria-label="Banner Mushroomie">
+      <div
+        className="brand-container relative aspect-[16/9] overflow-hidden rounded-[18px] border border-neutral-200 bg-white shadow-strong md:aspect-[2/1]"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
         {banners.map((banner, index) => {
-          const isActive = index === current
-          const isPureImage = !banner.title && !banner.subtitle && !banner.description && !banner.button_text
-          
+          const active = index === current
+          const hasContent = banner.title || banner.subtitle || banner.description || banner.button_text
           return (
-            <div 
-              key={banner.id}
-              className={`absolute inset-0 w-full h-full transition-all duration-700 ease-in-out ${
-                isActive 
-                  ? 'opacity-100 z-10 scale-100' 
-                  : 'opacity-0 z-0 scale-105 pointer-events-none'
-              }`}
-            >
-              {/* Background Image */}
-              <Image 
-                src={getPublicImageUrl(banner.image_url, 'banner')} 
-                alt={banner.title || 'Mushroomie Banner'} 
+            <article key={banner.id} aria-hidden={!active} className={`absolute inset-0 transition-opacity duration-500 ${active ? 'z-10 opacity-100' : 'pointer-events-none opacity-0'}`}>
+              <Image
+                src={getPublicImageUrl(banner.image_url, 'banner')}
+                alt={banner.title || 'Bộ sưu tập Mushroomie'}
                 fill
-                sizes="100vw"
+                unoptimized={banner.image_url.startsWith('/uploads/')}
                 priority={index === 0}
-                fetchPriority={index === 0 ? "high" : "auto"}
-                loading={index === 0 ? undefined : "lazy"}
-                style={{ objectFit: 'contain' }}
-                className="pointer-events-none"
+                fetchPriority={index === 0 ? 'high' : 'auto'}
+                sizes="(max-width: 768px) 100vw, 1280px"
+                className="object-contain"
               />
-
-              {/* Slide Content */}
-              {!isPureImage && (
-                <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-20 relative z-20 h-full flex pointer-events-none ${
-                  banner.text_position === 'top-left' ? 'items-start justify-start' :
-                  banner.text_position === 'top-right' ? 'items-start justify-end' :
-                  banner.text_position === 'center' ? 'items-center justify-center' :
-                  banner.text_position === 'bottom-right' ? 'items-end justify-end' :
-                  'items-end justify-start'
-                }`}>
-                  <div className={`max-w-2xl text-white space-y-4 sm:space-y-6 ${
-                    banner.text_position === 'center' ? 'text-center flex flex-col items-center' :
-                    banner.text_position?.includes('right') ? 'text-right flex flex-col items-end' : 'text-left'
-                  }`}>
-                    {/* Floating pill badge */}
-                    <div 
-                      className={`inline-flex items-center gap-2 bg-white/20 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-semibold backdrop-blur-sm transition-all duration-700 delay-100 transform ${
-                        isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                      }`}
-                    >
-                      <span>🍄</span> Mushroomie Handmade
+              {hasContent && (
+                <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/65 via-black/10 to-transparent p-5 md:p-10">
+                  <div className="max-w-2xl text-white">
+                    <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.12em] text-yellow md:text-xs">Mushroomie handmade</p>
+                    {banner.title && <h1 className="text-balance font-heading text-2xl leading-[1.08] md:text-5xl">{banner.title}</h1>}
+                    {banner.subtitle && <p className="mt-2 font-heading text-lg text-yellow md:text-2xl">{banner.subtitle}</p>}
+                    {banner.description && <p className="mt-3 hidden max-w-xl text-sm leading-6 text-white/80 sm:block">{banner.description}</p>}
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {banner.button_text && <Link href={banner.button_link || '/san-pham'} className="rounded-xl bg-white px-5 py-2.5 text-sm font-extrabold text-primary">{banner.button_text}</Link>}
+                      {banner.secondary_button_text && <Link href={banner.secondary_button_link || '/lien-he'} className="rounded-xl border border-white/60 px-5 py-2.5 text-sm font-extrabold text-white">{banner.secondary_button_text}</Link>}
                     </div>
-
-                    {/* Banner Headline */}
-                    <h1 
-                      className={`font-heading font-bold leading-tight transition-all duration-700 delay-200 transform ${
-                        isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                      } ${
-                        banner.text_size === 'small' ? 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl' :
-                        banner.text_size === 'large' ? 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl' :
-                        'text-3xl sm:text-5xl md:text-6xl lg:text-7xl'
-                      }`}
-                    >
-                      {banner.title}
-                      {banner.subtitle && (
-                        <>
-                          <br />
-                          <span className="text-yellow-300 drop-shadow-sm font-extrabold">{banner.subtitle}</span>
-                        </>
-                      )}
-                    </h1>
-
-                    {/* Banner Description */}
-                    {banner.description && (
-                      <p 
-                        className={`text-white/85 leading-relaxed transition-all duration-700 delay-300 transform ${
-                          isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                        } ${
-                          banner.text_size === 'small' ? 'text-xs sm:text-sm md:text-base' :
-                          banner.text_size === 'large' ? 'text-base sm:text-xl md:text-2xl' :
-                          'text-sm sm:text-lg md:text-xl'
-                        }`}
-                      >
-                        {banner.description}
-                      </p>
-                    )}
-
-                    {/* Action buttons */}
-                    {(banner.button_text || banner.secondary_button_text) && (
-                      <div 
-                        className={`flex flex-wrap gap-3 sm:gap-4 pt-2 sm:pt-4 transition-all duration-700 delay-400 transform pointer-events-auto ${
-                          isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                        }`}
-                      >
-                        {banner.button_text && (
-                          <Link 
-                            href={banner.button_link || '#'} 
-                            className="bg-white text-primary px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-full font-bold text-sm sm:text-base hover:bg-yellow-50 transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center min-w-[120px] sm:min-w-[140px]"
-                          >
-                            {banner.button_text}
-                          </Link>
-                        )}
-                        {banner.secondary_button_text && (
-                          <Link 
-                            href={banner.secondary_button_link || '#'} 
-                            className="border-2 border-white text-white px-6 sm:px-8 py-2 sm:py-3 rounded-full font-bold text-sm sm:text-base hover:bg-white hover:text-neutral-900 transition-all flex items-center justify-center min-w-[120px] sm:min-w-[140px]"
-                          >
-                            {banner.secondary_button_text}
-                          </Link>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
-
-              {/* If banner.link is provided, make the entire slide a clickable link */}
-              {banner.link && (
-                <Link href={banner.link} className="absolute inset-0 z-20 w-full h-full cursor-pointer pointer-events-auto" />
-              )}
-              {/* If it's a pure image without banner.link, fallback to button_link */}
-              {!banner.link && isPureImage && banner.button_link && (
-                <Link href={banner.button_link} className="absolute inset-0 z-20 w-full h-full cursor-pointer pointer-events-auto" />
-              )}
-            </div>
+              {banner.link && !hasContent && <Link href={banner.link} className="absolute inset-0" aria-label="Mở banner" />}
+            </article>
           )
         })}
+
+        {banners.length > 1 && (
+          <>
+            <button onClick={previous} aria-label="Banner trước" className="absolute left-3 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-xl bg-white/90 text-text shadow-card hover:bg-white"><ChevronLeft size={20} /></button>
+            <button onClick={next} aria-label="Banner tiếp theo" className="absolute right-3 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-xl bg-white/90 text-text shadow-card hover:bg-white"><ChevronRight size={20} /></button>
+            <div className="absolute bottom-3 right-3 z-20 flex gap-1.5 rounded-lg bg-black/25 p-1.5 backdrop-blur-sm">
+              {banners.map((banner, index) => (
+                <button key={banner.id} onClick={() => setCurrent(index)} aria-label={`Chuyển đến banner ${index + 1}`} aria-current={index === current} className={`h-1.5 rounded-full transition-[width,background-color] ${index === current ? 'w-6 bg-white' : 'w-1.5 bg-white/55'}`} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
-
-      {/* Navigation Arrow Buttons */}
-      {banners.length > 1 && (
-        <>
-          <button 
-            onClick={(e) => { e.stopPropagation(); handlePrev(); }}
-            className="absolute left-2 sm:left-4 z-30 p-2 sm:p-3 rounded-full bg-black/30 hover:bg-black/50 text-white border border-white/10 hover:border-white/20 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 active:scale-90"
-            title="Slide trước"
-          >
-            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
-          <button 
-            onClick={(e) => { e.stopPropagation(); handleNext(); }}
-            className="absolute right-2 sm:right-4 z-30 p-2 sm:p-3 rounded-full bg-black/30 hover:bg-black/50 text-white border border-white/10 hover:border-white/20 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 active:scale-90"
-            title="Slide tiếp theo"
-          >
-            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
-        </>
-      )}
-
-      {/* Pagination Dots */}
-      {banners.length > 1 && (
-        <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 z-30 flex justify-center items-center gap-2 sm:gap-2.5">
-          {banners.map((_, index) => {
-            const isActive = index === current
-            return (
-              <button 
-                key={index}
-                onClick={(e) => { e.stopPropagation(); handleDotClick(index); }}
-                className={`h-2 sm:h-2.5 rounded-full transition-all duration-300 ${
-                  isActive 
-                    ? 'w-6 sm:w-8 bg-yellow-300 shadow-sm' 
-                    : 'w-2 sm:w-2.5 bg-white/50 hover:bg-white/80'
-                }`}
-                title={`Chuyển đến slide ${index + 1}`}
-              />
-            )
-          })}
-        </div>
-      )}
+      <div className="brand-container mt-3 grid grid-cols-3 divide-x divide-neutral-200 rounded-xl border border-neutral-200 bg-white py-3 text-center text-[10px] font-extrabold uppercase tracking-[0.06em] text-neutral-600 sm:text-xs">
+        <span>Handmade kỹ</span>
+        <span>Custom theo ý</span>
+        <span>Gói quà chỉn chu</span>
+      </div>
     </section>
-    
-      {/* CUTE MARQUEE */}
-      <div className="w-full max-w-7xl mt-8 overflow-hidden bg-primary-light rounded-2xl py-3 border border-primary/10">
-        <div className="whitespace-nowrap animate-[marquee_20s_linear_infinite] inline-block font-heading text-white text-sm sm:text-base">
-          <span className="mx-4">🍄 TỪ TỪNG HẠT NHỎ, TẠO PHONG CÁCH RIÊNG</span>
-          <span className="mx-4">✨ CUSTOM THEO YÊU CẦU</span>
-          <span className="mx-4">🌸 HANDMADE WITH LOVE</span>
-          <span className="mx-4">🧶 CHẤT LIỆU TỰ NHIÊN</span>
-          <span className="mx-4">🍄 TỪ TỪNG HẠT NHỎ, TẠO PHONG CÁCH RIÊNG</span>
-          <span className="mx-4">✨ CUSTOM THEO YÊU CẦU</span>
-          <span className="mx-4">🌸 HANDMADE WITH LOVE</span>
-          <span className="mx-4">🧶 CHẤT LIỆU TỰ NHIÊN</span>
-          <span className="mx-4">🍄 TỪ TỪNG HẠT NHỎ, TẠO PHONG CÁCH RIÊNG</span>
-          <span className="mx-4">✨ CUSTOM THEO YÊU CẦU</span>
-        </div>
-      </div>
-    </div>
   )
 }

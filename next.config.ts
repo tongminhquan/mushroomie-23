@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next'
 import withBundleAnalyzer from '@next/bundle-analyzer'
+import path from 'node:path'
 
 const analyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -7,11 +8,14 @@ const analyzer = withBundleAnalyzer({
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  poweredByHeader: false,
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 31536000,
     remotePatterns: [
-      { protocol: 'https', hostname: 'picsum.photos' },
       { protocol: 'https', hostname: 'img.vietqr.io' },
       { protocol: 'https', hostname: 'api.qrserver.com' },
       { protocol: 'https', hostname: 'res.cloudinary.com' },
@@ -26,9 +30,6 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', 'date-fns'],
     serverActions: { allowedOrigins: ['localhost:3000', 'mushroomie.io.vn', '*.mushroomie.io.vn'] },
-  },
-  typescript: {
-    ignoreBuildErrors: true,
   },
   async headers() {
     return [

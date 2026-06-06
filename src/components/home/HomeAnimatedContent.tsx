@@ -1,227 +1,183 @@
-'use client'
-import Link from 'next/link'
 import Image from 'next/image'
-import dynamic from 'next/dynamic'
-import { Truck, Gem, Palette, CreditCard } from 'lucide-react'
+import Link from 'next/link'
+import { ArrowRight, CreditCard, Gem, Palette, PackageCheck } from 'lucide-react'
 import ProductCard from '@/components/product/ProductCard'
-import AnimateOnScroll, { StaggerChildren } from '@/components/ui/AnimateOnScroll'
+import PostCard from '@/components/blog/PostCard'
+import BrandContainer from '@/components/ui/BrandContainer'
+import SectionHeader from '@/components/ui/SectionHeader'
 
-const PostCard = dynamic(() => import('@/components/blog/PostCard'), {
-  ssr: true,
-})
+interface Product {
+  id: number
+  name: string
+  slug: string
+  price: number
+  sale_price?: number | null
+  featured_image?: string | null
+  is_customizable?: boolean
+  stock?: number
+  category?: { name: string; slug: string } | null
+  images?: { image_url: string }[]
+}
+
+interface Post {
+  id: number
+  title: string
+  slug: string
+  excerpt: string | null
+  featured_image: string | null
+  published_at: Date | string | null
+  category: { name: string; slug: string } | null
+}
+
+interface Review {
+  id: number
+  rating: number
+  content: string
+  name: string
+}
+
+interface Category {
+  id: number
+  name: string
+  slug: string
+  image_url: string | null
+  icon: string | null
+}
 
 interface HomeContentProps {
-  featuredProducts: any[]
-  posts: any[]
-  reviews: any[]
-  categories: any[]
+  featuredProducts: Product[]
+  posts: Post[]
+  reviews: Review[]
+  categories: Category[]
 }
 
-const categoryIcons: Record<string, string> = {
-  'vong-tay': '💛',
-  'moc-khoa': '🔑',
-  'charm': '✨',
-  'phu-kien': '🌈',
-}
+const promises = [
+  { icon: Gem, title: 'Làm thủ công', text: 'Mỗi món được ráp và hoàn thiện bằng tay.' },
+  { icon: Palette, title: 'Custom theo bạn', text: 'Chọn màu, charm và ghi chú cho món riêng.' },
+  { icon: PackageCheck, title: 'Đóng gói kỹ', text: 'Kiểm tra từng chi tiết trước khi gửi đi.' },
+  { icon: CreditCard, title: 'Thanh toán gọn', text: 'COD hoặc quét QR, xác nhận tự động.' },
+]
 
 export default function HomeAnimatedContent({ featuredProducts, posts, reviews, categories }: HomeContentProps) {
   return (
     <>
-      {/* CATEGORIES */}
-      <section className="py-8 bg-white border-b border-neutral-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="font-heading text-xl font-bold uppercase text-primary mb-6 text-center">Danh mục nổi bật</h2>
-          {categories.length > 0 ? (
-            <div className="flex flex-nowrap md:flex-wrap md:justify-center overflow-x-auto gap-4 md:gap-8 pb-4 hide-scrollbar snap-x">
-              <StaggerChildren animation="zoom-in" staggerDelay={50} className="flex gap-4 md:gap-8 min-w-max md:min-w-0 px-2 md:px-0">
-                {categories.map((cat: any) => (
-                  <Link key={cat.id} href={`/san-pham?category=${cat.slug}`}
-                    className="group flex flex-col items-center w-20 md:w-28 flex-shrink-0 snap-start">
-                    <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-secondary shadow-[0_2px_10px_rgba(0,0,0,0.05)] border-2 border-accent-peach flex items-center justify-center mb-3 overflow-hidden group-hover:border-primary group-hover:shadow-md transition-all">
-                      {cat.image_url ? (
-                         <Image src={cat.image_url} alt={cat.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" sizes="(max-width: 768px) 64px, 80px" />
-                      ) : (
-                        <div className="text-3xl group-hover:scale-110 transition-transform">{cat.icon || categoryIcons[cat.slug] || '💛'}</div>
-                      )}
-                    </div>
-                    <h3 className="font-heading font-semibold text-xs md:text-sm text-neutral-700 text-center line-clamp-2 group-hover:text-primary transition-colors">{cat.name}</h3>
-                  </Link>
-                ))}
-              </StaggerChildren>
-            </div>
-          ) : (
-            <div className="flex justify-center gap-8">
-              <StaggerChildren animation="zoom-in" staggerDelay={50} className="flex gap-8">
-                {[{ slug: 'vong-tay', name: 'Vòng tay' }, { slug: 'moc-khoa', name: 'Móc khóa' }, { slug: 'charm', name: 'Charm' }, { slug: 'phu-kien', name: 'Phụ kiện' }].map((cat) => (
-                  <Link key={cat.slug} href={`/san-pham?category=${cat.slug}`}
-                    className="group flex flex-col items-center w-24">
-                    <div className="w-20 h-20 rounded-full bg-secondary shadow-[0_2px_10px_rgba(0,0,0,0.05)] border-2 border-accent-peach flex items-center justify-center mb-3 group-hover:border-primary transition-all">
-                      <div className="text-3xl group-hover:scale-110 transition-transform">{categoryIcons[cat.slug]}</div>
-                    </div>
-                    <h3 className="font-heading font-semibold text-sm text-neutral-700 group-hover:text-primary transition-colors">{cat.name}</h3>
-                  </Link>
-                ))}
-              </StaggerChildren>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* FEATURED PRODUCTS */}
-      {featuredProducts.length > 0 && (
-        <section className="py-10 bg-neutral-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-white rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100">
-                <h2 className="font-heading text-xl font-bold uppercase text-primary flex items-center gap-2">
-                  <span className="text-2xl animate-pulse">🔥</span> SẢN PHẨM NỔI BẬT
-                </h2>
-                <Link href="/san-pham" className="text-sm font-semibold text-primary hover:underline hidden md:block">
-                  Xem tất cả &gt;&gt;
-                </Link>
-              </div>
-              <div className="p-4 md:p-5">
-                <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
-                  <StaggerChildren animation="fade-up" staggerDelay={50}>
-                    {featuredProducts.map((product) => (
-                      <ProductCard key={product.id} product={product as any} />
-                    ))}
-                  </StaggerChildren>
+      <section className="bg-white py-12 md:py-16">
+        <BrandContainer>
+          <SectionHeader
+            eyebrow="Chọn theo sở thích"
+            title="Bắt đầu từ món bạn thích"
+            description="Mỗi danh mục là một cách khác để kể câu chuyện của riêng bạn."
+            action={<Link href="/san-pham" className="inline-flex items-center gap-2 text-sm font-extrabold text-primary hover:gap-3">Xem tất cả <ArrowRight size={17} /></Link>}
+          />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {categories.map((category, index) => (
+              <Link
+                key={category.id}
+                href={`/san-pham?category=${category.slug}`}
+                className={`group relative min-h-40 overflow-hidden rounded-[18px] border border-neutral-200 bg-secondary p-4 transition hover:-translate-y-1 hover:border-pink hover:shadow-hover ${
+                  index === 0 ? 'sm:col-span-2 md:col-span-1 lg:col-span-2' : ''
+                }`}
+              >
+                <div className="relative mb-4 aspect-[4/3] overflow-hidden rounded-xl bg-white">
+                  {category.image_url ? (
+                    <Image src={category.image_url} alt={category.name} fill unoptimized={category.image_url.startsWith('/uploads/')} sizes="(max-width: 640px) 50vw, 260px" className="object-cover transition duration-500 group-hover:scale-105" />
+                  ) : (
+                    <div className="grid h-full place-items-center font-heading text-4xl text-primary/25">M</div>
+                  )}
                 </div>
-                <div className="md:hidden text-center mt-6">
-                  <Link href="/san-pham" className="text-sm font-semibold text-primary hover:underline">
-                    Xem tất cả sản phẩm &gt;&gt;
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* WHY MUSHROOMIE — Brand values with Lucide icons */}
-      <section className="py-14 bg-secondary">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimateOnScroll animation="fade-up" className="text-center mb-8">
-            <h2 className="font-heading text-xl md:text-2xl font-bold uppercase text-primary">Tại sao chọn Mushroomie?</h2>
-          </AnimateOnScroll>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            <AnimateOnScroll animation="fade-up" delay={0}>
-              <div className="bg-white rounded-2xl p-5 md:p-6 text-center shadow-card hover:shadow-hover hover:-translate-y-1 transition-all">
-                <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-accent-peach/50 flex items-center justify-center">
-                  <Truck size={28} className="text-primary" />
-                </div>
-                <h3 className="font-heading font-bold text-sm uppercase text-neutral-800 mb-1">Giao hàng tận nơi</h3>
-                <p className="text-xs text-neutral-500 hidden md:block">Ship COD toàn quốc, nhanh chóng</p>
-              </div>
-            </AnimateOnScroll>
-            <AnimateOnScroll animation="fade-up" delay={100}>
-              <div className="bg-white rounded-2xl p-5 md:p-6 text-center shadow-card hover:shadow-hover hover:-translate-y-1 transition-all">
-                <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-accent-mint/50 flex items-center justify-center">
-                  <Gem size={28} className="text-primary" />
-                </div>
-                <h3 className="font-heading font-bold text-sm uppercase text-neutral-800 mb-1">Thủ công 100%</h3>
-                <p className="text-xs text-neutral-500 hidden md:block">Làm bằng tay với tình yêu thương</p>
-              </div>
-            </AnimateOnScroll>
-            <AnimateOnScroll animation="fade-up" delay={200}>
-              <div className="bg-white rounded-2xl p-5 md:p-6 text-center shadow-card hover:shadow-hover hover:-translate-y-1 transition-all">
-                <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-accent-peach/50 flex items-center justify-center">
-                  <Palette size={28} className="text-primary" />
-                </div>
-                <h3 className="font-heading font-bold text-sm uppercase text-neutral-800 mb-1">Cá nhân hóa</h3>
-                <p className="text-xs text-neutral-500 hidden md:block">Tự chọn charm và màu sắc</p>
-              </div>
-            </AnimateOnScroll>
-            <AnimateOnScroll animation="fade-up" delay={300}>
-              <div className="bg-white rounded-2xl p-5 md:p-6 text-center shadow-card hover:shadow-hover hover:-translate-y-1 transition-all">
-                <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-accent-mint/50 flex items-center justify-center">
-                  <CreditCard size={28} className="text-primary" />
-                </div>
-                <h3 className="font-heading font-bold text-sm uppercase text-neutral-800 mb-1">Thanh toán dễ dàng</h3>
-                <p className="text-xs text-neutral-500 hidden md:block">QR Code tự động hoặc COD</p>
-              </div>
-            </AnimateOnScroll>
-          </div>
-        </div>
-      </section>
-
-      {/* REVIEWS */}
-      {reviews.length > 0 && (
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <AnimateOnScroll animation="fade-up" className="text-center mb-10">
-              <div className="inline-flex items-center gap-2 bg-primary text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 shadow-md">
-                <span>💬</span> ĐÁNH GIÁ
-              </div>
-              <h2 className="font-heading text-3xl font-bold text-primary mb-3">Khách hàng nói gì về Mushroomie?</h2>
-              <div className="flex justify-center gap-1 text-yellow-400 text-xl">{'★'.repeat(5)}</div>
-            </AnimateOnScroll>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <StaggerChildren animation="fade-up" staggerDelay={120}>
-                {reviews.map((review: any) => (
-                  <div key={review.id} className="bg-secondary rounded-2xl p-6 shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1 relative border border-accent-peach/30">
-                    <div className="absolute top-4 right-4 text-primary/10 text-5xl font-serif">&ldquo;</div>
-                    <div className="flex gap-1 text-yellow-400 text-sm mb-3">{'★'.repeat(review.rating)}</div>
-                    <p className="text-neutral-600 text-sm leading-relaxed mb-4 italic relative z-10">&ldquo;{review.content}&rdquo;</p>
-                    <div className="flex items-center gap-3 pt-3 border-t border-accent-peach/30">
-                      <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md">
-                        {review.name.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="font-bold text-sm text-neutral-800">{review.name}</span>
-                    </div>
-                  </div>
-                ))}
-              </StaggerChildren>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* BLOG PREVIEW */}
-      {posts.length > 0 && (
-        <section className="py-12 bg-neutral-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-heading text-xl font-bold uppercase text-primary">
-                Tin tức & Mẹo vặt
-              </h2>
-              <Link href="/tin-tuc" className="text-sm font-semibold text-primary hover:underline hidden md:block">
-                Xem tất cả &gt;&gt;
+                <h3 className="font-heading text-lg leading-tight text-text">{category.name}</h3>
+                <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary">Khám phá <ArrowRight size={14} /></span>
               </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-              <StaggerChildren animation="fade-up" staggerDelay={120}>
-                {posts.map((post: any) => <PostCard key={post.id} post={post as any} />)}
-              </StaggerChildren>
-            </div>
+            ))}
           </div>
+        </BrandContainer>
+      </section>
+
+      {featuredProducts.length > 0 && (
+        <section className="paper-surface py-14 md:py-20">
+          <BrandContainer>
+            <SectionHeader
+              eyebrow="Được yêu thích"
+              title="Những món nhỏ đang được chọn nhiều"
+              description="Các thiết kế nổi bật, dễ phối và có thể thêm dấu ấn riêng."
+              action={<Link href="/san-pham" className="inline-flex items-center gap-2 rounded-xl border border-primary px-4 py-2 text-sm font-extrabold text-primary hover:bg-primary hover:text-white">Xem bộ sưu tập <ArrowRight size={16} /></Link>}
+            />
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
+              {featuredProducts.slice(0, 8).map((product) => <ProductCard key={product.id} product={product} />)}
+            </div>
+          </BrandContainer>
         </section>
       )}
 
-      {/* CTA — Brand personality with handmade elements */}
-      <section className="py-14 bg-accent-peach/30 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-4 left-8 text-4xl opacity-20 rotate-12">✨</div>
-        <div className="absolute bottom-4 right-12 text-4xl opacity-20 -rotate-12">🍄</div>
-        <div className="absolute top-1/2 left-1/4 text-3xl opacity-10">💛</div>
-        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 bg-white text-primary text-xs font-bold px-4 py-1.5 rounded-full mb-4 shadow-sm border border-accent-peach">
-            ✨ HANDMADE WITH LOVE ✨
+      <section className="bg-white py-14 md:py-20">
+        <BrandContainer>
+          <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+            <div>
+              <p className="brand-kicker mb-4">Làm theo cách Mushroomie</p>
+              <h2 className="text-balance font-heading text-3xl leading-[1.1] text-text md:text-5xl">
+                Không chỉ là phụ kiện. Đó là món đồ mang dấu riêng.
+              </h2>
+              <p className="mt-5 max-w-xl text-sm leading-7 text-neutral-500 md:text-base">
+                Từ màu dây, hạt, charm đến lời nhắn nhỏ, Mushroomie giúp bạn ghép thành một món đồ hợp với người nhận và khoảnh khắc muốn nhớ.
+              </p>
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Link href="/lien-he" className="rounded-xl bg-primary px-6 py-3 text-sm font-extrabold text-white shadow-[0_8px_18px_rgba(228,29,29,0.18)] hover:bg-primary-dark">Custom món riêng</Link>
+                <Link href="/gioi-thieu" className="rounded-xl border border-neutral-300 px-6 py-3 text-sm font-extrabold text-text hover:border-primary hover:text-primary">Đọc câu chuyện</Link>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {promises.map(({ icon: Icon, title, text }, index) => (
+                <div key={title} className={`rounded-[18px] border border-neutral-200 p-5 ${index === 1 || index === 2 ? 'bg-secondary' : 'bg-white'}`}>
+                  <div className="mb-5 grid h-11 w-11 place-items-center rounded-xl bg-primary-light text-primary"><Icon size={22} /></div>
+                  <h3 className="text-sm font-extrabold text-text">{title}</h3>
+                  <p className="mt-2 text-xs leading-5 text-neutral-500">{text}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <h2 className="font-heading text-2xl md:text-3xl font-bold text-neutral-900 mb-4">Bạn cần tìm phụ kiện độc đáo?</h2>
-          <p className="text-neutral-600 mb-8 text-sm md:text-base max-w-lg mx-auto">
-            Mushroomie sẽ giúp bạn thiết kế những món đồ thủ công không ai có, thật sự là của riêng bạn.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/san-pham" className="bg-primary text-white px-8 py-3 rounded-full font-bold text-sm hover:bg-primary-dark transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95">
-              Khám phá sản phẩm
-            </Link>
-            <Link href="/lien-he" className="border-2 border-primary text-primary px-8 py-3 rounded-full font-bold text-sm hover:bg-primary hover:text-white transition-all">
-              Custom món riêng
-            </Link>
+        </BrandContainer>
+      </section>
+
+      {reviews.length > 0 && (
+        <section className="bg-pink/45 py-14 md:py-20">
+          <BrandContainer>
+            <SectionHeader eyebrow="Khách kể thật" title="Những lời nhắn sau khi mở hộp" />
+            <div className="grid gap-4 md:grid-cols-3">
+              {reviews.slice(0, 3).map((review, index) => (
+                <figure key={review.id} className={`rounded-[18px] bg-white p-6 shadow-card ${index === 1 ? 'md:-translate-y-4' : ''}`}>
+                  <div className="mb-4 text-sm tracking-[0.18em] text-primary" aria-label={`${review.rating} trên 5 sao`}>{'★'.repeat(review.rating)}</div>
+                  <blockquote className="text-sm leading-7 text-neutral-700">“{review.content}”</blockquote>
+                  <figcaption className="mt-5 border-t border-neutral-100 pt-4 text-sm font-extrabold text-text">{review.name}</figcaption>
+                </figure>
+              ))}
+            </div>
+          </BrandContainer>
+        </section>
+      )}
+
+      {posts.length > 0 && (
+        <section className="bg-white py-14 md:py-20">
+          <BrandContainer>
+            <SectionHeader
+              eyebrow="Góc handmade"
+              title="Chuyện nhỏ, mẹo hay và cảm hứng phối đồ"
+              action={<Link href="/tin-tuc" className="inline-flex items-center gap-2 text-sm font-extrabold text-primary">Xem bài viết <ArrowRight size={16} /></Link>}
+            />
+            <div className="grid gap-5 md:grid-cols-3">
+              {posts.slice(0, 3).map((post) => <PostCard key={post.id} post={post} />)}
+            </div>
+          </BrandContainer>
+        </section>
+      )}
+
+      <section className="bg-primary py-12 text-white md:py-16">
+        <BrandContainer className="flex flex-col gap-7 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="mb-3 text-xs font-extrabold uppercase tracking-[0.12em] text-yellow">Một món chỉ thuộc về bạn</p>
+            <h2 className="max-w-2xl text-balance font-heading text-3xl leading-[1.15] md:text-4xl">Kể Mushroomie nghe ý tưởng, tụi mình cùng làm nó thành thật.</h2>
           </div>
-        </div>
+          <Link href="/lien-he" className="shrink-0 rounded-xl bg-white px-6 py-3.5 text-center text-sm font-extrabold text-primary shadow-strong hover:bg-yellow hover:text-text">Bắt đầu custom</Link>
+        </BrandContainer>
       </section>
     </>
   )

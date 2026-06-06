@@ -16,8 +16,8 @@
 
   /* Primary */
   --color-primary: #e41d1d;      /* Đỏ Mushroomie */
-  --color-primary-dark: #b51515;
-  --color-primary-light: #ff4d4d;
+  --color-primary-dark: #b91414;
+  --color-primary-light: #fff0ed;
   --color-secondary: #fff7f2;    /* Trắng kem */
   
   /* Brand Aliases (explicit names per spec) */
@@ -37,12 +37,12 @@
   
   /* Neutrals */
   --color-neutral-50: #ffffff;
-  --color-neutral-100: #f8f4f1;
-  --color-neutral-200: #eae1db;
-  --color-neutral-300: #d4ccc5;
-  --color-neutral-400: #a9a29d;
-  --color-neutral-500: #8c8681;
-  --color-neutral-700: #5c5855;
+  --color-neutral-100: #f7f2ee;
+  --color-neutral-200: #e9dfd8;
+  --color-neutral-300: #d3c7bf;
+  --color-neutral-400: #9e938c;
+  --color-neutral-500: #756d68;
+  --color-neutral-700: #4a4542;
   --color-neutral-900: #2b2b2b;  /* Đen mềm */
 
   /* Typography */
@@ -51,17 +51,22 @@
   --font-body: var(--font-body), 'Montserrat', sans-serif;
 
   /* Layout */
-  --radius-card: 24px;
+  --radius-card: 18px;
   --radius-pill: 9999px;
   
   /* Softer, warmer shadows */
-  --shadow-card: 0 10px 25px -5px rgba(43, 43, 43, 0.05), 0 8px 10px -6px rgba(43, 43, 43, 0.01);
-  --shadow-hover: 0 20px 25px -5px rgba(228, 29, 29, 0.15), 0 8px 10px -6px rgba(228, 29, 29, 0.1);
-  --shadow-strong: 0 15px 35px -5px rgba(43, 43, 43, 0.1), 0 10px 15px -5px rgba(43, 43, 43, 0.05);
+  --shadow-card: 0 8px 24px rgba(91, 48, 35, 0.07);
+  --shadow-hover: 0 16px 34px rgba(148, 43, 34, 0.14);
+  --shadow-strong: 0 22px 55px rgba(91, 48, 35, 0.14);
 }
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--color-secondary);
 }
 
 body {
@@ -69,6 +74,62 @@ body {
   background-color: var(--color-secondary);
   color: var(--color-neutral-900);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+::selection {
+  color: #fff;
+  background: var(--color-primary);
+}
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 200;
+  transform: translateY(-180%);
+  border-radius: 10px;
+  background: var(--color-neutral-900);
+  color: white;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.brand-container {
+  width: calc(100% - 2rem);
+  max-width: 80rem;
+  margin-inline: auto;
+}
+
+.brand-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.brand-kicker::before {
+  content: "";
+  width: 1.75rem;
+  height: 2px;
+  background: currentColor;
+}
+
+.paper-surface {
+  background-color: #fffdfa;
+  background-image:
+    linear-gradient(rgba(185, 121, 75, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(185, 121, 75, 0.035) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 /* ========== Font Utilities ========== */
@@ -78,16 +139,16 @@ body {
 
 /* ========== Gradient Utilities ========== */
 .gradient-primary {
-  background: linear-gradient(135deg, #e41d1d 0%, #FF6B35 100%);
+  background: var(--color-primary);
 }
 .gradient-text {
-  background: linear-gradient(135deg, #e41d1d 0%, #FF6B35 100%);
+  background: linear-gradient(90deg, #e41d1d 0%, #b9794b 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .gradient-btn {
-  background: linear-gradient(135deg, #e41d1d 0%, #FF6B35 100%);
+  background: var(--color-primary);
   border: none;
   color: white;
   box-shadow: 0 4px 25px rgba(228, 29, 29, 0.35);
@@ -189,9 +250,7 @@ body {
   0%, 100% { box-shadow: 0 4px 25px rgba(228, 29, 29, 0.35); }
   50% { box-shadow: 0 4px 40px rgba(228, 29, 29, 0.55); }
 }
-.animate-pulse-glow {
-  animation: pulseGlow 2s ease-in-out infinite;
-}
+.animate-pulse-glow { box-shadow: 0 4px 25px rgba(228, 29, 29, 0.32); }
 
 /* Marquee animation */
 @keyframes marquee {
@@ -211,12 +270,29 @@ a, button, input, textarea, select,
 
 /* Focus styles */
 :focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline: 3px solid rgba(228, 29, 29, 0.42);
+  outline-offset: 3px;
   border-radius: 4px;
 }
 
 /* Fix cropper lag caused by global transform transition */
 .cropper-container, .cropper-container * {
   transition: none !important;
+}
+
+@media (max-width: 640px) {
+  .brand-container {
+    width: calc(100% - 1.25rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
 }

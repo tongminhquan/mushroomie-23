@@ -13,32 +13,32 @@ export default function CartDrawer() {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/40 z-[100] backdrop-blur-sm" onClick={closeCart} />
-      <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-[110] shadow-2xl flex flex-col">
-        <div className="flex items-center justify-between p-5 border-b border-neutral-100">
+      <div className="fixed inset-0 z-[100] bg-text/45 backdrop-blur-[2px]" onClick={closeCart} />
+      <aside role="dialog" aria-modal="true" aria-label="Giỏ hàng" className="fixed right-0 top-0 z-[110] flex h-full w-full max-w-md flex-col bg-secondary shadow-2xl">
+        <div className="flex items-center justify-between border-b border-neutral-200 bg-white p-5">
           <div className="flex items-center gap-2">
             <ShoppingBag size={20} className="text-primary" />
             <h2 className="font-heading font-bold text-lg">Giỏ hàng ({items.length})</h2>
           </div>
-          <button onClick={closeCart} className="p-2 rounded-full hover:bg-neutral-100 transition-colors">
+          <button onClick={closeCart} aria-label="Đóng giỏ hàng" className="grid h-10 w-10 place-items-center rounded-xl hover:bg-neutral-100">
             <X size={20} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="text-6xl mb-4">🛒</div>
-              <p className="font-heading font-bold text-neutral-700 mb-2">Giỏ hàng trống!</p>
-              <p className="text-neutral-500 text-sm mb-6">Hãy thêm sản phẩm để bắt đầu nhé</p>
-              <Button onClick={closeCart} variant="secondary" size="sm">Tiếp tục mua sắm</Button>
+              <div className="mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-pink text-primary"><ShoppingBag size={28} /></div>
+              <p className="mb-2 font-heading text-xl text-text">Giỏ hàng đang trống</p>
+              <p className="mb-6 max-w-xs text-sm leading-6 text-neutral-500">Chọn một món nhỏ hợp gu rồi quay lại đây nhé.</p>
+              <Link href="/san-pham" onClick={closeCart}><Button size="sm">Khám phá sản phẩm</Button></Link>
             </div>
           ) : (
             <div className="space-y-4">
               {items.map((item) => (
-                <div key={item.id} className="flex gap-3 p-3 bg-neutral-50 rounded-2xl">
-                  <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                    <Image src={item.image?.startsWith('http') || item.image?.startsWith('/') || item.image?.startsWith('data:') ? item.image : '/' + item.image} alt={item.name} fill className="object-cover" unoptimized={true} />
+                <div key={item.id} className="flex gap-3 rounded-[18px] border border-neutral-200 bg-white p-3 shadow-card">
+                  <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-secondary">
+                    <Image src={item.image?.startsWith('http') || item.image?.startsWith('/') || item.image?.startsWith('data:') ? item.image : '/' + item.image} alt={item.name} fill className="object-contain p-1" unoptimized />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-sm text-neutral-900 line-clamp-2 mb-1">{item.name}</h3>
@@ -49,14 +49,14 @@ export default function CartDrawer() {
                     )}
                     <p className="font-bold text-primary text-sm">{formatPrice(item.price)}</p>
                     <div className="flex items-center gap-2 mt-2">
-                      <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-6 h-6 rounded-full bg-neutral-200 flex items-center justify-center hover:bg-neutral-300 transition-colors">
+                      <button aria-label="Giảm số lượng" onClick={() => updateQuantity(item.id, item.quantity - 1)} className="grid h-7 w-7 place-items-center rounded-lg bg-neutral-100 hover:bg-neutral-200">
                         <Minus size={12} />
                       </button>
                       <span className="text-sm font-semibold w-6 text-center">{item.quantity}</span>
-                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-6 h-6 rounded-full bg-neutral-200 flex items-center justify-center hover:bg-neutral-300 transition-colors">
+                      <button aria-label="Tăng số lượng" onClick={() => updateQuantity(item.id, item.quantity + 1)} className="grid h-7 w-7 place-items-center rounded-lg bg-neutral-100 hover:bg-neutral-200">
                         <Plus size={12} />
                       </button>
-                      <button onClick={() => removeItem(item.id)} className="ml-auto p-1 rounded-full hover:bg-red-50 hover:text-primary transition-colors">
+                      <button aria-label="Xóa sản phẩm" onClick={() => removeItem(item.id)} className="ml-auto grid h-7 w-7 place-items-center rounded-lg hover:bg-red-50 hover:text-primary">
                         <Trash2 size={14} />
                       </button>
                     </div>
@@ -68,7 +68,7 @@ export default function CartDrawer() {
         </div>
 
         {items.length > 0 && (
-          <div className="p-5 border-t border-neutral-100 space-y-3">
+          <div className="space-y-3 border-t border-neutral-200 bg-white p-5">
             <div className="flex items-center justify-between">
               <span className="text-neutral-500">Tạm tính</span>
               <span className="font-bold text-lg text-neutral-900">{formatPrice(getTotalPrice())}</span>
@@ -81,7 +81,7 @@ export default function CartDrawer() {
             </button>
           </div>
         )}
-      </div>
+      </aside>
     </>
   )
 }

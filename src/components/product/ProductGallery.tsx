@@ -1,6 +1,8 @@
 'use client'
-import { useState, useEffect } from 'react'
-import Badge from '@/components/ui/Badge'
+
+import Image from 'next/image'
+import { useState } from 'react'
+import BrandBadge from '@/components/ui/BrandBadge'
 
 interface ProductGalleryProps {
   images: string[]
@@ -12,66 +14,55 @@ interface ProductGalleryProps {
 const FALLBACK_IMAGE = '/logo.png'
 
 export default function ProductGallery({ images, productName, isCustomizable, isOnSale }: ProductGalleryProps) {
-  const [mainImage, setMainImage] = useState(images[0] || FALLBACK_IMAGE)
-  const [hasError, setHasError] = useState(false)
-
-  // Reset main image when images prop changes
-  useEffect(() => {
-    setMainImage(images[0] || FALLBACK_IMAGE)
-    setHasError(false)
-  }, [images])
-
-  const handleImageError = () => {
-    if (!hasError) {
-      setHasError(true)
-      setMainImage(FALLBACK_IMAGE)
-    }
-  }
+  const gallery = images.length > 0 ? images : [FALLBACK_IMAGE]
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [failed, setFailed] = useState(false)
+  const mainImage = failed ? FALLBACK_IMAGE : gallery[selectedIndex] || FALLBACK_IMAGE
 
   return (
-    <div className="space-y-4">
-      <div className="relative w-full aspect-square bg-white rounded-2xl overflow-hidden shadow-card flex flex-col items-center justify-center p-4">
-        {hasError && (
-          <div className="absolute inset-0 z-0 flex flex-col items-center justify-center text-neutral-400 bg-neutral-50/50">
-            <span className="text-sm font-medium mt-16">Ảnh đang được cập nhật</span>
-          </div>
-        )}
-        <img
+    <div className="space-y-3">
+      <div className="relative aspect-square overflow-hidden rounded-[18px] border border-neutral-200 bg-white shadow-card">
+        <Image
           src={mainImage}
-          alt={hasError ? 'Ảnh đang được cập nhật' : productName}
-          className="w-full h-full object-contain relative z-10"
-          loading="eager"
-          decoding="async"
-          onError={handleImageError}
+          alt={failed ? 'Ảnh sản phẩm đang được cập nhật' : productName}
+          fill
+          priority
+          fetchPriority="high"
+          unoptimized={mainImage.startsWith('/uploads/')}
+          sizes="(max-width: 1024px) 100vw, 50vw"
+          className="object-contain p-4"
+          onError={() => setFailed(true)}
         />
-        <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
-          {isCustomizable && <Badge variant="custom">Cá nhân hóa</Badge>}
-          {isOnSale && <Badge variant="sale">Sale</Badge>}
-          <Badge variant="handmade">🧶 Handmade</Badge>
+        <div className="absolute left-4 top-4 flex flex-col items-start gap-2">
+          {isCustomizable && <BrandBadge tone="yellow">Cá nhân hóa</BrandBadge>}
+          {isOnSale && <BrandBadge tone="red">Đang giảm giá</BrandBadge>}
+          <BrandBadge tone="pink">Handmade</BrandBadge>
         </div>
       </div>
-      
-      {images.length > 1 && (
-        <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-4">
-          {images.map((img, i) => (
+
+      {gallery.length > 1 && (
+        <div className="grid grid-cols-5 gap-2">
+          {gallery.map((image, index) => (
             <button
-              key={i}
+              key={`${image}-${index}`}
+              type="button"
               onClick={() => {
-                setMainImage(img)
-                setHasError(false)
+                setSelectedIndex(index)
+                setFailed(false)
               }}
-              className={`relative aspect-square w-full bg-white rounded-xl overflow-hidden shadow-sm border-2 transition-all p-1 ${
-                mainImage === img && !hasError ? 'border-primary ring-2 ring-primary/30' : 'border-transparent hover:border-neutral-300'
+              aria-label={`Xem ảnh sản phẩm ${index + 1}`}
+              aria-pressed={selectedIndex === index}
+              className={`relative aspect-square overflow-hidden rounded-xl border bg-white ${
+                selectedIndex === index ? 'border-primary ring-2 ring-primary/15' : 'border-neutral-200 hover:border-neutral-400'
               }`}
             >
-              <img 
-                src={img} 
-                alt={`${productName} thumbnail ${i + 1}`} 
-                className="w-full h-full object-contain" 
-                loading="lazy"
-                onError={(e) => {
-                  e.currentTarget.src = FALLBACK_IMAGE;
-                }}
+              <Image
+                src={image}
+                alt={`${productName}, ảnh ${index + 1}`}
+                fill
+                unoptimized={image.startsWith('/uploads/')}
+                sizes="120px"
+                className="object-contain p-1.5"
               />
             </button>
           ))}

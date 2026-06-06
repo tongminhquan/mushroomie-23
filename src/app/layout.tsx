@@ -1,7 +1,5 @@
 import type { Metadata } from 'next'
 import { Paytone_One, Montserrat } from 'next/font/google'
-import Script from 'next/script'
-import ClarityInit from '@/components/analytics/ClarityInit'
 import './globals.css'
 
 const paytoneOne = Paytone_One({
@@ -18,6 +16,7 @@ const montserrat = Montserrat({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://mushroomie.io.vn'),
   title: {
     default: 'Mushroomie — Phụ kiện Handmade Cá nhân hóa',
     template: '%s | Mushroomie',
@@ -44,35 +43,22 @@ export const metadata: Metadata = {
     siteName: 'Mushroomie',
     title: 'Mushroomie — Phụ kiện Handmade Cá nhân hóa',
     description: 'Phụ kiện handmade cá nhân hóa dành cho giới trẻ',
+    images: [{ url: '/logo_facebook_1024.png', width: 1024, height: 1024, alt: 'Mushroomie Handmade' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Mushroomie — Phụ kiện Handmade Cá nhân hóa',
     description: 'Phụ kiện handmade cá nhân hóa dành cho giới trẻ',
+    images: ['/logo_facebook_1024.png'],
   },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi" suppressHydrationWarning className={`${paytoneOne.variable} ${montserrat.variable}`}>
-      <head>
-      </head>
       <body suppressHydrationWarning className="font-body bg-secondary min-h-screen">
-        <ClarityInit />
+        <a href="#main-content" className="skip-link">Đi đến nội dung chính</a>
         {children}
-        <Script
-          id="gtm"
-          strategy="lazyOnload"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-              })(window,document,'script','dataLayer','GTM-K55B6RVG');
-            `,
-          }}
-        />
       </body>
     </html>
   )
