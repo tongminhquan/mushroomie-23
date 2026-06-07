@@ -11,6 +11,11 @@ const gameLoading = () => (
   </div>
 )
 
+const TetrisGame = dynamic(() => import('@/components/minigame/TetrisGame'), {
+  ssr: false,
+  loading: gameLoading,
+})
+
 const BlockBlastGame = dynamic(() => import('@/components/minigame/BlockBlastGame'), {
   ssr: false,
   loading: gameLoading,
@@ -170,11 +175,18 @@ export default function MiniGamePage() {
     backdropFilter: 'blur(16px)',
   }
 
+  const gamePanel: React.CSSProperties = {
+    background: 'linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.018))',
+    border: '1px solid rgba(255,255,255,0.08)',
+    boxShadow: '0 28px 80px rgba(0,0,0,0.34)',
+    alignItems: 'center',
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(180deg, #0a0a1a 0%, #0d0d24 40%, #0a0a1a 100%)',
-      fontFamily: "'Outfit', sans-serif",
+      fontFamily: 'var(--font-body), Montserrat, sans-serif',
     }}>
       <div className="container mx-auto px-4 py-6 lg:py-10">
         {/* Header */}
@@ -207,19 +219,21 @@ export default function MiniGamePage() {
 
             {/* Title */}
             <h1 style={{
-              fontSize: 'clamp(36px, 7vw, 72px)',
-              fontWeight: 900,
-              lineHeight: 1.05,
+              fontFamily: 'var(--font-body), Montserrat, sans-serif',
+              fontSize: 'clamp(32px, 6vw, 62px)',
+              fontWeight: 700,
+              lineHeight: 1.12,
               color: '#ffffff',
-              letterSpacing: '-0.03em',
-              margin: '0 0 14px 0',
+              letterSpacing: '0',
+              margin: '0 auto 16px',
+              maxWidth: '860px',
               textWrap: 'balance',
             }}>
               Xếp gạch cùng{' '}
               <span style={{
-                background: 'linear-gradient(135deg, #e41d1d, #ff6b6b)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                color: '#ff5a5a',
+                fontWeight: 800,
+                textShadow: '0 10px 32px rgba(228,29,29,0.32)',
               }}>
                 Mushroomie
               </span>
@@ -228,7 +242,7 @@ export default function MiniGamePage() {
             {/* Subtitle */}
             <p style={{
               fontSize: 'clamp(15px, 2.2vw, 20px)',
-              fontWeight: 600,
+              fontWeight: 500,
               color: '#c9cad8',
               lineHeight: 1.5,
               margin: 0,
@@ -259,18 +273,48 @@ export default function MiniGamePage() {
 
         <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto items-start">
           {/* Game Area */}
-          <div className="flex-1 min-w-0 flex flex-col items-center w-full">
-            <div className="rounded-2xl p-4 md:p-5 w-full flex justify-center" style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.05)',
-              boxShadow: '0 0 80px rgba(0,0,0,0.4)',
-              minHeight: '500px',
-              alignItems: 'center'
-            }}>
-              <GameErrorBoundary resetKey="blockblast">
-                <BlockBlastGame onGameOver={handleGameOver} />
-              </GameErrorBoundary>
-            </div>
+          <div className="flex-1 min-w-0 flex flex-col items-center gap-5 w-full">
+            <section className="mini-game-panel rounded-2xl p-3 sm:p-4 md:p-5 w-full" style={gamePanel}>
+              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.22em] text-primary-light/80">
+                    Game chính
+                  </p>
+                  <h2 className="font-body text-2xl font-semibold leading-tight text-white md:text-3xl">
+                    Tetris Mushroomie
+                  </h2>
+                </div>
+                <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-white/60">
+                  Phím + cảm ứng
+                </span>
+              </div>
+              <div className="flex w-full justify-center">
+                <GameErrorBoundary resetKey="tetris">
+                  <TetrisGame onGameOver={handleGameOver} />
+                </GameErrorBoundary>
+              </div>
+            </section>
+
+            <section className="mini-game-panel rounded-2xl p-3 sm:p-4 md:p-5 w-full" style={gamePanel}>
+              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.22em] text-white/35">
+                    Thử thách thêm
+                  </p>
+                  <h2 className="font-body text-2xl font-semibold leading-tight text-white md:text-3xl">
+                    Block Blast 8 x 8
+                  </h2>
+                </div>
+                <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-white/60">
+                  Kéo thả khối
+                </span>
+              </div>
+              <div className="flex w-full justify-center">
+                <GameErrorBoundary resetKey="blockblast">
+                  <BlockBlastGame onGameOver={handleGameOver} />
+                </GameErrorBoundary>
+              </div>
+            </section>
           </div>
 
           {/* Points & Vouchers Sidebar */}
@@ -350,7 +394,7 @@ export default function MiniGamePage() {
                           color: canExchange ? '#fff' : 'rgba(255,255,255,0.25)',
                           boxShadow: canExchange ? '0 0 20px rgba(228,29,29,0.3)' : 'none',
                           transition: 'all 0.2s ease',
-                          fontFamily: "'Outfit', sans-serif",
+                          fontFamily: 'var(--font-body), Montserrat, sans-serif',
                         }}
                       >
                         {exchangeLoading ? '...' : 'Đổi ngay'}
@@ -395,10 +439,24 @@ export default function MiniGamePage() {
       </div>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+
+        .mini-game-panel .tetris-game {
+          min-width: 0;
+        }
+
+        .mini-game-panel .tetris-main {
+          max-width: 100%;
+          flex-wrap: wrap;
+        }
+
+        @media (min-width: 768px) {
+          .mini-game-panel .tetris-main {
+            flex-wrap: nowrap;
+          }
         }
       `}</style>
     </div>

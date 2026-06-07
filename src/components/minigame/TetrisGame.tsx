@@ -547,12 +547,12 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
         ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
         const cx = canvas.width / 2, cy = canvas.height / 2
         ctx.shadowColor = '#ff4d6a'; ctx.shadowBlur = 40
-        ctx.font = "bold 36px 'Outfit', sans-serif"
+        ctx.font = "700 36px 'Montserrat', system-ui, sans-serif"
         ctx.fillStyle = '#ff4d6a'; ctx.fillText('GAME OVER', cx, cy - 35)
         ctx.shadowColor = '#00e5ff'; ctx.shadowBlur = 20
-        ctx.font = "700 22px 'Outfit', sans-serif"
+        ctx.font = "700 22px 'Montserrat', system-ui, sans-serif"
         ctx.fillStyle = '#00e5ff'; ctx.fillText(`Điểm: ${g.score}`, cx, cy + 15)
-        ctx.shadowBlur = 0; ctx.font = "500 14px 'Outfit', sans-serif"
+        ctx.shadowBlur = 0; ctx.font = "500 14px 'Montserrat', system-ui, sans-serif"
         ctx.fillStyle = 'rgba(255,255,255,0.4)'
         ctx.fillText('Nhấn R hoặc nút bên dưới để chơi lại', cx, cy + 50)
         ctx.restore()
@@ -811,13 +811,13 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
           display: inline-flex; align-items: center; justify-content: center;
           min-width: 40px; padding: 2px 6px; font-size: 10px; font-weight: 700;
           color: #00e5ff; background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2);
-          border-radius: 5px; font-family: 'Outfit', monospace;
+          border-radius: 5px; font-family: var(--font-body), Montserrat, monospace;
         }
         .tetris-key-desc { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 500; }
         .tetris-quick-actions { display: flex; gap: 4px; }
         .tetris-action-btn {
           flex: 1; padding: 6px; border-radius: 8px; font-size: 14px;
-          font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif;
+          font-weight: 700; cursor: pointer; font-family: var(--font-body), Montserrat, sans-serif;
         }
         .tetris-action-restart { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2); color: #00e5ff; }
         .tetris-action-pause   { background: rgba(255,225,77,0.1); border: 1px solid rgba(255,225,77,0.2); color: #ffe14d; }
