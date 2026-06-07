@@ -63,7 +63,7 @@ model Voucher {
   status           String   @default("active") // "active" | "reserved" | "used" | "expired"
   source           String   @default("points") // "points" | "mini_game" | "admin" | "campaign"
   game             String?
-  score_id         Int?     @unique
+  score_id         Int?
   expires_at       DateTime?
   used_at          DateTime?
   order_id         Int?
@@ -93,7 +93,7 @@ model GameScore {
   created_at   DateTime @default(now())
 
   user         User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
-  voucher      Voucher?
+  vouchers     Voucher[]
 
   @@index([game, score])
   @@index([game, created_at])

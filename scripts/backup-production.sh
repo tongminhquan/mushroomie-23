@@ -47,7 +47,7 @@ else
   # A safer way without echoing the password into the command line is using an environment variable
   export MYSQL_PWD=$(printf '%b' "${DB_PASS//%/\\x}")
   
-  mysqldump -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" "$DB_NAME" | gzip > "$BACKUP_DIR/db/mysql-$DATE.sql.gz"
+  mysqldump --no-tablespaces -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" "$DB_NAME" | gzip > "$BACKUP_DIR/db/mysql-$DATE.sql.gz"
   echo "[$(date)] Database backup created: mysql-$DATE.sql.gz"
   
   unset MYSQL_PWD
