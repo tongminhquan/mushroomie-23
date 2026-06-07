@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
@@ -15,6 +14,7 @@ import {
   X,
 } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
+import SafeImage from '@/components/ui/SafeImage'
 
 interface CategoryLink {
   href: string
@@ -25,7 +25,7 @@ const navLinks = [
   { href: '/', label: 'Trang chủ' },
   { href: '/san-pham', label: 'Sản phẩm' },
   { href: '/gioi-thieu', label: 'Câu chuyện' },
-  { href: '/tin-tuc', label: 'Góc handmade' },
+  { href: '/tin-tuc', label: 'Tin tức' },
   { href: '/mini-game', label: 'Mini game' },
   { href: '/lien-he', label: 'Liên hệ' },
 ]
@@ -100,7 +100,7 @@ export default function Header() {
           </button>
 
           <Link href="/" className="relative h-11 w-28 shrink-0 md:h-14 md:w-36" aria-label="Mushroomie - Trang chủ">
-            <Image src="/logo.png" alt="Mushroomie" fill priority sizes="144px" className="object-contain" />
+            <SafeImage src="/logo.png" fallbackSrc="/logo.png" alt="Mushroomie" fill priority sizes="144px" className="object-contain" />
           </Link>
 
           <form onSubmit={submitSearch} className="hidden flex-1 md:block">
@@ -238,7 +238,7 @@ export default function Header() {
         <div className="fixed inset-0 z-[120] bg-black/35 md:hidden" onClick={() => setMenuOpen(false)}>
           <nav className="h-full w-[84%] max-w-sm bg-white p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}>
             <div className="mb-6 flex items-center justify-between">
-              <Image src="/logo.png" width={128} height={52} alt="Mushroomie" className="h-auto w-28" />
+              <SafeImage src="/logo.png" fallbackSrc="/logo.png" width={128} height={52} alt="Mushroomie" className="h-auto w-28" />
               <button aria-label="Đóng menu" onClick={() => setMenuOpen(false)} className="grid h-10 w-10 place-items-center rounded-xl bg-neutral-100"><X size={20} /></button>
             </div>
             <div className="space-y-1">

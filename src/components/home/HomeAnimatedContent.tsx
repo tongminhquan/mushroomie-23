@@ -1,10 +1,10 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, CreditCard, Gem, Palette, PackageCheck } from 'lucide-react'
 import ProductCard from '@/components/product/ProductCard'
 import PostCard from '@/components/blog/PostCard'
 import BrandContainer from '@/components/ui/BrandContainer'
 import SectionHeader from '@/components/ui/SectionHeader'
+import SafeImage from '@/components/ui/SafeImage'
 
 interface Product {
   id: number
@@ -80,7 +80,7 @@ export default function HomeAnimatedContent({ featuredProducts, posts, reviews, 
               >
                 <div className="relative mb-4 aspect-[4/3] overflow-hidden rounded-xl bg-white">
                   {category.image_url ? (
-                    <Image src={category.image_url} alt={category.name} fill unoptimized={category.image_url.startsWith('/uploads/')} sizes="(max-width: 640px) 50vw, 260px" className="object-cover transition duration-500 group-hover:scale-105" />
+                    <SafeImage src={category.image_url} alt={category.name} fill sizes="(max-width: 640px) 50vw, 260px" className="object-cover transition duration-500 group-hover:scale-105" />
                   ) : (
                     <div className="grid h-full place-items-center font-heading text-4xl text-primary/25">M</div>
                   )}

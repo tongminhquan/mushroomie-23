@@ -1,10 +1,13 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
 import Breadcrumb from '@/components/layout/Breadcrumb'
-import { formatDate } from '@/lib/utils'
+import { formatDate, getPublicImageUrl } from '@/lib/utils'
+import { normalizeArticleImages, sanitizeHtml } from '@/lib/sanitize'
+import { toAbsoluteUrl } from '@/lib/url'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import type { Post } from '@prisma/client'
+import SafeImage from '@/components/ui/SafeImage'
 
 const SITE_URL = 'https://mushroomie.io.vn'
 const SITE_NAME = 'Mushroomie'
@@ -16,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!post) return { title: 'Bài viết không tồn tại' }
 
   const postUrl = `${SITE_URL}/tin-tuc/${post.slug}`
-  const ogImage = post.og_image || post.featured_image || DEFAULT_OG_IMAGE
+  const ogImage = toAbsoluteUrl(post.og_image || post.featured_image || DEFAULT_OG_IMAGE)
 
   return {
     title: post.seo_title || `${post.title} | ${SITE_NAME}`,
@@ -42,12 +45,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       card: 'summary_large_image',
       title: post.twitter_title || post.og_title || post.seo_title || post.title,
       description: post.twitter_description || post.og_description || post.meta_description || '',
-      images: [post.twitter_image || post.og_image || post.featured_image || DEFAULT_OG_IMAGE],
+      images: [toAbsoluteUrl(post.twitter_image || post.og_image || post.featured_image || DEFAULT_OG_IMAGE)],
     },
   }
 }
 
-function generateJsonLd(post: any) {
+function generateJsonLd(post: Post) {
   const schemaType = post.schema_type || 'BlogPosting'
   const postUrl = `${SITE_URL}/tin-tuc/${post.slug}`
 
@@ -62,7 +65,7 @@ function generateJsonLd(post: any) {
     '@type': ['BlogPosting', 'Article', 'NewsArticle'].includes(schemaType) ? schemaType : 'BlogPosting',
     headline: post.seo_title || post.title,
     description: post.meta_description || post.excerpt || '',
-    image: post.og_image || post.featured_image || DEFAULT_OG_IMAGE,
+    image: toAbsoluteUrl(post.og_image || post.featured_image || DEFAULT_OG_IMAGE),
     url: postUrl,
     author: {
       '@type': 'Organization',
@@ -102,6 +105,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
   }).catch(() => [])
 
   const jsonLd = generateJsonLd(post)
+  const articleHtml = normalizeArticleImages(sanitizeHtml(post.content || ''))
 
   return (
     <div className="min-h-screen bg-secondary">
@@ -121,8 +125,8 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
         <article className="bg-white rounded-3xl shadow-card overflow-hidden mt-4">
           {post.featured_image && (
             <div className="relative h-72 md:h-96">
-              <Image
-                src={post.featured_image}
+              <SafeImage
+                src={getPublicImageUrl(post.featured_image)}
                 alt={post.featured_image_alt || post.title}
                 fill
                 className="object-cover"
@@ -145,7 +149,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
             </div>
             <div
               className="prose prose-neutral max-w-none prose-headings:font-heading prose-img:rounded-2xl"
-              dangerouslySetInnerHTML={{ __html: post.content || '' }}
+              dangerouslySetInnerHTML={{ __html: articleHtml }}
             />
           </div>
         </article>
@@ -159,7 +163,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                   className="bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-hover transition-all hover:-translate-y-1">
                   {p.featured_image && (
                     <div className="relative h-40">
-                      <Image src={p.featured_image} alt={p.featured_image_alt || p.title} fill className="object-cover" />
+                      <SafeImage src={getPublicImageUrl(p.featured_image)} alt={p.featured_image_alt || p.title} fill className="object-cover" />
                     </div>
                   )}
                   <div className="p-4">

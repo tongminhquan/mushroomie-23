@@ -101,7 +101,11 @@ function BlockCell({ color, opacity = 1 }: { color: string; opacity?: number }) 
 // ─── Audio System ──────────────────────────────────────────────────────────────
 const playSound = (type: 'move' | 'drop' | 'invalid' | 'clear', combo: number = 0) => {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const AudioContextClass = window.AudioContext ||
+      (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+    if (!AudioContextClass) return
+
+    const ctx = new AudioContextClass()
     const osc = ctx.createOscillator()
     const gain = ctx.createGain()
     osc.connect(gain)
@@ -143,8 +147,11 @@ const playSound = (type: 'move' | 'drop' | 'invalid' | 'clear', combo: number = 
       osc.start(now)
       osc.stop(now + 0.2)
     }
-  } catch (e) {
-    // Ignore audio errors
+    osc.addEventListener('ended', () => {
+      void ctx.close().catch(() => undefined)
+    }, { once: true })
+  } catch {
+    // Browsers may block audio until a user gesture; gameplay should continue.
   }
 }
 
@@ -204,6 +211,13 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     upd()
     window.addEventListener('resize', upd)
     return () => window.removeEventListener('resize', upd)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      cancelAnimationFrame(rafRef.current)
+      document.body.style.overflow = ''
+    }
   }, [])
 
   // ── Logic helpers ───────────────────────────────────────────────────────────
@@ -318,7 +332,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     const fullCols = Array.from({ length: COLS }, (_, c) => c).filter(c => nb.every(r => r[c]))
     const lc = fullRows.length + fullCols.length
 
-    const finish = (fb: (string|null)[][], sc: number, co: number) => {
+    const finish = (fb: (string|null)[][], sc: number) => {
       const nh = [...handRef.current]; nh[idx] = null
       const allGone = nh.every(p => !p)
       const fh = allGone ? [mkPiece(), mkPiece(), mkPiece()] : nh
@@ -343,14 +357,14 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
         setScore(ns); scoreRef.current = ns
         setLines(nl); linesRef.current = nl
         setCombo(newCombo); comboRef.current = newCombo
-        finish(cb, ns, newCombo)
+        finish(cb, ns)
       }, 400)
     } else {
       playSound('drop')
       const ns = scoreRef.current + count
       setScore(ns); scoreRef.current = ns
       setCombo(0); comboRef.current = 0
-      finish(nb, ns, 0)
+      finish(nb, ns)
     }
   }, [checkGameOver])
 
@@ -427,7 +441,12 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     dragging.current = { idx, piece, isTouch, grabOffsetX, grabOffsetY, fixedLift }
 
     // Capture all pointer events to this element
-    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    try {
+      ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    } catch {
+      dragging.current = null
+      return
+    }
 
     if (isTouch) document.body.style.overflow = 'hidden'
 
@@ -517,8 +536,6 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     setIsOver(false); isOverRef.current = false
     setHl(null)
   }
-
-  const stride = cs + GAP
 
   // ── RENDER ──────────────────────────────────────────────────────────────────
   return (

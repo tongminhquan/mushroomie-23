@@ -1,10 +1,10 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { getPublicImageUrl } from '@/lib/utils'
+import SafeImage from '@/components/ui/SafeImage'
 
 interface Banner {
   id: number
@@ -60,11 +60,11 @@ export default function HomeHeroCarousel({
           const hasContent = banner.title || banner.subtitle || banner.description || banner.button_text
           return (
             <article key={banner.id} aria-hidden={!active} className={`absolute inset-0 transition-opacity duration-500 ${active ? 'z-10 opacity-100' : 'pointer-events-none opacity-0'}`}>
-              <Image
+              <SafeImage
                 src={getPublicImageUrl(banner.image_url, 'banner')}
+                imageKind="banner"
                 alt={banner.title || 'Bộ sưu tập Mushroomie'}
                 fill
-                unoptimized={banner.image_url.startsWith('/uploads/')}
                 priority={index === 0}
                 fetchPriority={index === 0 ? 'high' : 'auto'}
                 sizes="(max-width: 768px) 100vw, 1280px"

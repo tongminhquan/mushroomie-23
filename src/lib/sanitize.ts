@@ -28,6 +28,43 @@ export function sanitizeHtml(html: string): string {
   return clean
 }
 
+export function normalizeArticleImages(html: string): string {
+  if (!html) return ''
+
+  return html.replace(
+    /(<img\b[^>]*\bsrc\s*=\s*["'])([^"']+)(["'][^>]*>)/gi,
+    (_match, prefix: string, source: string, suffix: string) => {
+      let normalized = source.trim()
+
+      if (
+        normalized.startsWith('http://localhost') ||
+        normalized.startsWith('https://localhost') ||
+        normalized.startsWith('http://127.0.0.1') ||
+        normalized.startsWith('https://127.0.0.1')
+      ) {
+        try {
+          normalized = new URL(normalized).pathname
+        } catch {
+          normalized = '/images/product-placeholder.png'
+        }
+      }
+
+      if (normalized.startsWith('/public/uploads/')) {
+        normalized = normalized.replace('/public', '')
+      }
+
+      if (
+        normalized.startsWith('/wp-content/uploads/') ||
+        normalized.startsWith('https://mushroomie.io.vn/wp-content/uploads/')
+      ) {
+        normalized = '/images/product-placeholder.png'
+      }
+
+      return `${prefix}${normalized}${suffix}`
+    },
+  )
+}
+
 /**
  * Calculate reading time in minutes from HTML content.
  */

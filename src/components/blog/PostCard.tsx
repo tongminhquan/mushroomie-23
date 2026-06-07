@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { ArrowUpRight, Calendar } from 'lucide-react'
 import { formatDate, getPublicImageUrl } from '@/lib/utils'
+import SafeImage from '@/components/ui/SafeImage'
 
 interface PostCardProps {
   post: {
@@ -21,7 +21,7 @@ export default function PostCard({ post }: PostCardProps) {
       <article className="flex h-full flex-col overflow-hidden rounded-[18px] border border-neutral-200 bg-white transition duration-200 hover:-translate-y-1 hover:border-pink hover:shadow-hover">
         <div className="relative aspect-[16/10] overflow-hidden bg-secondary">
           {post.featured_image ? (
-            <Image src={getPublicImageUrl(post.featured_image)} alt={post.title} fill unoptimized={post.featured_image.startsWith('/uploads/')} className="object-cover transition-transform duration-500 group-hover:scale-[1.035]" sizes="(max-width: 768px) 100vw, 33vw" />
+            <SafeImage src={getPublicImageUrl(post.featured_image)} alt={post.title} fill className="object-cover transition-transform duration-500 group-hover:scale-[1.035]" sizes="(max-width: 768px) 100vw, 33vw" />
           ) : (
             <div className="grid h-full w-full place-items-center bg-pink font-heading text-5xl text-primary/30">M</div>
           )}

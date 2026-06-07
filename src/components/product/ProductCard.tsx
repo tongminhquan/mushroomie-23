@@ -1,12 +1,12 @@
 'use client'
 import Link from 'next/link'
-import Image from 'next/image'
 import { ShoppingBag, Check } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { getPublicImageUrl } from '@/lib/utils'
 import { useState } from 'react'
 import BrandBadge from '@/components/ui/BrandBadge'
 import PriceText from '@/components/ui/PriceText'
+import SafeImage from '@/components/ui/SafeImage'
 
 interface ProductCardProps {
   product: {
@@ -53,11 +53,10 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-[18px] border border-neutral-200 bg-white transition duration-200 hover:-translate-y-1 hover:border-pink hover:shadow-hover">
       <Link href={`/san-pham/${product.slug}`} className="relative block aspect-square w-full shrink-0 overflow-hidden bg-secondary">
-        <Image
+        <SafeImage
           src={imageUrl}
           alt={product.name}
           fill
-          unoptimized={imageUrl.startsWith('/uploads/')}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="object-contain p-3 transition-transform duration-500 ease-out group-hover:scale-[1.035]"
         />

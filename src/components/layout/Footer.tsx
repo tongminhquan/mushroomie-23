@@ -1,7 +1,7 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { Globe, Mail, MapPin, Phone } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
+import SafeImage from '@/components/ui/SafeImage'
 
 export default async function Footer() {
   const categories = await prisma.category.findMany({
@@ -16,7 +16,7 @@ export default async function Footer() {
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.4fr_0.7fr_0.7fr_1fr]">
           <div>
             <Link href="/" className="relative mb-5 block h-14 w-36">
-              <Image src="/logo.png" alt="Mushroomie" fill sizes="144px" className="object-contain object-left" />
+              <SafeImage src="/logo.png" fallbackSrc="/logo.png" alt="Mushroomie" fill sizes="144px" className="object-contain object-left" />
             </Link>
             <p className="max-w-sm text-sm leading-7 text-white/65">
               Phụ kiện handmade được làm chậm, làm kỹ và cá nhân hóa theo câu chuyện riêng của bạn.
@@ -42,7 +42,7 @@ export default async function Footer() {
             <h2 className="mb-4 text-sm font-extrabold text-white">Mushroomie</h2>
             <ul className="space-y-3 text-sm text-white/60">
               <li><Link href="/gioi-thieu" className="hover:text-white">Câu chuyện thương hiệu</Link></li>
-              <li><Link href="/tin-tuc" className="hover:text-white">Góc handmade</Link></li>
+              <li><Link href="/tin-tuc" className="hover:text-white">Tin tức</Link></li>
               <li><Link href="/mini-game" className="hover:text-white">Mini game</Link></li>
               <li><Link href="/chinh-sach-bao-mat" className="hover:text-white">Chính sách bảo mật</Link></li>
               <li><Link href="/dieu-khoan-dich-vu" className="hover:text-white">Điều khoản dịch vụ</Link></li>

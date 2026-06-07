@@ -3,10 +3,18 @@
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import dynamic from 'next/dynamic'
-import Link from 'next/link'
+import GameErrorBoundary from '@/components/minigame/GameErrorBoundary'
 
-const TetrisGame = dynamic(() => import('@/components/minigame/TetrisGame'), { ssr: false })
-const BlockBlastGame = dynamic(() => import('@/components/minigame/BlockBlastGame'), { ssr: false })
+const gameLoading = () => (
+  <div className="flex min-h-80 items-center justify-center text-sm font-bold text-white/60">
+    Đang tải mini game...
+  </div>
+)
+
+const BlockBlastGame = dynamic(() => import('@/components/minigame/BlockBlastGame'), {
+  ssr: false,
+  loading: gameLoading,
+})
 
 const VOUCHER_TIERS = [
   { percent: 10, points: 10000, icon: '🎟️', gradient: 'linear-gradient(135deg, #00e5ff, #4d7aff)' },
@@ -14,11 +22,17 @@ const VOUCHER_TIERS = [
   { percent: 20, points: 20000, icon: '🏆', gradient: 'linear-gradient(135deg, #ff8c1a, #e41d1d)' },
 ]
 
+interface Voucher {
+  id: number
+  code: string
+  discount_percent: number
+  created_at: string
+}
+
 export default function MiniGamePage() {
-  const { data: session } = useSession()
-  const [activeGame, setActiveGame] = useState<'tetris' | 'blockblast'>('tetris')
+  const { data: session, status } = useSession()
   const [points, setPoints] = useState(0)
-  const [vouchers, setVouchers] = useState<any[]>([])
+  const [vouchers, setVouchers] = useState<Voucher[]>([])
   const [loading, setLoading] = useState(true)
   const [exchangeLoading, setExchangeLoading] = useState(false)
   const [error, setError] = useState('')
@@ -55,17 +69,48 @@ export default function MiniGamePage() {
   }
 
   useEffect(() => {
-    if (session) {
-      fetchPoints()
-      startGameSession()
-    } else {
-      setLoading(false)
+    if (!session) return
+
+    const controller = new AbortController()
+    const loadPoints = async () => {
+      try {
+        const res = await fetch('/api/minigame/get-points', { signal: controller.signal })
+        const data = await res.json()
+        if (res.ok && !controller.signal.aborted) {
+          setPoints(data.points)
+          setVouchers(data.vouchers)
+        }
+      } catch (error) {
+        if (error instanceof Error && error.name !== 'AbortError') console.error(error)
+      } finally {
+        if (!controller.signal.aborted) setLoading(false)
+      }
     }
+
+    void loadPoints()
+    return () => controller.abort()
   }, [session])
 
   useEffect(() => {
-    startGameSession()
-  }, [activeGame])
+    if (!session) return
+
+    const controller = new AbortController()
+    const createGameSession = async () => {
+      try {
+        const res = await fetch('/api/minigame/start', {
+          method: 'POST',
+          signal: controller.signal,
+        })
+        const data = await res.json()
+        if (data.token && !controller.signal.aborted) setGameToken(data.token)
+      } catch (error) {
+        if (error instanceof Error && error.name !== 'AbortError') console.error(error)
+      }
+    }
+
+    void createGameSession()
+    return () => controller.abort()
+  }, [session])
 
   const handleGameOver = async (score: number) => {
     setLastScore(score)
@@ -110,7 +155,7 @@ export default function MiniGamePage() {
         alert(`🎉 Đổi thành công! Mã voucher: ${data.voucher.code}`)
         fetchPoints()
       }
-    } catch (e) {
+    } catch {
       setError('Lỗi kết nối')
     } finally {
       setExchangeLoading(false)
@@ -168,7 +213,7 @@ export default function MiniGamePage() {
               color: '#ffffff',
               letterSpacing: '-0.03em',
               margin: '0 0 14px 0',
-              textWrap: 'balance' as any,
+              textWrap: 'balance',
             }}>
               Xếp gạch cùng{' '}
               <span style={{
@@ -215,32 +260,6 @@ export default function MiniGamePage() {
         <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto items-start">
           {/* Game Area */}
           <div className="flex-1 min-w-0 flex flex-col items-center w-full">
-            {/* Game Tabs */}
-            <div className="flex gap-2 mb-4 p-1 rounded-2xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <button 
-                onClick={() => setActiveGame('tetris')}
-                className="px-6 py-2 rounded-xl text-sm font-bold transition-all"
-                style={{ 
-                  background: activeGame === 'tetris' ? 'rgba(0,229,255,0.15)' : 'transparent',
-                  color: activeGame === 'tetris' ? '#00e5ff' : 'rgba(255,255,255,0.4)',
-                  boxShadow: activeGame === 'tetris' ? '0 0 20px rgba(0,229,255,0.1)' : 'none'
-                }}
-              >
-                Tetris
-              </button>
-              <button 
-                onClick={() => setActiveGame('blockblast')}
-                className="px-6 py-2 rounded-xl text-sm font-bold transition-all"
-                style={{ 
-                  background: activeGame === 'blockblast' ? 'rgba(228,29,29,0.15)' : 'transparent',
-                  color: activeGame === 'blockblast' ? '#ff4d6a' : 'rgba(255,255,255,0.4)',
-                  boxShadow: activeGame === 'blockblast' ? '0 0 20px rgba(228,29,29,0.1)' : 'none'
-                }}
-              >
-                Block Blast
-              </button>
-            </div>
-
             <div className="rounded-2xl p-4 md:p-5 w-full flex justify-center" style={{
               background: 'rgba(255,255,255,0.02)',
               border: '1px solid rgba(255,255,255,0.05)',
@@ -248,30 +267,9 @@ export default function MiniGamePage() {
               minHeight: '500px',
               alignItems: 'center'
             }}>
-              {!session ? (
-                <div className="flex flex-col items-center justify-center p-10 text-center">
-                  <div className="text-5xl mb-4">🔒</div>
-                  <h3 className="text-2xl font-bold text-white mb-3">Yêu cầu đăng nhập</h3>
-                  <p className="text-base mb-6" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                    Bạn cần đăng nhập để tham gia chơi game và tích điểm đổi voucher nhé!
-                  </p>
-                  <Link 
-                    href="/tai-khoan/dang-nhap?callbackUrl=/mini-game" 
-                    className="px-8 py-3 rounded-xl font-bold transition-transform hover:scale-105" 
-                    style={{ 
-                      background: 'linear-gradient(135deg, #e41d1d, #ff4d6a)', 
-                      color: '#fff',
-                      boxShadow: '0 0 20px rgba(228,29,29,0.3)'
-                    }}
-                  >
-                    Đăng nhập ngay
-                  </Link>
-                </div>
-              ) : activeGame === 'tetris' ? (
-                <TetrisGame onGameOver={handleGameOver} />
-              ) : (
+              <GameErrorBoundary resetKey="blockblast">
                 <BlockBlastGame onGameOver={handleGameOver} />
-              )}
+              </GameErrorBoundary>
             </div>
           </div>
 
@@ -282,7 +280,7 @@ export default function MiniGamePage() {
               <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '2px', color: 'rgba(255,255,255,0.35)', marginBottom: '6px' }}>
                 ĐIỂM TÍCH LŨY
               </div>
-              {loading ? (
+              {status === 'loading' || (status === 'authenticated' && loading) ? (
                 <div className="h-12 animate-pulse rounded-lg w-1/2 mx-auto" style={{ background: 'rgba(255,255,255,0.08)' }} />
               ) : (
                 <div style={{

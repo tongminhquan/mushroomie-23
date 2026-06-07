@@ -1,8 +1,9 @@
 'use client'
 
-import Image from 'next/image'
 import { useState } from 'react'
 import BrandBadge from '@/components/ui/BrandBadge'
+import SafeImage from '@/components/ui/SafeImage'
+import { getPublicImageUrl } from '@/lib/utils'
 
 interface ProductGalleryProps {
   images: string[]
@@ -14,7 +15,9 @@ interface ProductGalleryProps {
 const FALLBACK_IMAGE = '/logo.png'
 
 export default function ProductGallery({ images, productName, isCustomizable, isOnSale }: ProductGalleryProps) {
-  const gallery = images.length > 0 ? images : [FALLBACK_IMAGE]
+  const gallery = images.length > 0
+    ? images.map((image) => getPublicImageUrl(image, 'product'))
+    : [FALLBACK_IMAGE]
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [failed, setFailed] = useState(false)
   const mainImage = failed ? FALLBACK_IMAGE : gallery[selectedIndex] || FALLBACK_IMAGE
@@ -22,13 +25,12 @@ export default function ProductGallery({ images, productName, isCustomizable, is
   return (
     <div className="space-y-3">
       <div className="relative aspect-square overflow-hidden rounded-[18px] border border-neutral-200 bg-white shadow-card">
-        <Image
+        <SafeImage
           src={mainImage}
           alt={failed ? 'Ảnh sản phẩm đang được cập nhật' : productName}
           fill
           priority
           fetchPriority="high"
-          unoptimized={mainImage.startsWith('/uploads/')}
           sizes="(max-width: 1024px) 100vw, 50vw"
           className="object-contain p-4"
           onError={() => setFailed(true)}
@@ -56,11 +58,10 @@ export default function ProductGallery({ images, productName, isCustomizable, is
                 selectedIndex === index ? 'border-primary ring-2 ring-primary/15' : 'border-neutral-200 hover:border-neutral-400'
               }`}
             >
-              <Image
+              <SafeImage
                 src={image}
                 alt={`${productName}, ảnh ${index + 1}`}
                 fill
-                unoptimized={image.startsWith('/uploads/')}
                 sizes="120px"
                 className="object-contain p-1.5"
               />

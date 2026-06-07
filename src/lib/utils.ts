@@ -56,11 +56,16 @@ export function getPublicImageUrl(pathOrUrl?: string | null, type: 'product' | '
   const value = pathOrUrl.trim();
   if (!value) return fallback;
 
-  // Handle localhost links generated in local DB
-  if (value.startsWith('http://localhost') || value.startsWith('https://localhost') || value.startsWith('http://127.0.0.1')) {
+  // Handle internal links generated in local or legacy environments.
+  if (
+    value.startsWith('http://localhost') ||
+    value.startsWith('https://localhost') ||
+    value.startsWith('http://127.0.0.1') ||
+    value.startsWith('https://127.0.0.1')
+  ) {
     try {
       const url = new URL(value);
-      return url.pathname;
+      return normalizeLocalImagePath(url.pathname);
     } catch {
       return fallback;
     }
@@ -68,12 +73,18 @@ export function getPublicImageUrl(pathOrUrl?: string | null, type: 'product' | '
   
   // Convert absolute internal URLs to relative to use Next.js image optimization properly
   if (value.startsWith(SITE_URL)) {
-    return value.replace(SITE_URL, '');
+    return normalizeLocalImagePath(value.replace(SITE_URL, ''));
   }
 
-  // Already a full absolute remote URL or relative URL
+  // Already a full absolute remote URL or relative URL.
   if (value.startsWith('http')) return value;
-  if (value.startsWith('/')) return value;
+  return normalizeLocalImagePath(value);
+}
 
-  return `/${value}`;
+function normalizeLocalImagePath(value: string): string {
+  const withLeadingSlash = value.startsWith('/') ? value : `/${value}`;
+  if (withLeadingSlash.startsWith('/public/uploads/')) {
+    return withLeadingSlash.replace('/public', '');
+  }
+  return withLeadingSlash;
 }

@@ -4,10 +4,24 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      NEXT_PUBLIC_APP_URL: https://mushroomie.io.vn
+      NEXT_PUBLIC_SITE_URL: https://mushroomie.io.vn
+      NEXT_PUBLIC_ENABLE_ANALYTICS: "false"
 
     steps:
       - uses: actions/checkout@v4
@@ -19,8 +33,6 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run typecheck --if-present
-
-      - run: npx tsc --noEmit --pretty false
+      - run: npm run typecheck
 
       - run: npm run build

@@ -7,6 +7,7 @@ const analyzer = withBundleAnalyzer({
 })
 
 const nextConfig: NextConfig = {
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   output: 'standalone',
   poweredByHeader: false,
   turbopack: {
@@ -25,6 +26,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'mushroomie.io.vn' },
       { protocol: 'https', hostname: 'down-vn.img.susercontent.com' },
       { protocol: 'https', hostname: 'cf.shopee.vn' },
+      { protocol: 'https', hostname: 'picsum.photos' },
     ],
   },
   experimental: {
