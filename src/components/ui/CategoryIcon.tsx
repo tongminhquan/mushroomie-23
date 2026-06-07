@@ -1,39 +1,73 @@
 'use client'
 
+import Image from 'next/image'
 import { useState } from 'react'
+import { cn, getPublicImageUrl } from '@/lib/utils'
 
-export default function CategoryIcon({ iconSrc, name }: { iconSrc: string | null, name: string }) {
+type CategoryIconSize = 'sm' | 'md' | 'lg'
+
+const sizeClasses: Record<CategoryIconSize, { image: string; text: string; pixels: number }> = {
+  sm: { image: 'h-8 w-8', text: 'text-2xl', pixels: 32 },
+  md: { image: 'h-9 w-9', text: 'text-3xl', pixels: 36 },
+  lg: { image: 'h-20 w-20', text: 'text-5xl', pixels: 80 },
+}
+
+const imageLikePattern = /^(https?:\/\/|\/|uploads\/|public\/|images\/)/i
+const fileExtensionPattern = /\.(avif|gif|jpe?g|png|svg|webp)(\?.*)?$/i
+
+function isImageSource(value: string) {
+  return imageLikePattern.test(value) || fileExtensionPattern.test(value)
+}
+
+function normalizeIconSrc(value: string) {
+  return getPublicImageUrl(value, 'product')
+}
+
+export default function CategoryIcon({
+  iconSrc,
+  name,
+  size = 'md',
+  imageClassName,
+  fallbackClassName,
+}: {
+  iconSrc: string | null
+  name: string
+  size?: CategoryIconSize
+  imageClassName?: string
+  fallbackClassName?: string
+}) {
   const [hasError, setHasError] = useState(false)
+  const value = iconSrc?.trim()
+  const classes = sizeClasses[size]
 
-  if (iconSrc && !hasError && /^https?:\/\//.test(iconSrc)) {
+  if (value && !hasError && isImageSource(value)) {
+    const src = normalizeIconSrc(value)
+
     return (
-      <img
-        src={iconSrc}
+      <Image
+        src={src}
         alt={name}
-        className="w-[36px] h-[36px] object-contain mx-auto"
-        loading="lazy"
+        width={classes.pixels}
+        height={classes.pixels}
+        sizes={`${classes.pixels}px`}
+        unoptimized
+        className={cn('block shrink-0 object-contain', classes.image, imageClassName)}
         onError={() => setHasError(true)}
       />
-    );
+    )
   }
 
-  if (iconSrc && !hasError && iconSrc.startsWith('/')) {
+  if (value && !hasError) {
     return (
-      <img
-        src={iconSrc}
-        alt={name}
-        className="w-[36px] h-[36px] object-contain mx-auto"
-        loading="lazy"
-        onError={() => setHasError(true)}
-      />
-    );
+      <span className={cn('flex items-center justify-center leading-none', classes.text, fallbackClassName)}>
+        {value}
+      </span>
+    )
   }
 
-  // If there's an error loading the image, or it's a string emoji
-  if (iconSrc && !hasError && !iconSrc.startsWith('/') && !/^https?:\/\//.test(iconSrc)) {
-    return <span className="text-4xl leading-none flex items-center justify-center">{iconSrc}</span>;
-  }
-
-  // Fallback
-  return <span className="text-4xl leading-none flex items-center justify-center">🍄</span>;
+  return (
+    <span className={cn('flex items-center justify-center leading-none', classes.text, fallbackClassName)}>
+      🍄
+    </span>
+  )
 }
