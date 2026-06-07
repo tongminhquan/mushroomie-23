@@ -52,7 +52,7 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: blob: https:",
               "font-src 'self' https://fonts.gstatic.com",
               "frame-src 'self' https://www.google.com/maps/ https://www.google.com/recaptcha/",
-              "connect-src 'self' https://pay.payos.vn https://www.google-analytics.com https://region1.google-analytics.com https://static.cloudflareinsights.com https://cloudflareinsights.com https://www.clarity.ms",
+              "connect-src 'self' https://pay.payos.vn https://www.google-analytics.com https://region1.google-analytics.com https://static.cloudflareinsights.com https://cloudflareinsights.com https://www.clarity.ms https://*.clarity.ms",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
