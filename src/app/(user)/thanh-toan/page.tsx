@@ -18,6 +18,16 @@ interface CheckoutUser {
   address?: string | null
 }
 
+interface AvailableVoucher {
+  id: number
+  code: string
+  discountPercent: number
+  discountAmount: number
+  source: string
+  game?: string | null
+  expiresAt?: string | null
+}
+
 export default function CheckoutPage() {
   const { items, getTotalPrice, clearCart } = useCartStore()
   const { data: session } = useSession()
@@ -25,6 +35,10 @@ export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'cod'>('bank_transfer')
+  const [availableVouchers, setAvailableVouchers] = useState<AvailableVoucher[]>([])
+  const [selectedVoucher, setSelectedVoucher] = useState<AvailableVoucher | null>(null)
+  const [voucherLoading, setVoucherLoading] = useState(false)
+  const [voucherDismissed, setVoucherDismissed] = useState(false)
 
   const user = session?.user as CheckoutUser | undefined
   const [form, setForm] = useState({
@@ -50,7 +64,46 @@ export default function CheckoutPage() {
 
   const subtotal = getTotalPrice()
   const shippingFee = 30000
-  const total = subtotal + shippingFee
+  const voucherDiscount = selectedVoucher
+    ? Math.min(subtotal, Math.floor((subtotal * selectedVoucher.discountPercent) / 100))
+    : 0
+  const total = Math.max(0, subtotal - voucherDiscount) + shippingFee
+
+  useEffect(() => {
+    setVoucherDismissed(window.sessionStorage.getItem('mushroomie_checkout_voucher_dismissed') === '1')
+  }, [])
+
+  useEffect(() => {
+    if (!session?.user || subtotal <= 0) {
+      setAvailableVouchers([])
+      setSelectedVoucher(null)
+      return
+    }
+
+    const controller = new AbortController()
+    const loadVouchers = async () => {
+      setVoucherLoading(true)
+      try {
+        const response = await fetch(`/api/vouchers/my-available?subtotal=${subtotal}`, {
+          signal: controller.signal,
+        })
+        if (!response.ok) return
+        const data = await response.json()
+        const items = data.items ?? []
+        setAvailableVouchers(items)
+        if (!voucherDismissed && !selectedVoucher && data.best) {
+          setSelectedVoucher(data.best)
+        }
+      } catch (error) {
+        if (error instanceof Error && error.name !== 'AbortError') console.error(error)
+      } finally {
+        if (!controller.signal.aborted) setVoucherLoading(false)
+      }
+    }
+
+    void loadVouchers()
+    return () => controller.abort()
+  }, [session?.user, subtotal, selectedVoucher, voucherDismissed])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -71,6 +124,7 @@ export default function CheckoutPage() {
           ...form,
           shipping_fee: shippingFee,
           payment_method: paymentMethod,
+          voucher_id: selectedVoucher?.id ?? null,
           items: items.map((item) => ({
             product_id: item.productId,
             product_name: item.name,
@@ -217,6 +271,72 @@ export default function CheckoutPage() {
                     <span className="text-neutral-500">Phí vận chuyển</span>
                     <span>{formatPrice(shippingFee)}</span>
                   </div>
+                  {session?.user && (
+                    <div className="rounded-xl border border-primary/15 bg-primary-light/40 p-3">
+                      <div className="mb-2 flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold uppercase tracking-[0.08em] text-primary">Voucher</span>
+                        {voucherLoading && <span className="text-xs text-neutral-500">Đang tải...</span>}
+                      </div>
+                      {availableVouchers.length > 0 ? (
+                        <div className="space-y-2">
+                          <select
+                            value={selectedVoucher?.id ?? ''}
+                            onChange={(event) => {
+                              if (!event.target.value) {
+                                setSelectedVoucher(null)
+                                setVoucherDismissed(true)
+                                window.sessionStorage.setItem('mushroomie_checkout_voucher_dismissed', '1')
+                                return
+                              }
+                              const next = availableVouchers.find((voucher) => voucher.id === Number(event.target.value)) ?? null
+                              setSelectedVoucher(next)
+                              setVoucherDismissed(false)
+                              window.sessionStorage.removeItem('mushroomie_checkout_voucher_dismissed')
+                            }}
+                            className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold outline-none focus:border-primary"
+                          >
+                            <option value="">Không áp dụng voucher</option>
+                            {availableVouchers.map((voucher) => (
+                              <option key={voucher.id} value={voucher.id}>
+                                {voucher.code} - giam {voucher.discountPercent}%
+                              </option>
+                            ))}
+                          </select>
+                          {selectedVoucher && (
+                            <div className="rounded-lg border border-primary/15 bg-white p-3 text-xs">
+                              <div className="flex justify-between gap-2">
+                                <span className="font-mono font-bold text-primary">{selectedVoucher.code}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedVoucher(null)
+                                    setVoucherDismissed(true)
+                                    window.sessionStorage.setItem('mushroomie_checkout_voucher_dismissed', '1')
+                                  }}
+                                  className="font-bold text-neutral-500 hover:text-primary"
+                                >
+                                  Bỏ áp dụng
+                                </button>
+                              </div>
+                              <div className="mt-1 text-neutral-500">
+                                Giảm {selectedVoucher.discountPercent}%{selectedVoucher.expiresAt ? `, hạn ${new Date(selectedVoucher.expiresAt).toLocaleDateString('vi-VN')}` : ''}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-neutral-500">
+                          {voucherLoading ? 'Đang kiểm tra voucher của bạn.' : 'Chưa có voucher phù hợp cho đơn hàng này.'}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {voucherDiscount > 0 && (
+                    <div className="flex justify-between text-sm font-semibold text-primary">
+                      <span>Giảm voucher</span>
+                      <span>-{formatPrice(voucherDiscount)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-bold text-base pt-2 border-t border-neutral-100">
                     <span>Tổng cộng</span>
                     <span className="text-primary text-lg">{formatPrice(total)}</span>

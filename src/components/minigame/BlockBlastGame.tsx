@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState, useCallback } from 'react'
+import type { GameOverPayload } from '@/lib/game-config'
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 const DEBUG_DRAG = false // Set true to log drag coordinates to console
@@ -100,7 +101,8 @@ function BlockCell({ color, opacity = 1 }: { color: string; opacity?: number }) 
 }
 
 // ─── Audio System ──────────────────────────────────────────────────────────────
-const playSound = (type: 'move' | 'drop' | 'invalid' | 'clear', combo: number = 0) => {
+const playSound = (type: 'move' | 'drop' | 'invalid' | 'clear', combo: number = 0, enabled = true) => {
+  if (!enabled) return
   try {
     const AudioContextClass = window.AudioContext ||
       (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
@@ -157,7 +159,14 @@ const playSound = (type: 'move' | 'drop' | 'invalid' | 'clear', combo: number = 
 }
 
 // ─── Main Game ──────────────────────────────────────────────────────────────────
-export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: number) => void }) {
+export default function BlockBlastGame({
+  onGameOver,
+  soundEnabled = true,
+}: {
+  onGameOver: (result: GameOverPayload) => void
+  soundEnabled?: boolean
+  onSoundToggle?: (enabled: boolean) => void
+}) {
   // ── Cell size (responsive) ──────────────────────────────────────────────────
   const [cs, setCs] = useState(48)
   const csRef = useRef(48)
@@ -171,6 +180,8 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
   const [lines, setLines]     = useState(0);  const linesRef = useRef(0)
   const [combo, setCombo]     = useState(0);  const comboRef = useRef(0)
   const [isOver, setIsOver]   = useState(false); const isOverRef = useRef(false)
+  const soundEnabledRef       = useRef(soundEnabled)
+  const startedAtRef          = useRef(Date.now())
   const [clearing, setClearing] = useState<Cell[]>([])
   const [placed,   setPlaced]   = useState<Cell[]>([])
 
@@ -201,6 +212,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
   useEffect(() => { boardRef.current = board },   [board])
   useEffect(() => { handRef.current = hand },     [hand])
   useEffect(() => { isOverRef.current = isOver }, [isOver])
+  useEffect(() => { soundEnabledRef.current = soundEnabled }, [soundEnabled])
 
   // ── Responsive cell size ────────────────────────────────────────────────────
   useEffect(() => {
@@ -316,7 +328,17 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     const any = h.some(p => p && Array.from({ length: ROWS }, (_, r) =>
       Array.from({ length: COLS }, (_, c) => canPlace(b, p.matrix, r, c))
     ).flat().some(Boolean))
-    if (!any && h.some(Boolean)) { setIsOver(true); onGameOver(sc) }
+    if (!any && h.some(Boolean)) {
+      setIsOver(true)
+      onGameOver({
+        game: 'block-blast',
+        score: sc,
+        lines: linesRef.current,
+        combo: comboRef.current,
+        level: 1,
+        durationSec: Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000)),
+      })
+    }
   }, [canPlace, onGameOver])
 
   const placePiece = useCallback((piece: Piece, idx: number, row: number, col: number) => {
@@ -342,7 +364,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     }
 
     if (lc > 0) {
-      playSound('clear', comboRef.current)
+      playSound('clear', comboRef.current, soundEnabledRef.current)
       const toClear: Cell[] = []
       fullRows.forEach(r => { for (let c = 0; c < COLS; c++) toClear.push({ r, c }) })
       fullCols.forEach(c => { for (let r = 0; r < ROWS; r++) if (!toClear.some(x => x.r === r && x.c === c)) toClear.push({ r, c }) })
@@ -361,7 +383,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
         finish(cb, ns)
       }, 400)
     } else {
-      playSound('drop')
+      playSound('drop', 0, soundEnabledRef.current)
       const ns = scoreRef.current + count
       setScore(ns); scoreRef.current = ns
       setCombo(0); comboRef.current = 0
@@ -437,7 +459,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
       })
     }
 
-    playSound('move')
+    playSound('move', 0, soundEnabledRef.current)
 
     dragging.current = { idx, piece, isTouch, grabOffsetX, grabOffsetY, fixedLift }
 
@@ -521,7 +543,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     if (ok) {
       placePiece(drag.piece, drag.idx, row, col)
     } else {
-      playSound('invalid')
+      playSound('invalid', 0, soundEnabledRef.current)
     }
 
     setHl(null)
@@ -535,6 +557,7 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
     setLines(0); linesRef.current = 0
     setCombo(0); comboRef.current = 0
     setIsOver(false); isOverRef.current = false
+    startedAtRef.current = Date.now()
     setHl(null)
   }
 

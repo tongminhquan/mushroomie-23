@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useEffect, useCallback, useState } from 'react'
+import type { GameOverPayload } from '@/lib/game-config'
 
 // ── Constants ──
 const COLS = 10
@@ -38,7 +39,9 @@ interface LineClearAnim {
 }
 
 interface TetrisGameProps {
-  onGameOver?: (score: number) => void
+  onGameOver?: (result: GameOverPayload) => void
+  soundEnabled?: boolean
+  onSoundToggle?: (enabled: boolean) => void
 }
 
 // ── Web Audio synth for sound effects ──
@@ -122,7 +125,7 @@ function sfxGameOver(ctx: AudioContext) {
   })
 }
 
-export default function TetrisGame({ onGameOver }: TetrisGameProps) {
+export default function TetrisGame({ onGameOver, soundEnabled = true, onSoundToggle }: TetrisGameProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const nextCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -146,6 +149,7 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
     lineClearAnim: LineClearAnim | null
     // Particle effects
     particles: Particle[]
+    startedAt: number
   }>({
     grid: [], cur: null, nextType: '',
     score: 0, lines: 0, level: 0,
@@ -153,6 +157,7 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
     over: false, paused: false, animFrame: null, flashTimer: 0,
     lineClearAnim: null,
     particles: [],
+    startedAt: Date.now(),
   })
 
   const [score,  setScore]      = useState(0)
@@ -173,9 +178,16 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
   }
 
   const toggleMute = () => {
-    isMutedRef.current = !isMutedRef.current
-    setIsMuted(isMutedRef.current)
+    const nextMuted = !isMutedRef.current
+    isMutedRef.current = nextMuted
+    setIsMuted(nextMuted)
+    onSoundToggle?.(!nextMuted)
   }
+
+  useEffect(() => {
+    isMutedRef.current = !soundEnabled
+    setIsMuted(!soundEnabled)
+  }, [soundEnabled])
 
   // ── Helpers ──
   const randomType = () => TYPES[Math.floor(Math.random() * TYPES.length)]
@@ -558,13 +570,21 @@ export default function TetrisGame({ onGameOver }: TetrisGameProps) {
         ctx.restore()
       }
     }
-    onGameOver?.(g.score)
+    onGameOver?.({
+      game: 'tetris',
+      score: g.score,
+      lines: g.lines,
+      combo: 0,
+      level: g.level + 1,
+      durationSec: Math.max(1, Math.round((Date.now() - g.startedAt) / 1000)),
+    })
   }, [onGameOver])
 
   const start = useCallback(() => {
     const g = gameRef.current
     g.grid = newGrid()
     g.score = 0; g.lines = 0; g.level = 0
+    g.startedAt = Date.now()
     g.over = false; g.paused = false
     g.dropInterval = 1000; g.last = 0; g.acc = 0
     g.flashTimer = 0;

@@ -1,12 +1,27 @@
 'use client'
+
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useState } from 'react'
 import {
-  LayoutDashboard, Package, FileText, ShoppingCart,
-  MessageSquare, Star, LogOut, ChevronRight, ExternalLink,
-  CreditCard, Activity, Settings, ImageIcon, Users, ClipboardList, FolderOpen
+  Activity,
+  ChevronRight,
+  ClipboardList,
+  CreditCard,
+  ExternalLink,
+  FileText,
+  FolderOpen,
+  ImageIcon,
+  LayoutDashboard,
+  LogOut,
+  MessageSquare,
+  Package,
+  Settings,
+  ShoppingCart,
+  Star,
+  TicketPercent,
+  Users,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
@@ -16,6 +31,7 @@ const navItems = [
   { href: '/admin/san-pham', icon: Package, label: 'Sản phẩm' },
   { href: '/admin/bai-viet', icon: FileText, label: 'Bài viết' },
   { href: '/admin/don-hang', icon: ShoppingCart, label: 'Đơn hàng' },
+  { href: '/admin/voucher-history', icon: TicketPercent, label: 'Lịch sử voucher' },
   { href: '/admin/thanh-toan', icon: CreditCard, label: 'Thanh toán', exact: true },
   { href: '/admin/thanh-toan/webhook-logs', icon: Activity, label: 'Webhook Logs' },
   { href: '/admin/lien-he', icon: MessageSquare, label: 'Liên hệ' },
@@ -34,12 +50,9 @@ export default function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
 
-  const isActive = (href: string, exact?: boolean) => {
-    if (exact) return pathname === href
-    return pathname.startsWith(href)
-  }
+  const isActive = (href: string, exact?: boolean) => exact ? pathname === href : pathname.startsWith(href)
 
-  const filteredNavItems = navItems.filter(item => {
+  const filteredNavItems = navItems.filter((item) => {
     if ((item.href === '/admin/tai-khoan' || item.href === '/admin/nhat-ky') && role !== 'super_admin') {
       return false
     }
@@ -48,31 +61,32 @@ export default function AdminSidebar() {
 
   return (
     <>
-      {/* Nút Hamburger cho Mobile */}
-      <button 
-        className="md:hidden fixed top-3 left-4 z-40 bg-white text-neutral-900 p-2 rounded-xl shadow-md border border-neutral-200"
+      <button
+        className="fixed left-4 top-3 z-40 rounded-xl border border-neutral-200 bg-white p-2 text-neutral-900 shadow-md md:hidden"
         onClick={() => setIsOpen(true)}
+        aria-label="Mở menu admin"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
       </button>
 
-      {/* Backdrop (Lớp phủ nền đen khi mở sidebar) */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm transition-opacity"
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
 
-      {/* Sidebar chính */}
-      <aside className={cn(
-        "h-screen flex flex-col flex-shrink-0 fixed inset-y-0 left-0 z-50 transform transition-all duration-300 ease-in-out md:relative md:translate-x-0 shadow-2xl md:shadow-none overflow-hidden border-r border-neutral-200 bg-white",
-        isOpen ? "translate-x-0" : "-translate-x-full",
-        isCollapsed ? "w-20" : "w-64"
-      )}>
-        {/* Logo */}
-        <div className={cn("flex h-[77px] items-center border-b border-neutral-200 transition-all duration-300", isCollapsed ? "justify-center" : "justify-between px-5")}>
-          <Link href="/admin" className={cn("flex items-center gap-3 overflow-hidden", isCollapsed ? "hidden" : "flex")}>
+      <aside
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 flex h-screen flex-shrink-0 transform flex-col overflow-hidden border-r border-neutral-200 bg-white shadow-2xl transition-all duration-300 ease-in-out md:relative md:translate-x-0 md:shadow-none',
+          isOpen ? 'translate-x-0' : '-translate-x-full',
+          isCollapsed ? 'w-20' : 'w-64',
+        )}
+      >
+        <div className={cn('flex h-[77px] items-center border-b border-neutral-200 transition-all duration-300', isCollapsed ? 'justify-center' : 'justify-between px-5')}>
+          <Link href="/admin" className={cn('flex items-center gap-3 overflow-hidden', isCollapsed ? 'hidden' : 'flex')}>
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-secondary">
               <Image src="/logo.png" alt="Mushroomie" width={40} height={40} className="h-9 w-9 object-contain" />
             </div>
@@ -80,58 +94,61 @@ export default function AdminSidebar() {
               Quản trị
             </div>
           </Link>
-          <button 
+          <button
             className="hidden p-2 text-neutral-400 hover:text-primary md:flex"
             onClick={() => setIsCollapsed(!isCollapsed)}
+            aria-label="Thu gọn menu"
           >
-            <svg className={cn("w-5 h-5 transition-transform duration-300", isCollapsed ? "rotate-180" : "")} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            <svg className={cn('h-5 w-5 transition-transform duration-300', isCollapsed ? 'rotate-180' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
-          <button className="md:hidden text-neutral-400 p-1 mr-4" onClick={() => setIsOpen(false)}>
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          <button className="mr-4 p-1 text-neutral-400 md:hidden" onClick={() => setIsOpen(false)} aria-label="Đóng menu admin">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
-      {/* Nav */}
-      <nav className="no-scrollbar flex-1 space-y-1 overflow-y-auto overflow-x-hidden p-3">
-        {filteredNavItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={() => setIsOpen(false)}
-            title={item.label}
-            className={cn(
-              'flex items-center gap-3 py-3 rounded-xl transition-all group',
-              isCollapsed ? 'justify-center px-3' : 'px-4',
-              isActive(item.href, item.exact)
-                ? 'bg-primary-light text-primary'
-                : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
-            )}
-          >
-            <item.icon size={isCollapsed ? 22 : 18} className="flex-shrink-0 transition-all duration-300" />
-            <span className={cn("text-sm font-medium whitespace-nowrap transition-all duration-300", isCollapsed ? "w-0 opacity-0 overflow-hidden" : "flex-1 opacity-100")}>
-              {item.label}
-            </span>
-            <ChevronRight size={14} className={cn("transition-all duration-300 flex-shrink-0", isCollapsed ? "w-0 opacity-0" : "w-auto opacity-0 group-hover:opacity-100")} />
-          </Link>
-        ))}
-      </nav>
+        <nav className="no-scrollbar flex-1 space-y-1 overflow-y-auto overflow-x-hidden p-3">
+          {filteredNavItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setIsOpen(false)}
+              title={item.label}
+              className={cn(
+                'group flex items-center gap-3 rounded-xl py-3 transition-all',
+                isCollapsed ? 'justify-center px-3' : 'px-4',
+                isActive(item.href, item.exact)
+                  ? 'bg-primary-light text-primary'
+                  : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900',
+              )}
+            >
+              <item.icon size={isCollapsed ? 22 : 18} className="flex-shrink-0 transition-all duration-300" />
+              <span className={cn('whitespace-nowrap text-sm font-medium transition-all duration-300', isCollapsed ? 'w-0 overflow-hidden opacity-0' : 'flex-1 opacity-100')}>
+                {item.label}
+              </span>
+              <ChevronRight size={14} className={cn('flex-shrink-0 transition-all duration-300', isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-0 group-hover:opacity-100')} />
+            </Link>
+          ))}
+        </nav>
 
-      {/* Footer */}
-      <div className="space-y-1 border-t border-neutral-200 p-3">
-        <Link href="/" target="_blank" title="Xem website" className={cn("flex items-center gap-3 py-3 rounded-xl text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-all text-sm", isCollapsed ? "justify-center px-3" : "px-4")}>
-          <ExternalLink size={isCollapsed ? 22 : 18} className="flex-shrink-0" />
-          {!isCollapsed && <span className="whitespace-nowrap">Xem website</span>}
-        </Link>
-        <button
-          onClick={() => signOut({ callbackUrl: '/' })}
-          title="Đăng xuất"
-          className={cn("w-full flex items-center gap-3 py-3 rounded-xl text-neutral-500 hover:bg-red-50 hover:text-red-600 transition-all text-sm", isCollapsed ? "justify-center px-3" : "px-4")}
-        >
-          <LogOut size={isCollapsed ? 22 : 18} className="flex-shrink-0" />
-          {!isCollapsed && <span className="whitespace-nowrap">Đăng xuất</span>}
-        </button>
-      </div>
-    </aside>
+        <div className="space-y-1 border-t border-neutral-200 p-3">
+          <Link href="/" target="_blank" title="Xem website" className={cn('flex items-center gap-3 rounded-xl py-3 text-sm text-neutral-500 transition-all hover:bg-neutral-100 hover:text-neutral-900', isCollapsed ? 'justify-center px-3' : 'px-4')}>
+            <ExternalLink size={isCollapsed ? 22 : 18} className="flex-shrink-0" />
+            {!isCollapsed && <span className="whitespace-nowrap">Xem website</span>}
+          </Link>
+          <button
+            onClick={() => signOut({ callbackUrl: '/' })}
+            title="Đăng xuất"
+            className={cn('flex w-full items-center gap-3 rounded-xl py-3 text-sm text-neutral-500 transition-all hover:bg-red-50 hover:text-red-600', isCollapsed ? 'justify-center px-3' : 'px-4')}
+          >
+            <LogOut size={isCollapsed ? 22 : 18} className="flex-shrink-0" />
+            {!isCollapsed && <span className="whitespace-nowrap">Đăng xuất</span>}
+          </button>
+        </div>
+      </aside>
     </>
   )
 }

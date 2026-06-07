@@ -20,6 +20,7 @@ const orderSchema = z.object({
   })),
   shipping_fee: z.number().min(0).default(0),
   payment_method: z.string().default('bank_transfer'),
+  voucher_id: z.number().int().positive().optional().nullable(),
 })
 
 export async function POST(request: NextRequest) {
@@ -32,52 +33,102 @@ export async function POST(request: NextRequest) {
 
     const session = await auth()
     const userId = session?.user?.id ? Number(session.user.id) : null
-
-    const { items, shipping_fee, payment_method, ...orderData } = parsed.data
-
+    const { items, shipping_fee, payment_method, voucher_id, ...orderData } = parsed.data
     const subtotal = items.reduce((sum, item) => sum + item.price_snapshot * item.quantity, 0)
-    const total = subtotal + shipping_fee
     const order_code = generateOrderCode()
 
-    const order = await prisma.order.create({
-      data: {
-        ...orderData,
-        order_code,
-        user_id: userId,
-        subtotal,
-        shipping_fee,
-        total,
-        payment_method,
-        payment_status: 'PENDING',
-        order_status: payment_method === 'cod' ? 'PROCESSING' : 'PENDING_PAYMENT',
-        items: {
-          create: items.map((item) => ({
-            product_id: item.product_id,
-            product_name: item.product_name,
-            quantity: item.quantity,
-            price_snapshot: item.price_snapshot,
-            selected_options: item.selected_options ? JSON.stringify(item.selected_options) : null,
-            custom_note: item.custom_note,
-            total_price: item.price_snapshot * item.quantity,
-          })),
-        },
-      },
-      include: { items: true },
-    })
+    const order = await prisma.$transaction(async (tx) => {
+      let voucher: { id: number; code: string; discount_percent: number } | null = null
+      let voucherDiscountAmount = 0
 
-    // Log initial status
-    await prisma.orderStatusHistory.create({
-      data: {
-        order_id: order.id,
-        old_status: '',
-        new_status: payment_method === 'cod' ? 'PROCESSING' : 'PENDING_PAYMENT',
-        changed_by: 'SYSTEM',
-        note: 'Đơn hàng được tạo',
-      },
+      if (voucher_id) {
+        if (!userId) throw new Error('LOGIN_REQUIRED_FOR_VOUCHER')
+
+        voucher = await tx.voucher.findFirst({
+          where: {
+            id: voucher_id,
+            user_id: userId,
+            status: 'active',
+            OR: [{ expires_at: null }, { expires_at: { gt: new Date() } }],
+          },
+          select: { id: true, code: true, discount_percent: true },
+        })
+
+        if (!voucher) throw new Error('VOUCHER_NOT_AVAILABLE')
+        voucherDiscountAmount = Math.min(subtotal, Math.floor((subtotal * voucher.discount_percent) / 100))
+      }
+
+      const total = Math.max(0, subtotal - voucherDiscountAmount) + shipping_fee
+      const orderStatus = payment_method === 'cod' ? 'PROCESSING' : 'PENDING_PAYMENT'
+
+      const createdOrder = await tx.order.create({
+        data: {
+          ...orderData,
+          order_code,
+          user_id: userId,
+          subtotal,
+          shipping_fee,
+          voucher_id: voucher?.id ?? null,
+          voucher_code: voucher?.code ?? null,
+          voucher_discount_percent: voucher?.discount_percent ?? null,
+          voucher_discount_amount: voucherDiscountAmount,
+          total,
+          payment_method,
+          payment_status: 'PENDING',
+          order_status: orderStatus,
+          items: {
+            create: items.map((item) => ({
+              product_id: item.product_id,
+              product_name: item.product_name,
+              quantity: item.quantity,
+              price_snapshot: item.price_snapshot,
+              selected_options: item.selected_options ? JSON.stringify(item.selected_options) : null,
+              custom_note: item.custom_note,
+              total_price: item.price_snapshot * item.quantity,
+            })),
+          },
+        },
+        include: { items: true },
+      })
+
+      if (voucher) {
+        const updated = await tx.voucher.updateMany({
+          where: {
+            id: voucher.id,
+            user_id: userId,
+            status: 'active',
+          },
+          data: {
+            status: payment_method === 'cod' ? 'used' : 'reserved',
+            order_id: createdOrder.id,
+            used_at: payment_method === 'cod' ? new Date() : null,
+          },
+        })
+
+        if (updated.count !== 1) throw new Error('VOUCHER_NOT_AVAILABLE')
+      }
+
+      await tx.orderStatusHistory.create({
+        data: {
+          order_id: createdOrder.id,
+          old_status: '',
+          new_status: orderStatus,
+          changed_by: 'SYSTEM',
+          note: 'Order created',
+        },
+      })
+
+      return createdOrder
     })
 
     return NextResponse.json({ orderId: order.id, orderCode: order.order_code }, { status: 201 })
   } catch (error) {
+    if (error instanceof Error && error.message === 'LOGIN_REQUIRED_FOR_VOUCHER') {
+      return NextResponse.json({ error: 'Login required for voucher' }, { status: 401 })
+    }
+    if (error instanceof Error && error.message === 'VOUCHER_NOT_AVAILABLE') {
+      return NextResponse.json({ error: 'Voucher is not available' }, { status: 400 })
+    }
     console.error('[ORDER CREATE]', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }

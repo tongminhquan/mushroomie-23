@@ -1,0 +1,527 @@
+'use client'
+
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import dynamic from 'next/dynamic'
+import { useSession } from 'next-auth/react'
+import { ArrowLeft, BarChart3, Music, Music2, Play, RotateCcw, Ticket, Trophy } from 'lucide-react'
+import GameErrorBoundary from '@/components/minigame/GameErrorBoundary'
+import { useGameAudio } from '@/components/minigame/useGameAudio'
+import {
+  GAME_DEFINITIONS,
+  type GameKey,
+  type GameOverPayload,
+  type LeaderboardPeriod,
+} from '@/lib/game-config'
+
+const gameLoading = () => (
+  <div className="flex min-h-[420px] w-full items-center justify-center rounded-2xl border border-white/10 bg-black/25 text-sm font-bold text-white/50">
+    Đang tải game...
+  </div>
+)
+
+const TetrisGame = dynamic(() => import('@/components/minigame/TetrisGame'), {
+  ssr: false,
+  loading: gameLoading,
+})
+
+const BlockBlastGame = dynamic(() => import('@/components/minigame/BlockBlastGame'), {
+  ssr: false,
+  loading: gameLoading,
+})
+
+interface LeaderboardItem {
+  rank: number
+  userId: number
+  name: string
+  score: number
+  lines: number
+  combo: number
+  level: number
+  durationSec: number
+  createdAt: string
+  isCurrentUser?: boolean
+}
+
+interface SubmitState {
+  status: 'idle' | 'saving' | 'saved' | 'guest' | 'error'
+  message?: string
+  voucher?: { code: string; discount_percent: number } | null
+}
+
+export default function GamePageClient({ game }: { game: GameKey }) {
+  const config = GAME_DEFINITIONS[game]
+  const { data: session } = useSession()
+  const [phase, setPhase] = useState<'start' | 'playing' | 'result'>('start')
+  const [soundEnabled, setSoundEnabled] = useState(true)
+  const [token, setToken] = useState('')
+  const [runId, setRunId] = useState(0)
+  const [lastResult, setLastResult] = useState<GameOverPayload | null>(null)
+  const [submitState, setSubmitState] = useState<SubmitState>({ status: 'idle' })
+  const [period, setPeriod] = useState<LeaderboardPeriod>('today')
+  const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([])
+  const [leaderboardLoading, setLeaderboardLoading] = useState(true)
+  const [leaderboardError, setLeaderboardError] = useState('')
+  const [refreshTick, setRefreshTick] = useState(0)
+
+  useGameAudio({
+    game,
+    active: phase === 'playing',
+    enabled: soundEnabled,
+    volume: 0.12,
+  })
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem('mushroomie_game_sound_enabled')
+    if (stored === '0') setSoundEnabled(false)
+  }, [])
+
+  const persistSound = (enabled: boolean) => {
+    setSoundEnabled(enabled)
+    window.localStorage.setItem('mushroomie_game_sound_enabled', enabled ? '1' : '0')
+  }
+
+  const loadLeaderboard = useCallback(async (signal?: AbortSignal) => {
+    setLeaderboardLoading(true)
+    setLeaderboardError('')
+    try {
+      const response = await fetch(`/api/game/leaderboard?game=${game}&period=${period}`, { signal })
+      if (!response.ok) throw new Error('Không tải được bảng xếp hạng')
+      const data = await response.json()
+      setLeaderboard(data.items ?? [])
+    } catch (error) {
+      if (error instanceof Error && error.name !== 'AbortError') {
+        setLeaderboardError(error.message)
+      }
+    } finally {
+      if (!signal?.aborted) setLeaderboardLoading(false)
+    }
+  }, [game, period])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    void loadLeaderboard(controller.signal)
+    const timer = window.setInterval(() => void loadLeaderboard(), 8000)
+    return () => {
+      controller.abort()
+      window.clearInterval(timer)
+    }
+  }, [loadLeaderboard, refreshTick])
+
+  const startGame = async () => {
+    setSubmitState({ status: 'idle' })
+    setLastResult(null)
+
+    let nextToken = ''
+    if (session?.user?.id) {
+      try {
+        const response = await fetch('/api/game/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ game }),
+        })
+        const data = await response.json()
+        if (response.ok && data.token) nextToken = data.token
+        else setSubmitState({ status: 'error', message: 'Không tạo được phiên lưu điểm. Bạn vẫn có thể chơi.' })
+      } catch {
+        setSubmitState({ status: 'error', message: 'Không tạo được phiên lưu điểm. Bạn vẫn có thể chơi.' })
+      }
+    }
+
+    setToken(nextToken)
+    setRunId((value) => value + 1)
+    setPhase('playing')
+  }
+
+  const submitScore = useCallback(async (result: GameOverPayload) => {
+    if (!session?.user?.id) {
+      setSubmitState({ status: 'guest', message: 'Đăng nhập để lưu điểm và nhận voucher.' })
+      return
+    }
+
+    if (!token) {
+      setSubmitState({ status: 'error', message: 'Phiên lưu điểm không hợp lệ. Hãy chơi lại một lượt mới.' })
+      return
+    }
+
+    setSubmitState({ status: 'saving', message: 'Đang lưu điểm...' })
+    try {
+      const response = await fetch('/api/game/submit-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          game,
+          score: result.score,
+          lines: result.lines ?? 0,
+          combo: result.combo ?? 0,
+          level: result.level ?? 1,
+          durationSec: result.durationSec ?? 0,
+          token,
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Không lưu được điểm')
+      }
+
+      setSubmitState({
+        status: 'saved',
+        message: 'Đã lưu điểm và cập nhật bảng xếp hạng.',
+        voucher: data.voucher ?? null,
+      })
+      setRefreshTick((value) => value + 1)
+    } catch (error) {
+      setSubmitState({
+        status: 'error',
+        message: error instanceof Error ? error.message : 'Không lưu được điểm',
+      })
+    } finally {
+      setToken('')
+    }
+  }, [game, session?.user?.id, token])
+
+  const handleGameOver = useCallback((payload: GameOverPayload | number) => {
+    const result = typeof payload === 'number'
+      ? { game, score: payload, durationSec: 0 }
+      : { ...payload, game }
+
+    setLastResult(result)
+    setPhase('result')
+    void submitScore(result)
+  }, [game, submitScore])
+
+  const GameComponent = useMemo(() => (game === 'tetris' ? TetrisGame : BlockBlastGame), [game])
+
+  return (
+    <main className="min-h-screen bg-[#090916] text-white">
+      <section className="border-b border-white/10 bg-[radial-gradient(circle_at_top,rgba(228,29,29,0.18),transparent_45%)]">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-7 md:px-6 md:py-9">
+          <Link href="/mini-game" className="inline-flex w-fit items-center gap-2 text-sm font-bold text-white/58 hover:text-white">
+            <ArrowLeft size={16} />
+            Về trang chọn game
+          </Link>
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-[#ff6b6b]">
+                {game === 'tetris' ? 'Game chính' : 'Thử thách thêm'}
+              </p>
+              <h1 className="mt-2 font-body text-4xl font-extrabold leading-tight tracking-normal md:text-5xl">
+                {config.title}
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-white/58 md:text-base">
+                {config.description}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => persistSound(!soundEnabled)}
+              className="inline-flex h-11 w-fit items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-extrabold text-white/72 hover:bg-white/10"
+            >
+              {soundEnabled ? <Music2 size={17} /> : <Music size={17} />}
+              {soundEnabled ? 'Âm thanh bật' : 'Âm thanh tắt'}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-6xl gap-5 px-4 py-6 md:px-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="min-w-0">
+          {phase === 'start' ? (
+            <StartScreen
+              game={game}
+              soundEnabled={soundEnabled}
+              onSoundChange={persistSound}
+              onStart={startGame}
+            />
+          ) : (
+            <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-3 shadow-[0_30px_90px_rgba(0,0,0,0.35)] sm:p-4 md:p-5">
+              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/42">
+                    {config.controlMode}
+                  </p>
+                  <h2 className="mt-1 text-2xl font-extrabold tracking-normal text-white md:text-3xl">
+                    {config.title}
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={startGame}
+                  className="inline-flex w-fit items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-extrabold text-white/68 hover:bg-white/10"
+                >
+                  <RotateCcw size={15} />
+                  Chơi lại
+                </button>
+              </div>
+              <GameErrorBoundary resetKey={`${game}-${runId}`}>
+                <GameComponent
+                  key={`${game}-${runId}`}
+                  onGameOver={handleGameOver}
+                  soundEnabled={soundEnabled}
+                  onSoundToggle={persistSound}
+                />
+              </GameErrorBoundary>
+            </section>
+          )}
+        </div>
+
+        <aside className="space-y-5">
+          <ResultPanel
+            result={lastResult}
+            state={submitState}
+            onRestart={startGame}
+            signedIn={!!session?.user?.id}
+          />
+          <VoucherTierPanel game={game} />
+          <LeaderboardPanel
+            items={leaderboard}
+            period={period}
+            loading={leaderboardLoading}
+            error={leaderboardError}
+            onPeriodChange={setPeriod}
+          />
+        </aside>
+      </section>
+    </main>
+  )
+}
+
+function StartScreen({
+  game,
+  soundEnabled,
+  onSoundChange,
+  onStart,
+}: {
+  game: GameKey
+  soundEnabled: boolean
+  onSoundChange: (enabled: boolean) => void
+  onStart: () => void
+}) {
+  const { data: session } = useSession()
+  const config = GAME_DEFINITIONS[game]
+
+  return (
+    <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-5 shadow-[0_30px_90px_rgba(0,0,0,0.35)] md:p-7">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div>
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-[#ff6b6b]">
+            Sẵn sàng chơi
+          </p>
+          <h2 className="mt-2 font-body text-3xl font-extrabold tracking-normal text-white md:text-4xl">
+            {config.title}
+          </h2>
+          <p className="mt-3 text-sm font-medium leading-6 text-white/58">{config.startHint}</p>
+
+          <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div className="mb-3 text-xs font-extrabold uppercase tracking-[0.16em] text-white/38">
+              Hướng dẫn
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {config.instructions.map((item) => (
+                <div key={item} className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm font-semibold text-white/68">
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {!session && (
+            <div className="mt-5 rounded-2xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm font-semibold text-amber-100">
+              Đăng nhập để lưu điểm và nhận voucher.
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            onClick={onStart}
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#e41d1d] px-5 text-sm font-extrabold text-white shadow-[0_16px_36px_rgba(228,29,29,0.28)] hover:bg-[#c91515]"
+          >
+            <Play size={18} />
+            Bắt đầu chơi
+          </button>
+          <button
+            type="button"
+            onClick={() => document.getElementById('game-leaderboard')?.scrollIntoView({ behavior: 'smooth' })}
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 text-sm font-extrabold text-white/72 hover:bg-white/10"
+          >
+            <BarChart3 size={18} />
+            Xem bảng xếp hạng
+          </button>
+          <button
+            type="button"
+            onClick={() => onSoundChange(!soundEnabled)}
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/20 px-5 text-sm font-extrabold text-white/72 hover:bg-white/10"
+          >
+            {soundEnabled ? <Music2 size={18} /> : <Music size={18} />}
+            {soundEnabled ? 'Tắt nhạc nền' : 'Bật nhạc nền'}
+          </button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function VoucherTierPanel({ game }: { game: GameKey }) {
+  const config = GAME_DEFINITIONS[game]
+
+  return (
+    <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-5" id="game-voucher">
+      <div className="mb-4 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white/42">
+        <Ticket size={15} />
+        Mốc voucher
+      </div>
+      <div className="space-y-3">
+        {config.voucherTiers.map((tier) => (
+          <div key={tier.percent} className="flex items-center justify-between rounded-xl border border-white/10 bg-black/20 px-4 py-3">
+            <span className="text-sm font-bold text-white/70">{tier.score.toLocaleString('vi-VN')} điểm</span>
+            <span className="rounded-full bg-[#e41d1d]/15 px-3 py-1 text-sm font-black text-[#ff6b6b]">
+              Giảm {tier.percent}%
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function ResultPanel({
+  result,
+  state,
+  onRestart,
+  signedIn,
+}: {
+  result: GameOverPayload | null
+  state: SubmitState
+  onRestart: () => void
+  signedIn: boolean
+}) {
+  return (
+    <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
+      <div className="mb-4 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white/42">
+        <Trophy size={15} />
+        Kết quả
+      </div>
+      {result ? (
+        <div>
+          <div className="text-4xl font-black text-[#00e5ff]">{result.score.toLocaleString('vi-VN')}</div>
+          <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs font-bold text-white/56">
+            <div className="rounded-xl bg-black/20 p-2">Hàng<br />{result.lines ?? 0}</div>
+            <div className="rounded-xl bg-black/20 p-2">Combo<br />{result.combo ?? 0}</div>
+            <div className="rounded-xl bg-black/20 p-2">Giây<br />{result.durationSec ?? 0}</div>
+          </div>
+          {state.message && (
+            <div className={`mt-4 rounded-xl border px-3 py-2 text-sm font-semibold ${
+              state.status === 'error'
+                ? 'border-red-400/20 bg-red-400/10 text-red-100'
+                : 'border-white/10 bg-black/20 text-white/66'
+            }`}>
+              {state.message}
+            </div>
+          )}
+          {state.voucher && (
+            <div className="mt-3 rounded-xl border border-[#e41d1d]/25 bg-[#e41d1d]/10 px-3 py-2">
+              <div className="text-xs font-bold uppercase tracking-[0.12em] text-[#ff8a8a]">Voucher mới</div>
+              <div className="mt-1 font-mono text-sm font-black text-white">{state.voucher.code}</div>
+              <Link href="/thanh-toan" className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-lg bg-[#e41d1d] text-sm font-extrabold text-white">
+                Dùng voucher ngay
+              </Link>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={onRestart}
+            className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 text-sm font-extrabold text-white/72 hover:bg-white/10"
+          >
+            <RotateCcw size={16} />
+            Chơi lại
+          </button>
+        </div>
+      ) : (
+        <p className="text-sm font-medium leading-6 text-white/48">
+          {signedIn ? 'Kết quả lượt chơi sẽ hiển thị tại đây.' : 'Bạn có thể chơi khách, nhưng cần đăng nhập để lưu điểm.'}
+        </p>
+      )}
+    </section>
+  )
+}
+
+function LeaderboardPanel({
+  items,
+  period,
+  loading,
+  error,
+  onPeriodChange,
+}: {
+  items: LeaderboardItem[]
+  period: LeaderboardPeriod
+  loading: boolean
+  error: string
+  onPeriodChange: (period: LeaderboardPeriod) => void
+}) {
+  const labels: Record<LeaderboardPeriod, string> = {
+    today: 'Hôm nay',
+    week: 'Tuần này',
+    all: 'Tất cả',
+  }
+
+  return (
+    <section id="game-leaderboard" className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white/42">
+          <BarChart3 size={15} />
+          Bảng xếp hạng
+        </div>
+      </div>
+      <div className="mb-4 grid grid-cols-3 gap-2">
+        {(['today', 'week', 'all'] as LeaderboardPeriod[]).map((value) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => onPeriodChange(value)}
+            className={`rounded-lg px-2 py-2 text-xs font-extrabold ${
+              period === value
+                ? 'bg-[#e41d1d] text-white'
+                : 'border border-white/10 bg-black/20 text-white/52 hover:bg-white/10'
+            }`}
+          >
+            {labels[value]}
+          </button>
+        ))}
+      </div>
+      {loading ? (
+        <div className="space-y-2">
+          {[1, 2, 3].map((item) => <div key={item} className="h-10 animate-pulse rounded-xl bg-white/5" />)}
+        </div>
+      ) : error ? (
+        <div className="rounded-xl border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm font-semibold text-red-100">
+          {error}
+        </div>
+      ) : items.length > 0 ? (
+        <div className="space-y-2">
+          {items.slice(0, 10).map((item) => (
+            <div
+              key={`${item.rank}-${item.userId}-${item.score}`}
+              className={`flex items-center justify-between rounded-xl border px-3 py-2 ${
+                item.isCurrentUser
+                  ? 'border-[#e41d1d]/35 bg-[#e41d1d]/12'
+                  : 'border-white/10 bg-black/20'
+              }`}
+            >
+              <div className="min-w-0">
+                <div className="truncate text-sm font-extrabold text-white/80">#{item.rank} {item.name}</div>
+                <div className="text-xs font-semibold text-white/36">{new Date(item.createdAt).toLocaleDateString('vi-VN')}</div>
+              </div>
+              <div className="text-right text-lg font-black text-[#00e5ff]">{item.score.toLocaleString('vi-VN')}</div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="rounded-xl border border-white/10 bg-black/20 px-3 py-4 text-sm font-medium text-white/42">
+          Chưa có điểm cho bộ lọc này.
+        </p>
+      )}
+    </section>
+  )
+}

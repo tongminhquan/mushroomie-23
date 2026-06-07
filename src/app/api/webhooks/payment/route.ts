@@ -123,6 +123,10 @@ export async function POST(request: Request) {
           where: { id: payment.id },
           data: { status: 'EXPIRED' },
         }),
+        prisma.voucher.updateMany({
+          where: { order_id: payment.order_id, status: 'reserved' },
+          data: { status: 'active', order_id: null, used_at: null },
+        }),
         prisma.paymentWebhookEvent.update({
           where: { id: savedEvent.id },
           data: {
@@ -155,7 +159,12 @@ export async function POST(request: Request) {
         data: {
           payment_status: 'PAID',
           order_status: 'PROCESSING',
-        },
+          },
+      })
+
+      await tx.voucher.updateMany({
+        where: { order_id: payment.order_id, status: 'reserved' },
+        data: { status: 'used', used_at: now },
       })
 
       // Log status history

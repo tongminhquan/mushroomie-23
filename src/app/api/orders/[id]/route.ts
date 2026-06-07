@@ -85,9 +85,20 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const order = await prisma.order.findUnique({ where: { id: Number(id) } })
     if (!order) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-    const updatedOrder = await prisma.order.update({
-      where: { id: Number(id) },
-      data: { order_status },
+    const updatedOrder = await prisma.$transaction(async (tx) => {
+      const nextOrder = await tx.order.update({
+        where: { id: Number(id) },
+        data: { order_status },
+      })
+
+      if (order_status === 'CANCELLED') {
+        await tx.voucher.updateMany({
+          where: { order_id: Number(id), status: 'reserved' },
+          data: { status: 'active', order_id: null, used_at: null },
+        })
+      }
+
+      return nextOrder
     })
 
     // Log status history
