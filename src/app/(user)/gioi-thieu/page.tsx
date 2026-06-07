@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import Image from 'next/image'
 import AnimateOnScroll, { StaggerChildren } from '@/components/ui/AnimateOnScroll'
 import { prisma } from '@/lib/prisma'
 import { Category } from '@prisma/client'
@@ -15,7 +14,7 @@ export default async function AboutPage() {
   const targetSlugs = ['vong-tay', 'charm', 'moc-khoa', 'vong-co'];
   const dbCategories = await prisma.category.findMany({
     where: { slug: { in: targetSlugs }, type: 'product' },
-  });
+  }).catch(() => []);
 
   const orderedCategories = targetSlugs.map(slug => 
     dbCategories.find((c: Category) => c.slug === slug)
@@ -81,14 +80,14 @@ export default async function AboutPage() {
             <AnimateOnScroll animation="fade-left" delay={200}>
               <div className="space-y-6">
                 <h2 className="font-heading text-3xl md:text-4xl font-bold text-neutral-900">
-                  Câu chuyện bắt đầu <br/>từ niềm đam mê "không đụng hàng"
+                  Câu chuyện bắt đầu <br/>từ niềm đam mê &quot;không đụng hàng&quot;
                 </h2>
                 <div className="space-y-4 text-neutral-600 leading-relaxed text-lg">
                   <p>
                     Mọi thứ bắt nguồn từ một dự án tốt nghiệp nhỏ của nhóm sinh viên FPT Polytechnic, nhưng trên hết, đó là sự đồng điệu của những bạn trẻ yêu thích phụ kiện handmade. Chúng mình nhận ra, giữa vô vàn sản phẩm đại trà trên thị trường, tìm được một món đồ thực sự mang <span className="font-semibold text-neutral-800">dấu ấn cá nhân</span> lại chẳng hề dễ dàng.
                   </p>
                   <p>
-                    Cái tên <strong>Mushroomie</strong> ra đời từ đó. Hình ảnh cây nấm (mushroom) trong tự nhiên luôn đa dạng, không có cây nào hoàn toàn giống cây nào. Kết hợp cùng hậu tố <em>"-ie"</em> xinh xắn, Mushroomie mang mong muốn trở thành một người bạn nhỏ bé, dễ thương đồng hành cùng bạn mỗi ngày.
+                    Cái tên <strong>Mushroomie</strong> ra đời từ đó. Hình ảnh cây nấm (mushroom) trong tự nhiên luôn đa dạng, không có cây nào hoàn toàn giống cây nào. Kết hợp cùng hậu tố <em>&quot;-ie&quot;</em> xinh xắn, Mushroomie mang mong muốn trở thành một người bạn nhỏ bé, dễ thương đồng hành cùng bạn mỗi ngày.
                   </p>
                   <p>
                     Đặc biệt, cảm hứng <strong>Pixel</strong> trong logo chính là phép ẩn dụ hoàn hảo: từng ô vuông nhỏ xíu ghép lại thành hình ảnh lớn, cũng như từng hạt charm, sợi dây cước được chúng mình tỉ mẩn kết nối bằng tay để tạo nên một món phụ kiện hoàn chỉnh — duy nhất dành cho bạn.
@@ -201,7 +200,7 @@ export default async function AboutPage() {
             </AnimateOnScroll>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-4">
             <StaggerChildren animation="zoom-in" staggerDelay={100}>
               {orderedCategories.map((prod: Category, idx: number) => {
                 const color = bgColors[prod.slug] || 'bg-neutral-50';
@@ -209,12 +208,17 @@ export default async function AboutPage() {
                 const iconSrc = prod.icon || prod.image_url || null;
 
                 return (
-                <Link href={link} key={idx} className={`${color} block p-8 rounded-3xl border border-black/5 hover:scale-[1.02] transition-transform duration-300 cursor-pointer`}>
-                  <div className="mb-4 bg-white/60 w-16 h-16 flex items-center justify-center rounded-full shadow-sm">
-                    <CategoryIcon iconSrc={iconSrc} name={prod.name} />
+                <Link href={link} key={prod.id ?? idx} className={`${color} flex h-full min-h-[232px] flex-col rounded-3xl border border-black/5 p-6 transition-transform duration-300 hover:scale-[1.02]`}>
+                  <div className="mb-5 flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/70 shadow-sm">
+                    <CategoryIcon iconSrc={iconSrc} name={prod.name} size="md" imageClassName="max-h-9 max-w-9" />
                   </div>
-                  <h3 className="font-heading font-bold text-lg text-neutral-900 mb-2">{prod.name}</h3>
-                  <p className="text-neutral-600 text-sm">{prod.description || 'Khám phá bộ sưu tập phụ kiện độc đáo từ Mushroomie.'}</p>
+                  <div className="flex flex-1 flex-col">
+                    <h3 className="min-h-14 font-heading text-lg font-bold leading-tight text-neutral-900">{prod.name}</h3>
+                    <p className="mt-2 overflow-hidden text-sm leading-6 text-neutral-600 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
+                      {prod.description || 'Khám phá bộ sưu tập phụ kiện độc đáo từ Mushroomie.'}
+                    </p>
+                  </div>
+                  <span className="mt-5 text-xs font-extrabold uppercase tracking-[0.08em] text-primary/80">Xem sản phẩm</span>
                 </Link>
                 );
               })}

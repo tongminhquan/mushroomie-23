@@ -4,8 +4,9 @@ import React, { useEffect, useRef, useState, useCallback } from 'react'
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 const DEBUG_DRAG = false // Set true to log drag coordinates to console
-const ROWS = 8
-const COLS = 8
+const BOARD_SIZE = 8
+const ROWS = BOARD_SIZE
+const COLS = BOARD_SIZE
 const GAP = 2       // px gap between cells
 const PAD = 6       // board padding
 const BOARD_BORDER = 2 // board border width in px
@@ -660,6 +661,15 @@ export default function BlockBlastGame({ onGameOver }: { onGameOver: (score: num
 
         {/* ── Sidebar ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 160, maxWidth: 200, flex: 1 }}>
+          <div style={{
+            background: 'rgba(255,255,255,.04)',
+            border: '1px solid rgba(255,255,255,.08)',
+            borderRadius: 14,
+            padding: '12px 16px',
+          }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,.4)', marginBottom: 5 }}>BẢNG</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: '#fff' }}>{BOARD_SIZE} x {BOARD_SIZE}</div>
+          </div>
           {[
             { label: 'ĐIỂM SỐ', val: score.toLocaleString(), color: '#00e5ff', big: true  },
             { label: 'HÀNG',    val: lines,                   color: '#39e75f', big: false },

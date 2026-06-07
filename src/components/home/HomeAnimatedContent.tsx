@@ -4,7 +4,7 @@ import ProductCard from '@/components/product/ProductCard'
 import PostCard from '@/components/blog/PostCard'
 import BrandContainer from '@/components/ui/BrandContainer'
 import SectionHeader from '@/components/ui/SectionHeader'
-import SafeImage from '@/components/ui/SafeImage'
+import CategoryIcon from '@/components/ui/CategoryIcon'
 
 interface Product {
   id: number
@@ -69,24 +69,26 @@ export default function HomeAnimatedContent({ featuredProducts, posts, reviews, 
             description="Mỗi danh mục là một cách khác để kể câu chuyện của riêng bạn."
             action={<Link href="/san-pham" className="inline-flex items-center gap-2 text-sm font-extrabold text-primary hover:gap-3">Xem tất cả <ArrowRight size={17} /></Link>}
           />
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {categories.map((category, index) => (
+          <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {categories.map((category) => (
               <Link
                 key={category.id}
                 href={`/san-pham?category=${category.slug}`}
-                className={`group relative min-h-40 overflow-hidden rounded-[18px] border border-neutral-200 bg-secondary p-4 transition hover:-translate-y-1 hover:border-pink hover:shadow-hover ${
-                  index === 0 ? 'sm:col-span-2 md:col-span-1 lg:col-span-2' : ''
-                }`}
+                className="group flex min-h-[214px] flex-col overflow-hidden rounded-[18px] border border-neutral-200 bg-secondary p-4 transition hover:-translate-y-1 hover:border-pink hover:shadow-hover"
               >
-                <div className="relative mb-4 aspect-[4/3] overflow-hidden rounded-xl bg-white">
-                  {category.image_url ? (
-                    <SafeImage src={category.image_url} alt={category.name} fill sizes="(max-width: 640px) 50vw, 260px" className="object-cover transition duration-500 group-hover:scale-105" />
-                  ) : (
-                    <div className="grid h-full place-items-center font-heading text-4xl text-primary/25">M</div>
-                  )}
+                <div className="mb-4 flex h-32 w-full items-center justify-center overflow-hidden rounded-xl bg-white">
+                  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-secondary/80 shadow-sm transition duration-500 group-hover:scale-105">
+                    <CategoryIcon
+                      iconSrc={category.icon || category.image_url}
+                      name={category.name}
+                      size="lg"
+                      imageClassName="max-h-20 max-w-20"
+                      fallbackClassName="text-primary"
+                    />
+                  </div>
                 </div>
                 <h3 className="font-heading text-lg leading-tight text-text">{category.name}</h3>
-                <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary">Khám phá <ArrowRight size={14} /></span>
+                <span className="mt-auto inline-flex items-center gap-1 pt-3 text-xs font-bold text-primary">Khám phá <ArrowRight size={14} /></span>
               </Link>
             ))}
           </div>
