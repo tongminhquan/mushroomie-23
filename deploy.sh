@@ -26,7 +26,7 @@ npx prisma generate
 # Build dự án
 echo "Đang build Next.js app trong thư mục staging..."
 rm -rf "$BUILD_DIR" "$RELEASE_DIR"
-NEXT_DIST_DIR="$BUILD_DIR" npm run build
+NODE_OPTIONS="--max-old-space-size=1024" NEXT_DIST_DIR="$BUILD_DIR" npm run build
 
 # Chuẩn bị release hoàn chỉnh trước khi thay bản đang chạy.
 echo "Chuẩn bị standalone release..."
