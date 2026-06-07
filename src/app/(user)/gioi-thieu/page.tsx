@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import AnimateOnScroll, { StaggerChildren } from '@/components/ui/AnimateOnScroll'
 import { prisma } from '@/lib/prisma'
+import { Category } from '@prisma/client'
 import CategoryIcon from '@/components/ui/CategoryIcon'
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export default async function AboutPage() {
   });
 
   const orderedCategories = targetSlugs.map(slug => 
-    dbCategories.find(c => c.slug === slug)
+    dbCategories.find((c: Category) => c.slug === slug)
   ).filter(Boolean) as typeof dbCategories;
 
   const bgColors: Record<string, string> = {
@@ -202,7 +203,7 @@ export default async function AboutPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StaggerChildren animation="zoom-in" staggerDelay={100}>
-              {orderedCategories.map((prod, idx) => {
+              {orderedCategories.map((prod: Category, idx: number) => {
                 const color = bgColors[prod.slug] || 'bg-neutral-50';
                 const link = `/san-pham?category=${prod.slug}`;
                 const iconSrc = prod.icon || prod.image_url || null;

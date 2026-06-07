@@ -24,12 +24,12 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   const sp = await searchParams
   const page = Math.max(1, Number(sp.page || 1))
   const limit = 12
-  const where: Prisma.ProductWhereInput = { status: 'active' }
+  const where: any = { status: 'active' }
 
   if (sp.category) where.category = { slug: sp.category }
   if (sp.search) where.name = { contains: sp.search }
 
-  const orderBy: Prisma.ProductOrderByWithRelationInput =
+  const orderBy: any =
     sp.sort === 'price_asc' ? { price: 'asc' }
       : sp.sort === 'price_desc' ? { price: 'desc' }
         : { created_at: 'desc' }
@@ -41,7 +41,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
       orderBy,
       skip: (page - 1) * limit,
       take: limit,
-    }).then((items) => items.map((product) => ({
+    }).then((items: any[]) => items.map((product: any) => ({
       ...product,
       price: Number(product.price),
       sale_price: product.sale_price ? Number(product.sale_price) : null,
@@ -51,7 +51,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   ])
 
   const totalPages = Math.ceil(total / limit)
-  const activeCategory = categories.find((category) => category.slug === sp.category)
+  const activeCategory = categories.find((category: any) => category.slug === sp.category)
   const title = sp.search ? `Kết quả cho “${sp.search}”` : activeCategory?.name || 'Tất cả sản phẩm'
 
   const buildUrl = (params: Partial<SearchParams>) => {
@@ -91,7 +91,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
               <h3 className="mb-2 text-xs font-extrabold uppercase tracking-[0.08em] text-neutral-400">Danh mục</h3>
               <div className="flex gap-2 overflow-x-auto pb-2 lg:block lg:space-y-1 lg:overflow-visible">
                 <Link href={buildUrl({ category: undefined, page: undefined })} className={`block shrink-0 rounded-lg px-3 py-2 text-sm font-bold ${!sp.category ? 'bg-primary text-white' : 'text-neutral-700 hover:bg-primary-light hover:text-primary'}`}>Tất cả</Link>
-                {categories.map((category) => (
+                {categories.map((category: any) => (
                   <Link key={category.id} href={buildUrl({ category: category.slug, page: undefined })} className={`block shrink-0 rounded-lg px-3 py-2 text-sm font-semibold ${sp.category === category.slug ? 'bg-primary text-white' : 'text-neutral-700 hover:bg-primary-light hover:text-primary'}`}>
                     {category.name}
                   </Link>
@@ -122,7 +122,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
               />
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
-                {products.map((product) => <ProductCard key={product.id} product={product} />)}
+                {products.map((product: any) => <ProductCard key={product.id} product={product} />)}
               </div>
             )}
 

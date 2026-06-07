@@ -103,7 +103,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-50">
-              {products.map((product) => (
+              {products.map((product: any) => (
                 <tr key={product.id} className="hover:bg-neutral-50 transition-colors">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">

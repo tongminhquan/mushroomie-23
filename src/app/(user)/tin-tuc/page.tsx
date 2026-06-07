@@ -57,7 +57,7 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
               <Link href="/tin-tuc" className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 !sp.category ? 'bg-primary text-white' : 'bg-white text-neutral-700 hover:bg-primary-light hover:text-primary'
               }`}>Tất cả</Link>
-              {categories.map((cat) => (
+              {categories.map((cat: any) => (
                 <Link key={cat.id} href={`/tin-tuc?category=${cat.slug}`}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                     sp.category === cat.slug ? 'bg-primary text-white' : 'bg-white text-neutral-700 hover:bg-primary-light hover:text-primary'
@@ -76,7 +76,7 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map((post) => <PostCard key={post.id} post={post as any} />)}
+            {posts.map((post: any) => <PostCard key={post.id} post={post as any} />)}
           </div>
         )}
 

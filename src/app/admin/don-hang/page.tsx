@@ -109,7 +109,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-50">
-              {orders.map((order) => {
+              {orders.map((order: any) => {
                 const isExpired = order.payment?.status === 'EXPIRED'
                 const displayOrderStatus = isExpired ? 'CANCELLED' : order.order_status
                 const displayPaymentStatus = isExpired ? 'EXPIRED' : order.payment_status

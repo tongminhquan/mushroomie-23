@@ -63,7 +63,7 @@ export default async function MyOrdersPage() {
         ) : (
           <div className="space-y-4">
             <StaggerChildren animation="fade-up" staggerDelay={100}>
-              {orders.map((order) => {
+              {orders.map((order: any) => {
                 const isExpired = order.payment?.status === 'EXPIRED'
                 const displayStatus = isExpired ? 'CANCELLED' : order.order_status
                 

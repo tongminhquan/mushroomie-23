@@ -158,7 +158,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
           <section className="mt-12">
             <h2 className="font-heading text-2xl font-bold text-neutral-900 mb-6">Bài viết liên quan</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedPosts.map((p) => (
+              {relatedPosts.map((p: any) => (
                 <Link key={p.id} href={`/tin-tuc/${p.slug}`}
                   className="bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-hover transition-all hover:-translate-y-1">
                   {p.featured_image && (

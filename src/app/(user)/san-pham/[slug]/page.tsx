@@ -81,7 +81,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     where: { category_id: product.category_id, status: 'active', id: { not: product.id } },
     include: { category: true, images: { orderBy: { sort_order: 'asc' }, take: 1 } },
     take: 4,
-  }).then(products => products.map(p => ({
+  }).then((products: any[]) => products.map((p: any) => ({
     ...p,
     price: Number(p.price),
     sale_price: p.sale_price ? Number(p.sale_price) : null
@@ -89,7 +89,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const allImages = [
     ...(product.featured_image ? [getPublicImageUrl(product.featured_image)] : []),
-    ...product.images.map((i) => getPublicImageUrl(i.image_url)),
+    ...product.images.map((i: any) => getPublicImageUrl(i.image_url)),
   ].filter(Boolean)
 
   const price = Number(product.price)
@@ -118,7 +118,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     ...(product.reviews.length > 0 && {
       aggregateRating: {
         '@type': 'AggregateRating',
-        ratingValue: (product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length).toFixed(1),
+        ratingValue: (product.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / product.reviews.length).toFixed(1),
         reviewCount: product.reviews.length,
       }
     })
@@ -174,7 +174,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 <section className="rounded-[18px] border border-neutral-200 bg-white p-6">
                   <h2 className="mb-4 font-heading text-xl text-text">Đánh giá ({product.reviews.length})</h2>
                   <div className="space-y-4">
-                    {product.reviews.map((review) => (
+                    {product.reviews.map((review: any) => (
                       <div key={review.id} className="border-b border-neutral-100 pb-4 last:border-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-semibold text-sm">{review.name}</span>
@@ -195,7 +195,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <section className="mt-16 border-t border-neutral-200 pt-12">
               <SectionHeader eyebrow="Có thể bạn sẽ thích" title="Sản phẩm liên quan" />
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {relatedProducts.map((p) => <ProductCard key={p.id} product={p} />)}
+                {relatedProducts.map((p: any) => <ProductCard key={p.id} product={p} />)}
               </div>
             </section>
         )}

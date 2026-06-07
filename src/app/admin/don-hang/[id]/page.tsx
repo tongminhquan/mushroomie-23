@@ -88,7 +88,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
           <div className="bg-white rounded-2xl p-5 shadow-card">
             <h2 className="font-heading font-bold text-base mb-4">Sản phẩm đặt ({order.items.length})</h2>
             <div className="space-y-3">
-              {order.items.map((item) => (
+              {order.items.map((item: any) => (
                 <div key={item.id} className="flex justify-between text-sm py-2 border-b border-neutral-50 last:border-0">
                   <div>
                     <div className="font-semibold">{item.product_name}</div>
@@ -124,7 +124,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
           <div className="bg-white rounded-2xl p-5 shadow-card">
             <h2 className="font-heading font-bold text-base mb-4">Lịch sử trạng thái</h2>
             <div className="space-y-3">
-              {order.status_history.map((h, i) => (
+              {order.status_history.map((h: any, i: number) => (
                 <div key={h.id} className="flex gap-3 text-sm">
                   <div className="flex flex-col items-center">
                     <div className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />

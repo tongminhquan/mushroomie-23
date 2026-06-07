@@ -53,7 +53,7 @@ export default async function AdminReviewsPage({ searchParams }: { searchParams:
       </div>
 
       <div className="space-y-3">
-        {reviews.map((review) => (
+        {reviews.map((review: any) => (
           <div key={review.id} className="bg-white rounded-2xl p-5 shadow-card">
             <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
               <div className="flex items-center gap-2">

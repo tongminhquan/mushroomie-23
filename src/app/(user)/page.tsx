@@ -18,7 +18,7 @@ export default async function HomePage() {
       where: { status: 'active', is_featured: true },
       include: { category: true, images: { orderBy: { sort_order: 'asc' }, take: 1 } },
       take: 8,
-    }).then(products => products.map(p => ({
+    }).then((products: any[]) => products.map((p: any) => ({
       id: p.id,
       name: p.name,
       slug: p.slug,
@@ -28,7 +28,7 @@ export default async function HomePage() {
       is_customizable: p.is_customizable,
       stock: p.stock,
       category: p.category ? { name: p.category.name, slug: p.category.slug } : null,
-      images: p.images.map(img => ({ image_url: img.image_url }))
+      images: p.images.map((img: any) => ({ image_url: img.image_url }))
     }))).catch(() => []),
     prisma.post.findMany({
       where: { status: 'published' },

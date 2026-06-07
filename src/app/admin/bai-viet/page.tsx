@@ -68,7 +68,7 @@ export default async function AdminPostsPage({ searchParams }: { searchParams: P
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-50">
-              {posts.map((post) => (
+              {posts.map((post: any) => (
                 <tr key={post.id} className="hover:bg-neutral-50 transition-colors">
                   <td className="py-3 px-4">
                     <div className="font-semibold line-clamp-1">{post.title}</div>

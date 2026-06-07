@@ -96,7 +96,7 @@ export default async function OrderDetailsPage({ params, searchParams }: { param
             <AnimateOnScroll animation="fade-up" className="bg-white rounded-2xl shadow-card p-6">
               <h2 className="font-heading font-bold text-lg mb-4">Sản phẩm đã đặt</h2>
               <div className="space-y-4">
-                {order.items.map((item) => {
+                {order.items.map((item: any) => {
                   const imageUrl = item.product?.featured_image || '/logo.png'
                   const safeImageUrl = imageUrl.startsWith('http') || imageUrl.startsWith('/') || imageUrl.startsWith('data:') ? imageUrl : '/' + imageUrl
 
