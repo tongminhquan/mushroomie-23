@@ -439,6 +439,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
             }))
           }}
           onClose={() => setShowMediaPicker(false)}
+          purpose="post"
         />
       )}
     </div>

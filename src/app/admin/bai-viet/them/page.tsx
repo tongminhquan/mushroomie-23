@@ -706,6 +706,7 @@ export default function AddPostPage() {
           value={mediaPickerTarget === 'featured' ? form.featured_image : mediaPickerTarget === 'og' ? form.og_image : form.twitter_image}
           onChange={handleMediaSelect}
           onClose={() => setShowMediaPicker(false)}
+          purpose="post"
         />
       )}
 

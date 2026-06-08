@@ -30,6 +30,7 @@ interface MediaPickerProps {
   onClose: () => void
   title?: string
   submitText?: string
+  purpose?: 'banner' | 'product' | 'post' | 'category' | 'icon' | 'avatar' | 'media'
 }
 
 // Simulated media library from picsum
@@ -51,7 +52,7 @@ function formatBytes(bytes: number) {
   return (bytes / 1048576).toFixed(1) + ' MB'
 }
 
-export default function MediaPicker({ value, onChange, onClose, title, submitText }: MediaPickerProps) {
+export default function MediaPicker({ value, onChange, onClose, title, submitText, purpose = 'media' }: MediaPickerProps) {
   const [tab, setTab] = useState<'upload' | 'library'>('library')
   const [selected, setSelected] = useState<MediaItem | null>(null)
   const [search, setSearch] = useState('')
@@ -146,6 +147,7 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
       {fileToEdit && (
         <ImageEditorModal
           src={fileToEdit}
+          purpose={purpose}
           onSave={handleCroppedSave}
           onCancel={() => setFileToEdit(null)}
         />

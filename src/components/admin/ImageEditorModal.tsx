@@ -6,11 +6,12 @@ import { Crop, ZoomIn, ZoomOut, RotateCcw, RotateCw, Undo, Redo, X, Check } from
 
 interface ImageEditorModalProps {
   src: string
+  purpose?: 'banner' | 'product' | 'post' | 'category' | 'icon' | 'avatar' | 'media'
   onSave: (newUrl: string, itemData?: any) => void
   onCancel: () => void
 }
 
-export default function ImageEditorModal({ src, onSave, onCancel }: ImageEditorModalProps) {
+export default function ImageEditorModal({ src, purpose = 'media', onSave, onCancel }: ImageEditorModalProps) {
   const cropperRef = useRef<ReactCropperElement>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [aspectRatio, setAspectRatio] = useState<number | undefined>(undefined)
@@ -50,6 +51,7 @@ export default function ImageEditorModal({ src, onSave, onCancel }: ImageEditorM
 
       const formData = new FormData()
       formData.append('file', blob, `edited-${Date.now()}.png`)
+      formData.append('purpose', purpose)
 
       try {
         const res = await fetch('/api/upload', {

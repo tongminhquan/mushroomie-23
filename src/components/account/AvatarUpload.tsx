@@ -26,6 +26,7 @@ export function AvatarUpload({ initialAvatar, userName }: AvatarUploadProps) {
       // Upload file to /api/upload
       const formData = new FormData()
       formData.append('file', file)
+      formData.append('purpose', 'avatar')
       
       const uploadRes = await fetch('/api/upload', {
         method: 'POST',

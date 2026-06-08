@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useCartStore } from '@/store/cart'
 import { useSession } from 'next-auth/react'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, getPublicImageUrl } from '@/lib/utils'
 import Button from '@/components/ui/Button'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -252,7 +252,7 @@ export default function CheckoutPage() {
                   {items.map((item) => (
                     <div key={item.id} className="flex gap-3">
                       <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-50">
-                        <Image src={item.image?.startsWith('http') || item.image?.startsWith('/') || item.image?.startsWith('data:') ? item.image : '/' + item.image} alt={item.name} fill className="object-contain p-1" unoptimized />
+                        <Image src={getPublicImageUrl(item.image)} alt={item.name} fill sizes="56px" className="object-contain p-1" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold line-clamp-1">{item.name}</p>

@@ -195,6 +195,7 @@ export default function ManageCategoriesModal() {
               setShowMediaPicker(false)
             }}
             onClose={() => setShowMediaPicker(false)}
+            purpose="category"
           />
         </div>
       )}

@@ -53,6 +53,7 @@ export default function SingleImageUploader({ value, onChange }: SingleImageUplo
           onClose={() => setShowPicker(false)}
           title="Chọn ảnh chính"
           submitText="Chọn ảnh này"
+          purpose="product"
         />
       )}
     </div>

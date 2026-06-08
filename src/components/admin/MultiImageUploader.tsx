@@ -66,6 +66,7 @@ export default function MultiImageUploader({ images, onChange }: MultiImageUploa
           onClose={() => setShowPicker(false)}
           title="Chọn ảnh phụ sản phẩm"
           submitText="Thêm ảnh này"
+          purpose="product"
         />
       )}
     </div>

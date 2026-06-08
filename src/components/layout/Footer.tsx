@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Globe, Mail, MapPin, Phone } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import SafeImage from '@/components/ui/SafeImage'
+import SafeEmail from '@/components/ui/SafeEmail'
 
 export default async function Footer() {
   const categories = await prisma.category.findMany({
@@ -54,7 +55,7 @@ export default async function Footer() {
             <ul className="space-y-4 text-sm leading-6 text-white/60">
               <li className="flex gap-3"><MapPin size={17} className="mt-1 shrink-0 text-coral" />Hẻm 2 tổ 11, Phường Trảng Dài, Đồng Nai</li>
               <li className="flex items-center gap-3"><Phone size={17} className="shrink-0 text-coral" /><a href="tel:+84848744060" className="hover:text-white">0848 744 060</a></li>
-              <li className="flex items-center gap-3"><Mail size={17} className="shrink-0 text-coral" /><a href="mailto:cskh@mushroomie.io.vn" className="hover:text-white">cskh@mushroomie.io.vn</a></li>
+              <li className="flex items-center gap-3"><Mail size={17} className="shrink-0 text-coral" /><SafeEmail email="cskh@mushroomie.io.vn" className="hover:text-white" /></li>
               <li className="flex items-center gap-3"><Globe size={17} className="shrink-0 text-coral" /><a href="https://mushroomie.io.vn" className="hover:text-white">mushroomie.io.vn</a></li>
             </ul>
           </div>

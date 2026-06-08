@@ -392,6 +392,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           value=""
           title="Chèn Media vào bài viết"
           submitText={isReplacingImage ? "Thay thế ảnh" : "Chèn vào bài viết"}
+          purpose="post"
           onChange={(url, meta) => {
             setShowMediaPicker(false)
             if (!url) {

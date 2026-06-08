@@ -49,10 +49,14 @@ function ResolvedImage({
       {...props}
       src={resolvedSrc}
       alt={alt}
-      unoptimized={unoptimized ?? resolvedSrc.startsWith('/')}
+      unoptimized={unoptimized ?? shouldBypassOptimizer(resolvedSrc)}
       onError={() => {
         if (resolvedSrc !== fallback) setResolvedSrc(fallback)
       }}
     />
   )
+}
+
+function shouldBypassOptimizer(src: string) {
+  return src.startsWith('data:') || src.startsWith('blob:') || src.endsWith('.svg')
 }

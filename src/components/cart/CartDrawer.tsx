@@ -3,7 +3,7 @@ import { useCartStore } from '@/store/cart'
 import { X, ShoppingBag, Minus, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, getPublicImageUrl } from '@/lib/utils'
 import Button from '@/components/ui/Button'
 
 export default function CartDrawer() {
@@ -38,7 +38,7 @@ export default function CartDrawer() {
               {items.map((item) => (
                 <div key={item.id} className="flex gap-3 rounded-[18px] border border-neutral-200 bg-white p-3 shadow-card">
                   <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-secondary">
-                    <Image src={item.image?.startsWith('http') || item.image?.startsWith('/') || item.image?.startsWith('data:') ? item.image : '/' + item.image} alt={item.name} fill className="object-contain p-1" unoptimized />
+                    <Image src={getPublicImageUrl(item.image)} alt={item.name} fill sizes="80px" className="object-contain p-1" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-sm text-neutral-900 line-clamp-2 mb-1">{item.name}</h3>

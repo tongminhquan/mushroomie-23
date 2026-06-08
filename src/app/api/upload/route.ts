@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server'
-import { writeFile, readdir, stat, unlink } from 'fs/promises'
+import { readdir, stat, unlink } from 'fs/promises'
 import { join } from 'path'
 import fs from 'fs'
+import { normalizeUploadPurpose, optimizeUploadImage } from '@/lib/image-processing'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 const uploadDir = join(process.cwd(), 'public', 'uploads')
 
@@ -44,6 +46,7 @@ export async function POST(request: Request) {
   try {
     const data = await request.formData()
     const file: File | null = data.get('file') as unknown as File
+    const purpose = normalizeUploadPurpose(data.get('purpose'))
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
@@ -52,40 +55,18 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Secure MIME check
-    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-    if (!allowedMimeTypes.includes(file.type)) {
-      return NextResponse.json({ error: 'Invalid file type. Only JPG, PNG, WEBP, GIF are allowed.' }, { status: 400 })
-    }
-
-    // Generate unique filename using crypto
-    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'bin'
-    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif']
-    if (!allowedExtensions.includes(fileExt)) {
-      return NextResponse.json({ error: 'Invalid file extension.' }, { status: 400 })
-    }
-
-    const uniqueSuffix = crypto.randomUUID()
-    const filename = `${uniqueSuffix}.${fileExt}`
-    
-    const path = join(uploadDir, filename)
-    
-    // Ensure directory exists
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true })
-    }
-
-    await writeFile(path, buffer)
-
-    return NextResponse.json({ 
-      id: Date.now(),
-      url: `/uploads/${filename}`, 
-      filename: filename,
-      size: file.size
+    const optimized = await optimizeUploadImage({
+      buffer,
+      declaredMime: file.type,
+      purpose,
+      uploadDir,
     })
+
+    return NextResponse.json(optimized)
   } catch (error) {
     console.error('Upload error:', error)
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Upload failed'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 

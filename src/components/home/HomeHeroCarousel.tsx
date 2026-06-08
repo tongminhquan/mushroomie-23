@@ -93,9 +93,11 @@ export default function HomeHeroCarousel({
           <>
             <button onClick={previous} aria-label="Banner trước" className="absolute left-3 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-xl bg-white/90 text-text shadow-card hover:bg-white"><ChevronLeft size={20} /></button>
             <button onClick={next} aria-label="Banner tiếp theo" className="absolute right-3 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-xl bg-white/90 text-text shadow-card hover:bg-white"><ChevronRight size={20} /></button>
-            <div className="absolute bottom-3 right-3 z-20 flex gap-1.5 rounded-lg bg-black/25 p-1.5 backdrop-blur-sm">
+            <div className="absolute bottom-3 right-3 z-20 flex gap-1 rounded-lg bg-black/25 p-1 backdrop-blur-sm">
               {banners.map((banner, index) => (
-                <button key={banner.id} onClick={() => setCurrent(index)} aria-label={`Chuyển đến banner ${index + 1}`} aria-current={index === current} className={`h-1.5 rounded-full transition-[width,background-color] ${index === current ? 'w-6 bg-white' : 'w-1.5 bg-white/55'}`} />
+                <button key={banner.id} onClick={() => setCurrent(index)} aria-label={`Chuyển đến banner ${index + 1}`} aria-current={index === current} className="grid h-8 min-w-8 place-items-center rounded-lg">
+                  <span className={`h-1.5 rounded-full transition-[width,background-color] ${index === current ? 'w-6 bg-white' : 'w-1.5 bg-white/55'}`} />
+                </button>
               ))}
             </div>
           </>

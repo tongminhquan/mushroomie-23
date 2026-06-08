@@ -72,6 +72,7 @@ export default function MediaLibrary() {
     setUploading(true)
     const formData = new FormData()
     formData.append('file', e.target.files[0])
+    formData.append('purpose', 'media')
     
     try {
       const res = await fetch('/api/upload', {
@@ -118,7 +119,8 @@ export default function MediaLibrary() {
           format: editFormat,
           quality: editQuality,
           cropData: cropData,
-          overwrite: overwrite
+          overwrite: overwrite,
+          purpose: 'media'
         })
       });
       if (res.ok) {

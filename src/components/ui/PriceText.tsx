@@ -14,7 +14,7 @@ export default function PriceText({
     <div className={cn('flex flex-wrap items-baseline gap-2 tabular-nums', className)}>
       <strong className="text-xl text-primary">{formatPrice(price)}</strong>
       {originalPrice && originalPrice > price && (
-        <span className="text-xs text-neutral-400 line-through">{formatPrice(originalPrice)}</span>
+        <span className="text-xs text-neutral-500 line-through">{formatPrice(originalPrice)}</span>
       )}
     </div>
   )

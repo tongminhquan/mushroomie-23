@@ -15,8 +15,8 @@
   /* ========== Mushroomie Brand Design Tokens ========== */
 
   /* Primary */
-  --color-primary: #e41d1d;      /* Đỏ Mushroomie */
-  --color-primary-dark: #b91414;
+  --color-primary: #c91414;      /* Đỏ Mushroomie, darkened for contrast */
+  --color-primary-dark: #a80f0f;
   --color-primary-light: #fff0ed;
   --color-secondary: #fff7f2;    /* Trắng kem */
   
@@ -26,7 +26,7 @@
   --color-pink: #ffd6d6;
   --color-coral: #ff6b6b;
   --color-yellow: #ffe7a3;
-  --color-kraft: #b9794b;
+  --color-kraft: #6f4528;
   --color-text: #2b2b2b;
 
   /* Accents */
@@ -41,7 +41,7 @@
   --color-neutral-200: #e9dfd8;
   --color-neutral-300: #d3c7bf;
   --color-neutral-400: #9e938c;
-  --color-neutral-500: #756d68;
+  --color-neutral-500: #66615d;
   --color-neutral-700: #4a4542;
   --color-neutral-900: #2b2b2b;  /* Đen mềm */
 

@@ -845,6 +845,7 @@ export default function AdminBannersPage() {
             setForm(prev => ({ ...prev, image_url: url }))
           }}
           onClose={() => setShowMediaPicker(false)}
+          purpose="banner"
         />
       )}
     </div>
