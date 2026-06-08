@@ -65,8 +65,8 @@ export default function HomeHeroCarousel({
                 imageKind="banner"
                 alt={banner.title || 'Bộ sưu tập Mushroomie'}
                 fill
-                priority={index === 0}
-                fetchPriority={index === 0 ? 'high' : 'auto'}
+                priority={index < 2}
+                fetchPriority={index < 2 ? 'high' : 'auto'}
                 sizes="(max-width: 768px) 100vw, 1280px"
                 className="object-contain"
               />
