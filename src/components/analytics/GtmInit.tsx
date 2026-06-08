@@ -24,10 +24,8 @@ export default function GtmInit() {
 
     const events: Array<keyof WindowEventMap> = ['pointerdown', 'keydown', 'scroll']
     events.forEach((event) => window.addEventListener(event, load, { once: true, passive: true }))
-    const timer = window.setTimeout(load, 12000)
 
     return () => {
-      window.clearTimeout(timer)
       events.forEach((event) => window.removeEventListener(event, load))
     }
   }, [])

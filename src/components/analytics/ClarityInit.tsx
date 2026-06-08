@@ -6,25 +6,22 @@ const CLARITY_ID = 'wztywnpske'
 
 export default function ClarityInit() {
   useEffect(() => {
-    const startClarity = () => {
+    const load = () => {
       if (document.querySelector(`script[data-clarity-id="${CLARITY_ID}"]`)) return
 
-      window.setTimeout(() => {
-        const script = document.createElement('script')
-        script.async = true
-        script.dataset.clarityId = CLARITY_ID
-        script.src = `https://www.clarity.ms/tag/${CLARITY_ID}`
-        document.head.appendChild(script)
-      }, 2500)
+      const script = document.createElement('script')
+      script.async = true
+      script.dataset.clarityId = CLARITY_ID
+      script.src = `https://www.clarity.ms/tag/${CLARITY_ID}`
+      document.head.appendChild(script)
     }
 
-    if ('requestIdleCallback' in window) {
-      const idleId = window.requestIdleCallback(startClarity, { timeout: 5000 })
-      return () => window.cancelIdleCallback(idleId)
-    }
+    const events: Array<keyof WindowEventMap> = ['pointerdown', 'keydown', 'scroll']
+    events.forEach((event) => window.addEventListener(event, load, { once: true, passive: true }))
 
-    const timer = globalThis.setTimeout(startClarity, 3500)
-    return () => globalThis.clearTimeout(timer)
+    return () => {
+      events.forEach((event) => window.removeEventListener(event, load))
+    }
   }, [])
 
   return null

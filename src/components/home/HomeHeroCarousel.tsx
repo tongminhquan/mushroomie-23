@@ -39,7 +39,7 @@ export default function HomeHeroCarousel({
     if (!hasBanners || banners.length < 2 || paused) return
     const timer = window.setInterval(() => {
       setCurrent((value) => (value + 1) % banners.length)
-    }, 6500)
+    }, 12000)
     return () => window.clearInterval(timer)
   }, [banners.length, hasBanners, paused])
 

@@ -33,7 +33,7 @@ export default function PostCard({ post }: PostCardProps) {
           <h3 className="line-clamp-2 font-heading text-lg leading-snug text-text transition-colors group-hover:text-primary">{post.title}</h3>
           {post.excerpt && <p className="text-neutral-500 text-sm leading-relaxed mb-3 line-clamp-2">{post.excerpt}</p>}
           <div className="mt-auto flex items-center justify-between border-t border-neutral-100 pt-4">
-            {post.published_at ? <span className="flex items-center gap-1.5 text-xs text-neutral-400" suppressHydrationWarning><Calendar size={13} />{formatDate(post.published_at)}</span> : <span />}
+            {post.published_at ? <span className="flex items-center gap-1.5 text-xs text-neutral-500" suppressHydrationWarning><Calendar size={13} />{formatDate(post.published_at)}</span> : <span />}
             <ArrowUpRight size={17} className="text-primary transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           </div>
         </div>
