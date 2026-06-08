@@ -5,7 +5,6 @@ import { formatPrice } from '@/lib/utils'
 import { AlertTriangle, CheckCircle, Clock, Landmark, RefreshCw, XCircle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Link from 'next/link'
-import Image from 'next/image'
 
 interface Payment {
   status: string
@@ -31,18 +30,55 @@ interface OrderInfo {
   payment?: Payment | null
 }
 
+type QrStatus = 'loading' | 'loaded' | 'error'
+
+interface QrState {
+  key: string
+  index: number
+  status: QrStatus
+}
+
 /**
  * Build a VietQR image URL client-side from payment bank info.
  * This is the fallback when the server-provided qr_code_url is invalid or missing.
  */
 function buildClientQrUrl(payment: Payment): string {
-  const bankBin = payment.bank_name // may be BIN code like "970422"
-  const accountNo = payment.bank_account
+  const bankBin = normalizeBankBin(payment.bank_name)
+  const accountNo = payment.bank_account.replace(/\D/g, '')
   const amount = Math.round(Number(payment.amount)) // integer VND, no decimals
   const addInfo = encodeURIComponent(payment.transfer_content || '')
   const accountName = encodeURIComponent(payment.account_name || '')
 
   return `https://img.vietqr.io/image/${bankBin}-${accountNo}-compact2.png?amount=${amount}&addInfo=${addInfo}&accountName=${accountName}`
+}
+
+const bankBinAliases: Record<string, string> = {
+  mb: '970422',
+  mbbank: '970422',
+  militarybank: '970422',
+  vietcombank: '970436',
+  vcb: '970436',
+  techcombank: '970407',
+  tcb: '970407',
+  acb: '970416',
+  bidv: '970418',
+  vietinbank: '970415',
+  agribank: '970405',
+  vpbank: '970432',
+  vib: '970441',
+  tpbank: '970423',
+  sacombank: '970403',
+  shb: '970443',
+  hdbank: '970437',
+  msb: '970426',
+  ocb: '970448',
+}
+
+function normalizeBankBin(value: string): string {
+  const trimmed = value.trim()
+  if (/^\d{6}$/.test(trimmed)) return trimmed
+  const key = trimmed.toLowerCase().replace(/[^a-z0-9]/g, '')
+  return bankBinAliases[key] || trimmed
 }
 
 /**
@@ -59,6 +95,14 @@ function isImageUrl(url: string): boolean {
   return false
 }
 
+function qrProxyUrl(url: string): string {
+  return `/api/qr?url=${encodeURIComponent(url)}`
+}
+
+function uniqueUrls(urls: string[]): string[] {
+  return Array.from(new Set(urls.filter(Boolean)))
+}
+
 export default function ConfirmPage() {
   const searchParams = useSearchParams()
   const orderCode = searchParams.get('orderCode') || ''
@@ -68,7 +112,7 @@ export default function ConfirmPage() {
   const [polling, setPolling] = useState(false)
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const [orderInfo, setOrderInfo] = useState<OrderInfo | null>(null)
-  const [qrStatus, setQrStatus] = useState<'loading' | 'loaded' | 'error'>('loading')
+  const [qrState, setQrState] = useState<QrState>({ key: '', index: 0, status: 'loading' })
 
   const fetchData = useCallback(async () => {
     if (!orderCode) return
@@ -117,30 +161,53 @@ export default function ConfirmPage() {
     return () => clearInterval(timer)
   }, [timeLeft])
 
-  // Compute the best QR image URL
-  const qrImageUrl = useMemo(() => {
-    if (!payment) return ''
+  // Compute QR image candidates. Direct VietQR is fastest; /api/qr is kept as fallback.
+  const qrImageUrls = useMemo(() => {
+    if (!payment) return []
+    const candidates: string[] = []
 
-    // If server provided a valid image URL, use it (via proxy to avoid CORS)
     if (payment.qr_code_url && isImageUrl(payment.qr_code_url)) {
-      return `/api/qr?url=${encodeURIComponent(payment.qr_code_url)}`
+      candidates.push(payment.qr_code_url)
+      candidates.push(qrProxyUrl(payment.qr_code_url))
     }
 
-    // Fallback: build VietQR image URL from payment bank info
     if (payment.bank_account && payment.amount) {
       const directUrl = buildClientQrUrl(payment)
-      return `/api/qr?url=${encodeURIComponent(directUrl)}`
+      if (isImageUrl(directUrl)) {
+        candidates.push(directUrl)
+        candidates.push(qrProxyUrl(directUrl))
+      }
     }
 
-    return ''
+    return uniqueUrls(candidates)
   }, [payment])
 
-  // Reset QR status when URL changes
+  const qrImageKey = qrImageUrls.join('|')
+  const fallbackQrState = useMemo<QrState>(() => ({
+    key: qrImageKey,
+    index: 0,
+    status: qrImageUrls.length > 0 ? 'loading' : 'error',
+  }), [qrImageKey, qrImageUrls.length])
+  const currentQrState = qrState.key === qrImageKey ? qrState : fallbackQrState
+  const qrIndex = currentQrState.index
+  const qrStatus = currentQrState.status
+  const qrImageUrl = qrImageUrls[qrIndex] || ''
+
+  const handleQrError = useCallback(() => {
+    setQrState((previous) => {
+      const base = previous.key === qrImageKey ? previous : fallbackQrState
+      if (base.index < qrImageUrls.length - 1) {
+        return { key: qrImageKey, index: base.index + 1, status: 'loading' }
+      }
+      return { key: qrImageKey, index: base.index, status: 'error' }
+    })
+  }, [fallbackQrState, qrImageKey, qrImageUrls.length])
+
   useEffect(() => {
-    if (qrImageUrl) {
-      queueMicrotask(() => setQrStatus('loading'))
-    }
-  }, [qrImageUrl])
+    if (!qrImageUrl || qrStatus !== 'loading') return
+    const timer = window.setTimeout(handleQrError, 10000)
+    return () => window.clearTimeout(timer)
+  }, [handleQrError, qrImageUrl, qrStatus])
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60)
@@ -240,16 +307,18 @@ export default function ConfirmPage() {
                 )}
 
                 {/* QR image */}
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element -- Dynamic bank QR URLs load more reliably without Next image optimization. */}
+                <img
                   src={qrImageUrl}
                   alt="QR Code chuyển khoản"
                   width={280}
                   height={280}
-                  unoptimized
+                  loading="eager"
+                  fetchPriority="high"
                   className={`mx-auto rounded-2xl border-4 border-primary-light shadow-card ${qrStatus !== 'loaded' ? 'hidden' : ''}`}
                   referrerPolicy="no-referrer"
-                  onLoad={() => setQrStatus('loaded')}
-                  onError={() => setQrStatus('error')}
+                  onLoad={() => setQrState({ key: qrImageKey, index: qrIndex, status: 'loaded' })}
+                  onError={handleQrError}
                 />
 
                 {/* Error state */}
