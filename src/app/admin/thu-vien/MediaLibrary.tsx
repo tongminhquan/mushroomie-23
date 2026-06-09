@@ -158,7 +158,7 @@ export default function MediaLibrary() {
           <label className="bg-primary text-white px-4 py-2 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-colors shadow-sm cursor-pointer flex items-center gap-2">
             <Upload size={18} />
             {uploading ? 'Đang tải lên...' : 'Tải ảnh lên'}
-            <input type="file" accept="image/*" className="hidden" onChange={handleUpload} disabled={uploading} />
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="hidden" onChange={handleUpload} disabled={uploading} />
           </label>
         </div>
       </div>
@@ -177,7 +177,7 @@ export default function MediaLibrary() {
           <label className="bg-primary text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary-dark cursor-pointer inline-flex items-center gap-2">
             <Upload size={18} />
             Tải ảnh lên ngay
-            <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="hidden" onChange={handleUpload} />
           </label>
         </div>
       ) : (

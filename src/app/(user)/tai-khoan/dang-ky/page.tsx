@@ -50,7 +50,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8 flex flex-col items-center">
-          <div className="relative h-20 w-48 mb-4"><Image src="/logo.png" alt="Mushroomie Logo" fill className="object-contain" priority /></div>
+          <div className="relative h-20 w-48 mb-4"><Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority /></div>
           <h1 className="font-heading text-2xl font-bold">Tạo tài khoản Mushroomie</h1>
           <p className="text-neutral-500 text-sm mt-1">Tham gia cộng đồng phụ kiện handmade!</p>
         </div>

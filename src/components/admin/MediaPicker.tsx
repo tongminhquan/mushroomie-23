@@ -36,7 +36,7 @@ interface MediaPickerProps {
 // Simulated media library from picsum
 const DEMO_IMAGES: MediaItem[] = Array.from({ length: 30 }, (_, i) => ({
   id: i + 1,
-  url: `/logo.png`,
+  url: `/logo.webp`,
   filename: `image-${i + 1}.jpg`,
   alt_text: '',
   caption: '',
@@ -204,7 +204,7 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
                   >
                     {isUploading ? 'Đang tải lên...' : 'Chọn tệp'}
                   </button>
-                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => {
+                  <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="hidden" onChange={(e) => {
                     const file = e.target.files?.[0]
                     if (file) uploadFile(file)
                   }} />

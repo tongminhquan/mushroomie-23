@@ -11,7 +11,7 @@ import SafeImage from '@/components/ui/SafeImage'
 
 const SITE_URL = 'https://mushroomie.io.vn'
 const SITE_NAME = 'Mushroomie'
-const DEFAULT_OG_IMAGE = `${SITE_URL}/logo.png`
+const DEFAULT_OG_IMAGE = `${SITE_URL}/logo.webp`
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -76,7 +76,7 @@ function generateJsonLd(post: Post) {
       name: SITE_NAME,
       logo: {
         '@type': 'ImageObject',
-        url: `${SITE_URL}/logo.png`,
+        url: `${SITE_URL}/logo.webp`,
       },
     },
     datePublished: post.published_at?.toISOString() || post.created_at?.toISOString(),

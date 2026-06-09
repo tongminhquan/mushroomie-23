@@ -33,7 +33,7 @@ export default function AddToCartButton({ product }: Props) {
   const [added, setAdded] = useState(false)
 
   const displayPrice = Number(product.sale_price || product.price)
-  const imageUrl = product.featured_image || `/logo.png`
+  const imageUrl = product.featured_image || `/logo.webp`
   const isOutOfStock = product.stock <= 0
 
   const router = useRouter()

@@ -3,7 +3,7 @@ import { mkdir, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import sharp from 'sharp'
 
-export type UploadImagePurpose = 'banner' | 'product' | 'post' | 'category' | 'icon' | 'avatar' | 'media'
+export type UploadImagePurpose = 'banner' | 'product' | 'post' | 'category' | 'icon' | 'avatar' | 'media' | 'default'
 
 export interface CropData {
   x: number
@@ -23,19 +23,23 @@ export interface OptimizedUploadResult {
 }
 
 const WEBP_QUALITY = 85
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024
+const MAX_INPUT_PIXELS = 40_000_000
+const sharpInputOptions = { failOn: 'warning' as const, animated: false, limitInputPixels: MAX_INPUT_PIXELS }
 
 const maxWidthByPurpose: Record<UploadImagePurpose, number> = {
   banner: 1920,
   product: 1200,
   post: 1200,
-  media: 1200,
+  media: 1600,
   category: 512,
   icon: 512,
   avatar: 512,
+  default: 1600,
 }
 
-const allowedMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'])
-const allowedSharpFormats = new Set(['jpeg', 'png', 'webp', 'gif', 'avif'])
+const allowedMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif'])
+const allowedSharpFormats = new Set(['jpeg', 'png', 'webp', 'avif'])
 
 export function normalizeUploadPurpose(value?: FormDataEntryValue | string | null): UploadImagePurpose {
   const normalized = typeof value === 'string' ? value.trim().toLowerCase() : ''
@@ -45,7 +49,7 @@ export function normalizeUploadPurpose(value?: FormDataEntryValue | string | nul
   if (normalized === 'icon') return 'icon'
   if (normalized === 'avatar' || normalized === 'user') return 'avatar'
   if (normalized === 'media') return 'media'
-  return 'product'
+  return 'default'
 }
 
 export async function optimizeUploadImage({
@@ -64,8 +68,8 @@ export async function optimizeUploadImage({
   await assertSafeImage(buffer, declaredMime)
   await mkdir(uploadDir, { recursive: true })
 
-  const metadata = await sharp(buffer, { failOn: 'warning', animated: false }).metadata()
-  let pipeline = sharp(buffer, { failOn: 'warning', animated: false }).rotate()
+  const metadata = await sharp(buffer, sharpInputOptions).metadata()
+  let pipeline = sharp(buffer, sharpInputOptions).rotate()
 
   if (cropData && cropData.width > 0 && cropData.height > 0 && metadata.width && metadata.height) {
     const left = Math.max(0, Math.round(cropData.x))
@@ -74,12 +78,12 @@ export async function optimizeUploadImage({
     const height = Math.min(Math.max(1, Math.round(cropData.height)), metadata.height - top)
 
     if (width > 0 && height > 0) {
-    pipeline = pipeline.extract({
+      pipeline = pipeline.extract({
         left,
         top,
         width,
         height,
-    })
+      })
     }
   }
 
@@ -114,6 +118,10 @@ async function assertSafeImage(buffer: Buffer, declaredMime?: string) {
     throw new Error('Image file is empty')
   }
 
+  if (buffer.length > MAX_UPLOAD_BYTES) {
+    throw new Error('Image file exceeds the 25 MB limit')
+  }
+
   if (declaredMime && !allowedMimeTypes.has(declaredMime)) {
     throw new Error('Invalid image MIME type')
   }
@@ -123,7 +131,7 @@ async function assertSafeImage(buffer: Buffer, declaredMime?: string) {
     throw new Error('Invalid image signature')
   }
 
-  const metadata = await sharp(buffer, { failOn: 'warning', animated: false }).metadata()
+  const metadata = await sharp(buffer, sharpInputOptions).metadata()
   if (!metadata.format || !allowedSharpFormats.has(metadata.format)) {
     throw new Error('Unsupported image format')
   }
@@ -148,10 +156,6 @@ function sniffImageMime(buffer: Buffer): string | null {
   }
   if (buffer.length >= 12 && buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.toString('ascii', 8, 12) === 'WEBP') {
     return 'image/webp'
-  }
-  if (buffer.length >= 6) {
-    const gif = buffer.toString('ascii', 0, 6)
-    if (gif === 'GIF87a' || gif === 'GIF89a') return 'image/gif'
   }
   if (buffer.length >= 12 && buffer.toString('ascii', 4, 8) === 'ftyp') {
     const brand = buffer.toString('ascii', 8, 12)

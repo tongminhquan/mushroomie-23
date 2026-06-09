@@ -69,7 +69,7 @@ export default async function HomePage() {
         </div>
         <div className="relative hidden min-h-full bg-pink lg:block">
           <Image
-            src="/logo.png"
+            src="/logo.webp"
             alt="Logo Mushroomie"
             fill
             priority
@@ -86,7 +86,7 @@ export default async function HomePage() {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name: 'Mushroomie Handmade',
-    image: `${process.env.NEXT_PUBLIC_APP_URL}/logo.png`,
+    image: `${process.env.NEXT_PUBLIC_APP_URL}/logo.webp`,
     '@id': `${process.env.NEXT_PUBLIC_APP_URL}`,
     url: `${process.env.NEXT_PUBLIC_APP_URL}`,
     telephone: '+84848744060',

@@ -17,7 +17,7 @@ export default async function Footer() {
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.4fr_0.7fr_0.7fr_1fr]">
           <div>
             <Link href="/" className="relative mb-5 block h-14 w-36">
-              <SafeImage src="/logo.png" fallbackSrc="/logo.png" alt="Mushroomie" fill sizes="144px" className="object-contain object-left" />
+              <SafeImage src="/logo.webp" fallbackSrc="/logo.webp" alt="Mushroomie" fill sizes="144px" className="object-contain object-left" />
             </Link>
             <p className="max-w-sm text-sm leading-7 text-white/65">
               Phụ kiện handmade được làm chậm, làm kỹ và cá nhân hóa theo câu chuyện riêng của bạn.

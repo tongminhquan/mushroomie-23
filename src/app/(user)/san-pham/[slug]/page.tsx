@@ -97,7 +97,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const displayPrice = salePrice || price
   const isOnSale = !!salePrice && salePrice < price
 
-  const defaultImage = `/logo.png`
+  const defaultImage = `/logo.webp`
 
   // Product Schema JSON-LD
   const productSchema = {

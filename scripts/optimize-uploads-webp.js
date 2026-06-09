@@ -18,6 +18,7 @@ const apply = process.argv.includes('--apply')
 const dryRun = process.argv.includes('--dry-run') || !apply
 
 const imagePattern = /\.(avif|gif|jpe?g|png|webp)$/i
+const optimizedWebpPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.webp$/i
 const siteOrigins = [
   process.env.NEXT_PUBLIC_APP_URL,
   process.env.NEXT_PUBLIC_SITE_URL,
@@ -36,14 +37,15 @@ const maxWidthByPurpose = {
   banner: 1920,
   product: 1200,
   post: 1200,
-  media: 1200,
+  media: 1600,
   category: 512,
   icon: 512,
   avatar: 512,
 }
 
 async function main() {
-  const files = await listUploadImages()
+  const previouslyConverted = await loadPreviouslyConvertedFiles()
+  const files = await listUploadImages(previouslyConverted)
   const references = await collectReferences()
   const mapping = []
   let totalBefore = 0
@@ -133,10 +135,40 @@ async function main() {
   }, null, 2))
 }
 
-async function listUploadImages() {
+async function listUploadImages(previouslyConverted) {
   if (!fsSync.existsSync(uploadDir)) return []
   const files = await fs.readdir(uploadDir)
-  return files.filter((file) => imagePattern.test(file))
+  return files.filter((file) => (
+    imagePattern.test(file)
+    && !optimizedWebpPattern.test(file)
+    && !previouslyConverted.has(file)
+  ))
+}
+
+async function loadPreviouslyConvertedFiles() {
+  const converted = new Set()
+  if (!fsSync.existsSync(mappingDir)) return converted
+
+  const reports = (await fs.readdir(mappingDir)).filter((file) => (
+    file.startsWith('upload-webp-mapping-') && file.endsWith('.json')
+  ))
+
+  for (const report of reports) {
+    try {
+      const payload = JSON.parse(await fs.readFile(path.join(mappingDir, report), 'utf8'))
+      for (const item of payload.mapping || []) {
+        if (!item.oldPath || !item.newPath || item.dryRun) continue
+        const outputPath = path.join(uploadDir, path.basename(item.newPath))
+        if (fsSync.existsSync(outputPath)) {
+          converted.add(path.basename(item.oldPath))
+        }
+      }
+    } catch (error) {
+      console.warn(`Skipping invalid mapping report ${report}: ${error.message}`)
+    }
+  }
+
+  return converted
 }
 
 async function collectReferences() {

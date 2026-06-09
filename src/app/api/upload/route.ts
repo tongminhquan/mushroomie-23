@@ -20,7 +20,7 @@ export async function GET() {
     const images = []
     
     for (const file of files) {
-      if (file.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+      if (file.match(/\.webp$/i)) {
         const fileStat = await stat(join(uploadDir, file))
         images.push({
           id: fileStat.mtimeMs,

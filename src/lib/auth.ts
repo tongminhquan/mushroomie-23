@@ -31,7 +31,7 @@ declare module 'next-auth' {
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || 'mushroomie-secret-key-change-in-production',
-  theme: { logo: '/logo.png' },
+  theme: { logo: '/logo.webp' },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,

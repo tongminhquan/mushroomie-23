@@ -88,7 +88,7 @@ export default function AdminSidebar() {
         <div className={cn('flex h-[77px] items-center border-b border-neutral-200 transition-all duration-300', isCollapsed ? 'justify-center' : 'justify-between px-5')}>
           <Link href="/admin" className={cn('flex items-center gap-3 overflow-hidden', isCollapsed ? 'hidden' : 'flex')}>
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-secondary">
-              <Image src="/logo.png" alt="Mushroomie" width={40} height={40} className="h-9 w-9 object-contain" />
+              <Image src="/logo.webp" alt="Mushroomie" width={40} height={40} className="h-9 w-9 object-contain" />
             </div>
             <div className="whitespace-nowrap text-[11px] font-extrabold uppercase tracking-[0.1em] text-primary">
               Quản trị

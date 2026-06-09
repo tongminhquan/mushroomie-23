@@ -76,7 +76,7 @@ export default function ProfileCompletionGuard({ children }: { children: React.R
         <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 animate-in fade-in zoom-in duration-300">
           <div className="text-center mb-6 flex flex-col items-center">
             <div className="relative h-16 w-40 mb-4">
-              <Image src="/logo.png" alt="Mushroomie Logo" fill className="object-contain" priority />
+              <Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority />
             </div>
             <h2 className="font-heading text-xl font-bold text-primary mb-2">Bổ sung thông tin</h2>
             <p className="text-stone-500 text-sm">

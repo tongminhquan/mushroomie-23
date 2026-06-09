@@ -77,7 +77,7 @@ export function AvatarUpload({ initialAvatar, userName }: AvatarUploadProps) {
         type="file" 
         ref={fileInputRef} 
         onChange={handleFileChange} 
-        accept="image/*" 
+        accept="image/jpeg,image/png,image/webp,image/avif"
         className="hidden" 
       />
       {loading && (

@@ -12,7 +12,7 @@ interface ProductGalleryProps {
   isOnSale: boolean
 }
 
-const FALLBACK_IMAGE = '/logo.png'
+const FALLBACK_IMAGE = '/logo.webp'
 
 export default function ProductGallery({ images, productName, isCustomizable, isOnSale }: ProductGalleryProps) {
   const gallery = images.length > 0

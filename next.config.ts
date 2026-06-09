@@ -26,7 +26,6 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'mushroomie.io.vn' },
       { protocol: 'https', hostname: 'down-vn.img.susercontent.com' },
       { protocol: 'https', hostname: 'cf.shopee.vn' },
-      { protocol: 'https', hostname: 'picsum.photos' },
     ],
   },
   experimental: {
@@ -45,6 +44,12 @@ const nextConfig: NextConfig = {
         source: '/uploads/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=2592000, stale-while-revalidate=86400' },
+        ],
+      },
+      {
+        source: '/logo.webp',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
       {

@@ -13,7 +13,9 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "images:optimize:dry-run": "node scripts/optimize-uploads-webp.js --dry-run",
-    "images:optimize": "node scripts/optimize-uploads-webp.js --apply"
+    "images:optimize": "node scripts/optimize-uploads-webp.js --apply",
+    "media:convert-webp": "node scripts/optimize-uploads-webp.js",
+    "media:convert-webp:apply": "node scripts/optimize-uploads-webp.js --apply"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
