@@ -34,9 +34,7 @@ export default function HomeLanding({
   return (
     <>
       <HomeHeroLanding banners={banners} />
-      <AnimateOnScroll duration={500}>
-        <HomeBrandStory products={products} />
-      </AnimateOnScroll>
+      <HomeBrandStory products={products} />
       <HomeVisionMissionGoals />
       <AnimateOnScroll duration={500}>
         <HomeCoreValues />
