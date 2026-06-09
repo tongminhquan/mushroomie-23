@@ -141,7 +141,7 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
                 Từ từng hạt nhỏ,<br className="sm:hidden" /> tạo phong cách riêng
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-white sm:text-base sm:leading-7 md:mt-2">
-                Mushroomie tạo nên phụ kiện handmade cá nhân hóa từ hạt, charm và những màu sắc bạn yêu thích.
+                Phụ kiện handmade cá nhân hóa từ hạt, charm và màu bạn yêu.
               </p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row lg:justify-end">
