@@ -35,7 +35,7 @@ export default function HomeCategoryShowcase({ categories }: { categories: HomeC
                   />
                 </div>
                 <h3 className="font-heading text-xl leading-tight text-text sm:text-2xl">{category.name}</h3>
-                <span className="mt-auto inline-flex items-center gap-2 pt-4 text-xs font-extrabold text-primary sm:text-sm">
+                <span className="mt-auto inline-flex items-center gap-2 pt-4 text-xs font-extrabold text-primary-dark sm:text-sm">
                   Khám phá <ArrowRight size={16} />
                 </span>
               </Link>

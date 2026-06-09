@@ -65,7 +65,7 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
         onMouseLeave={() => setPaused(false)}
       >
         <div
-          className="relative h-[215px] overflow-hidden bg-pink sm:h-[300px] md:h-[540px]"
+          className="relative hidden overflow-hidden bg-pink sm:block sm:h-[300px] md:h-[540px]"
           aria-roledescription="carousel"
           aria-label="Bộ sưu tập Mushroomie"
         >
@@ -140,7 +140,7 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
               <h1 className="mt-4 max-w-4xl text-balance font-heading text-2xl leading-[1.08] sm:text-4xl md:mt-3 lg:text-[2.75rem]">
                 Từ từng hạt nhỏ,<br className="sm:hidden" /> tạo phong cách riêng
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-white/82 sm:text-base sm:leading-7 md:mt-2">
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-white sm:text-base sm:leading-7 md:mt-2">
                 Mushroomie tạo nên phụ kiện handmade cá nhân hóa từ hạt, charm và những màu sắc bạn yêu thích.
               </p>
             </div>

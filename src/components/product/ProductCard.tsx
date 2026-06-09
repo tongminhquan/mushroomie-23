@@ -93,7 +93,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             className={`mt-2 flex min-h-10 w-full items-center justify-center gap-2 rounded-xl px-3 text-xs font-extrabold transition duration-200 active:translate-y-px ${
               added ? 'bg-yellow text-text' : isOutOfStock ? 'cursor-not-allowed bg-neutral-200 text-neutral-500' : 'bg-text text-white hover:bg-primary'
             }`}
-            aria-label="Thêm vào giỏ"
+            aria-label={added ? 'Đã thêm' : isOutOfStock ? 'Hết hàng' : 'Chọn mua'}
           >
             {added ? (
               <>

@@ -43,7 +43,7 @@ export default function HomeTrust({ reviews }: { reviews: HomeReview[] }) {
                 key={review.id}
                 className={`rounded-[18px] border border-white/80 bg-white p-6 shadow-card ${index === 1 ? 'md:-translate-y-4' : ''}`}
               >
-                <div className="mb-5 flex gap-1 text-primary" aria-label={`${review.rating} trên 5 sao`}>
+                <div className="mb-5 flex gap-1 text-primary" role="img" aria-label={`${review.rating} trên 5 sao`}>
                   {Array.from({ length: review.rating }, (_, star) => (
                     <Star key={star} size={16} fill="currentColor" />
                   ))}
