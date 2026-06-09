@@ -315,7 +315,7 @@ export default function ConfirmPage() {
                   height={280}
                   loading="eager"
                   fetchPriority="high"
-                  className={`mx-auto rounded-2xl border-4 border-primary-light shadow-card ${qrStatus !== 'loaded' ? 'hidden' : ''}`}
+                  className={`mx-auto h-[280px] w-[280px] rounded-2xl border-4 border-primary-light bg-white object-contain shadow-card ${qrStatus !== 'loaded' ? 'hidden' : ''}`}
                   referrerPolicy="no-referrer"
                   onLoad={() => setQrState({ key: qrImageKey, index: qrIndex, status: 'loaded' })}
                   onError={handleQrError}
