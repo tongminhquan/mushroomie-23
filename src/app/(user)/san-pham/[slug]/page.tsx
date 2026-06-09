@@ -134,9 +134,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           { label: product.name },
         ]} />
 
-        <div className="mt-5 grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+        <div className="mt-5 grid items-stretch gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.95fr)] lg:gap-10">
           {/* Gallery */}
-          <div>
+          <div className="h-full">
             <ProductGallery
               images={allImages.length > 0 ? allImages : [defaultImage]}
               productName={product.name}
@@ -146,7 +146,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           </div>
 
           {/* Product info */}
-          <div className="lg:pt-4">
+          <div className="flex h-full flex-col rounded-[24px] border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
             <div className="space-y-5">
               {product.category && (
                 <Link href={`/san-pham?category=${product.category.slug}`} className="brand-kicker">{product.category.name}</Link>
@@ -158,37 +158,47 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               {product.short_description && (
                 <p className="max-w-xl text-sm leading-7 text-neutral-600 md:text-base">{product.short_description}</p>
               )}
+            </div>
 
-              <div className="rounded-[18px] border border-neutral-200 bg-white p-5 shadow-card">
-                <AddToCartButton product={product} />
-              </div>
-
-              {product.description && (
-                <section className="rounded-[18px] border border-neutral-200 bg-white p-6">
-                  <h2 className="mb-4 font-heading text-xl text-text">Mô tả chi tiết</h2>
-                  <div className="prose prose-sm max-w-none text-neutral-600 prose-headings:font-heading prose-headings:text-text prose-a:text-primary" dangerouslySetInnerHTML={{ __html: product.description }} />
-                </section>
-              )}
-
-              {product.reviews.length > 0 && (
-                <section className="rounded-[18px] border border-neutral-200 bg-white p-6">
-                  <h2 className="mb-4 font-heading text-xl text-text">Đánh giá ({product.reviews.length})</h2>
-                  <div className="space-y-4">
-                    {product.reviews.map((review: any) => (
-                      <div key={review.id} className="border-b border-neutral-100 pb-4 last:border-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold text-sm">{review.name}</span>
-                          <div className="flex text-yellow-400 text-xs">{'★'.repeat(review.rating)}</div>
-                        </div>
-                        <p className="text-sm text-neutral-600">{review.content}</p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
+            <div className="mt-auto pt-8">
+              <AddToCartButton product={product} />
             </div>
           </div>
         </div>
+
+        {/* Description and Reviews */}
+        {(product.description || product.reviews.length > 0) && (
+          <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.95fr)] lg:gap-10">
+            {/* Empty left column on desktop to align with right info column, or let it span full? The user suggested it can span full if it's a block below. Let's make it span full for better reading. */}
+            <div className="lg:col-span-2">
+              <div className="space-y-8">
+                {product.description && (
+                  <section className="rounded-[24px] border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+                    <h2 className="mb-6 font-heading text-2xl text-text">Mô tả chi tiết</h2>
+                    <div className="prose prose-sm max-w-none text-neutral-600 prose-headings:font-heading prose-headings:text-text prose-a:text-primary" dangerouslySetInnerHTML={{ __html: product.description }} />
+                  </section>
+                )}
+
+                {product.reviews.length > 0 && (
+                  <section className="rounded-[24px] border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+                    <h2 className="mb-6 font-heading text-2xl text-text">Đánh giá ({product.reviews.length})</h2>
+                    <div className="space-y-5">
+                      {product.reviews.map((review: any) => (
+                        <div key={review.id} className="border-b border-neutral-100 pb-5 last:border-0">
+                          <div className="mb-1 flex items-center gap-2">
+                            <span className="text-sm font-semibold text-text">{review.name}</span>
+                            <div className="flex text-xs text-yellow">{'★'.repeat(review.rating)}</div>
+                          </div>
+                          <p className="text-sm leading-6 text-neutral-600">{review.content}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Related */}
         {relatedProducts.length > 0 && (

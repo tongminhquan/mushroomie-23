@@ -130,39 +130,7 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
             </>
           )}
         </div>
-
-        <div className="relative overflow-hidden bg-primary px-5 py-6 text-white sm:px-8 md:absolute md:inset-x-0 md:bottom-0 md:z-20 md:px-10 md:py-5">
-          <AnimatedDoodle icon="sparkle" className="right-[7%] top-3 h-8 w-8 rotate-12 text-yellow/80" />
-          <AnimatedDoodle icon="heart" className="bottom-4 right-[19%] hidden h-7 w-7 -rotate-12 text-pink/70 sm:block" />
-          <div className="relative z-10 grid items-end gap-5 lg:grid-cols-[1fr_auto]">
-            <div className="max-w-4xl">
-              <BrandSticker tone="white">Made for you</BrandSticker>
-              <h1 className="mt-4 max-w-4xl text-balance font-heading text-2xl leading-[1.08] sm:text-4xl md:mt-3 lg:text-[2.75rem]">
-                Từ từng hạt nhỏ,<br className="sm:hidden" /> tạo phong cách riêng
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-white sm:text-base sm:leading-7 md:mt-2">
-                Phụ kiện handmade cá nhân hóa từ hạt, charm và màu bạn yêu.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row lg:justify-end">
-              <Link
-                href="/san-pham"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-white px-5 text-sm font-extrabold text-primary shadow-card hover:-translate-y-0.5 hover:bg-yellow hover:text-text"
-              >
-                Khám phá sản phẩm <ArrowRight size={17} />
-              </Link>
-              <Link
-                href="/lien-he"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-white/55 px-5 text-sm font-extrabold text-white hover:-translate-y-0.5 hover:bg-white hover:text-primary"
-              >
-                <MessageCircle size={17} /> Custom món riêng
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="brand-container grid grid-cols-2 border-x border-b border-neutral-200 bg-white sm:grid-cols-4">
+      </div>      <div className="brand-container grid grid-cols-2 rounded-b-[18px] border-x border-b border-neutral-200 bg-white sm:grid-cols-4">
         {proofItems.map(({ icon: Icon, label }, index) => (
           <div
             key={label}
@@ -174,6 +142,38 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
             <span className="text-xs font-extrabold leading-5 text-text sm:text-sm">{label}</span>
           </div>
         ))}
+      </div>
+
+      <div className="brand-container mt-6 lg:mt-8">
+        <div className="relative overflow-hidden rounded-[32px] bg-primary px-6 py-8 text-white shadow-xl sm:px-10 sm:py-12">
+          <AnimatedDoodle icon="sparkle" className="right-[7%] top-5 h-8 w-8 rotate-12 text-yellow/80" />
+          <AnimatedDoodle icon="heart" className="bottom-6 right-[19%] hidden h-7 w-7 -rotate-12 text-pink/70 sm:block" />
+          <div className="relative z-10 grid items-end gap-6 lg:grid-cols-[1fr_auto]">
+            <div className="max-w-4xl">
+              <BrandSticker tone="white">Made for you</BrandSticker>
+              <h1 className="mt-5 max-w-4xl text-balance font-heading text-3xl leading-[1.1] sm:text-4xl lg:text-[2.75rem]">
+                Từ từng hạt nhỏ,<br className="sm:hidden" /> tạo phong cách riêng
+              </h1>
+              <p className="mt-4 max-w-2xl font-body text-base leading-7 text-white/95 sm:text-lg">
+                Phụ kiện handmade cá nhân hóa từ hạt, charm và màu bạn yêu.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row lg:justify-end">
+              <Link
+                href="/san-pham"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-extrabold text-primary shadow-card hover:-translate-y-0.5 hover:bg-yellow hover:text-text sm:min-h-[56px] sm:text-base"
+              >
+                Khám phá sản phẩm <ArrowRight size={18} />
+              </Link>
+              <Link
+                href="/lien-he"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-white/40 px-6 text-sm font-extrabold text-white hover:-translate-y-0.5 hover:border-white hover:bg-white/10 sm:min-h-[56px] sm:text-base"
+              >
+                <MessageCircle size={18} /> Custom món riêng
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )

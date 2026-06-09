@@ -23,8 +23,8 @@ export default function ProductGallery({ images, productName, isCustomizable, is
   const mainImage = failed ? FALLBACK_IMAGE : gallery[selectedIndex] || FALLBACK_IMAGE
 
   return (
-    <div className="space-y-3">
-      <div className="relative aspect-square overflow-hidden rounded-[18px] border border-neutral-200 bg-white shadow-card">
+    <div className="flex h-full flex-col space-y-3">
+      <div className="relative flex aspect-square flex-1 items-center justify-center overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-card lg:aspect-auto lg:min-h-[520px]">
         <SafeImage
           src={mainImage}
           alt={failed ? 'Ảnh sản phẩm đang được cập nhật' : productName}
