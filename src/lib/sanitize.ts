@@ -1,3 +1,5 @@
+import DOMPurify from 'isomorphic-dompurify'
+
 /**
  * Server-side HTML sanitizer for blog post content.
  * Removes dangerous HTML elements and attributes to prevent XSS.
@@ -5,27 +7,12 @@
 export function sanitizeHtml(html: string): string {
   if (!html) return ''
 
-  let clean = html
-
-  // Remove script tags and content
-  clean = clean.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-
-  // Remove iframe, object, embed, form tags and content
-  clean = clean.replace(/<(iframe|object|embed|form)\b[^<]*(?:(?!<\/\1>)<[^<]*)*<\/\1>/gi, '')
-  // Also catch self-closing variants
-  clean = clean.replace(/<(iframe|object|embed|form)\b[^>]*\/>/gi, '')
-
-  // Remove all on* event handlers
-  clean = clean.replace(/\s+on\w+\s*=\s*(["'])[^"']*\1/gi, '')
-  clean = clean.replace(/\s+on\w+\s*=\s*[^\s>]+/gi, '')
-
-  // Remove javascript: URLs
-  clean = clean.replace(/(href|src|action)\s*=\s*(["'])\s*javascript:[^"']*\2/gi, '$1=$2#$2')
-
-  // Remove data: URLs in src (potential XSS vector), except data:image
-  clean = clean.replace(/src\s*=\s*(["'])\s*data:(?!image\/)[^"']*\1/gi, 'src=$1#$1')
-
-  return clean
+  return DOMPurify.sanitize(html, {
+    USE_PROFILES: { html: true },
+    ADD_ATTR: ['target'],
+    FORBID_TAGS: ['style', 'script', 'iframe', 'form', 'object', 'embed'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover']
+  })
 }
 
 export function normalizeArticleImages(html: string): string {

@@ -2,8 +2,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { z } from 'zod'
-
 import crypto from 'crypto'
+import { rateLimiter } from '@/lib/rate-limit'
+
+const usedTokensCache = new Map<string, number>()
+// Clean up cache periodically (every 1 hour)
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    const now = Date.now()
+    for (const [token, timestamp] of usedTokensCache.entries()) {
+      if (now - timestamp > 24 * 60 * 60 * 1000) {
+        usedTokensCache.delete(token)
+      }
+    }
+  }, 3600000)
+}
 
 const SECRET = process.env.NEXTAUTH_SECRET || 'mushroomie-secret-fallback'
 
@@ -14,6 +27,11 @@ const scoreSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const req = request as any
+    if (rateLimiter.isLimited(req, 10, 60000, 'minigame_submit')) {
+      return rateLimiter.getLimitResponse()
+    }
+
     const session = await auth()
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Chưa đăng nhập' }, { status: 401 })
@@ -45,6 +63,11 @@ export async function POST(request: NextRequest) {
     if (signature !== expectedSignature) {
        return NextResponse.json({ error: 'Sai chữ ký token' }, { status: 403 })
     }
+
+    if (usedTokensCache.has(token)) {
+      return NextResponse.json({ error: 'Token đã được sử dụng' }, { status: 403 })
+    }
+    usedTokensCache.set(token, Date.now())
 
     const [userId, startTimeStr] = payload.split(':')
     if (userId !== session.user.id) {

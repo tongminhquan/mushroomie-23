@@ -3,6 +3,8 @@ import { readdir, stat, unlink } from 'fs/promises'
 import { join } from 'path'
 import fs from 'fs'
 import { normalizeUploadPurpose, optimizeUploadImage } from '@/lib/image-processing'
+import { requireAdmin } from '@/lib/auth'
+import { rateLimiter } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -44,6 +46,13 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const req = request as any
+    if (rateLimiter.isLimited(req, 10, 60000, 'upload_post')) {
+      return rateLimiter.getLimitResponse()
+    }
+    
+    await requireAdmin()
+
     const data = await request.formData()
     const file: File | null = data.get('file') as unknown as File
     const purpose = normalizeUploadPurpose(data.get('purpose'))
@@ -72,6 +81,13 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const req = request as any
+    if (rateLimiter.isLimited(req, 10, 60000, 'upload_del')) {
+      return rateLimiter.getLimitResponse()
+    }
+
+    await requireAdmin()
+
     const url = new URL(request.url)
     const filename = url.searchParams.get('filename')
     

@@ -450,7 +450,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                   <span className="text-xs font-semibold text-neutral-700">Sản phẩm nổi bật</span>
                 </label>
                 <p className="text-[10px] text-neutral-400 ml-6 -mt-1 leading-normal">
-                  Sẽ xuất hiện ở mục "Sản phẩm nổi bật" tại trang chủ.
+                  Sẽ xuất hiện ở mục &quot;Sản phẩm nổi bật&quot; tại trang chủ.
                 </p>
               </div>
             </div>

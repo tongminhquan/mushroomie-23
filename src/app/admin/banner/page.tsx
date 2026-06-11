@@ -407,7 +407,7 @@ export default function AdminBannersPage() {
                     {banner.button_text && (
                       <div className="flex items-center gap-1.5 text-xs text-neutral-500 bg-neutral-50 border px-3 py-1.5 rounded-full">
                         <span className="font-semibold text-neutral-700">Nút chính:</span>
-                        <span>"{banner.button_text}"</span>
+                        <span>&quot;{banner.button_text}&quot;</span>
                         <span className="text-neutral-300">|</span>
                         <span className="font-mono text-neutral-400">{banner.button_link}</span>
                       </div>
@@ -415,7 +415,7 @@ export default function AdminBannersPage() {
                     {banner.secondary_button_text && (
                       <div className="flex items-center gap-1.5 text-xs text-neutral-500 bg-neutral-50 border px-3 py-1.5 rounded-full">
                         <span className="font-semibold text-neutral-700">Nút phụ:</span>
-                        <span>"{banner.secondary_button_text}"</span>
+                        <span>&quot;{banner.secondary_button_text}&quot;</span>
                         <span className="text-neutral-300">|</span>
                         <span className="font-mono text-neutral-400">{banner.secondary_button_link}</span>
                       </div>

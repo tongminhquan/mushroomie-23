@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { z } from 'zod'
 import { generateOrderCode } from '@/lib/utils'
+import { rateLimiter } from '@/lib/rate-limit'
 
 const orderSchema = z.object({
   customer_name: z.string().min(1),
@@ -25,6 +26,11 @@ const orderSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const req = request as any
+    if (rateLimiter.isLimited(req, 5, 60000, 'order_post')) {
+      return rateLimiter.getLimitResponse()
+    }
+
     const body = await request.json()
     const parsed = orderSchema.safeParse(body)
     if (!parsed.success) {
@@ -34,7 +40,32 @@ export async function POST(request: NextRequest) {
     const session = await auth()
     const userId = session?.user?.id ? Number(session.user.id) : null
     const { items, shipping_fee, payment_method, voucher_id, ...orderData } = parsed.data
-    const subtotal = items.reduce((sum, item) => sum + item.price_snapshot * item.quantity, 0)
+    
+    // FETCH REAL PRICES FROM DB
+    const productIds = items.map(i => i.product_id)
+    const productsInDb = await prisma.product.findMany({ where: { id: { in: productIds } } })
+    const productMap = new Map(productsInDb.map(p => [p.id, p]))
+
+    let realSubtotal = 0
+    const secureItems = items.map(item => {
+      const dbProduct = productMap.get(item.product_id)
+      if (!dbProduct) throw new Error(`Sản phẩm không tồn tại: ${item.product_name}`)
+      if (dbProduct.status !== 'active') throw new Error(`Sản phẩm ngừng bán: ${item.product_name}`)
+      if (item.quantity <= 0) throw new Error(`Số lượng không hợp lệ cho: ${item.product_name}`)
+      
+      const realPrice = dbProduct.sale_price ? Number(dbProduct.sale_price) : Number(dbProduct.price)
+      realSubtotal += realPrice * item.quantity
+
+      return {
+        ...item,
+        price_snapshot: realPrice,
+        total_price: realPrice * item.quantity
+      }
+    })
+
+    const realShippingFee = realSubtotal >= 500000 ? 0 : 30000
+    const subtotal = realSubtotal
+
     const order_code = generateOrderCode()
 
     const order = await prisma.$transaction(async (tx) => {
@@ -58,7 +89,7 @@ export async function POST(request: NextRequest) {
         voucherDiscountAmount = Math.min(subtotal, Math.floor((subtotal * voucher.discount_percent) / 100))
       }
 
-      const total = Math.max(0, subtotal - voucherDiscountAmount) + shipping_fee
+      const total = Math.max(0, subtotal - voucherDiscountAmount) + realShippingFee
       const orderStatus = payment_method === 'cod' ? 'PROCESSING' : 'PENDING_PAYMENT'
 
       const createdOrder = await tx.order.create({
@@ -67,7 +98,7 @@ export async function POST(request: NextRequest) {
           order_code,
           user_id: userId,
           subtotal,
-          shipping_fee,
+          shipping_fee: realShippingFee,
           voucher_id: voucher?.id ?? null,
           voucher_code: voucher?.code ?? null,
           voucher_discount_percent: voucher?.discount_percent ?? null,
@@ -77,14 +108,14 @@ export async function POST(request: NextRequest) {
           payment_status: 'PENDING',
           order_status: orderStatus,
           items: {
-            create: items.map((item) => ({
+            create: secureItems.map((item) => ({
               product_id: item.product_id,
               product_name: item.product_name,
               quantity: item.quantity,
               price_snapshot: item.price_snapshot,
               selected_options: item.selected_options ? JSON.stringify(item.selected_options) : null,
               custom_note: item.custom_note,
-              total_price: item.price_snapshot * item.quantity,
+              total_price: item.total_price,
             })),
           },
         },

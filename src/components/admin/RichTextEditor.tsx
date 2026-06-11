@@ -62,6 +62,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
   const [showImageEditor, setShowImageEditor] = useState(false)
   // Used to replace the current selected image instead of inserting a new one
   const [isReplacingImage, setIsReplacingImage] = useState(false)
+  const [wordCount, setWordCount] = useState(0)
 
   // Init editor
   useEffect(() => {
@@ -94,6 +95,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     const html = editorRef.current.innerHTML
     if (html !== lastValue.current) {
       lastValue.current = html
+      setWordCount(editorRef.current.innerText?.trim().split(/\s+/).filter(Boolean).length ?? 0)
       onChange(html)
     }
   }, [onChange])
@@ -384,7 +386,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       {/* Status bar */}
       <div className="status-bar">
         <span>Hỗ trợ định dạng HTML</span>
-        <span>{editorRef.current?.innerText?.trim().split(/\s+/).filter(Boolean).length ?? 0} từ</span>
+        <span>{wordCount} từ</span>
       </div>
 
       {showMediaPicker && (

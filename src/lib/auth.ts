@@ -151,3 +151,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   session: { strategy: 'jwt' },
 })
+
+export async function requireAuth() {
+  const session = await auth()
+  if (!session?.user) throw new Error('UNAUTHORIZED')
+  return session
+}
+
+export async function requireAdmin() {
+  const session = await requireAuth()
+  if (!['super_admin', 'admin'].includes(session.user.role as string)) {
+    throw new Error('FORBIDDEN')
+  }
+  return session
+}
+
+export async function requireSuperAdmin() {
+  const session = await requireAuth()
+  if (session.user.role !== 'super_admin') {
+    throw new Error('FORBIDDEN')
+  }
+  return session
+}

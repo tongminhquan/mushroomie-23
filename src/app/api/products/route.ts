@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { z } from 'zod'
 import { generateSlug } from '@/lib/utils'
 import { logAdminAction } from '@/lib/admin-logger'
+import { sanitizeHtml } from '@/lib/sanitize'
 
 const productSchema = z.object({
   name: z.string().min(1),
@@ -80,13 +81,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { images, ...productData } = parsed.data
+    const { images, description, short_description, ...productData } = parsed.data
 
     const slug = productData.slug || generateSlug(productData.name)
     const product = await prisma.product.create({
       data: { 
         ...productData, 
         slug,
+        description: description ? sanitizeHtml(description) : undefined,
+        short_description: short_description ? sanitizeHtml(short_description) : undefined,
         images: images?.length ? {
           create: images.map((url, index) => ({
             image_url: url,
