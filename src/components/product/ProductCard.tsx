@@ -52,7 +52,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-[18px] border border-neutral-200 bg-white transition duration-200 hover:-translate-y-1 hover:border-pink hover:shadow-hover">
-      <Link href={`/san-pham/${product.slug}`} className="relative block aspect-square w-full shrink-0 overflow-hidden bg-secondary">
+      <Link href={`/san-pham/${product.slug}`} className="relative block aspect-[3/4] w-full shrink-0 overflow-hidden bg-secondary">
         <SafeImage
           src={imageUrl}
           alt={product.name}

@@ -82,6 +82,9 @@ export function getPublicImageUrl(pathOrUrl?: string | null, type: 'product' | '
 }
 
 function normalizeLocalImagePath(value: string): string {
+  if (!value.includes('/') && !value.startsWith('http')) {
+    return `/uploads/${value}`;
+  }
   const withLeadingSlash = value.startsWith('/') ? value : `/${value}`;
   if (withLeadingSlash.startsWith('/public/uploads/')) {
     return withLeadingSlash.replace('/public', '');

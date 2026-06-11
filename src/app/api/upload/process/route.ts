@@ -5,6 +5,8 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { normalizeUploadPurpose, optimizeUploadImage, type CropData } from '@/lib/image-processing'
 
+import { requireAdmin } from '@/lib/auth'
+
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
@@ -12,6 +14,7 @@ const uploadDir = join(process.cwd(), 'public', 'uploads')
 
 export async function POST(request: Request) {
   try {
+    await requireAdmin()
     const data = await request.json()
     const { filename, cropData, overwrite } = data
     const purpose = normalizeUploadPurpose(data.purpose || data.kind)

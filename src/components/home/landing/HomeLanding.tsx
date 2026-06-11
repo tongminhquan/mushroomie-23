@@ -1,5 +1,6 @@
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 import HomeHeroLanding from './HomeHeroLanding'
+import HomeCustomCTA from './HomeCustomCTA'
 import HomeBrandStory from './HomeBrandStory'
 import HomeVisionMissionGoals from './HomeVisionMissionGoals'
 import HomeCoreValues from './HomeCoreValues'
@@ -36,6 +37,9 @@ export default function HomeLanding({
       <HomeHeroLanding banners={banners} />
       <HomeCategoryShowcase categories={categories} />
       <HomeFeaturedProducts products={products} />
+      <AnimateOnScroll duration={500}>
+        <HomeCustomCTA />
+      </AnimateOnScroll>
       <HomeBrandStory products={products} />
       <HomeVisionMissionGoals />
       <AnimateOnScroll duration={500}>
@@ -45,11 +49,12 @@ export default function HomeLanding({
         <HomeCustomProcess products={products} />
       </AnimateOnScroll>
       <HomeHandmadeBehindScenes products={products} />
-      <HomeLatestPosts posts={posts} />
       <AnimateOnScroll duration={500}>
         <HomeTrust reviews={reviews} />
       </AnimateOnScroll>
+      <HomeLatestPosts posts={posts} />
       <HomeFinalCTA />
     </>
   )
 }
+

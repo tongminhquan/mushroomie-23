@@ -145,37 +145,7 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
         ))}
       </div>
 
-      <div className="brand-container mt-6 lg:mt-8">
-        <div className="relative overflow-hidden rounded-[32px] bg-primary px-6 py-8 text-white shadow-xl sm:px-10 sm:py-12">
-          <AnimatedDoodle icon="sparkle" className="right-[7%] top-5 h-8 w-8 rotate-12 text-yellow/80" />
-          <AnimatedDoodle icon="heart" className="bottom-6 right-[19%] hidden h-7 w-7 -rotate-12 text-pink/70 sm:block" />
-          <div className="relative z-10 grid items-end gap-6 lg:grid-cols-[1fr_auto]">
-            <div className="max-w-4xl">
-              <BrandSticker tone="white">Made for you</BrandSticker>
-              <h1 className="mt-5 max-w-4xl text-balance font-heading text-3xl leading-[1.1] sm:text-4xl lg:text-[2.75rem]">
-                Từ từng hạt nhỏ,<br className="sm:hidden" /> tạo phong cách riêng
-              </h1>
-              <p className="mt-4 max-w-2xl font-body text-base leading-7 text-white/95 sm:text-lg">
-                Phụ kiện handmade cá nhân hóa từ hạt, charm và màu bạn yêu.
-              </p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row lg:justify-end">
-              <Link
-                href="/san-pham"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-extrabold text-primary shadow-card hover:-translate-y-0.5 hover:bg-yellow hover:text-text sm:min-h-[56px] sm:text-base"
-              >
-                Khám phá sản phẩm <ArrowRight size={18} />
-              </Link>
-              <Link
-                href="/lien-he"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-white/40 px-6 text-sm font-extrabold text-white hover:-translate-y-0.5 hover:border-white hover:bg-white/10 sm:min-h-[56px] sm:text-base"
-              >
-                <MessageCircle size={18} /> Custom món riêng
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+
     </section>
   )
 }

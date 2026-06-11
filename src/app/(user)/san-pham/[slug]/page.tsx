@@ -160,7 +160,22 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               )}
             </div>
 
-            <div className="mt-auto pt-8">
+            <div className="mt-8 space-y-3 rounded-xl bg-pink/20 p-4 text-sm text-text">
+              <div className="flex items-center gap-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">✓</span>
+                <p><strong>Handmade 100%:</strong> Tỉ mỉ từng chi tiết</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">✓</span>
+                <p><strong>Custom theo yêu cầu:</strong> Nhắn tin để thiết kế riêng</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">✓</span>
+                <p><strong>Giao hàng toàn quốc:</strong> Đóng gói cẩn thận làm quà tặng</p>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-neutral-100">
               <AddToCartButton product={product} />
             </div>
           </div>

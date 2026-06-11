@@ -24,7 +24,7 @@ export default function ProductGallery({ images, productName, isCustomizable, is
 
   return (
     <div className="flex h-full flex-col space-y-3">
-      <div className="relative flex aspect-square flex-1 items-center justify-center overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-card lg:aspect-auto lg:min-h-[520px]">
+      <div className="relative flex aspect-[3/4] flex-1 items-center justify-center overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-card lg:aspect-auto lg:min-h-[520px]">
         <SafeImage
           src={mainImage}
           alt={failed ? 'Ảnh sản phẩm đang được cập nhật' : productName}
@@ -54,7 +54,7 @@ export default function ProductGallery({ images, productName, isCustomizable, is
               }}
               aria-label={`Xem ảnh sản phẩm ${index + 1}`}
               aria-pressed={selectedIndex === index}
-              className={`relative aspect-square overflow-hidden rounded-xl border bg-white ${
+              className={`relative aspect-[3/4] overflow-hidden rounded-xl border bg-white ${
                 selectedIndex === index ? 'border-primary ring-2 ring-primary/15' : 'border-neutral-200 hover:border-neutral-400'
               }`}
             >
