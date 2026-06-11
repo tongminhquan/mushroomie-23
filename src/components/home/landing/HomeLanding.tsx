@@ -34,13 +34,13 @@ export default function HomeLanding({
   return (
     <>
       <HomeHeroLanding banners={banners} />
+      <HomeCategoryShowcase categories={categories} />
+      <HomeFeaturedProducts products={products} />
       <HomeBrandStory products={products} />
       <HomeVisionMissionGoals />
       <AnimateOnScroll duration={500}>
         <HomeCoreValues />
       </AnimateOnScroll>
-      <HomeCategoryShowcase categories={categories} />
-      <HomeFeaturedProducts products={products} />
       <AnimateOnScroll duration={500}>
         <HomeCustomProcess products={products} />
       </AnimateOnScroll>

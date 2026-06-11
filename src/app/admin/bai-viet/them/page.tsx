@@ -7,6 +7,8 @@ import dynamic from 'next/dynamic'
 import SeoAnalyzer from '@/components/admin/SeoAnalyzer'
 import MediaPicker from '@/components/admin/MediaPicker'
 import CategoryPanel from '@/components/admin/CategoryPanel'
+import InternalLinkSuggester from '@/components/admin/InternalLinkSuggester'
+import { generateSlug } from '@/lib/utils'
 
 const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor'), {
   ssr: false,
@@ -17,17 +19,7 @@ const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor')
   ),
 })
 
-function generateSlug(text: string) {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/đ/g, 'd')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-}
+
 
 type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -343,16 +335,28 @@ export default function AddPostPage() {
                   className="w-full text-2xl font-bold text-neutral-900 border-0 outline-none placeholder:text-neutral-300 leading-tight"
                 />
               </div>
-              <div className="px-6 py-3 flex items-center gap-2 bg-neutral-50/50 text-sm">
-                <span className="text-neutral-400 text-xs font-medium">Đường dẫn:</span>
+              <div className="px-6 py-3 flex items-center gap-2 bg-neutral-50/50 text-sm border-t border-neutral-100">
+                <span className="text-neutral-400 text-xs font-medium whitespace-nowrap">Đường dẫn:</span>
                 <span className="text-neutral-300">/tin-tuc/</span>
                 <input
                   name="slug"
                   value={form.slug}
                   onChange={handleChange}
                   placeholder="duong-dan-bai-viet"
-                  className="flex-1 text-primary font-mono text-xs border-0 outline-none focus:bg-primary/5 rounded px-1 py-0.5"
+                  className="flex-1 text-primary font-mono text-xs border-0 outline-none focus:bg-primary/5 rounded px-1 py-0.5 bg-transparent"
                 />
+                {slugEdited && (
+                  <button
+                    onClick={() => {
+                      setForm(p => ({ ...p, slug: generateSlug(p.title) }))
+                      setSlugEdited(false)
+                      markDirty()
+                    }}
+                    className="text-[10px] bg-neutral-200 text-neutral-600 px-2 py-0.5 rounded hover:bg-primary/10 hover:text-primary transition-colors whitespace-nowrap"
+                  >
+                    Tạo lại từ tiêu đề
+                  </button>
+                )}
               </div>
             </div>
 
@@ -575,6 +579,9 @@ export default function AddPostPage() {
                 )}
               </div>
             </div>
+
+            {/* Internal Link Suggester */}
+            <InternalLinkSuggester />
 
             {/* SEO Analyzer (existing component - enhanced) */}
             <SeoAnalyzer form={form} setForm={(fn: any) => { setForm(fn); markDirty() }} onScoreChange={setSeoScore} />

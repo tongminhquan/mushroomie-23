@@ -9,8 +9,11 @@ interface FormData {
   seo_title: string
   meta_description: string
   focus_keyword?: string
+  secondary_keywords?: string[]
   featured_image?: string
   featured_image_alt?: string
+  og_image?: string
+  twitter_image?: string
 }
 
 interface SeoAnalyzerProps {
@@ -94,8 +97,9 @@ export default function SeoAnalyzer({ form, setForm, onScoreChange }: SeoAnalyze
 
   // SEO Analysis Engine
   useEffect(() => {
-    const checks: CheckResult[] = []
-    let pts = 0
+    const timer = setTimeout(() => {
+      const checks: CheckResult[] = []
+      let pts = 0
 
     const rawHtml = form.content || ''
     const plain = rawHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').toLowerCase().trim()
@@ -319,10 +323,35 @@ export default function SeoAnalyzer({ form, setForm, onScoreChange }: SeoAnalyze
       checks.push({ status: 'warning', text: 'Chưa có nội dung để đánh giá khả năng đọc.', group: 'content_readability' })
     }
 
+    // 22. Secondary keywords check (3pts)
+    if (form.secondary_keywords && form.secondary_keywords.length > 0) {
+      let foundSKs = 0;
+      form.secondary_keywords.forEach(sk => {
+        if (sk.trim() && plain.includes(sk.toLowerCase().trim())) foundSKs++;
+      });
+      if (foundSKs > 0) {
+        pts += 3;
+        checks.push({ status: 'success', text: `Tìm thấy ${foundSKs}/${form.secondary_keywords.length} từ khóa phụ trong nội dung.`, group: 'basic' });
+      } else {
+        checks.push({ status: 'warning', text: 'Chưa tìm thấy từ khóa phụ nào trong nội dung bài viết.', group: 'basic' });
+      }
+    }
+
+    // 23. Social Images check (2pts)
+    if (form.og_image || form.twitter_image || form.featured_image) {
+      pts += 2;
+      checks.push({ status: 'success', text: 'Đã có hình ảnh để hiển thị trên mạng xã hội.', group: 'additional' });
+    } else {
+      checks.push({ status: 'warning', text: 'Nên thêm ảnh đại diện (Featured Image) hoặc OG/Twitter Image để bài viết nổi bật khi chia sẻ.', group: 'additional' });
+    }
+
     const finalScore = Math.min(100, pts)
     setScore(finalScore)
     setResults(checks)
     onScoreChange?.(finalScore)
+    }, 500) // 500ms debounce
+
+    return () => clearTimeout(timer)
   }, [form, keyword, onScoreChange])
 
   const scoreColor = score >= 80 ? 'text-green-700' : score >= 50 ? 'text-orange-600' : score > 0 ? 'text-red-600' : 'text-neutral-400'

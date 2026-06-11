@@ -1,0 +1,6 @@
+.next
+node_modules
+cpanel-deploy
+test-v4-extract
+*.js
+scripts

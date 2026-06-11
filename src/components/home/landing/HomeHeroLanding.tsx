@@ -50,9 +50,9 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
     if (slides.length < 2 || paused) return
     const timer = window.setInterval(() => {
       setCurrent((value) => (value + 1) % slides.length)
-    }, 12000)
+    }, 4000)
     return () => window.clearInterval(timer)
-  }, [paused, slides.length])
+  }, [paused, slides.length, current])
 
   const previous = () => setCurrent((value) => (value - 1 + slides.length) % slides.length)
   const next = () => setCurrent((value) => (value + 1) % slides.length)
@@ -65,9 +65,10 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
         onMouseLeave={() => setPaused(false)}
       >
         <div
-          className="relative hidden overflow-hidden bg-pink sm:block sm:h-[300px] md:h-[540px]"
+          className="relative overflow-hidden bg-pink aspect-[4/3] sm:aspect-auto sm:h-[300px] md:h-[540px]"
           aria-roledescription="carousel"
           aria-label="Bộ sưu tập Mushroomie"
+          aria-live="polite"
         >
           {slides.map((banner, index) => {
             const active = index === current
@@ -101,7 +102,7 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
                 type="button"
                 onClick={previous}
                 aria-label="Banner trước"
-                className="absolute left-3 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-lg border border-neutral-200 bg-white/95 text-text shadow-card hover:bg-yellow"
+                className="absolute left-3 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-lg border border-neutral-200 bg-white/95 text-text shadow-card hover:bg-yellow min-h-[44px] min-w-[44px]"
               >
                 <ChevronLeft size={20} />
               </button>
@@ -109,7 +110,7 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
                 type="button"
                 onClick={next}
                 aria-label="Banner tiếp theo"
-                className="absolute right-3 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-lg border border-neutral-200 bg-white/95 text-text shadow-card hover:bg-yellow"
+                className="absolute right-3 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-lg border border-neutral-200 bg-white/95 text-text shadow-card hover:bg-yellow min-h-[44px] min-w-[44px]"
               >
                 <ChevronRight size={20} />
               </button>

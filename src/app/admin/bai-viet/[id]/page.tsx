@@ -1,12 +1,14 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, ImageIcon, Eye, Save, BookOpen, Trash2, ExternalLink } from 'lucide-react'
+import { ArrowLeft, ImageIcon, Eye, Save, BookOpen, Globe, Share2, Settings2, AlertTriangle, CheckCircle2, Loader2, Trash2, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import SeoAnalyzer from '@/components/admin/SeoAnalyzer'
 import MediaPicker from '@/components/admin/MediaPicker'
 import CategoryPanel from '@/components/admin/CategoryPanel'
+import InternalLinkSuggester from '@/components/admin/InternalLinkSuggester'
+import { generateSlug } from '@/lib/utils'
 
 const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor'), {
   ssr: false,
@@ -17,17 +19,9 @@ const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor')
   ),
 })
 
-function generateSlug(text: string) {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/đ/g, 'd')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-}
+
+
+type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
 export default function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
@@ -36,12 +30,29 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   const [isFetching, setIsFetching] = useState(true)
   const [error, setError] = useState('')
   const [showMediaPicker, setShowMediaPicker] = useState(false)
+  const [mediaPickerTarget, setMediaPickerTarget] = useState<'featured' | 'og' | 'twitter'>('featured')
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([])
   const [slugEdited, setSlugEdited] = useState(false)
   const [hasToc, setHasToc] = useState(false)
   const [tocHeadings, setTocHeadings] = useState({ h2: true, h3: true, h4: false, h5: false })
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [editorMode, setEditorMode] = useState<'rich' | 'html'>('rich')
+  const [showValidationDialog, setShowValidationDialog] = useState(false)
+  const [validationErrors, setValidationErrors] = useState<string[]>([])
+  const [seoScore, setSeoScore] = useState(0)
+
+  // Autosave
+  const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle')
+  const lastSavedRef = useRef<string>('')
+  const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Tags
+  const [tagInput, setTagInput] = useState('')
+  const [tags, setTags] = useState<string[]>([])
+
+  // Secondary keywords
+  const [skInput, setSkInput] = useState('')
+  const [secondaryKeywords, setSecondaryKeywords] = useState<string[]>([])
 
   const [form, setForm] = useState({
     title: '',
@@ -56,6 +67,19 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
     seo_title: '',
     meta_description: '',
     focus_keyword: '',
+    // Social / OG
+    og_title: '',
+    og_description: '',
+    og_image: '',
+    // Twitter
+    twitter_title: '',
+    twitter_description: '',
+    twitter_image: '',
+    // Technical SEO
+    canonical_url: '',
+    robots_index: true,
+    robots_follow: true,
+    schema_type: 'BlogPosting',
   })
 
   // Load post data
@@ -81,9 +105,32 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           seo_title: post.seo_title || '',
           meta_description: post.meta_description || '',
           focus_keyword: post.focus_keyword || '',
+          og_title: post.og_title || '',
+          og_description: post.og_description || '',
+          og_image: post.og_image || '',
+          twitter_title: post.twitter_title || '',
+          twitter_description: post.twitter_description || '',
+          twitter_image: post.twitter_image || '',
+          canonical_url: post.canonical_url || '',
+          robots_index: post.robots_index ?? true,
+          robots_follow: post.robots_follow ?? true,
+          schema_type: post.schema_type || 'BlogPosting',
         })
         if (post.category_id) setSelectedCategoryIds([post.category_id])
         if (post.has_toc) setHasToc(true)
+        if (post.tags) {
+          try {
+            setTags(typeof post.tags === 'string' ? JSON.parse(post.tags) : post.tags)
+          } catch (e) {}
+        }
+        if (post.secondary_keywords) {
+          try {
+            setSecondaryKeywords(typeof post.secondary_keywords === 'string' ? JSON.parse(post.secondary_keywords) : post.secondary_keywords)
+          } catch (e) {}
+        }
+
+        // Init last saved snapshot
+        lastSavedRef.current = JSON.stringify({ ...post, tags: post.tags, secondaryKeywords: post.secondary_keywords, selectedCategoryIds: [post.category_id] })
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Lỗi tải bài viết')
       } finally {
@@ -92,26 +139,157 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
     })
   }, [params])
 
+  // ── Unsaved changes warning ──
+  const isDirtyRef = useRef(false)
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (isDirtyRef.current) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [])
+
+  const markDirty = useCallback(() => {
+    isDirtyRef.current = true
+  }, [])
+
+  // ── Autosave every 30s ──
+  useEffect(() => {
+    if (!postId) return
+    autosaveTimerRef.current = setInterval(() => {
+      if (!isDirtyRef.current) return
+      const snapshot = JSON.stringify({ ...form, tags, secondaryKeywords, selectedCategoryIds })
+      if (snapshot === lastSavedRef.current) return
+
+      // Don't autosave if title is empty
+      if (!form.title.trim()) return
+
+      setAutosaveStatus('saving')
+      fetch('/api/posts/autosave', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: postId,
+          ...form,
+          category_id: selectedCategoryIds[0] ?? undefined,
+          secondary_keywords: secondaryKeywords,
+          tags,
+          has_toc: hasToc,
+        }),
+      })
+        .then(res => {
+          if (!res.ok) throw new Error('Autosave failed')
+          return res.json()
+        })
+        .then(() => {
+          lastSavedRef.current = snapshot
+          isDirtyRef.current = false
+          setAutosaveStatus('saved')
+          setTimeout(() => setAutosaveStatus('idle'), 3000)
+        })
+        .catch(() => {
+          setAutosaveStatus('error')
+          setTimeout(() => setAutosaveStatus('idle'), 5000)
+        })
+    }, 30000)
+
+    return () => {
+      if (autosaveTimerRef.current) clearInterval(autosaveTimerRef.current)
+    }
+  }, [form, tags, secondaryKeywords, selectedCategoryIds, postId, hasToc])
+
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value
     setForm(p => ({ ...p, title: v, slug: slugEdited ? p.slug : generateSlug(v) }))
+    markDirty()
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     if (name === 'slug') setSlugEdited(true)
     setForm(p => ({ ...p, [name]: value }))
+    markDirty()
+  }
+
+  const handleCheckboxChange = (name: string, checked: boolean) => {
+    setForm(p => ({ ...p, [name]: checked }))
+    markDirty()
+  }
+
+  // ── Tag chips ──
+  const addTag = () => {
+    const t = tagInput.trim().toLowerCase()
+    if (t && !tags.includes(t)) {
+      setTags(prev => [...prev, t])
+      markDirty()
+    }
+    setTagInput('')
+  }
+
+  // ── Secondary keyword chips ──
+  const addSecondaryKeyword = () => {
+    const k = skInput.trim().toLowerCase()
+    if (k && !secondaryKeywords.includes(k)) {
+      setSecondaryKeywords(prev => [...prev, k])
+      markDirty()
+    }
+    setSkInput('')
+  }
+
+  // ── Validation before publish ──
+  const validateForPublish = (): string[] => {
+    const errors: string[] = []
+    if (!form.title.trim()) errors.push('Thiếu tiêu đề bài viết')
+    if (!form.slug.trim()) errors.push('Thiếu đường dẫn (slug)')
+    if (!form.content.trim() || form.content.replace(/<[^>]+>/g, '').trim().length < 50) errors.push('Nội dung quá ngắn hoặc trống')
+    if (!form.featured_image) errors.push('Thiếu ảnh đại diện')
+    if (form.featured_image && !form.featured_image_alt.trim()) errors.push('Thiếu alt text cho ảnh đại diện')
+    if (!form.meta_description.trim()) errors.push('Thiếu meta description')
+    if (!form.focus_keyword.trim()) errors.push('Thiếu từ khóa chính (focus keyword)')
+    if (selectedCategoryIds.length === 0) errors.push('Chưa chọn danh mục')
+    const seoTitleLen = (form.seo_title || form.title).length
+    if (seoTitleLen > 60) errors.push(`SEO title quá dài (${seoTitleLen} ký tự, tối đa 60)`)
+    const metaLen = form.meta_description.length
+    if (metaLen > 0 && metaLen < 120) errors.push(`Meta description quá ngắn (${metaLen} ký tự, tối thiểu 120)`)
+    if (metaLen > 160) errors.push(`Meta description quá dài (${metaLen} ký tự, tối đa 160)`)
+    return errors
   }
 
   const handleSubmit = async (submitStatus: string) => {
     if (!form.title.trim()) { setError('Vui lòng nhập tiêu đề bài viết'); return }
-    setIsLoading(true); setError('')
+
+    if (submitStatus === 'published') {
+      const errors = validateForPublish()
+      if (errors.length > 0) {
+        setValidationErrors(errors)
+        setShowValidationDialog(true)
+        return
+      }
+      if (seoScore < 70) {
+        setValidationErrors([`Điểm SEO hiện tại: ${seoScore}/100. Khuyến nghị đạt tối thiểu 70 điểm trước khi xuất bản.`])
+        setShowValidationDialog(true)
+        return
+      }
+    }
+
+    await doSubmit(submitStatus)
+  }
+
+  const doSubmit = async (submitStatus: string) => {
+    setIsLoading(true)
+    setError('')
+    setShowValidationDialog(false)
     try {
       const payload = {
         ...form,
         status: submitStatus,
         category_id: selectedCategoryIds[0] ?? undefined,
         has_toc: hasToc,
+        secondary_keywords: secondaryKeywords,
+        tags,
       }
       const res = await fetch(`/api/posts/${postId}`, {
         method: 'PUT',
@@ -122,6 +300,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         const d = await res.json()
         throw new Error(d.error || 'Có lỗi xảy ra')
       }
+      isDirtyRef.current = false
       router.push('/admin/bai-viet')
       router.refresh()
     } catch (e) {
@@ -142,6 +321,36 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
       setError('Không thể xóa bài viết')
       setIsLoading(false)
     }
+  }
+
+  const openMediaPicker = (target: 'featured' | 'og' | 'twitter') => {
+    setMediaPickerTarget(target)
+    setShowMediaPicker(true)
+  }
+
+  const handleMediaSelect = (url: string, meta?: any) => {
+    if (mediaPickerTarget === 'featured') {
+      setForm(p => ({
+        ...p,
+        featured_image: url,
+        featured_image_alt: meta?.seo_title || meta?.alt_text || p.featured_image_alt,
+        featured_image_caption: meta?.caption || p.featured_image_caption,
+        featured_image_description: meta?.description || p.featured_image_description,
+      }))
+    } else if (mediaPickerTarget === 'og') {
+      setForm(p => ({ ...p, og_image: url }))
+    } else if (mediaPickerTarget === 'twitter') {
+      setForm(p => ({ ...p, twitter_image: url }))
+    }
+    markDirty()
+  }
+
+  // Autosave status indicator
+  const AutosaveIndicator = () => {
+    if (autosaveStatus === 'saving') return <span className="text-xs text-blue-600 flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> Đang lưu...</span>
+    if (autosaveStatus === 'saved') return <span className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 size={12} /> Đã lưu tự động</span>
+    if (autosaveStatus === 'error') return <span className="text-xs text-red-600 flex items-center gap-1"><AlertTriangle size={12} /> Lỗi khi lưu</span>
+    return null
   }
 
   if (isFetching) {
@@ -170,6 +379,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <AutosaveIndicator />
             {error && <span className="text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-lg border border-red-100">{error}</span>}
             {form.slug && (
               <Link href={`/tin-tuc/${form.slug}`} target="_blank" className="flex items-center gap-1.5 px-3 py-2 border border-neutral-200 rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-50 transition-colors">
@@ -210,17 +420,28 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                   className="w-full text-2xl font-bold text-neutral-900 border-0 outline-none placeholder:text-neutral-300 leading-tight"
                 />
               </div>
-              <div className="px-6 py-3 flex items-center gap-2 bg-neutral-50/50 text-sm">
-                <span className="text-neutral-400 text-xs font-medium">Đường dẫn:</span>
-                <span className="text-neutral-300">/</span>
+              <div className="px-6 py-3 flex items-center gap-2 bg-neutral-50/50 text-sm border-t border-neutral-100">
+                <span className="text-neutral-400 text-xs font-medium whitespace-nowrap">Đường dẫn:</span>
+                <span className="text-neutral-300">/tin-tuc/</span>
                 <input
                   name="slug"
                   value={form.slug}
                   onChange={handleChange}
                   placeholder="duong-dan-bai-viet"
-                  className="flex-1 text-primary font-mono text-xs border-0 outline-none focus:bg-primary/5 rounded px-1 py-0.5"
+                  className="flex-1 text-primary font-mono text-xs border-0 outline-none focus:bg-primary/5 rounded px-1 py-0.5 bg-transparent"
                 />
-                <span className="text-neutral-300">/</span>
+                {slugEdited && (
+                  <button
+                    onClick={() => {
+                      setForm(p => ({ ...p, slug: generateSlug(p.title) }))
+                      setSlugEdited(false)
+                      markDirty()
+                    }}
+                    className="text-[10px] bg-neutral-200 text-neutral-600 px-2 py-0.5 rounded hover:bg-primary/10 hover:text-primary transition-colors whitespace-nowrap"
+                  >
+                    Tạo lại từ tiêu đề
+                  </button>
+                )}
               </div>
             </div>
 
@@ -246,13 +467,13 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
               {editorMode === 'rich' ? (
                 <RichTextEditor
                   value={form.content}
-                  onChange={v => setForm(p => ({ ...p, content: v }))}
+                  onChange={v => { setForm(p => ({ ...p, content: v })); markDirty() }}
                   placeholder="Bắt đầu viết nội dung bài viết của bạn..."
                 />
               ) : (
                 <textarea
                   value={form.content}
-                  onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
+                  onChange={e => { setForm(p => ({ ...p, content: e.target.value })); markDirty() }}
                   placeholder="<p>Nhập mã HTML tại đây...</p>"
                   className="w-full min-h-[450px] p-5 font-mono text-sm bg-[#1e1e1e] text-[#d4d4d4] outline-none resize-y"
                   spellCheck={false}
@@ -271,7 +492,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                 value={form.excerpt}
                 onChange={handleChange}
                 rows={3}
-                placeholder="Một đoạn giới thiệu ngắn về bài viết (nếu để trống sẽ tự lấy từ nội dung)..."
+                placeholder="Tóm tắt ngắn nội dung bài viết để hiển thị ở trang blog."
                 className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none resize-none text-sm"
               />
             </div>
@@ -307,20 +528,23 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                       ))}
                     </div>
                   </div>
-                  <div>
-                    <label className="block font-semibold text-neutral-600 mb-1.5">Nhãn tiêu đề</label>
-                    <input
-                      defaultValue="Mục lục"
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none"
-                    />
-                    <p className="text-xs text-neutral-400 mt-1">Ví dụ: Nội dung, Mục lục, Nội dung trang</p>
-                  </div>
                 </div>
               ) : (
                 <div className="p-5">
                   <p className="text-sm text-neutral-400">Bật tính năng Mục lục để hệ thống tự động tạo mục lục từ các thẻ tiêu đề H2, H3 trong bài viết.</p>
                 </div>
               )}
+            </div>
+
+            {/* ── SEO Cơ bản (below editor on mobile, visible on desktop too) ── */}
+            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden xl:hidden">
+              <div className="px-5 py-3 bg-neutral-50 border-b border-neutral-100 flex items-center gap-2">
+                <Settings2 size={15} className="text-neutral-500" />
+                <span className="text-sm font-semibold text-neutral-700">SEO & Mạng xã hội</span>
+              </div>
+              <div className="p-5 text-sm text-neutral-400">
+                Cuộn xuống để xem panel SEO ở cột bên phải (desktop) hoặc bên dưới (mobile).
+              </div>
             </div>
           </div>
 
@@ -346,9 +570,21 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                   </select>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-neutral-500">👁 Hiển thị</span>
-                  <span className="text-neutral-700 font-medium">Công khai</span>
+                  <span className="text-neutral-500">📊 Schema</span>
+                  <select
+                    name="schema_type"
+                    value={form.schema_type}
+                    onChange={handleChange}
+                    className="border border-neutral-200 rounded-lg px-2 py-1.5 text-sm focus:border-primary outline-none bg-white"
+                  >
+                    <option value="BlogPosting">BlogPosting</option>
+                    <option value="Article">Article</option>
+                    <option value="NewsArticle">NewsArticle</option>
+                    <option value="HowTo">HowTo</option>
+                    <option value="FAQPage">FAQPage</option>
+                  </select>
                 </div>
+                <AutosaveIndicator />
                 <div className="pt-2 border-t border-neutral-100 flex gap-2">
                   <button onClick={() => handleSubmit('draft')} className="flex-1 py-2 border border-neutral-200 rounded-xl text-sm font-medium text-neutral-600 hover:bg-neutral-50 transition-colors">
                     Lưu nháp
@@ -386,61 +622,227 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                     <div className="relative group rounded-xl overflow-hidden border border-neutral-200">
                       <img src={form.featured_image} alt={form.featured_image_alt} className="w-full aspect-video object-cover" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <button onClick={() => setShowMediaPicker(true)} className="bg-white text-neutral-800 px-3 py-1.5 rounded-lg text-xs font-semibold">Thay đổi</button>
+                        <button onClick={() => openMediaPicker('featured')} className="bg-white text-neutral-800 px-3 py-1.5 rounded-lg text-xs font-semibold">Thay đổi</button>
                         <button onClick={() => setForm(p => ({ ...p, featured_image: '', featured_image_alt: '', featured_image_caption: '', featured_image_description: '' }))} className="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Xóa</button>
                       </div>
                     </div>
-                    <p className="text-xs text-neutral-400 text-center">Nhấn vào ảnh để sửa hoặc cập nhật</p>
+                    <p className="text-xs text-neutral-400 text-center">Khuyến nghị: 1200×675px</p>
                     <div className="space-y-2 pt-2 border-t border-neutral-100">
                       <div>
-                        <label className="block text-xs font-semibold text-neutral-600 mb-1">Tiêu đề SEO (Title)</label>
-                        <input value={form.featured_image_alt} onChange={e => setForm(p => ({ ...p, featured_image_alt: e.target.value }))} placeholder="Tiêu đề tối ưu SEO cho ảnh..." className="w-full px-3 py-1.5 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none" />
+                        <label className="block text-xs font-semibold text-neutral-600 mb-1">Alt text (SEO) <span className="text-red-500">*</span></label>
+                        <input value={form.featured_image_alt} onChange={e => { setForm(p => ({ ...p, featured_image_alt: e.target.value })); markDirty() }} placeholder="Mô tả ảnh, ví dụ: vòng tay handmade charm hoa hồng Mushroomie" className="w-full px-3 py-1.5 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none" />
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-neutral-600 mb-1">Chú thích (Caption)</label>
-                        <input value={form.featured_image_caption} onChange={e => setForm(p => ({ ...p, featured_image_caption: e.target.value }))} placeholder="Chú thích hiển thị dưới ảnh..." className="w-full px-3 py-1.5 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-neutral-600 mb-1">Mô tả (Description)</label>
-                        <textarea value={form.featured_image_description} onChange={e => setForm(p => ({ ...p, featured_image_description: e.target.value }))} rows={2} placeholder="Mô tả nội dung ảnh..." className="w-full px-3 py-1.5 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none resize-none" />
+                        <input value={form.featured_image_caption} onChange={e => { setForm(p => ({ ...p, featured_image_caption: e.target.value })); markDirty() }} placeholder="Chú thích hiển thị dưới ảnh..." className="w-full px-3 py-1.5 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none" />
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <button onClick={() => setShowMediaPicker(true)} className="w-full border-2 border-dashed border-neutral-200 rounded-xl py-8 flex flex-col items-center gap-2 text-neutral-400 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all">
+                  <button onClick={() => openMediaPicker('featured')} className="w-full border-2 border-dashed border-neutral-200 rounded-xl py-8 flex flex-col items-center gap-2 text-neutral-400 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all">
                     <ImageIcon size={28} />
                     <span className="text-sm font-medium">Chọn ảnh đại diện</span>
-                    <span className="text-xs">Nhấn để mở thư viện Media</span>
+                    <span className="text-xs">Khuyến nghị: 1200×675px</span>
                   </button>
                 )}
               </div>
             </div>
 
             {/* Category Panel */}
-            <CategoryPanel selectedIds={selectedCategoryIds} onChange={setSelectedCategoryIds} />
+            <CategoryPanel selectedIds={selectedCategoryIds} onChange={(ids) => { setSelectedCategoryIds(ids); markDirty() }} />
 
-            {/* SEO Analyzer */}
-            <SeoAnalyzer form={form} setForm={setForm} />
+            {/* Tags */}
+            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
+              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
+                <span className="font-semibold text-sm text-neutral-800">Tags</span>
+              </div>
+              <div className="p-4">
+                <div className="flex gap-2 mb-2">
+                  <input
+                    value={tagInput}
+                    onChange={e => setTagInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag() } }}
+                    placeholder="Thêm tag..."
+                    className="flex-1 px-3 py-1.5 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none"
+                  />
+                  <button onClick={addTag} className="px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold">+</button>
+                </div>
+                {tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {tags.map(t => (
+                      <span key={t} className="inline-flex items-center gap-1 bg-primary/10 text-primary px-2.5 py-1 rounded-full text-xs font-medium">
+                        {t}
+                        <button onClick={() => { setTags(prev => prev.filter(x => x !== t)); markDirty() }} className="hover:text-red-500">×</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Internal Link Suggester */}
+            <InternalLinkSuggester />
+
+            {/* SEO Analyzer (existing component - enhanced) */}
+            <SeoAnalyzer form={form} setForm={(fn: any) => { setForm(fn); markDirty() }} onScoreChange={setSeoScore} />
+
+            {/* ── Social / OG / Twitter Panel ── */}
+            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
+              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100 flex items-center gap-2">
+                <Share2 size={14} className="text-neutral-500" />
+                <span className="font-semibold text-sm text-neutral-800">Mạng xã hội</span>
+              </div>
+              <div className="p-4 space-y-4">
+                {/* Social preview card */}
+                <div className="border border-neutral-200 rounded-xl overflow-hidden">
+                  <div className="aspect-[1.91/1] bg-neutral-100 relative">
+                    {(form.og_image || form.featured_image) ? (
+                      <img src={form.og_image || form.featured_image} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-neutral-300">
+                        <ImageIcon size={32} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3 bg-neutral-50">
+                    <p className="text-[10px] text-neutral-400 uppercase">mushroomie.io.vn</p>
+                    <p className="text-sm font-semibold text-neutral-800 line-clamp-1 mt-0.5">
+                      {form.og_title || form.seo_title || form.title || 'Tiêu đề bài viết'}
+                    </p>
+                    <p className="text-xs text-neutral-500 line-clamp-2 mt-0.5">
+                      {form.og_description || form.meta_description || 'Mô tả sẽ hiển thị khi chia sẻ lên Facebook, Zalo...'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* OG fields */}
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-600 mb-1">OG Title</label>
+                  <input name="og_title" value={form.og_title} onChange={handleChange} placeholder="Để trống sẽ dùng SEO title" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-600 mb-1">OG Description</label>
+                  <textarea name="og_description" value={form.og_description} onChange={handleChange} rows={2} placeholder="Để trống sẽ dùng meta description" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none resize-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-600 mb-1">OG Image</label>
+                  <div className="flex gap-2">
+                    <input name="og_image" value={form.og_image} onChange={handleChange} placeholder="Để trống sẽ dùng ảnh đại diện" className="flex-1 px-3 py-2 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none" />
+                    <button onClick={() => openMediaPicker('og')} className="px-3 py-2 border border-primary text-primary rounded-lg text-xs font-semibold hover:bg-primary/5">Chọn</button>
+                  </div>
+                </div>
+
+                <hr className="border-neutral-100" />
+
+                {/* Twitter fields */}
+                <p className="text-xs font-bold text-neutral-500 uppercase tracking-wide">Twitter Card</p>
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-600 mb-1">Twitter Title</label>
+                  <input name="twitter_title" value={form.twitter_title} onChange={handleChange} placeholder="Để trống sẽ dùng OG title" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-600 mb-1">Twitter Description</label>
+                  <textarea name="twitter_description" value={form.twitter_description} onChange={handleChange} rows={2} placeholder="Để trống sẽ dùng OG description" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none resize-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-600 mb-1">Twitter Image</label>
+                  <div className="flex gap-2">
+                    <input name="twitter_image" value={form.twitter_image} onChange={handleChange} placeholder="Để trống sẽ dùng OG image" className="flex-1 px-3 py-2 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none" />
+                    <button onClick={() => openMediaPicker('twitter')} className="px-3 py-2 border border-primary text-primary rounded-lg text-xs font-semibold hover:bg-primary/5">Chọn</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Technical SEO Panel ── */}
+            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
+              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100 flex items-center gap-2">
+                <Globe size={14} className="text-neutral-500" />
+                <span className="font-semibold text-sm text-neutral-800">SEO Kỹ thuật</span>
+              </div>
+              <div className="p-4 space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-600 mb-1">Canonical URL</label>
+                  <input name="canonical_url" value={form.canonical_url} onChange={handleChange} placeholder="Để trống sẽ tự dùng URL bài viết" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-xs font-mono focus:border-primary outline-none" />
+                </div>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
+                    <input type="checkbox" checked={form.robots_index} onChange={e => handleCheckboxChange('robots_index', e.target.checked)} className="w-4 h-4 accent-primary rounded" />
+                    Index
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
+                    <input type="checkbox" checked={form.robots_follow} onChange={e => handleCheckboxChange('robots_follow', e.target.checked)} className="w-4 h-4 accent-primary rounded" />
+                    Follow
+                  </label>
+                </div>
+                <p className="text-xs text-neutral-400">Bỏ tích &quot;Index&quot; nếu không muốn Google index bài viết này.</p>
+
+                {/* Secondary keywords */}
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-600 mb-1">Từ khóa phụ</label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      value={skInput}
+                      onChange={e => setSkInput(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSecondaryKeyword() } }}
+                      placeholder="Ví dụ: vòng cổ handmade"
+                      className="flex-1 px-3 py-1.5 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none"
+                    />
+                    <button onClick={addSecondaryKeyword} className="px-3 py-1.5 bg-neutral-200 text-neutral-700 rounded-lg text-xs font-semibold hover:bg-neutral-300">+</button>
+                  </div>
+                  {secondaryKeywords.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {secondaryKeywords.map(k => (
+                        <span key={k} className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full text-xs font-medium">
+                          {k}
+                          <button onClick={() => { setSecondaryKeywords(prev => prev.filter(x => x !== k)); markDirty() }} className="hover:text-red-500">×</button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Media Picker Modal */}
+      {/* ── Media Picker Modal ── */}
       {showMediaPicker && (
         <MediaPicker
-          value={form.featured_image}
-          onChange={(url, meta) => {
-            setForm(p => ({
-              ...p,
-              featured_image: url,
-              featured_image_alt: meta?.seo_title || meta?.alt_text || p.featured_image_alt,
-              featured_image_caption: meta?.caption || p.featured_image_caption,
-              featured_image_description: meta?.description || p.featured_image_description,
-            }))
-          }}
+          value={mediaPickerTarget === 'featured' ? form.featured_image : mediaPickerTarget === 'og' ? form.og_image : form.twitter_image}
+          onChange={handleMediaSelect}
           onClose={() => setShowMediaPicker(false)}
           purpose="post"
         />
+      )}
+
+      {/* ── Validation Dialog ── */}
+      {showValidationDialog && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="px-5 py-4 border-b border-neutral-100 flex items-center gap-2">
+              <AlertTriangle size={18} className="text-orange-500" />
+              <h3 className="font-bold text-neutral-800">Kiểm tra trước khi xuất bản</h3>
+            </div>
+            <div className="p-5 space-y-2 max-h-64 overflow-y-auto">
+              {validationErrors.map((err, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm">
+                  <span className="text-red-500 mt-0.5">⚠</span>
+                  <span className="text-neutral-700">{err}</span>
+                </div>
+              ))}
+            </div>
+            <div className="px-5 py-4 bg-neutral-50 border-t border-neutral-100 flex justify-end gap-2">
+              <button onClick={() => setShowValidationDialog(false)} className="px-4 py-2 border border-neutral-200 rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-100">
+                Quay lại sửa
+              </button>
+              <button onClick={() => doSubmit('published')} className="px-4 py-2 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600">
+                Vẫn xuất bản
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
