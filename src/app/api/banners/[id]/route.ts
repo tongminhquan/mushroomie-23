@@ -35,6 +35,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
 
+    // Sanitize image_url to fix incorrect absolute paths accidentally passed from frontend
+    if (parsed.data.image_url.startsWith('/var/www/mushroomie/public')) {
+      parsed.data.image_url = parsed.data.image_url.replace('/var/www/mushroomie/public', '')
+    }
+
     const banner = await prisma.banner.update({
       where: { id: Number(id) },
       data: parsed.data,

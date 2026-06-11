@@ -54,6 +54,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
 
+    // Sanitize image_url to fix incorrect absolute paths accidentally passed from frontend
+    if (parsed.data.image_url.startsWith('/var/www/mushroomie/public')) {
+      parsed.data.image_url = parsed.data.image_url.replace('/var/www/mushroomie/public', '')
+    }
+
     const banner = await prisma.banner.create({
       data: parsed.data,
     })
