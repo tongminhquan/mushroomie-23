@@ -21,9 +21,9 @@ export default function HomeFinalCTA() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/san-pham"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-text px-5 text-sm font-extrabold text-white hover:-translate-y-0.5 hover:bg-primary"
+              className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-text px-5 text-sm font-extrabold text-white hover:-translate-y-0.5 hover:bg-primary"
             >
-              Khám phá sản phẩm <ArrowRight size={17} />
+              Khám phá sản phẩm <ArrowRight size={17} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
             <Link
               href="/lien-he"

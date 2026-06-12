@@ -56,6 +56,8 @@ export function getPublicImageUrl(pathOrUrl?: string | null, type: 'product' | '
   const value = pathOrUrl.trim();
   if (!value) return fallback;
 
+  if (value.startsWith('blob:')) return value;
+
   // Handle internal links generated in local or legacy environments.
   if (
     value.startsWith('http://localhost') ||
@@ -64,8 +66,7 @@ export function getPublicImageUrl(pathOrUrl?: string | null, type: 'product' | '
     value.startsWith('https://127.0.0.1')
   ) {
     try {
-      const url = new URL(value);
-      return normalizeLocalImagePath(url.pathname);
+      return new URL(value).pathname;
     } catch {
       return fallback;
     }
@@ -73,21 +74,20 @@ export function getPublicImageUrl(pathOrUrl?: string | null, type: 'product' | '
   
   // Convert absolute internal URLs to relative to use Next.js image optimization properly
   if (value.startsWith(SITE_URL)) {
-    return normalizeLocalImagePath(value.replace(SITE_URL, ''));
+    try {
+      return new URL(value).pathname;
+    } catch {
+      return fallback;
+    }
   }
 
-  // Already a full absolute remote URL or relative URL.
+  if (value.startsWith('/public/uploads/')) return value.replace('/public', '');
+  if (value.startsWith('public/uploads/')) return `/${value.replace('public/', '')}`;
+  if (value.startsWith('uploads/')) return `/${value}`;
+  if (value.startsWith('/uploads/')) return value;
+  
+  if (value.startsWith('/')) return value;
   if (value.startsWith('http')) return value;
-  return normalizeLocalImagePath(value);
-}
 
-function normalizeLocalImagePath(value: string): string {
-  if (!value.includes('/') && !value.startsWith('http')) {
-    return `/uploads/${value}`;
-  }
-  const withLeadingSlash = value.startsWith('/') ? value : `/${value}`;
-  if (withLeadingSlash.startsWith('/public/uploads/')) {
-    return withLeadingSlash.replace('/public', '');
-  }
-  return withLeadingSlash;
+  return `/uploads/${value}`;
 }

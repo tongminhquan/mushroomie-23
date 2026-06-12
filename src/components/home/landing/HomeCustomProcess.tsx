@@ -47,7 +47,7 @@ export default function HomeCustomProcess({ products }: { products: HomeProduct[
 
             <ol className="mt-9 grid gap-3 md:grid-cols-3">
               {steps.map(({ icon: Icon, title, text }, index) => (
-                <li key={title} className="relative rounded-[16px] border border-white/12 bg-white/[0.06] p-5">
+                <li key={title} className="relative rounded-[16px] border border-white/12 bg-white/[0.06] p-5 hover-lift">
                   <span className="absolute right-4 top-4 font-heading text-3xl text-white/10">0{index + 1}</span>
                   <div className="grid h-11 w-11 place-items-center rounded-lg bg-yellow text-text">
                     <Icon size={21} />
@@ -60,9 +60,9 @@ export default function HomeCustomProcess({ products }: { products: HomeProduct[
 
             <Link
               href="/lien-he"
-              className="mt-8 inline-flex min-h-12 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-extrabold text-white hover:-translate-y-0.5 hover:bg-white hover:text-primary"
+              className="group mt-8 inline-flex min-h-12 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-extrabold text-white transition-colors hover:-translate-y-0.5 hover:bg-white hover:text-primary"
             >
-              Custom ngay <ArrowRight size={17} />
+              Custom ngay <ArrowRight size={17} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </div>
 

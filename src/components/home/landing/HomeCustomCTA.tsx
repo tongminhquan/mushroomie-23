@@ -24,9 +24,9 @@ export default function HomeCustomCTA() {
           <div className="flex flex-col gap-3 sm:flex-row lg:justify-end">
             <Link
               href="/san-pham"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-extrabold text-white shadow-card hover:-translate-y-0.5 hover:bg-text sm:min-h-[56px] sm:text-base transition-all"
+              className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-extrabold text-white shadow-card hover:-translate-y-0.5 hover:bg-text sm:min-h-[56px] sm:text-base transition-all"
             >
-              Khám phá sản phẩm <ArrowRight size={18} />
+              Khám phá sản phẩm <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
             <Link
               href="/lien-he"

@@ -36,7 +36,7 @@ export default function HomeCategoryShowcase({ categories }: { categories: HomeC
                 </div>
                 <h3 className="font-heading text-xl leading-tight text-text sm:text-2xl">{category.name}</h3>
                 <span className="mt-auto inline-flex items-center gap-2 pt-4 text-xs font-extrabold text-primary-dark sm:text-sm">
-                  Khám phá <ArrowRight size={16} />
+                  Khám phá <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
               </Link>
             ))}
@@ -50,9 +50,9 @@ export default function HomeCategoryShowcase({ categories }: { categories: HomeC
         <div className="mt-7">
           <Link
             href="/san-pham"
-            className="inline-flex min-h-12 items-center gap-2 rounded-lg bg-text px-5 text-sm font-extrabold text-white hover:bg-primary"
+            className="group inline-flex min-h-12 items-center gap-2 rounded-lg bg-text px-5 text-sm font-extrabold text-white transition-colors hover:bg-primary"
           >
-            Xem tất cả sản phẩm <ArrowRight size={17} />
+            Xem tất cả sản phẩm <ArrowRight size={17} className="transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </div>
       </BrandContainer>

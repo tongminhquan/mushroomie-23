@@ -25,9 +25,9 @@ export default function HomeFeaturedProducts({ products }: { products: HomeProdu
         <div className="mt-8 flex justify-center">
           <Link
             href="/san-pham"
-            className="inline-flex min-h-12 items-center gap-2 rounded-lg border border-primary px-5 text-sm font-extrabold text-primary hover:bg-primary hover:text-white"
+            className="group inline-flex min-h-12 items-center gap-2 rounded-lg border border-primary px-5 text-sm font-extrabold text-primary transition-colors hover:bg-primary hover:text-white"
           >
-            Xem bộ sưu tập <ArrowRight size={17} />
+            Xem bộ sưu tập <ArrowRight size={17} className="transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </div>
       </BrandContainer>

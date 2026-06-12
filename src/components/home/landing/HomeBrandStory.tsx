@@ -40,9 +40,9 @@ export default function HomeBrandStory({ products }: { products: HomeProduct[] }
             </div>
             <Link
               href="/gioi-thieu"
-              className="mt-7 inline-flex min-h-11 items-center gap-2 rounded-lg border border-primary px-4 text-sm font-extrabold text-primary hover:bg-primary hover:text-white"
+              className="group mt-7 inline-flex min-h-11 items-center gap-2 rounded-lg border border-primary px-4 text-sm font-extrabold text-primary transition-colors hover:bg-primary hover:text-white"
             >
-              Đọc câu chuyện thương hiệu <ArrowRight size={17} />
+              Đọc câu chuyện thương hiệu <ArrowRight size={17} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </div>
 
@@ -55,7 +55,7 @@ export default function HomeBrandStory({ products }: { products: HomeProduct[] }
                 sizes="(max-width: 1024px) 100vw, 52vw"
                 className="object-contain p-5 sm:p-8"
               />
-              <BrandSticker tone="yellow" className="absolute left-4 top-4 rotate-[-2deg]">
+              <BrandSticker tone="yellow" className="absolute left-4 top-4 rotate-[-2deg] animate-float-soft">
                 Bắt đầu ở tuổi 18
               </BrandSticker>
             </div>
@@ -64,7 +64,7 @@ export default function HomeBrandStory({ products }: { products: HomeProduct[] }
               {milestones.map(({ icon: Icon, label }, index) => (
                 <li
                   key={label}
-                  className="flex min-h-24 items-start gap-3 rounded-[14px] border border-neutral-200 bg-secondary p-4"
+                  className="flex min-h-24 items-start gap-3 rounded-[14px] border border-neutral-200 bg-secondary p-4 hover-lift"
                 >
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white text-primary shadow-sm">
                     <Icon size={18} />

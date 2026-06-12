@@ -135,7 +135,7 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
         {proofItems.map(({ icon: Icon, label }, index) => (
           <div
             key={label}
-            className={`flex min-h-20 items-center gap-3 px-4 py-3 ${index % 2 === 0 ? 'border-r border-neutral-200' : ''} ${index < 2 ? 'border-b border-neutral-200 sm:border-b-0' : ''} sm:border-r sm:last:border-r-0`}
+            className={`flex min-h-20 items-center gap-3 px-4 py-3 hover-lift ${index % 2 === 0 ? 'border-r border-neutral-200' : ''} ${index < 2 ? 'border-b border-neutral-200 sm:border-b-0' : ''} sm:border-r sm:last:border-r-0`}
           >
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary-light text-primary">
               <Icon size={18} />

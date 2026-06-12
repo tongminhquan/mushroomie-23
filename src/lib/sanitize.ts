@@ -27,7 +27,8 @@ export function normalizeArticleImages(html: string): string {
         normalized.startsWith('http://localhost') ||
         normalized.startsWith('https://localhost') ||
         normalized.startsWith('http://127.0.0.1') ||
-        normalized.startsWith('https://127.0.0.1')
+        normalized.startsWith('https://127.0.0.1') ||
+        normalized.startsWith('https://mushroomie.io.vn')
       ) {
         try {
           normalized = new URL(normalized).pathname
@@ -38,6 +39,12 @@ export function normalizeArticleImages(html: string): string {
 
       if (normalized.startsWith('/public/uploads/')) {
         normalized = normalized.replace('/public', '')
+      }
+      if (normalized.startsWith('public/uploads/')) {
+        normalized = `/${normalized.replace('public/', '')}`
+      }
+      if (normalized.startsWith('uploads/')) {
+        normalized = `/${normalized}`
       }
 
       if (
