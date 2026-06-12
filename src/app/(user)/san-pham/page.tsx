@@ -22,7 +22,10 @@ interface SearchParams {
 
 export default async function ProductsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams
-  const page = Math.max(1, Number(sp.page || 1))
+  const pageRaw = sp.page
+  const pageStr = Array.isArray(pageRaw) ? pageRaw[0] : String(pageRaw || '1')
+  const pageNum = parseInt(pageStr, 10) || 1
+  const page = Math.max(1, pageNum)
   const limit = 12
   const where: any = { status: 'active' }
 
