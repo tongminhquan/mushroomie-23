@@ -1,9 +1,9 @@
 import { prisma } from '@/lib/prisma'
 import { formatPrice, formatDate } from '@/lib/utils'
-import { ShoppingCart, Package, FileText, MessageSquare, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { AdminCard, AdminPageHeader, AdminStatusBadge } from '@/components/admin/AdminUI'
+import { DashboardContent } from '@/components/admin/dashboard/DashboardContent'
 
 export const metadata: Metadata = { title: 'Dashboard | Admin Mushroomie' }
 
@@ -28,44 +28,20 @@ const statusLabels: Record<string, string> = {
 }
 
 export default async function AdminDashboard() {
-  const [totalOrders, revenueResult, totalProducts, totalPosts, unreadContacts, recentOrders] = await Promise.all([
-    prisma.order.count().catch(() => 0),
-    prisma.order.aggregate({ _sum: { total: true }, where: { order_status: { not: 'CANCELLED' }, OR: [{ payment_status: 'PAID' }, { order_status: 'COMPLETED' }] } }).catch(() => ({ _sum: { total: 0 } })),
-    prisma.product.count({ where: { status: 'active' } }).catch(() => 0),
-    prisma.post.count({ where: { status: 'published' } }).catch(() => 0),
-    prisma.contact.count({ where: { status: 'unread' } }).catch(() => 0),
-    prisma.order.findMany({ take: 8, orderBy: { created_at: 'desc' }, include: { payment: true } }).catch(() => []),
-  ])
-
-  const totalRevenue = Number(revenueResult._sum.total || 0)
-
-  const stats = [
-    { icon: ShoppingCart, label: 'Tổng đơn hàng', value: totalOrders, href: '/admin/don-hang' },
-    { icon: TrendingUp, label: 'Doanh thu', value: formatPrice(totalRevenue), href: '/admin/don-hang' },
-    { icon: Package, label: 'Sản phẩm', value: totalProducts, href: '/admin/san-pham' },
-    { icon: FileText, label: 'Bài viết', value: totalPosts, href: '/admin/bai-viet' },
-    { icon: MessageSquare, label: 'Liên hệ mới', value: unreadContacts, href: '/admin/lien-he' },
-  ]
+  const recentOrders = await prisma.order.findMany({ 
+    take: 8, 
+    orderBy: { created_at: 'desc' }, 
+    include: { payment: true } 
+  }).catch(() => [])
 
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:p-8">
-      <AdminPageHeader title="Tổng quan" description="Theo dõi nhanh hoạt động bán hàng và nội dung." />
+      <AdminPageHeader title="Tổng quan" description="Theo dõi số liệu và hoạt động kinh doanh." />
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        {stats.map((stat) => (
-          <Link key={stat.label} href={stat.href}
-            className="rounded-xl border border-neutral-200 bg-white p-4 shadow-card transition hover:-translate-y-0.5 hover:border-pink hover:shadow-hover">
-            <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-primary-light text-primary">
-              <stat.icon size={20} />
-            </div>
-            <div className="text-xl font-bold text-neutral-900 truncate">{stat.value}</div>
-            <div className="text-xs text-neutral-500 mt-1">{stat.label}</div>
-          </Link>
-        ))}
-      </div>
+      {/* Main Dashboard Stats and Charts */}
+      <DashboardContent />
 
-      {/* Recent orders */}
+      {/* Recent orders table */}
       <AdminCard className="p-4 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-heading font-bold text-lg">Đơn hàng gần đây</h2>
