@@ -31,13 +31,13 @@ export const metadata: Metadata = {
     siteName: 'Mushroomie',
     title: 'Mushroomie — Phụ kiện Handmade Cá nhân hóa',
     description: 'Phụ kiện handmade cá nhân hóa dành cho giới trẻ',
-    images: [{ url: '/logo_facebook_1024.png', width: 1024, height: 1024, alt: 'Mushroomie Handmade' }],
+    images: [{ url: '/logo.png', width: 500, height: 500, alt: 'Mushroomie Handmade' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Mushroomie — Phụ kiện Handmade Cá nhân hóa',
     description: 'Phụ kiện handmade cá nhân hóa dành cho giới trẻ',
-    images: ['/logo_facebook_1024.png'],
+    images: ['/logo.png'],
   },
 }
 
