@@ -3,6 +3,7 @@ import { useEffect, useRef, useCallback, useState } from 'react'
 import { ImageIcon, AlignLeft, AlignCenter, AlignRight, AlignJustify, Edit2, X } from 'lucide-react'
 import MediaPicker from './MediaPicker'
 import ImageEditorModal from './ImageEditorModal'
+import { normalizeArticleImages } from '@/lib/sanitize'
 
 interface RichTextEditorProps {
   value: string
@@ -64,13 +65,16 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
   const [isReplacingImage, setIsReplacingImage] = useState(false)
   const [wordCount, setWordCount] = useState(0)
 
-  // Init editor
+  // Keep the contenteditable surface in sync with data loaded asynchronously.
   useEffect(() => {
     if (!editorRef.current) return
-    if (!editorRef.current.innerHTML && value) {
-      editorRef.current.innerHTML = value
+    const normalizedValue = normalizeArticleImages(value || '', 'storage')
+    if (editorRef.current.innerHTML !== normalizedValue && lastValue.current !== normalizedValue) {
+      editorRef.current.innerHTML = normalizedValue
+      lastValue.current = normalizedValue
+      setWordCount(editorRef.current.innerText?.trim().split(/\s+/).filter(Boolean).length ?? 0)
     }
-  }, [])
+  }, [value])
 
   const execCmd = useCallback((cmd: string, val?: string) => {
     if (!editorRef.current) return

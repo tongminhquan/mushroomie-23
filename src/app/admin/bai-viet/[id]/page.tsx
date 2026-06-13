@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { use, useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, ImageIcon, Eye, Save, BookOpen, Globe, Share2, Settings2, AlertTriangle, CheckCircle2, Loader2, Trash2, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
@@ -9,6 +9,7 @@ import MediaPicker from '@/components/admin/MediaPicker'
 import CategoryPanel from '@/components/admin/CategoryPanel'
 import InternalLinkSuggester from '@/components/admin/InternalLinkSuggester'
 import { generateSlug } from '@/lib/utils'
+import SafeImage from '@/components/ui/SafeImage'
 
 const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor'), {
   ssr: false,
@@ -22,13 +23,17 @@ const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor')
 
 
 type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+type LoadErrorState = { message: string; status?: number } | null
 
 export default function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
-  const [postId, setPostId] = useState<number | null>(null)
+  const { id } = use(params)
+  const postId = Number(id)
   const [isLoading, setIsLoading] = useState(false)
   const [isFetching, setIsFetching] = useState(true)
   const [error, setError] = useState('')
+  const [loadError, setLoadError] = useState<LoadErrorState>(null)
+  const [loadAttempt, setLoadAttempt] = useState(0)
   const [showMediaPicker, setShowMediaPicker] = useState(false)
   const [mediaPickerTarget, setMediaPickerTarget] = useState<'featured' | 'og' | 'twitter'>('featured')
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([])
@@ -40,6 +45,8 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   const [showValidationDialog, setShowValidationDialog] = useState(false)
   const [validationErrors, setValidationErrors] = useState<string[]>([])
   const [seoScore, setSeoScore] = useState(0)
+  const [featuredImagePreview, setFeaturedImagePreview] = useState('')
+  const [featuredImageMissing, setFeaturedImageMissing] = useState(false)
 
   // Autosave
   const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle')
@@ -82,16 +89,64 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
     schema_type: 'BlogPosting',
   })
 
+  const parseStringArray = useCallback((value: unknown) => {
+    if (Array.isArray(value)) {
+      return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    }
+    if (typeof value !== 'string' || !value.trim()) return []
+
+    try {
+      const parsed = JSON.parse(value)
+      return Array.isArray(parsed)
+        ? parsed.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+        : []
+    } catch {
+      return []
+    }
+  }, [])
+
+  const getLoadErrorMessage = useCallback((status?: number, fallback?: string) => {
+    if (status === 400) return 'ID bài viết không hợp lệ.'
+    if (status === 401) return 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
+    if (status === 403) return 'Bạn không có quyền truy cập bài viết này.'
+    if (status === 404) return 'Không tìm thấy bài viết.'
+    return fallback || 'Không thể tải bài viết, vui lòng thử lại.'
+  }, [])
+
   // Load post data
   useEffect(() => {
-    params.then(async ({ id }) => {
-      const numId = Number(id)
-      setPostId(numId)
+    let cancelled = false
+
+    async function loadPost() {
+      if (!id || !Number.isFinite(postId) || postId <= 0) {
+        setLoadError({ status: 400, message: getLoadErrorMessage(400) })
+        setIsFetching(false)
+        return
+      }
+
+      setIsFetching(true)
+      setLoadError(null)
+      setError('')
+
       try {
-        const res = await fetch(`/api/posts/${numId}`)
-        if (!res.ok) throw new Error('Không tìm thấy bài viết')
-        const data = await res.json()
-        const post = data.post || data
+        const res = await fetch(`/api/posts/${postId}`, {
+          cache: 'no-store',
+          credentials: 'include',
+        })
+        if (!res.ok) {
+          const requestError = new Error(getLoadErrorMessage(res.status)) as Error & { status?: number }
+          requestError.status = res.status
+          throw requestError
+        }
+        const data = await res.json().catch(() => null)
+        const post = data?.post || data
+        if (!post || typeof post !== 'object') {
+          throw new Error('Invalid post response.')
+        }
+        if (cancelled) return
+
+        const parsedTags = parseStringArray(post.tags)
+        const parsedSecondaryKeywords = parseStringArray(post.secondary_keywords)
         setForm({
           title: post.title || '',
           slug: post.slug || '',
@@ -116,28 +171,61 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           robots_follow: post.robots_follow ?? true,
           schema_type: post.schema_type || 'BlogPosting',
         })
-        if (post.category_id) setSelectedCategoryIds([post.category_id])
-        if (post.has_toc) setHasToc(true)
-        if (post.tags) {
-          try {
-            setTags(typeof post.tags === 'string' ? JSON.parse(post.tags) : post.tags)
-          } catch (e) {}
-        }
-        if (post.secondary_keywords) {
-          try {
-            setSecondaryKeywords(typeof post.secondary_keywords === 'string' ? JSON.parse(post.secondary_keywords) : post.secondary_keywords)
-          } catch (e) {}
-        }
+        setSelectedCategoryIds(post.category_id ? [post.category_id] : [])
+        setHasToc(Boolean(post.has_toc))
+        setTags(parsedTags)
+        setSecondaryKeywords(parsedSecondaryKeywords)
+        setFeaturedImagePreview(post.featured_image_preview || post.featured_image || '')
+        setFeaturedImageMissing(post.featured_image_exists === false)
 
         // Init last saved snapshot
-        lastSavedRef.current = JSON.stringify({ ...post, tags: post.tags, secondaryKeywords: post.secondary_keywords, selectedCategoryIds: [post.category_id] })
+        lastSavedRef.current = JSON.stringify({
+          title: post.title || '',
+          slug: post.slug || '',
+          excerpt: post.excerpt || '',
+          content: post.content || '',
+          featured_image: post.featured_image || '',
+          featured_image_alt: post.featured_image_alt || '',
+          featured_image_caption: post.featured_image_caption || '',
+          featured_image_description: post.featured_image_description || '',
+          status: post.status || 'draft',
+          seo_title: post.seo_title || '',
+          meta_description: post.meta_description || '',
+          focus_keyword: post.focus_keyword || '',
+          og_title: post.og_title || '',
+          og_description: post.og_description || '',
+          og_image: post.og_image || '',
+          twitter_title: post.twitter_title || '',
+          twitter_description: post.twitter_description || '',
+          twitter_image: post.twitter_image || '',
+          canonical_url: post.canonical_url || '',
+          robots_index: post.robots_index ?? true,
+          robots_follow: post.robots_follow ?? true,
+          schema_type: post.schema_type || 'BlogPosting',
+          tags: parsedTags,
+          secondaryKeywords: parsedSecondaryKeywords,
+          selectedCategoryIds: post.category_id ? [post.category_id] : [],
+        })
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Lỗi tải bài viết')
+        if (!cancelled) {
+          setLoadError({
+            status: typeof (e as { status?: unknown })?.status === 'number'
+              ? (e as { status?: number }).status
+              : undefined,
+            message: e instanceof Error ? e.message : getLoadErrorMessage(undefined),
+          })
+        }
       } finally {
-        setIsFetching(false)
+        if (!cancelled) setIsFetching(false)
       }
-    })
-  }, [params])
+    }
+
+    loadPost()
+
+    return () => {
+      cancelled = true
+    }
+  }, [getLoadErrorMessage, id, loadAttempt, parseStringArray, postId])
 
   // ── Unsaved changes warning ──
   const isDirtyRef = useRef(false)
@@ -337,6 +425,8 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         featured_image_caption: meta?.caption || p.featured_image_caption,
         featured_image_description: meta?.description || p.featured_image_description,
       }))
+      setFeaturedImagePreview(url)
+      setFeaturedImageMissing(false)
     } else if (mediaPickerTarget === 'og') {
       setForm(p => ({ ...p, og_image: url }))
     } else if (mediaPickerTarget === 'twitter') {
@@ -359,6 +449,34 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         <div className="text-center space-y-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-neutral-500 text-sm">Đang tải bài viết...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (loadError) {
+    const needsLogin = loadError.status === 401 || loadError.status === 403
+
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4">
+        <div className="w-full max-w-lg rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
+          <p className="text-sm font-bold uppercase tracking-[0.12em] text-red-500">Lỗi tải bài viết</p>
+          <h1 className="mt-2 text-2xl font-bold text-neutral-900">Không thể mở trang chỉnh sửa</h1>
+          <p className="mt-3 text-sm leading-6 text-neutral-600">{loadError.message}</p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              onClick={() => setLoadAttempt((value) => value + 1)}
+              className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark"
+            >
+              Tải lại
+            </button>
+            <Link
+              href={needsLogin ? '/tai-khoan/dang-nhap' : '/admin/bai-viet'}
+              className="rounded-xl border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+            >
+              {needsLogin ? 'Đăng nhập lại' : 'Quay lại danh sách'}
+            </Link>
+          </div>
         </div>
       </div>
     )
@@ -619,13 +737,37 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
               <div className="p-4">
                 {form.featured_image ? (
                   <div className="space-y-3">
-                    <div className="relative group rounded-xl overflow-hidden border border-neutral-200">
-                      <img src={form.featured_image} alt={form.featured_image_alt} className="w-full aspect-video object-cover" />
+                    <div className="relative group overflow-hidden rounded-xl border border-neutral-200 bg-secondary">
+                      <div className="relative aspect-video w-full">
+                        <SafeImage
+                          src={featuredImagePreview || form.featured_image}
+                          alt={form.featured_image_alt || form.title || 'Ảnh đại diện bài viết'}
+                          fill
+                          imageKind="post"
+                          sizes="320px"
+                          className="object-cover"
+                        />
+                      </div>
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <button onClick={() => openMediaPicker('featured')} className="bg-white text-neutral-800 px-3 py-1.5 rounded-lg text-xs font-semibold">Thay đổi</button>
-                        <button onClick={() => setForm(p => ({ ...p, featured_image: '', featured_image_alt: '', featured_image_caption: '', featured_image_description: '' }))} className="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Xóa</button>
+                        <button
+                          onClick={() => {
+                            setForm(p => ({ ...p, featured_image: '', featured_image_alt: '', featured_image_caption: '', featured_image_description: '' }))
+                            setFeaturedImagePreview('')
+                            setFeaturedImageMissing(false)
+                            markDirty()
+                          }}
+                          className="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold"
+                        >
+                          Xóa
+                        </button>
                       </div>
                     </div>
+                    {featuredImageMissing && (
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
+                        Ảnh hiện tại không còn tồn tại trong thư mục uploads. Public site đang dùng ảnh dự phòng. Vui lòng chọn lại ảnh để cập nhật dữ liệu.
+                      </div>
+                    )}
                     <p className="text-xs text-neutral-400 text-center">Khuyến nghị: 1200×675px</p>
                     <div className="space-y-2 pt-2 border-t border-neutral-100">
                       <div>
@@ -697,7 +839,14 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                 <div className="border border-neutral-200 rounded-xl overflow-hidden">
                   <div className="aspect-[1.91/1] bg-neutral-100 relative">
                     {(form.og_image || form.featured_image) ? (
-                      <img src={form.og_image || form.featured_image} alt="" className="w-full h-full object-cover" />
+                      <SafeImage
+                        src={form.og_image || featuredImagePreview || form.featured_image}
+                        alt={form.og_title || form.seo_title || form.title || 'Ảnh xem trước mạng xã hội'}
+                        fill
+                        imageKind="post"
+                        sizes="320px"
+                        className="object-cover"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-neutral-300">
                         <ImageIcon size={32} />

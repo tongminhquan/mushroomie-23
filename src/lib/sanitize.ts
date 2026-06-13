@@ -1,4 +1,5 @@
 import DOMPurify from 'isomorphic-dompurify'
+import { normalizeImageUrl, normalizeStoredImagePath } from '@/lib/image-url'
 
 /**
  * Server-side HTML sanitizer for blog post content.
@@ -15,45 +16,18 @@ export function sanitizeHtml(html: string): string {
   })
 }
 
-export function normalizeArticleImages(html: string): string {
+export function normalizeArticleImages(
+  html: string,
+  mode: 'render' | 'storage' = 'render',
+): string {
   if (!html) return ''
 
   return html.replace(
     /(<img\b[^>]*\bsrc\s*=\s*["'])([^"']+)(["'][^>]*>)/gi,
     (_match, prefix: string, source: string, suffix: string) => {
-      let normalized = source.trim()
-
-      if (
-        normalized.startsWith('http://localhost') ||
-        normalized.startsWith('https://localhost') ||
-        normalized.startsWith('http://127.0.0.1') ||
-        normalized.startsWith('https://127.0.0.1') ||
-        normalized.startsWith('https://mushroomie.io.vn')
-      ) {
-        try {
-          normalized = new URL(normalized).pathname
-        } catch {
-          normalized = '/images/product-placeholder.png'
-        }
-      }
-
-      if (normalized.startsWith('/public/uploads/')) {
-        normalized = normalized.replace('/public', '')
-      }
-      if (normalized.startsWith('public/uploads/')) {
-        normalized = `/${normalized.replace('public/', '')}`
-      }
-      if (normalized.startsWith('uploads/')) {
-        normalized = `/${normalized}`
-      }
-
-      if (
-        normalized.startsWith('/wp-content/uploads/') ||
-        normalized.startsWith('https://mushroomie.io.vn/wp-content/uploads/')
-      ) {
-        normalized = '/images/product-placeholder.png'
-      }
-
+      const normalized = mode === 'storage'
+        ? normalizeStoredImagePath(source.trim()) || source.trim()
+        : normalizeImageUrl(source.trim(), 'post')
       return `${prefix}${normalized}${suffix}`
     },
   )

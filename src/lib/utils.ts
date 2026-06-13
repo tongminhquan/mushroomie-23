@@ -7,6 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
+import { normalizeImageUrl, type PublicImageKind } from '@/lib/image-url'
 
 export function formatPrice(price: number | string): string {
   const num = typeof price === 'string' ? parseFloat(price) : price
@@ -42,52 +43,9 @@ export function truncate(str: string, length: number): string {
   return str.substring(0, length) + '...'
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || 'https://mushroomie.io.vn';
-
-export function getPublicImageUrl(pathOrUrl?: string | null, type: 'product' | 'banner' | 'user' = 'product'): string {
-  const fallback = type === 'banner' 
-    ? '/images/banner-placeholder.png' 
-    : type === 'user' 
-      ? '/images/avatar-placeholder.png' 
-      : '/images/product-placeholder.png';
-  
-  if (!pathOrUrl || typeof pathOrUrl !== 'string') return fallback;
-  
-  const value = pathOrUrl.trim();
-  if (!value) return fallback;
-
-  if (value.startsWith('blob:')) return value;
-
-  // Handle internal links generated in local or legacy environments.
-  if (
-    value.startsWith('http://localhost') ||
-    value.startsWith('https://localhost') ||
-    value.startsWith('http://127.0.0.1') ||
-    value.startsWith('https://127.0.0.1')
-  ) {
-    try {
-      return new URL(value).pathname;
-    } catch {
-      return fallback;
-    }
-  }
-  
-  // Convert absolute internal URLs to relative to use Next.js image optimization properly
-  if (value.startsWith(SITE_URL)) {
-    try {
-      return new URL(value).pathname;
-    } catch {
-      return fallback;
-    }
-  }
-
-  if (value.startsWith('/public/uploads/')) return value.replace('/public', '');
-  if (value.startsWith('public/uploads/')) return `/${value.replace('public/', '')}`;
-  if (value.startsWith('uploads/')) return `/${value}`;
-  if (value.startsWith('/uploads/')) return value;
-  
-  if (value.startsWith('/')) return value;
-  if (value.startsWith('http')) return value;
-
-  return `/uploads/${value}`;
+export function getPublicImageUrl(
+  pathOrUrl?: string | null,
+  type: PublicImageKind = 'product',
+): string {
+  return normalizeImageUrl(pathOrUrl, type)
 }

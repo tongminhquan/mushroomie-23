@@ -3,18 +3,30 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { generateSlug } from '@/lib/utils'
 import { logAdminAction } from '@/lib/admin-logger'
-import { sanitizeHtml, calculateReadingTime, calculateWordCount } from '@/lib/sanitize'
+import { buildPostContentMetrics, normalizeOptionalPostImage, serializePostForEditor, serializeStringArray } from '@/lib/post-normalization'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
     const isNumeric = /^\d+$/.test(id)
+    const session = await auth()
+    const isAdmin = ['super_admin', 'admin'].includes((session?.user as any)?.role)
+
+    if (isNumeric && !session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    if (isNumeric && !isAdmin) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const post = await prisma.post.findFirst({
-      where: isNumeric ? { id: Number(id) } : { slug: id },
+      where: isNumeric
+        ? { id: Number(id) }
+        : { slug: id, ...(isAdmin ? {} : { status: 'published' }) },
       include: { category: true, author: { select: { id: true, name: true } }, tags: { include: { tag: true } } },
     })
     if (!post) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-    return NextResponse.json(post)
+    return NextResponse.json({ post: await serializePostForEditor(post) })
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
@@ -38,25 +50,23 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       secondary_keywords,
     } = body
 
-    const sanitizedContent = content ? sanitizeHtml(content) : content
-    const readingTime = sanitizedContent ? calculateReadingTime(sanitizedContent) : undefined
-    const wordCount = sanitizedContent ? calculateWordCount(sanitizedContent) : undefined
+    const { content: normalizedContent, readingTime, wordCount } = buildPostContentMetrics(content)
 
     const data: any = {
-      title, excerpt, content: sanitizedContent, featured_image,
+      title, excerpt, content: normalizedContent, featured_image: normalizeOptionalPostImage(featured_image),
       featured_image_alt, featured_image_caption, featured_image_description,
       seo_title, meta_description, focus_keyword,
       og_title: og_title || null,
       og_description: og_description || null,
-      og_image: og_image || null,
+      og_image: normalizeOptionalPostImage(og_image),
       twitter_title: twitter_title || null,
       twitter_description: twitter_description || null,
-      twitter_image: twitter_image || null,
+      twitter_image: normalizeOptionalPostImage(twitter_image),
       canonical_url: canonical_url || null,
       robots_index: robots_index ?? true,
       robots_follow: robots_follow ?? true,
       schema_type: schema_type || 'BlogPosting',
-      secondary_keywords: Array.isArray(secondary_keywords) ? JSON.stringify(secondary_keywords) : (secondary_keywords || null),
+      secondary_keywords: serializeStringArray(secondary_keywords),
       reading_time: readingTime,
       word_count: wordCount,
       status: status || 'draft',

@@ -3,13 +3,12 @@
 import Image, { type ImageProps } from 'next/image'
 import { useState } from 'react'
 import { getPublicImageUrl } from '@/lib/utils'
-
-type ImageKind = 'product' | 'banner' | 'user'
+import type { PublicImageKind } from '@/lib/image-url'
 
 interface SafeImageProps extends Omit<ImageProps, 'src'> {
   src?: string | null
   fallbackSrc?: string
-  imageKind?: ImageKind
+  imageKind?: PublicImageKind
 }
 
 export default function SafeImage({
@@ -58,5 +57,5 @@ function ResolvedImage({
 }
 
 function shouldBypassOptimizer(src: string) {
-  return src.startsWith('data:') || src.startsWith('blob:') || src.endsWith('.svg')
+  return src.startsWith('data:') || src.startsWith('blob:') || src.endsWith('.svg') || /^https?:\/\//i.test(src)
 }

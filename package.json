@@ -15,7 +15,8 @@
     "images:optimize:dry-run": "node scripts/optimize-uploads-webp.js --dry-run",
     "images:optimize": "node scripts/optimize-uploads-webp.js --apply",
     "media:convert-webp": "node scripts/optimize-uploads-webp.js",
-    "media:convert-webp:apply": "node scripts/optimize-uploads-webp.js --apply"
+    "media:convert-webp:apply": "node scripts/optimize-uploads-webp.js --apply",
+    "posts:normalize-images": "ts-node --compiler-options {\"module\":\"CommonJS\"} scripts/normalize-post-image-urls.ts"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"

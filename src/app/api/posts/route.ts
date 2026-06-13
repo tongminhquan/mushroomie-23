@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { generateSlug } from '@/lib/utils'
 import { logAdminAction } from '@/lib/admin-logger'
-import { sanitizeHtml, calculateReadingTime, calculateWordCount } from '@/lib/sanitize'
+import { buildPostContentMetrics, normalizeOptionalPostImage, serializePostForEditor, serializeStringArray } from '@/lib/post-normalization'
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,7 +34,10 @@ export async function GET(request: NextRequest) {
       prisma.post.count({ where }),
     ])
 
-    return NextResponse.json({ posts, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } })
+    return NextResponse.json({
+      posts: await Promise.all(posts.map((post) => serializePostForEditor(post))),
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    })
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
@@ -58,9 +61,7 @@ export async function POST(request: NextRequest) {
       secondary_keywords,
     } = body
 
-    const sanitizedContent = content ? sanitizeHtml(content) : content
-    const readingTime = sanitizedContent ? calculateReadingTime(sanitizedContent) : null
-    const wordCount = sanitizedContent ? calculateWordCount(sanitizedContent) : null
+    const { content: normalizedContent, readingTime, wordCount } = buildPostContentMetrics(content)
 
     const postSlug = slug || generateSlug(title)
     const post = await prisma.post.create({
@@ -68,8 +69,8 @@ export async function POST(request: NextRequest) {
         title,
         slug: postSlug,
         excerpt,
-        content: sanitizedContent,
-        featured_image,
+        content: normalizedContent,
+        featured_image: normalizeOptionalPostImage(featured_image),
         featured_image_alt,
         featured_image_caption,
         featured_image_description,
@@ -80,15 +81,15 @@ export async function POST(request: NextRequest) {
         focus_keyword,
         og_title: og_title || null,
         og_description: og_description || null,
-        og_image: og_image || null,
+        og_image: normalizeOptionalPostImage(og_image),
         twitter_title: twitter_title || null,
         twitter_description: twitter_description || null,
-        twitter_image: twitter_image || null,
+        twitter_image: normalizeOptionalPostImage(twitter_image),
         canonical_url: canonical_url || null,
         robots_index: robots_index ?? true,
         robots_follow: robots_follow ?? true,
         schema_type: schema_type || 'BlogPosting',
-        secondary_keywords: Array.isArray(secondary_keywords) ? JSON.stringify(secondary_keywords) : (secondary_keywords || null),
+        secondary_keywords: serializeStringArray(secondary_keywords),
         reading_time: readingTime,
         word_count: wordCount,
         author_id: Number((session.user as any).id),

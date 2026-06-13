@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
-import { sanitizeHtml, calculateReadingTime, calculateWordCount } from '@/lib/sanitize'
+import { buildPostContentMetrics, normalizeOptionalPostImage, serializeStringArray } from '@/lib/post-normalization'
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,24 +21,22 @@ export async function POST(request: NextRequest) {
       secondary_keywords, has_toc,
     } = body
 
-    const sanitizedContent = content ? sanitizeHtml(content) : content
-    const readingTime = sanitizedContent ? calculateReadingTime(sanitizedContent) : undefined
-    const wordCount = sanitizedContent ? calculateWordCount(sanitizedContent) : undefined
+    const { content: normalizedContent, readingTime, wordCount } = buildPostContentMetrics(content)
 
     const data: any = {
       title: title || 'Bài viết chưa đặt tên',
       slug: slug || `draft-${Date.now()}`,
-      excerpt, content: sanitizedContent, featured_image, featured_image_alt,
+      excerpt, content: normalizedContent, featured_image: normalizeOptionalPostImage(featured_image), featured_image_alt,
       featured_image_caption, featured_image_description,
       category_id: category_id ? Number(category_id) : null,
       seo_title, meta_description, focus_keyword,
-      og_title, og_description, og_image,
-      twitter_title, twitter_description, twitter_image,
+      og_title, og_description, og_image: normalizeOptionalPostImage(og_image),
+      twitter_title, twitter_description, twitter_image: normalizeOptionalPostImage(twitter_image),
       canonical_url,
       robots_index: robots_index ?? true,
       robots_follow: robots_follow ?? true,
       schema_type: schema_type || 'BlogPosting',
-      secondary_keywords: secondary_keywords ? JSON.stringify(secondary_keywords) : null,
+      secondary_keywords: serializeStringArray(secondary_keywords),
       reading_time: readingTime,
       word_count: wordCount,
     }
