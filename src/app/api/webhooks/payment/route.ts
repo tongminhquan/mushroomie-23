@@ -21,14 +21,25 @@ export async function POST(request: Request) {
     // ─── STEP 2: Verify chữ ký webhook ────────────────────────────
     const verifyResult = await provider.verifyWebhookSignature(clonedRequest)
 
+    const sanitizedHeaders = sanitizeHeaders(request.headers)
+    const sanitizedPayload = sanitizePayload(verifyResult.rawPayload)
+    const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null
+    const userAgent = request.headers.get('user-agent') || null
+
     // Lưu webhook event để audit (kể cả khi invalid)
     const savedEvent = await prisma.paymentWebhookEvent.create({
       data: {
         provider: provider.providerKey,
         event_id: verifyResult.eventId || `unverified-${Date.now()}`,
         transaction_code: verifyResult.transactionCode || null,
-        raw_payload: verifyResult.rawPayload as object,
-        signature: verifyResult.signature || null,
+        amount: verifyResult.amount || null,
+        currency: 'VND',
+        raw_payload: sanitizedPayload as object,
+        sanitized_headers: sanitizedHeaders,
+        message: verifyResult.isValid ? 'Received valid webhook' : 'Invalid signature',
+        ip_address: ipAddress,
+        user_agent: userAgent,
+        signature: verifyResult.signature ? '[REDACTED]' : null,
         status: verifyResult.isValid ? 'VERIFIED' : 'FAILED',
         error_message: verifyResult.isValid ? null : 'Signature verification failed',
       },
@@ -225,4 +236,36 @@ function extractOrderCodes(content: string, prefix: string): string[] {
     const suffix = cleanMatch.substring(prefix.length)
     return `${prefix}-${suffix}`
   })
+}
+
+const SENSITIVE_HEADER_KEYS = [
+  'authorization', 'x-api-key', 'api-key', 'x-webhook-secret',
+  'x-casso-signature', 'x-sepay-signature', 'cookie', 'payos-signature'
+]
+
+function sanitizeHeaders(headers: Headers) {
+  const result: Record<string, string> = {}
+  headers.forEach((value, key) => {
+    const lowerKey = key.toLowerCase()
+    if (SENSITIVE_HEADER_KEYS.includes(lowerKey)) {
+      result[key] = '[REDACTED]'
+    } else {
+      result[key] = value
+    }
+  })
+  return result
+}
+
+function sanitizePayload(payload: any): any {
+  if (!payload || typeof payload !== 'object') return payload
+  const result = { ...payload }
+  const sensitiveKeys = ['token', 'secret', 'signature', 'password', 'apikey', 'authorization', 'securehash']
+  for (const key of Object.keys(result)) {
+    if (sensitiveKeys.includes(key.toLowerCase())) {
+      result[key] = '[REDACTED]'
+    } else if (typeof result[key] === 'object') {
+      result[key] = sanitizePayload(result[key])
+    }
+  }
+  return result
 }

@@ -327,11 +327,17 @@ model PaymentWebhookEvent {
   transaction_code String?
   order_id         Int?
   payment_id       Int?
+  amount           Decimal?  @db.Decimal(12, 2)
+  currency         String?   @default("VND")
   raw_payload      Json      // Full raw payload for audit
+  sanitized_headers Json?
   signature        String?   @db.Text
   status           String    @default("RECEIVED")
   // RECEIVED | VERIFIED | PROCESSED | FAILED | IGNORED
+  message          String?   @db.Text
   error_message    String?   @db.Text
+  ip_address       String?
+  user_agent       String?
   processed_at     DateTime?
   created_at       DateTime  @default(now())
 
