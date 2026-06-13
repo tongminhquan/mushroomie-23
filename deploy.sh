@@ -58,7 +58,7 @@ verify_public_assets "public"
 
 # Cài đặt dependencies (nếu có thay đổi)
 echo "Cài đặt dependencies..."
-npm ci
+npm ci --legacy-peer-deps
 
 echo "Cập nhật database và Prisma Client..."
 npx prisma db push
