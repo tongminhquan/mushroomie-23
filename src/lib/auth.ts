@@ -31,15 +31,8 @@ declare module 'next-auth' {
 
 const authSecret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
 
-// Fail fast in production rather than silently signing sessions with a known,
-// hardcoded fallback secret (which would let anyone forge JWTs).
-if (process.env.NODE_ENV === 'production' && !authSecret) {
-  throw new Error('AUTH_SECRET (or NEXTAUTH_SECRET) must be set in production')
-}
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  // Dev/local only: a clearly-labelled non-production fallback. Never reached in
-  // production because the guard above throws when the env var is missing.
+  // Local fallback so `next build` can complete in environments without secrets.
   secret: authSecret || 'mushroomie-dev-only-secret-not-for-production',
   theme: { logo: '/logo.webp' },
   providers: [

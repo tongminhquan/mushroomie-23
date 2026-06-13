@@ -106,6 +106,7 @@ function uniqueUrls(urls: string[]): string[] {
 export default function ConfirmPage() {
   const searchParams = useSearchParams()
   const orderCode = searchParams.get('orderCode') || ''
+  const accessToken = searchParams.get('accessToken') || ''
   const [payment, setPayment] = useState<Payment | null>(null)
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatusData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -118,8 +119,8 @@ export default function ConfirmPage() {
     if (!orderCode) return
     try {
       const [orderRes, statusRes] = await Promise.all([
-        fetch(`/api/orders/${orderCode}`),
-        fetch(`/api/orders/${orderCode}/payment-status`),
+        fetch(`/api/orders/${encodeURIComponent(orderCode)}?accessToken=${encodeURIComponent(accessToken)}`),
+        fetch(`/api/orders/${encodeURIComponent(orderCode)}/payment-status?accessToken=${encodeURIComponent(accessToken)}`),
       ])
       const orderData = await orderRes.json()
       const statusData = await statusRes.json()
@@ -135,7 +136,7 @@ export default function ConfirmPage() {
     } finally {
       setLoading(false)
     }
-  }, [orderCode])
+  }, [accessToken, orderCode])
 
   useEffect(() => {
     const timer = window.setTimeout(() => void fetchData(), 0)

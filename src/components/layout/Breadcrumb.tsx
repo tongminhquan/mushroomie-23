@@ -3,6 +3,15 @@ import { ChevronRight, Home } from 'lucide-react'
 
 interface BreadcrumbItem { label: string; href?: string }
 
+function safeJsonLd(value: unknown) {
+  return JSON.stringify(value)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029')
+}
+
 export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
   const schema = {
     '@context': 'https://schema.org',
@@ -20,7 +29,7 @@ export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }} />
       <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1 text-sm text-neutral-500 py-3">
       <Link href="/" className="flex items-center gap-1 hover:text-primary transition-colors">
         <Home size={14} /><span>Trang chủ</span>

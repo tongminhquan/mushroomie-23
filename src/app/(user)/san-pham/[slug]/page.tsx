@@ -11,6 +11,8 @@ import Link from 'next/link'
 import BrandContainer from '@/components/ui/BrandContainer'
 import PriceText from '@/components/ui/PriceText'
 import SectionHeader from '@/components/ui/SectionHeader'
+import { sanitizeHtml } from '@/lib/sanitize'
+import { safeJsonLd } from '@/lib/security'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -126,7 +128,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="min-h-screen bg-secondary py-5 md:py-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(productSchema) }} />
       <BrandContainer>
         <Breadcrumb items={[
           { label: 'Sản phẩm', href: '/san-pham' },
@@ -178,6 +180,15 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <div className="mt-6 pt-6 border-t border-[#f0e0d6]">
               <AddToCartButton product={product} />
             </div>
+            {product.description && (
+              <section className="mt-6 rounded-[18px] border border-neutral-200 bg-white p-6">
+                <h2 className="mb-4 font-heading text-xl text-text">Mô tả chi tiết</h2>
+                <div
+                  className="prose prose-sm max-w-none text-neutral-600 prose-headings:font-heading prose-headings:text-text prose-a:text-primary"
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description) }}
+                />
+              </section>
+            )}
 
             <div className="mt-4 flex items-start gap-3 rounded-[16px] border-[1.5px] border-dashed border-[#d9b89e] bg-secondary p-4">
               <span aria-hidden className="text-xl">🤍</span>

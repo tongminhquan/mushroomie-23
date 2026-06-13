@@ -4,6 +4,14 @@ import { auth } from '@/lib/auth'
 import { sendOrderEmail } from '@/lib/payment/email/sender'
 import { EmailTemplateKey } from '@/types'
 import { logAdminAction } from '@/lib/admin-logger'
+import { verifyOrderAccessToken } from '@/lib/order-access'
+import { checkRateLimit } from '@/lib/security'
+import { z } from 'zod'
+
+const updateOrderSchema = z.object({
+  order_status: z.enum(['PENDING_PAYMENT', 'PROCESSING', 'MAKING', 'PACKING', 'SHIPPING', 'COMPLETED', 'CANCELLED']),
+  note: z.string().trim().max(2000).optional().nullable(),
+}).strict()
 
 const ORDER_EMAIL_MAP: Record<string, EmailTemplateKey> = {
   PROCESSING: 'order_processing',
@@ -20,6 +28,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const { searchParams } = new URL(request.url)
     const phone = searchParams.get('phone')
     const email = searchParams.get('email')
+    const accessToken = searchParams.get('accessToken')
 
     const { id } = await params
     const isNumeric = /^\d+$/.test(id)
@@ -46,24 +55,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json(order)
     }
 
-    // Guest user must provide phone or email
-    if (phone && order.customer_phone === phone) return NextResponse.json(order)
-    if (email && order.customer_email === email) return NextResponse.json(order)
-
-    // For payment confirmation page, we can allow limited access without phone/email 
-    // ONLY IF the order was created very recently (e.g., within the last 2 hours)
-    // to allow the user to complete the payment flow right after checkout.
-    const hoursSinceCreation = (Date.now() - new Date(order.created_at).getTime()) / (1000 * 60 * 60)
-    if (hoursSinceCreation < 2 && (order.payment_status === 'PENDING' || order.payment_status === 'PAID')) {
-       // Return limited data to prevent PII leak (hide address, phone, email)
-       return NextResponse.json({
-         ...order,
-         customer_name: '***',
-         customer_phone: '***',
-         customer_email: '***',
-         shipping_address: '***'
-       })
+    const rateLimit = checkRateLimit(request, 'order-lookup', { limit: 60, windowMs: 5 * 60 * 1000 })
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many lookup requests' },
+        { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfter) } },
+      )
     }
+
+    if (verifyOrderAccessToken(accessToken, order.id, order.order_code)) {
+      return NextResponse.json(order)
+    }
+
+    // Guest lookup requires matching contact information.
+    if (phone && order.customer_phone === phone) return NextResponse.json(order)
+    if (email && order.customer_email.toLowerCase() === email.trim().toLowerCase()) return NextResponse.json(order)
 
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   } catch {
@@ -79,8 +85,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const { id } = await params
-    const body = await request.json()
-    const { order_status, note } = body
+    const parsed = updateOrderSchema.safeParse(await request.json())
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+    }
+    const { order_status, note } = parsed.data
 
     const order = await prisma.order.findUnique({ where: { id: Number(id) } })
     if (!order) return NextResponse.json({ error: 'Not found' }, { status: 404 })

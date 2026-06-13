@@ -4,30 +4,29 @@ import { auth } from '@/lib/auth'
 import { z } from 'zod'
 import { generateOrderCode } from '@/lib/utils'
 import { rateLimiter } from '@/lib/rate-limit'
+import { createOrderAccessToken } from '@/lib/order-access'
 
 const orderSchema = z.object({
-  customer_name: z.string().min(1),
+  customer_name: z.string().trim().min(1).max(120),
   customer_email: z.string().email(),
-  customer_phone: z.string().min(9),
-  shipping_address: z.string().min(1),
-  note: z.string().optional(),
+  customer_phone: z.string().trim().regex(/^(0|\+84)[0-9]{8,9}$/),
+  shipping_address: z.string().trim().min(10).max(1000),
+  note: z.string().trim().max(2000).optional(),
   items: z.array(z.object({
-    product_id: z.number(),
-    product_name: z.string(),
-    quantity: z.number().int().positive(),
-    price_snapshot: z.number(),
-    selected_options: z.record(z.string(), z.string()).optional(),
-    custom_note: z.string().optional(),
-  })),
-  shipping_fee: z.number().min(0).default(0),
-  payment_method: z.string().default('bank_transfer'),
+    product_id: z.number().int().positive(),
+    product_name: z.string().optional(),
+    quantity: z.number().int().positive().max(99),
+    price_snapshot: z.number().optional(),
+    selected_options: z.record(z.string().max(100), z.string().max(300)).optional(),
+    custom_note: z.string().trim().max(1000).optional(),
+  })).min(1).max(50),
+  payment_method: z.enum(['bank_transfer', 'cod']).default('bank_transfer'),
   user_voucher_id: z.string().optional().nullable(),
 })
 
 export async function POST(request: NextRequest) {
   try {
-    const req = request as any
-    if (rateLimiter.isLimited(req, 5, 60000, 'order_post')) {
+    if (rateLimiter.isLimited(request, 5, 60_000, 'order_post')) {
       return rateLimiter.getLimitResponse()
     }
 
@@ -39,56 +38,64 @@ export async function POST(request: NextRequest) {
 
     const session = await auth()
     const userId = session?.user?.id ? Number(session.user.id) : null
-    const { items, payment_method, user_voucher_id } = parsed.data
-    const orderData = {
-      customer_name: parsed.data.customer_name,
-      customer_email: parsed.data.customer_email,
-      customer_phone: parsed.data.customer_phone,
-      shipping_address: parsed.data.shipping_address,
-      note: parsed.data.note,
-    }
-    
-    // FETCH REAL PRICES FROM DB
-    const productIds = items.map(i => i.product_id)
-    const productsInDb = await prisma.product.findMany({ where: { id: { in: productIds } } })
-    const productMap = new Map(productsInDb.map(p => [p.id, p]))
+    const { items, payment_method, user_voucher_id, ...orderData } = parsed.data
 
-    let realSubtotal = 0
-    const secureItems = items.map(item => {
-      const dbProduct = productMap.get(item.product_id)
-      if (!dbProduct) throw new Error(`Sản phẩm không tồn tại: ${item.product_name}`)
-      if (dbProduct.status !== 'active') throw new Error(`Sản phẩm ngừng bán: ${item.product_name}`)
-      if (item.quantity <= 0) throw new Error(`Số lượng không hợp lệ cho: ${item.product_name}`)
-      
-      const realPrice = dbProduct.sale_price ? Number(dbProduct.sale_price) : Number(dbProduct.price)
-      realSubtotal += realPrice * item.quantity
+    const productIds = [...new Set(items.map((item) => item.product_id))]
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds }, status: 'active' },
+      include: { options: true },
+    })
+    const productById = new Map(products.map((product) => [product.id, product]))
+    if (products.length !== productIds.length) {
+      return NextResponse.json({ error: 'One or more products are unavailable' }, { status: 400 })
+    }
+
+    const authoritativeItems = items.map((item) => {
+      const product = productById.get(item.product_id)
+      if (!product || product.stock < item.quantity) throw new Error('PRODUCT_UNAVAILABLE')
+
+      const selectedOptions = item.selected_options || {}
+      const optionByName = new Map(product.options.map((option) => [option.option_name, option]))
+      for (const [name, value] of Object.entries(selectedOptions)) {
+        const option = optionByName.get(name)
+        if (!option) throw new Error('INVALID_PRODUCT_OPTIONS')
+        if (option.option_type !== 'text') {
+          const allowedValues = JSON.parse(option.option_values || '[]')
+          if (!Array.isArray(allowedValues) || !allowedValues.includes(value)) {
+            throw new Error('INVALID_PRODUCT_OPTIONS')
+          }
+        }
+      }
+
+      const regularPrice = Number(product.price)
+      const salePrice = product.sale_price === null ? null : Number(product.sale_price)
+      const unitPrice = salePrice !== null && salePrice > 0 && salePrice < regularPrice ? salePrice : regularPrice
 
       return {
         ...item,
-        price_snapshot: realPrice,
-        total_price: realPrice * item.quantity
+        product_name: product.name,
+        price_snapshot: unitPrice,
+        total_price: unitPrice * item.quantity,
       }
     })
 
-    const realShippingFee = realSubtotal >= 500000 ? 0 : 30000
-    const subtotal = realSubtotal
-
-    const order_code = generateOrderCode()
+    const subtotal = authoritativeItems.reduce((sum, item) => sum + item.price_snapshot * item.quantity, 0)
+    const shippingFee = 30_000
+    const orderCode = generateOrderCode()
 
     const order = await prisma.$transaction(async (tx) => {
-      let userVoucher = null
       let voucherDiscountAmount = 0
-      let itemDiscountAmount = 0
-      let shippingDiscountAmount = 0
-      let template = null
 
+      let userVoucher = null
+      let itemDiscountAmount = voucherDiscountAmount
+      let shippingDiscountAmount = 0
       if (user_voucher_id) {
         if (!userId) throw new Error('LOGIN_REQUIRED_FOR_VOUCHER')
 
         userVoucher = await tx.userVoucher.findFirst({
           where: {
             id: user_voucher_id,
-            userId: userId,
+            userId,
             status: 'AVAILABLE',
             OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
           },
@@ -96,8 +103,8 @@ export async function POST(request: NextRequest) {
         })
 
         if (!userVoucher) throw new Error('VOUCHER_NOT_AVAILABLE')
-        template = userVoucher.voucher
 
+        const template = userVoucher.voucher
         if (template.minOrderValue && subtotal < Number(template.minOrderValue)) {
           throw new Error('MIN_ORDER_VALUE_NOT_MET')
         }
@@ -110,33 +117,33 @@ export async function POST(request: NextRequest) {
         } else if (template.discountType === 'FIXED') {
           itemDiscountAmount = Number(template.discountValue)
         } else if (template.discountType === 'FREE_SHIPPING') {
-          shippingDiscountAmount = realShippingFee
+          shippingDiscountAmount = shippingFee
         }
 
         itemDiscountAmount = Math.min(subtotal, itemDiscountAmount)
-        shippingDiscountAmount = Math.min(realShippingFee, shippingDiscountAmount)
+        shippingDiscountAmount = Math.min(shippingFee, shippingDiscountAmount)
         voucherDiscountAmount = itemDiscountAmount + shippingDiscountAmount
       }
 
-      const total = Math.max(0, subtotal - itemDiscountAmount) + Math.max(0, realShippingFee - shippingDiscountAmount)
+      const total = Math.max(0, subtotal - itemDiscountAmount) + Math.max(0, shippingFee - shippingDiscountAmount)
       const orderStatus = payment_method === 'cod' ? 'PROCESSING' : 'PENDING_PAYMENT'
 
       const createdOrder = await tx.order.create({
-        data: {
+          data: {
           ...orderData,
-          order_code,
+          order_code: orderCode,
           user_id: userId,
           subtotal,
-          shipping_fee: realShippingFee,
-          voucher_id: userVoucher?.id ?? null,
-          voucher_code: template?.code ?? null,
+          shipping_fee: shippingFee,
+          voucher_id: user_voucher_id ?? null,
+          voucher_code: user_voucher_id ? userVoucher?.voucher.code ?? null : null,
           voucher_discount_amount: voucherDiscountAmount,
           total,
           payment_method,
           payment_status: 'PENDING',
           order_status: orderStatus,
           items: {
-            create: secureItems.map((item) => ({
+            create: authoritativeItems.map((item) => ({
               product_id: item.product_id,
               product_name: item.product_name,
               quantity: item.quantity,
@@ -150,10 +157,10 @@ export async function POST(request: NextRequest) {
         include: { items: true },
       })
 
-      if (userVoucher && template) {
+      if (user_voucher_id) {
         const updatedUserVoucher = await tx.userVoucher.updateMany({
           where: {
-            id: userVoucher.id,
+            id: user_voucher_id,
             userId: userId!,
             status: 'AVAILABLE',
           },
@@ -165,18 +172,6 @@ export async function POST(request: NextRequest) {
         })
 
         if (updatedUserVoucher.count !== 1) throw new Error('VOUCHER_NOT_AVAILABLE')
-
-        await tx.voucherRedemptionLog.create({
-          data: {
-            userId,
-            voucherId: template.id,
-            userVoucherId: userVoucher.id,
-            orderId: createdOrder.id,
-            action: payment_method === 'cod' ? 'USED' : 'APPLIED_TO_ORDER',
-            message: `Applied to order ${order_code}`,
-            discountAmount: voucherDiscountAmount,
-          }
-        })
       }
 
       await tx.orderStatusHistory.create({
@@ -192,13 +187,23 @@ export async function POST(request: NextRequest) {
       return createdOrder
     })
 
-    return NextResponse.json({ orderId: order.id, orderCode: order.order_code }, { status: 201 })
+    return NextResponse.json({
+      orderId: order.id,
+      orderCode: order.order_code,
+      accessToken: createOrderAccessToken(order.id, order.order_code),
+    }, { status: 201 })
   } catch (error) {
     if (error instanceof Error && error.message === 'LOGIN_REQUIRED_FOR_VOUCHER') {
       return NextResponse.json({ error: 'Login required for voucher' }, { status: 401 })
     }
     if (error instanceof Error && error.message === 'VOUCHER_NOT_AVAILABLE') {
       return NextResponse.json({ error: 'Voucher is not available' }, { status: 400 })
+    }
+    if (error instanceof Error && error.message === 'PRODUCT_UNAVAILABLE') {
+      return NextResponse.json({ error: 'Product is unavailable or out of stock' }, { status: 400 })
+    }
+    if (error instanceof Error && error.message === 'INVALID_PRODUCT_OPTIONS') {
+      return NextResponse.json({ error: 'Invalid product options' }, { status: 400 })
     }
     if (error instanceof Error && error.message === 'MIN_ORDER_VALUE_NOT_MET') {
       return NextResponse.json({ error: 'Minimum order value is not met for this voucher' }, { status: 400 })
@@ -216,8 +221,8 @@ export async function GET(request: NextRequest) {
     const isAdmin = ['super_admin', 'admin', 'viewer'].includes((session.user as any).role)
     const userId = Number((session.user as any).id)
     const { searchParams } = new URL(request.url)
-    const page = Number(searchParams.get('page') || 1)
-    const limit = Number(searchParams.get('limit') || 20)
+    const page = Math.max(1, Number(searchParams.get('page') || 1) || 1)
+    const limit = Math.min(100, Math.max(1, Number(searchParams.get('limit') || 20) || 20))
     const status = searchParams.get('status')
 
     const where: any = isAdmin ? {} : { user_id: userId }

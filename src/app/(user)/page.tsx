@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import HomeLanding from '@/components/home/landing/HomeLanding'
 import type { Metadata } from 'next'
+import { safeJsonLd } from '@/lib/security'
 
 export const metadata: Metadata = {
   title: 'Mushroomie - Phụ kiện handmade cá nhân hóa',
@@ -77,9 +78,9 @@ export default async function HomePage() {
 
   return (
     <div>
-      <h1 className="sr-only">Mushroomie — Phụ kiện handmade cá nhân hóa: vòng tay, charm, móc khóa, quà tặng</h1>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }} />
+      <h1 className="sr-only">Mushroomie - Phu kien handmade ca nhan hoa: vong tay, charm, moc khoa, qua tang</h1>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(localBusinessSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(webSiteSchema) }} />
       <HomeLanding
         banners={JSON.parse(JSON.stringify(banners))}
         products={JSON.parse(JSON.stringify(featuredProducts))}

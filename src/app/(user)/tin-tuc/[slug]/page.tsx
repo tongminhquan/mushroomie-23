@@ -9,6 +9,7 @@ import type { Metadata } from 'next'
 import type { Post } from '@prisma/client'
 import SafeImage from '@/components/ui/SafeImage'
 import { inspectImageForRender, resolveArticleImagesForRender, resolveImageUrlForRender } from '@/lib/server-image'
+import { safeJsonLd } from '@/lib/security'
 
 const SITE_URL = 'https://mushroomie.io.vn'
 const SITE_NAME = 'Mushroomie'
@@ -128,7 +129,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
       {/* JSON-LD Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
 
       {/* Article hero */}

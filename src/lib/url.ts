@@ -12,12 +12,20 @@ export function toAbsoluteUrl(pathOrUrl?: string | null): string {
 
 export function sanitizeCallbackUrl(url?: string | null): string {
   if (!url) return '/'
-  if (url.startsWith('http') || url.startsWith('//')) {
-    // Only allow absolute URLs if they match our domain
-    if (url.startsWith(SITE_URL)) return url
+  const value = url.trim()
+  if (!value || /[\u0000-\u001f\\]/.test(value)) return '/'
+
+  if (value.startsWith('/')) {
+    return value.startsWith('//') ? '/' : value
+  }
+
+  try {
+    const target = new URL(value)
+    const site = new URL(SITE_URL)
+    return target.origin === site.origin ? `${target.pathname}${target.search}${target.hash}` : '/'
+  } catch {
     return '/'
   }
-  return url.startsWith('/') ? url : `/${url}`
 }
 
 export function toPublicImageUrl(pathOrUrl?: string | null): string {

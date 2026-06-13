@@ -3,21 +3,31 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { getPaymentProvider } from '@/lib/payment/factory'
 import { z } from 'zod'
+import { verifyOrderAccessToken } from '@/lib/order-access'
+import { checkRateLimit } from '@/lib/security'
 
 const paymentSchema = z.object({
-  orderId: z.number(),
-  orderCode: z.string(),
+  orderId: z.number().int().positive(),
+  accessToken: z.string().max(1000).optional(),
 })
 
 export async function POST(request: NextRequest) {
   try {
+    const rateLimit = checkRateLimit(request, 'payment-create', { limit: 20, windowMs: 15 * 60 * 1000 })
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many payment requests' },
+        { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfter) } },
+      )
+    }
+
     const body = await request.json()
     const parsed = paymentSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { orderId, orderCode } = parsed.data
+    const { orderId, accessToken } = parsed.data
 
     // Check order exists and not yet paid
     const order = await prisma.order.findUnique({
@@ -26,6 +36,19 @@ export async function POST(request: NextRequest) {
     })
 
     if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    const session = await auth()
+    const isAdmin = session?.user && ['super_admin', 'admin'].includes(session.user.role || '')
+    const isOwner = session?.user?.id && order.user_id === Number(session.user.id)
+    const hasGuestToken = verifyOrderAccessToken(accessToken, order.id, order.order_code)
+    if (!isAdmin && !isOwner && !hasGuestToken) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    if (order.payment_method !== 'bank_transfer') {
+      return NextResponse.json({ error: 'Order does not use bank transfer' }, { status: 400 })
+    }
+    if (order.payment_status === 'PAID') {
+      return NextResponse.json({ error: 'Order is already paid' }, { status: 409 })
+    }
     if (order.payment) {
       // Return existing payment
       return NextResponse.json(order.payment)
@@ -37,7 +60,7 @@ export async function POST(request: NextRequest) {
     const provider = getPaymentProvider()
     const result = await provider.createPayment({
       orderId,
-      orderCode,
+      orderCode: order.order_code,
       amount: Number(order.total),
       customerEmail: order.customer_email,
       customerName: order.customer_name,

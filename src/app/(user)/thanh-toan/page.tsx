@@ -191,19 +191,19 @@ export default function CheckoutPage() {
         const data = await orderRes.json().catch(() => null)
         throw new Error(typeof data?.error === 'string' ? data.error : 'Tạo đơn hàng thất bại')
       }
-      const { orderId, orderCode } = await orderRes.json()
+      const { orderId, orderCode, accessToken } = await orderRes.json()
 
       if (paymentMethod === 'bank_transfer') {
         const payRes = await fetch('/api/payments', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderId, orderCode }),
+          body: JSON.stringify({ orderId, accessToken }),
         })
         if (!payRes.ok) throw new Error('Tạo thanh toán thất bại')
       }
 
       clearCart()
-      router.push(`/thanh-toan/xac-nhan?orderCode=${orderCode}`)
+      router.push(`/thanh-toan/xac-nhan?orderCode=${encodeURIComponent(orderCode)}&accessToken=${encodeURIComponent(accessToken)}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Có lỗi xảy ra. Vui lòng thử lại.')
     } finally {
