@@ -26,9 +26,9 @@ export async function GET(request: NextRequest) {
     const order = searchParams.get('order') || ''
 
     const where: any = {}
-    if (status) where.status = status
-    if (game) where.game = game
-    if (code) where.code = { contains: code }
+    if (status) where.status = status.toUpperCase()
+    if (game) where.sourceGame = game
+    if (code) where.voucher = { code: { contains: code } }
     if (user) {
       where.user = {
         OR: [
@@ -41,11 +41,11 @@ export async function GET(request: NextRequest) {
     if (order) where.order = { order_code: { contains: order } }
 
     const [items, total] = await Promise.all([
-      prisma.voucher.findMany({
+      prisma.userVoucher.findMany({
         where,
         include: {
           user: { select: { id: true, name: true, email: true, phone: true } },
-          score: true,
+          voucher: true,
           order: {
             select: {
               id: true,
@@ -58,11 +58,11 @@ export async function GET(request: NextRequest) {
             },
           },
         },
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      prisma.voucher.count({ where }),
+      prisma.userVoucher.count({ where }),
     ])
 
     return NextResponse.json({

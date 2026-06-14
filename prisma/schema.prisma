@@ -35,7 +35,7 @@ model User {
   order_status_histories OrderStatusHistory[]
   admin_logs          AdminLog[]
   point               UserPoint?
-  vouchers            Voucher[]
+  userVouchers        UserVoucher[]
   game_scores         GameScore[]
 
   @@map("users")
@@ -55,30 +55,110 @@ model UserPoint {
   @@map("user_points")
 }
 
+enum VoucherType {
+  GAME_REWARD
+  PROMOTION_CODE
+  MANUAL
+  AUTO_CAMPAIGN
+}
+
+enum DiscountType {
+  PERCENT
+  FIXED
+  FREE_SHIPPING
+}
+
+enum VoucherStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum UserVoucherStatus {
+  AVAILABLE
+  USED
+  EXPIRED
+  REVOKED
+}
+
 model Voucher {
-  id               Int      @id @default(autoincrement())
-  user_id          Int?
-  code             String   @unique
-  discount_percent Int
-  status           String   @default("active") // "active" | "reserved" | "used" | "expired"
-  source           String   @default("points") // "points" | "mini_game" | "admin" | "campaign"
-  game             String?
-  score_id         Int?
-  expires_at       DateTime?
-  used_at          DateTime?
-  order_id         Int?
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
+  id              String        @id @default(cuid())
+  code            String        @unique
+  title           String
+  description     String?       @db.Text
+  type            VoucherType
+  discountType    DiscountType
+  discountValue   Decimal       @db.Decimal(12, 2)
+  maxDiscount     Decimal?      @db.Decimal(12, 2)
+  minOrderValue   Decimal?      @db.Decimal(12, 2)
+  usageLimit      Int?
+  usedCount       Int           @default(0)
+  perUserLimit    Int           @default(1)
+  startsAt        DateTime?
+  expiresAt       DateTime?
+  status          VoucherStatus @default(ACTIVE)
+  sourceGame      String?
+  requiredScore   Int?
+  createdById     Int?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
-  user             User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  score            GameScore? @relation(fields: [score_id], references: [id], onDelete: SetNull)
-  order            Order?   @relation(fields: [order_id], references: [id], onDelete: SetNull)
+  userVouchers    UserVoucher[]
 
-  @@index([user_id, status])
-  @@index([game])
-  @@index([source])
-  @@index([order_id])
+  @@index([code])
+  @@index([type])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([sourceGame])
   @@map("vouchers")
+}
+
+model UserVoucher {
+  id              String            @id @default(cuid())
+  userId          Int
+  voucherId       String
+  status          UserVoucherStatus @default(AVAILABLE)
+  source          String?
+  sourceGame      String?
+  score           Int?
+  orderId         Int?
+  claimedAt       DateTime          @default(now())
+  usedAt          DateTime?
+  expiresAt       DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  user            User              @relation(fields: [userId], references: [id])
+  voucher         Voucher           @relation(fields: [voucherId], references: [id])
+  order           Order?            @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([voucherId])
+  @@index([status])
+  @@index([expiresAt])
+  @@unique([userId, voucherId])
+  @@map("user_vouchers")
+}
+
+model VoucherRedemptionLog {
+  id              String   @id @default(cuid())
+  userId          Int?
+  voucherId       String?
+  userVoucherId   String?
+  orderId         Int?
+  action          String
+  message         String?  @db.Text
+  discountAmount  Decimal? @db.Decimal(12, 2)
+  metadata        Json?
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([voucherId])
+  @@index([orderId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("voucher_redemption_logs")
 }
 
 model GameScore {
@@ -93,7 +173,7 @@ model GameScore {
   created_at   DateTime @default(now())
 
   user         User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
-  vouchers     Voucher[]
+  // vouchers logic is now tracked independently or via metadata, GameScore doesn't strictly need relation
 
   @@index([game, score])
   @@index([game, created_at])
@@ -234,9 +314,8 @@ model Order {
   note             String?   @db.Text
   subtotal         Decimal   @db.Decimal(12, 2)
   shipping_fee     Decimal   @db.Decimal(12, 2) @default(0)
-  voucher_id       Int?
+  voucher_id       String?
   voucher_code     String?
-  voucher_discount_percent Int?
   voucher_discount_amount  Decimal @db.Decimal(12, 2) @default(0)
   total            Decimal   @db.Decimal(12, 2)
   payment_method   String    @default("bank_transfer")
@@ -252,7 +331,7 @@ model Order {
   payment          Payment?
   status_history   OrderStatusHistory[]
   email_logs       EmailLog[]
-  vouchers         Voucher[]
+  userVouchers     UserVoucher[]
 
   @@map("orders")
 }

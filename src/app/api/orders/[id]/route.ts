@@ -92,9 +92,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       })
 
       if (order_status === 'CANCELLED') {
-        await tx.voucher.updateMany({
-          where: { order_id: Number(id), status: 'reserved' },
-          data: { status: 'active', order_id: null, used_at: null },
+        await tx.userVoucher.updateMany({
+          where: { orderId: Number(id), status: 'USED' },
+          data: { status: 'AVAILABLE', orderId: null, usedAt: null },
         })
       }
 

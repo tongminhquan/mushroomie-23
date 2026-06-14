@@ -25,10 +25,10 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         where: { id },
         select: { id: true, name: true, email: true, phone: true, created_at: true },
       }),
-      prisma.voucher.findMany({
-        where: { user_id: id },
-        include: { score: true, order: true },
-        orderBy: { created_at: 'desc' },
+      prisma.userVoucher.findMany({
+        where: { userId: id },
+        include: { voucher: true, order: true },
+        orderBy: { createdAt: 'desc' },
         take: 100,
       }),
       prisma.gameScore.findMany({

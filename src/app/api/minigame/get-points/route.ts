@@ -17,14 +17,15 @@ export async function GET() {
       where: { user_id: userId }
     })
 
-    const vouchers = await prisma.voucher.findMany({
-      where: { user_id: userId },
-      orderBy: { created_at: 'desc' }
+    const userVouchers = await prisma.userVoucher.findMany({
+      where: { userId: userId },
+      include: { voucher: true },
+      orderBy: { createdAt: 'desc' }
     })
 
     return NextResponse.json({
       points: userPoint?.points || 0,
-      vouchers
+      vouchers: userVouchers
     })
   } catch (error) {
     console.error('Lỗi lấy điểm:', error)

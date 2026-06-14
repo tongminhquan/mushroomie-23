@@ -82,34 +82,49 @@ export async function issueGameVoucher(
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  const existingToday = await tx.voucher.findMany({
+  const existingToday = await tx.userVoucher.findMany({
     where: {
-      user_id: input.userId,
-      source: 'mini_game',
-      game: input.game,
-      created_at: { gte: today },
+      userId: input.userId,
+      sourceGame: input.game,
+      createdAt: { gte: today },
     },
-    select: { discount_percent: true },
+    include: { voucher: true }
   })
 
-  const highestToday = existingToday.reduce((max, item) => Math.max(max, item.discount_percent), 0)
+  const highestToday = existingToday.reduce((max, item) => Math.max(max, Number(item.voucher.discountValue)), 0)
   if (highestToday >= percent) return null
 
-  const random = crypto.randomBytes(3).toString('hex').toUpperCase()
-  const gameCode = input.game === 'tetris' ? 'TETRIS' : 'BLAST'
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+  let template = await tx.voucher.findFirst({
+    where: { type: 'GAME_REWARD', sourceGame: input.game, discountValue: percent, discountType: 'PERCENT', status: 'ACTIVE' }
+  })
 
-  return tx.voucher.create({
+  if (!template) {
+    const gameCode = input.game === 'tetris' ? 'TETRIS' : 'BLAST'
+    template = await tx.voucher.create({
+      data: {
+        code: `${gameCode}_${percent}`,
+        title: `Voucher thưởng ${getGameTitle(input.game)} ${percent}%`,
+        type: 'GAME_REWARD',
+        discountType: 'PERCENT',
+        discountValue: percent,
+        sourceGame: input.game,
+        perUserLimit: 999,
+      }
+    })
+  }
+
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days
+
+  return tx.userVoucher.create({
     data: {
-      user_id: input.userId,
-      discount_percent: percent,
-      code: `${gameCode}-${percent}-${random}`,
-      status: 'active',
+      userId: input.userId,
+      voucherId: template.id,
       source: 'mini_game',
-      game: input.game,
-      score_id: input.scoreId,
-      expires_at: expiresAt,
+      sourceGame: input.game,
+      score: input.scoreId,
+      expiresAt: expiresAt,
     },
+    include: { voucher: true }
   })
 }
 

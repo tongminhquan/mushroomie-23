@@ -20,9 +20,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (status === 'PENDING' && payment?.expires_at && new Date(payment.expires_at) < new Date()) {
       await prisma.$transaction([
         prisma.payment.update({ where: { id: payment.id }, data: { status: 'EXPIRED' } }),
-        prisma.voucher.updateMany({
-          where: { order_id: order.id, status: 'reserved' },
-          data: { status: 'active', order_id: null, used_at: null },
+        prisma.userVoucher.updateMany({
+          where: { orderId: order.id, status: 'USED' },
+          data: { status: 'AVAILABLE', orderId: null, usedAt: null },
         }),
       ])
       status = 'EXPIRED'

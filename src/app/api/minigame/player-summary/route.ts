@@ -15,13 +15,14 @@ export async function GET() {
     const userId = Number(session.user.id)
     const [userPoint, vouchers, gameRows] = await Promise.all([
       prisma.userPoint.findUnique({ where: { user_id: userId } }),
-      prisma.voucher.findMany({
+      prisma.userVoucher.findMany({
         where: {
-          user_id: userId,
-          status: { in: ['active', 'reserved'] },
-          OR: [{ expires_at: null }, { expires_at: { gt: new Date() } }],
+          userId: userId,
+          status: 'AVAILABLE',
+          OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
         },
-        orderBy: { created_at: 'desc' },
+        include: { voucher: true },
+        orderBy: { createdAt: 'desc' },
         take: 20,
       }),
       prisma.gameScore.findMany({

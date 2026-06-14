@@ -50,19 +50,35 @@ export async function POST(request: NextRequest) {
         data: { points: { decrement: requiredPoints } }
       })
 
-      // Generate Code (e.g. GAME-10-X8J2K)
-      const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase()
-      const code = `GAME-${percent}-${randomStr}`
-
-      const voucher = await tx.voucher.create({
-        data: {
-          user_id: userId,
-          discount_percent: percent,
-          code: code
-        }
+      // Find or create template
+      let template = await tx.voucher.findFirst({
+        where: { type: 'GAME_REWARD', discountValue: percent, discountType: 'PERCENT', status: 'ACTIVE' }
       })
 
-      return voucher
+      if (!template) {
+        template = await tx.voucher.create({
+          data: {
+            code: `GAME_EXCHANGE_${percent}`,
+            title: `Voucher đổi điểm ${percent}%`,
+            type: 'GAME_REWARD',
+            discountType: 'PERCENT',
+            discountValue: percent,
+            perUserLimit: 999,
+          }
+        })
+      }
+
+      const userVoucher = await tx.userVoucher.create({
+        data: {
+          userId: userId,
+          voucherId: template.id,
+          source: 'exchange',
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 30 days
+        },
+        include: { voucher: true }
+      })
+
+      return userVoucher
     })
 
     return NextResponse.json({ success: true, voucher: result })

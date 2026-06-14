@@ -21,7 +21,7 @@ const orderSchema = z.object({
   })),
   shipping_fee: z.number().min(0).default(0),
   payment_method: z.string().default('bank_transfer'),
-  voucher_id: z.number().int().positive().optional().nullable(),
+  user_voucher_id: z.string().optional().nullable(),
 })
 
 export async function POST(request: NextRequest) {
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     const session = await auth()
     const userId = session?.user?.id ? Number(session.user.id) : null
-    const { items, shipping_fee, payment_method, voucher_id, ...orderData } = parsed.data
+    const { items, shipping_fee, payment_method, user_voucher_id, ...orderData } = parsed.data
     
     // FETCH REAL PRICES FROM DB
     const productIds = items.map(i => i.product_id)
@@ -69,24 +69,40 @@ export async function POST(request: NextRequest) {
     const order_code = generateOrderCode()
 
     const order = await prisma.$transaction(async (tx) => {
-      let voucher: { id: number; code: string; discount_percent: number } | null = null
+      let userVoucher = null
       let voucherDiscountAmount = 0
+      let template = null
 
-      if (voucher_id) {
+      if (user_voucher_id) {
         if (!userId) throw new Error('LOGIN_REQUIRED_FOR_VOUCHER')
 
-        voucher = await tx.voucher.findFirst({
+        userVoucher = await tx.userVoucher.findFirst({
           where: {
-            id: voucher_id,
-            user_id: userId,
-            status: 'active',
-            OR: [{ expires_at: null }, { expires_at: { gt: new Date() } }],
+            id: user_voucher_id,
+            userId: userId,
+            status: 'AVAILABLE',
+            OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
           },
-          select: { id: true, code: true, discount_percent: true },
+          include: { voucher: true },
         })
 
-        if (!voucher) throw new Error('VOUCHER_NOT_AVAILABLE')
-        voucherDiscountAmount = Math.min(subtotal, Math.floor((subtotal * voucher.discount_percent) / 100))
+        if (!userVoucher) throw new Error('VOUCHER_NOT_AVAILABLE')
+        template = userVoucher.voucher
+
+        if (template.minOrderValue && subtotal < Number(template.minOrderValue)) {
+          throw new Error('MIN_ORDER_VALUE_NOT_MET')
+        }
+
+        if (template.discountType === 'PERCENT') {
+          voucherDiscountAmount = Math.floor((subtotal * Number(template.discountValue)) / 100)
+          if (template.maxDiscount) {
+            voucherDiscountAmount = Math.min(voucherDiscountAmount, Number(template.maxDiscount))
+          }
+        } else if (template.discountType === 'FIXED') {
+          voucherDiscountAmount = Number(template.discountValue)
+        }
+
+        voucherDiscountAmount = Math.min(subtotal, voucherDiscountAmount)
       }
 
       const total = Math.max(0, subtotal - voucherDiscountAmount) + realShippingFee
@@ -99,9 +115,8 @@ export async function POST(request: NextRequest) {
           user_id: userId,
           subtotal,
           shipping_fee: realShippingFee,
-          voucher_id: voucher?.id ?? null,
-          voucher_code: voucher?.code ?? null,
-          voucher_discount_percent: voucher?.discount_percent ?? null,
+          voucher_id: userVoucher?.id ?? null,
+          voucher_code: template?.code ?? null,
           voucher_discount_amount: voucherDiscountAmount,
           total,
           payment_method,
@@ -122,21 +137,33 @@ export async function POST(request: NextRequest) {
         include: { items: true },
       })
 
-      if (voucher) {
-        const updated = await tx.voucher.updateMany({
+      if (userVoucher && template) {
+        const updatedUserVoucher = await tx.userVoucher.updateMany({
           where: {
-            id: voucher.id,
-            user_id: userId,
-            status: 'active',
+            id: userVoucher.id,
+            userId: userId!,
+            status: 'AVAILABLE',
           },
           data: {
-            status: payment_method === 'cod' ? 'used' : 'reserved',
-            order_id: createdOrder.id,
-            used_at: payment_method === 'cod' ? new Date() : null,
+            status: 'USED',
+            orderId: createdOrder.id,
+            usedAt: new Date(),
           },
         })
 
-        if (updated.count !== 1) throw new Error('VOUCHER_NOT_AVAILABLE')
+        if (updatedUserVoucher.count !== 1) throw new Error('VOUCHER_NOT_AVAILABLE')
+
+        await tx.voucherRedemptionLog.create({
+          data: {
+            userId,
+            voucherId: template.id,
+            userVoucherId: userVoucher.id,
+            orderId: createdOrder.id,
+            action: payment_method === 'cod' ? 'USED' : 'APPLIED_TO_ORDER',
+            message: `Applied to order ${order_code}`,
+            discountAmount: voucherDiscountAmount,
+          }
+        })
       }
 
       await tx.orderStatusHistory.create({

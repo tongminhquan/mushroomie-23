@@ -134,9 +134,9 @@ export async function POST(request: Request) {
           where: { id: payment.id },
           data: { status: 'EXPIRED' },
         }),
-        prisma.voucher.updateMany({
-          where: { order_id: payment.order_id, status: 'reserved' },
-          data: { status: 'active', order_id: null, used_at: null },
+        prisma.userVoucher.updateMany({
+          where: { orderId: payment.order_id, status: 'USED' },
+          data: { status: 'AVAILABLE', orderId: null, usedAt: null },
         }),
         prisma.paymentWebhookEvent.update({
           where: { id: savedEvent.id },
@@ -173,10 +173,7 @@ export async function POST(request: Request) {
           },
       })
 
-      await tx.voucher.updateMany({
-        where: { order_id: payment.order_id, status: 'reserved' },
-        data: { status: 'used', used_at: now },
-      })
+      // UserVoucher is already marked as USED when order is created, nothing to do here
 
       // Log status history
       await tx.orderStatusHistory.create({

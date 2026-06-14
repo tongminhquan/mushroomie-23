@@ -124,8 +124,8 @@ export async function GET(request: NextRequest) {
       .slice(0, 5)
 
     // 4. Voucher Summary
-    const vouchersIssued = await prisma.voucher.count({ where: { created_at: dateFilter } })
-    const vouchersUsed = await prisma.voucher.count({ where: { status: 'used', used_at: dateFilter } })
+    const vouchersIssued = await prisma.userVoucher.count({ where: { createdAt: dateFilter } })
+    const vouchersUsed = await prisma.userVoucher.count({ where: { status: 'USED', usedAt: dateFilter } })
     const voucherUsage = [
       { label: 'Đã nhận/Phát hành', count: vouchersIssued },
       { label: 'Đã dùng', count: vouchersUsed }
