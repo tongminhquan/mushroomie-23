@@ -2,8 +2,10 @@
 import Link from 'next/link'
 import { ShoppingBag, Check } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
-import { getPublicImageUrl } from '@/lib/utils'
-import { useState } from 'react'
+import { getPublicImageUrl, formatPrice } from '@/lib/utils'
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { useVoucherStore } from '@/store/voucher'
 import BrandBadge from '@/components/ui/BrandBadge'
 import PriceText from '@/components/ui/PriceText'
 import SafeImage from '@/components/ui/SafeImage'
@@ -31,6 +33,39 @@ export default function ProductCard({ product }: ProductCardProps) {
   const isOutOfStock = product.stock !== undefined && product.stock <= 0
   const hasSale = product.sale_price && product.sale_price < product.price
   const displayPrice = hasSale ? product.sale_price! : product.price
+
+  const { data: session } = useSession()
+  const { vouchers, fetchVouchers } = useVoucherStore()
+
+  useEffect(() => {
+    if (session?.user) {
+      fetchVouchers()
+    }
+  }, [session, fetchVouchers])
+
+  let bestDiscount = 0
+  let bestVoucher = null
+
+  if (session?.user) {
+    const available = vouchers.filter(v => v.status === 'AVAILABLE')
+    for (const uv of available) {
+      const v = uv.voucher
+      if (v.minOrderValue && displayPrice < Number(v.minOrderValue)) continue
+      
+      let discount = 0
+      if (v.discountType === 'PERCENT') {
+        discount = (displayPrice * Number(v.discountValue)) / 100
+        if (v.maxDiscount && discount > Number(v.maxDiscount)) discount = Number(v.maxDiscount)
+      } else {
+        discount = Number(v.discountValue)
+      }
+
+      if (discount > bestDiscount) {
+        bestDiscount = discount
+        bestVoucher = v
+      }
+    }
+  }
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -86,6 +121,11 @@ export default function ProductCard({ product }: ProductCardProps) {
           <h3 className="line-clamp-2 text-sm font-extrabold leading-snug text-text transition-colors group-hover:text-primary sm:text-[15px]">{product.name}</h3>
         </Link>
         <div className="flex flex-col gap-1 mt-auto">
+          {bestVoucher && bestDiscount > 0 && (
+            <div className="text-[11px] font-bold text-primary mb-1">
+              <span className="bg-primary/10 px-1.5 py-0.5 rounded">Rẻ hơn với voucher giảm {bestVoucher.discountType === 'PERCENT' ? `${Number(bestVoucher.discountValue)}%` : formatPrice(bestDiscount)}</span>
+            </div>
+          )}
           <PriceText price={displayPrice} originalPrice={hasSale ? product.price : null} />
           <button
             onClick={handleAddToCart}

@@ -151,6 +151,7 @@ export default function Header() {
                     <>
                       <Link href="/tai-khoan" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-neutral-100">Hồ sơ của tôi</Link>
                       <Link href="/tai-khoan/don-hang" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-neutral-100">Đơn hàng của tôi</Link>
+                      <Link href="/tai-khoan/voucher" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-neutral-100">Voucher của tôi</Link>
                       {isAdmin && <Link href="/admin" className="block rounded-lg px-3 py-2 text-sm font-semibold text-primary hover:bg-primary-light">Trang quản trị</Link>}
                       <button onClick={() => signOut({ callbackUrl: '/' })} className="mt-1 w-full border-t border-neutral-100 px-3 pt-3 text-left text-sm font-semibold text-red-600">Đăng xuất</button>
                     </>
@@ -252,6 +253,7 @@ export default function Header() {
                 {session ? 'Tài khoản của tôi' : 'Đăng nhập / Đăng ký'}
               </Link>
               <Link href="/tai-khoan/don-hang" className="block rounded-xl px-4 py-3 text-sm font-bold">Tra cứu đơn hàng</Link>
+              <Link href="/tai-khoan/voucher" className="block rounded-xl px-4 py-3 text-sm font-bold">Voucher của tôi</Link>
             </div>
           </nav>
         </div>

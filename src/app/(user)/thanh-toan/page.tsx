@@ -39,6 +39,9 @@ export default function CheckoutPage() {
   const [selectedVoucher, setSelectedVoucher] = useState<AvailableVoucher | null>(null)
   const [voucherLoading, setVoucherLoading] = useState(false)
   const [voucherDismissed, setVoucherDismissed] = useState(false)
+  const [manualCode, setManualCode] = useState('')
+  const [manualLoading, setManualLoading] = useState(false)
+  const [manualMessage, setManualMessage] = useState({ text: '', type: '' })
 
   const user = session?.user as CheckoutUser | undefined
   const [form, setForm] = useState({
@@ -107,6 +110,40 @@ export default function CheckoutPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  const handleApplyManualCode = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (!manualCode.trim() || subtotal <= 0) return
+    setManualLoading(true)
+    setManualMessage({ text: '', type: '' })
+    try {
+      const res = await fetch('/api/vouchers/redeem', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: manualCode.trim() })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Lỗi nhận mã')
+      
+      setManualMessage({ text: 'Nhận mã thành công!', type: 'success' })
+      setManualCode('')
+      
+      const response = await fetch(`/api/vouchers/my-available?subtotal=${subtotal}`)
+      if (response.ok) {
+        const newData = await response.json()
+        setAvailableVouchers(newData.items ?? [])
+        if (newData.best) {
+          setSelectedVoucher(newData.best)
+          setVoucherDismissed(false)
+          window.sessionStorage.removeItem('mushroomie_checkout_voucher_dismissed')
+        }
+      }
+    } catch (err: any) {
+      setManualMessage({ text: err.message, type: 'error' })
+    } finally {
+      setManualLoading(false)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -277,6 +314,30 @@ export default function CheckoutPage() {
                         <span className="text-xs font-bold uppercase tracking-[0.08em] text-primary">Voucher</span>
                         {voucherLoading && <span className="text-xs text-neutral-500">Đang tải...</span>}
                       </div>
+
+                      <div className="flex gap-2 mb-3">
+                        <input
+                          type="text"
+                          placeholder="Nhập mã voucher..."
+                          value={manualCode}
+                          onChange={(e) => setManualCode(e.target.value.toUpperCase())}
+                          className="flex-1 rounded-lg border border-neutral-200 px-3 py-1.5 text-sm font-mono outline-none focus:border-primary uppercase"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleApplyManualCode}
+                          disabled={manualLoading || !manualCode}
+                          className="rounded-lg bg-primary px-3 text-sm font-bold text-white hover:bg-primary-dark disabled:opacity-50"
+                        >
+                          {manualLoading ? '...' : 'Nhận'}
+                        </button>
+                      </div>
+                      {manualMessage.text && (
+                        <div className={`mb-3 text-xs font-semibold ${manualMessage.type === 'success' ? 'text-green-600' : 'text-red-500'}`}>
+                          {manualMessage.text}
+                        </div>
+                      )}
+
                       {availableVouchers.length > 0 ? (
                         <div className="space-y-2">
                           <select
