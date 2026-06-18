@@ -39,7 +39,14 @@ export async function POST(request: NextRequest) {
 
     const session = await auth()
     const userId = session?.user?.id ? Number(session.user.id) : null
-    const { items, shipping_fee, payment_method, user_voucher_id, ...orderData } = parsed.data
+    const { items, payment_method, user_voucher_id } = parsed.data
+    const orderData = {
+      customer_name: parsed.data.customer_name,
+      customer_email: parsed.data.customer_email,
+      customer_phone: parsed.data.customer_phone,
+      shipping_address: parsed.data.shipping_address,
+      note: parsed.data.note,
+    }
     
     // FETCH REAL PRICES FROM DB
     const productIds = items.map(i => i.product_id)
@@ -71,6 +78,8 @@ export async function POST(request: NextRequest) {
     const order = await prisma.$transaction(async (tx) => {
       let userVoucher = null
       let voucherDiscountAmount = 0
+      let itemDiscountAmount = 0
+      let shippingDiscountAmount = 0
       let template = null
 
       if (user_voucher_id) {
@@ -94,18 +103,22 @@ export async function POST(request: NextRequest) {
         }
 
         if (template.discountType === 'PERCENT') {
-          voucherDiscountAmount = Math.floor((subtotal * Number(template.discountValue)) / 100)
+          itemDiscountAmount = Math.floor((subtotal * Number(template.discountValue)) / 100)
           if (template.maxDiscount) {
-            voucherDiscountAmount = Math.min(voucherDiscountAmount, Number(template.maxDiscount))
+            itemDiscountAmount = Math.min(itemDiscountAmount, Number(template.maxDiscount))
           }
         } else if (template.discountType === 'FIXED') {
-          voucherDiscountAmount = Number(template.discountValue)
+          itemDiscountAmount = Number(template.discountValue)
+        } else if (template.discountType === 'FREE_SHIPPING') {
+          shippingDiscountAmount = realShippingFee
         }
 
-        voucherDiscountAmount = Math.min(subtotal, voucherDiscountAmount)
+        itemDiscountAmount = Math.min(subtotal, itemDiscountAmount)
+        shippingDiscountAmount = Math.min(realShippingFee, shippingDiscountAmount)
+        voucherDiscountAmount = itemDiscountAmount + shippingDiscountAmount
       }
 
-      const total = Math.max(0, subtotal - voucherDiscountAmount) + realShippingFee
+      const total = Math.max(0, subtotal - itemDiscountAmount) + Math.max(0, realShippingFee - shippingDiscountAmount)
       const orderStatus = payment_method === 'cod' ? 'PROCESSING' : 'PENDING_PAYMENT'
 
       const createdOrder = await tx.order.create({
@@ -186,6 +199,9 @@ export async function POST(request: NextRequest) {
     }
     if (error instanceof Error && error.message === 'VOUCHER_NOT_AVAILABLE') {
       return NextResponse.json({ error: 'Voucher is not available' }, { status: 400 })
+    }
+    if (error instanceof Error && error.message === 'MIN_ORDER_VALUE_NOT_MET') {
+      return NextResponse.json({ error: 'Minimum order value is not met for this voucher' }, { status: 400 })
     }
     console.error('[ORDER CREATE]', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
