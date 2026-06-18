@@ -10,6 +10,7 @@ BUILD_DIR=".next-deploy"
 RELEASE_DIR=".next-release"
 CURRENT_DIR=".next/standalone"
 PREVIOUS_DIR=".next/standalone.previous"
+NGINX_STATIC_DIR=".next/static"
 APP_ORIGIN="http://127.0.0.1:3001"
 REQUIRED_PUBLIC_ASSETS=(
   "logo.webp"
@@ -91,6 +92,10 @@ fi
 
 # Chỉ thay release hiện tại sau khi build và copy asset đều thành công.
 echo "Kích hoạt release mới..."
+echo "Updating static assets for Nginx..."
+mkdir -p "$NGINX_STATIC_DIR"
+cp -a "$BUILD_DIR/static/." "$NGINX_STATIC_DIR/"
+
 rm -rf "$PREVIOUS_DIR"
 if [ -d "$CURRENT_DIR" ]; then
   mv "$CURRENT_DIR" "$PREVIOUS_DIR"

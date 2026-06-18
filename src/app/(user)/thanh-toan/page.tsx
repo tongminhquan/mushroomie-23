@@ -19,13 +19,22 @@ interface CheckoutUser {
 }
 
 interface AvailableVoucher {
-  id: number
+  id: string
   code: string
-  discountPercent: number
+  title?: string
+  discountType: 'PERCENT' | 'FIXED' | 'FREE_SHIPPING'
+  discountValue: number
   discountAmount: number
   source: string
-  game?: string | null
+  sourceGame?: string | null
+  minOrderValue?: number | null
   expiresAt?: string | null
+}
+
+function formatVoucherDiscountLabel(voucher: AvailableVoucher) {
+  if (voucher.discountType === 'PERCENT') return `Giảm ${voucher.discountValue}%`
+  if (voucher.discountType === 'FIXED') return `Giảm ${formatPrice(voucher.discountValue)}`
+  return 'Miễn phí vận chuyển'
 }
 
 export default function CheckoutPage() {
@@ -67,10 +76,12 @@ export default function CheckoutPage() {
 
   const subtotal = getTotalPrice()
   const shippingFee = 30000
-  const voucherDiscount = selectedVoucher
-    ? Math.min(subtotal, Math.floor((subtotal * selectedVoucher.discountPercent) / 100))
+  const voucherDiscount = selectedVoucher ? Math.min(subtotal, selectedVoucher.discountAmount) : 0
+  const shippingDiscount = selectedVoucher?.discountType === 'FREE_SHIPPING'
+    ? Math.min(shippingFee, selectedVoucher.discountAmount)
     : 0
-  const total = Math.max(0, subtotal - voucherDiscount) + shippingFee
+  const itemDiscount = selectedVoucher?.discountType === 'FREE_SHIPPING' ? 0 : voucherDiscount
+  const total = Math.max(0, subtotal - itemDiscount) + Math.max(0, shippingFee - shippingDiscount)
 
   useEffect(() => {
     setVoucherDismissed(window.sessionStorage.getItem('mushroomie_checkout_voucher_dismissed') === '1')
@@ -139,8 +150,11 @@ export default function CheckoutPage() {
           window.sessionStorage.removeItem('mushroomie_checkout_voucher_dismissed')
         }
       }
-    } catch (err: any) {
-      setManualMessage({ text: err.message, type: 'error' })
+    } catch (err) {
+      setManualMessage({
+        text: err instanceof Error ? err.message : 'Không thể nhận mã',
+        type: 'error',
+      })
     } finally {
       setManualLoading(false)
     }
@@ -161,7 +175,7 @@ export default function CheckoutPage() {
           ...form,
           shipping_fee: shippingFee,
           payment_method: paymentMethod,
-          voucher_id: selectedVoucher?.id ?? null,
+          user_voucher_id: selectedVoucher?.id ?? null,
           items: items.map((item) => ({
             product_id: item.productId,
             product_name: item.name,
@@ -173,7 +187,10 @@ export default function CheckoutPage() {
         }),
       })
 
-      if (!orderRes.ok) throw new Error('Tạo đơn hàng thất bại')
+      if (!orderRes.ok) {
+        const data = await orderRes.json().catch(() => null)
+        throw new Error(typeof data?.error === 'string' ? data.error : 'Tạo đơn hàng thất bại')
+      }
       const { orderId, orderCode } = await orderRes.json()
 
       if (paymentMethod === 'bank_transfer') {
@@ -349,7 +366,7 @@ export default function CheckoutPage() {
                                 window.sessionStorage.setItem('mushroomie_checkout_voucher_dismissed', '1')
                                 return
                               }
-                              const next = availableVouchers.find((voucher) => voucher.id === Number(event.target.value)) ?? null
+                              const next = availableVouchers.find((voucher) => voucher.id === event.target.value) ?? null
                               setSelectedVoucher(next)
                               setVoucherDismissed(false)
                               window.sessionStorage.removeItem('mushroomie_checkout_voucher_dismissed')
@@ -359,7 +376,7 @@ export default function CheckoutPage() {
                             <option value="">Không áp dụng voucher</option>
                             {availableVouchers.map((voucher) => (
                               <option key={voucher.id} value={voucher.id}>
-                                {voucher.code} - giam {voucher.discountPercent}%
+                                {voucher.code} - {formatVoucherDiscountLabel(voucher)}
                               </option>
                             ))}
                           </select>
@@ -380,7 +397,7 @@ export default function CheckoutPage() {
                                 </button>
                               </div>
                               <div className="mt-1 text-neutral-500">
-                                Giảm {selectedVoucher.discountPercent}%{selectedVoucher.expiresAt ? `, hạn ${new Date(selectedVoucher.expiresAt).toLocaleDateString('vi-VN')}` : ''}
+                                {formatVoucherDiscountLabel(selectedVoucher)}{selectedVoucher.expiresAt ? `, hạn ${new Date(selectedVoucher.expiresAt).toLocaleDateString('vi-VN')}` : ''}
                               </div>
                             </div>
                           )}
@@ -392,10 +409,10 @@ export default function CheckoutPage() {
                       )}
                     </div>
                   )}
-                  {voucherDiscount > 0 && (
+                  {(itemDiscount > 0 || shippingDiscount > 0) && (
                     <div className="flex justify-between text-sm font-semibold text-primary">
                       <span>Giảm voucher</span>
-                      <span>-{formatPrice(voucherDiscount)}</span>
+                      <span>-{formatPrice(itemDiscount + shippingDiscount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between font-bold text-base pt-2 border-t border-neutral-100">

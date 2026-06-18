@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const range = searchParams.get('range') || '30d'
 
-    let startDate = new Date()
+    const startDate = new Date()
     if (range === '7d') startDate.setDate(startDate.getDate() - 7)
     else if (range === '90d') startDate.setDate(startDate.getDate() - 90)
     else if (range === 'year') startDate.setFullYear(startDate.getFullYear() - 1)

@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const subtotal = Math.max(0, Number(searchParams.get('subtotal') || 0))
+    const estimatedShippingFee = subtotal >= 500000 ? 0 : 30000
     const now = new Date()
 
     const userVouchers = await prisma.userVoucher.findMany({
@@ -40,10 +41,14 @@ export async function GET(request: NextRequest) {
           }
         } else if (template.discountType === 'FIXED') {
           discountAmount = Number(template.discountValue)
+        } else if (template.discountType === 'FREE_SHIPPING') {
+          discountAmount = estimatedShippingFee
         }
       }
 
-      discountAmount = Math.min(subtotal, discountAmount)
+      discountAmount = template.discountType === 'FREE_SHIPPING'
+        ? Math.min(estimatedShippingFee, discountAmount)
+        : Math.min(subtotal, discountAmount)
 
       return {
         id: uv.id,

@@ -60,6 +60,10 @@
   --shadow-strong: 0 22px 55px rgba(91, 48, 35, 0.14);
 }
 
+:root {
+  --mushroomie-static-revision: 20260618;
+}
+
 * {
   box-sizing: border-box;
 }
