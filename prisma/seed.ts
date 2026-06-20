@@ -4,12 +4,27 @@ import 'dotenv/config'
 
 const prisma = new PrismaClient()
 
+// Seed accounts must use strong passwords supplied via env — never hardcoded.
+// Required: SEED_ADMIN_PASSWORD, SEED_USER_PASSWORD, SEED_SUPER_ADMIN_PASSWORD (each >= 12 chars).
+function requireSeedPassword(name: string): string {
+  const value = process.env[name]
+  if (!value || value.length < 12) {
+    throw new Error(`${name} must be set to a strong password (at least 12 characters) before seeding.`)
+  }
+  return value
+}
+
 async function main() {
   console.log('🌱 Seeding database...')
 
+  // Guard: never seed a production database unless explicitly allowed.
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_PRODUCTION_SEED !== 'true') {
+    throw new Error('Refusing to seed in production. Set ALLOW_PRODUCTION_SEED=true to override intentionally.')
+  }
+
   // ─── USERS ────────────────────────────────────────────────
-  const adminPassword = await bcrypt.hash('Admin@123', 12)
-  const userPassword = await bcrypt.hash('User@123', 12)
+  const adminPassword = await bcrypt.hash(requireSeedPassword('SEED_ADMIN_PASSWORD'), 12)
+  const userPassword = await bcrypt.hash(requireSeedPassword('SEED_USER_PASSWORD'), 12)
 
   const admin = await prisma.user.upsert({
     where: { email: 'admin@mushroomie.vn' },
@@ -35,7 +50,7 @@ async function main() {
 
   console.log('✅ Users created')
 
-  const superAdminPassword = await bcrypt.hash('SuperAdmin@123', 12)
+  const superAdminPassword = await bcrypt.hash(requireSeedPassword('SEED_SUPER_ADMIN_PASSWORD'), 12)
   await prisma.user.upsert({
     where: { email: 'quantmtb01641@gmail.com' },
     update: { role: 'super_admin' },
@@ -254,8 +269,8 @@ async function main() {
 
   console.log('')
   console.log('🎉 Seed completed!')
-  console.log('📧 Admin: admin@mushroomie.vn / Admin@123')
-  console.log('📧 User:  user@mushroomie.vn / User@123')
+  console.log('📧 Admin: admin@mushroomie.vn (password from SEED_ADMIN_PASSWORD)')
+  console.log('📧 User:  user@mushroomie.vn (password from SEED_USER_PASSWORD)')
 }
 
 main()
