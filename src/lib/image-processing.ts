@@ -3,6 +3,13 @@ import { mkdir, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import sharp from 'sharp'
 
+// Memory hardening for the constrained (~1GB) production VPS: disable libvips'
+// operation/file cache (keeps steady-state RSS low) and limit per-operation thread
+// fan-out (bounds the native off-heap memory a single decode can allocate). These do
+// not change image output — only how much memory/threads libvips holds at runtime.
+sharp.cache(false)
+sharp.concurrency(1)
+
 export type UploadImagePurpose = 'banner' | 'product' | 'post' | 'category' | 'icon' | 'avatar' | 'media' | 'default'
 
 export interface CropData {
