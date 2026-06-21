@@ -55,7 +55,10 @@ const TOOLBAR_BUTTONS = [
 export default function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const isComposing = useRef(false)
-  const lastValue = useRef(value)
+  // Seed with null (not `value`): otherwise the first sync effect sees
+  // lastValue === value and skips writing the loaded content into the empty
+  // contenteditable surface, leaving the editor blank on edit pages.
+  const lastValue = useRef<string | null>(null)
   const [showMediaPicker, setShowMediaPicker] = useState(false)
   const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null)
   const [imgOffset, setImgOffset] = useState({ top: 0, left: 0 })

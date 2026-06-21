@@ -50,10 +50,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       secondary_keywords,
     } = body
 
-    const { content: normalizedContent, readingTime, wordCount } = buildPostContentMetrics(content)
-
     const data: any = {
-      title, excerpt, content: normalizedContent, featured_image: normalizeOptionalPostImage(featured_image),
+      title, excerpt, featured_image: normalizeOptionalPostImage(featured_image),
       featured_image_alt, featured_image_caption, featured_image_description,
       seo_title, meta_description, focus_keyword,
       og_title: og_title || null,
@@ -67,10 +65,17 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       robots_follow: robots_follow ?? true,
       schema_type: schema_type || 'BlogPosting',
       secondary_keywords: serializeStringArray(secondary_keywords),
-      reading_time: readingTime,
-      word_count: wordCount,
       status: status || 'draft',
       category_id: category_id ? Number(category_id) : null,
+    }
+
+    // Only touch content when the client explicitly sends a string, so a payload
+    // that omits `content` can never wipe the stored article.
+    if (typeof content === 'string') {
+      const { content: normalizedContent, readingTime, wordCount } = buildPostContentMetrics(content)
+      data.content = normalizedContent
+      data.reading_time = readingTime
+      data.word_count = wordCount
     }
     data.slug = slug || (title ? generateSlug(title) : undefined)
     if (status === 'published') data.published_at = new Date()

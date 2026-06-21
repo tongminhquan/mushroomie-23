@@ -52,6 +52,9 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle')
   const lastSavedRef = useRef<string>('')
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null)
+  // Snapshot of the content as loaded from the server, to guard against
+  // accidentally saving an empty editor over an article that has content.
+  const originalContentRef = useRef<string>('')
 
   // Tags
   const [tagInput, setTagInput] = useState('')
@@ -171,6 +174,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           robots_follow: post.robots_follow ?? true,
           schema_type: post.schema_type || 'BlogPosting',
         })
+        originalContentRef.current = post.content || ''
         setSelectedCategoryIds(post.category_id ? [post.category_id] : [])
         setHasToc(Boolean(post.has_toc))
         setTags(parsedTags)
@@ -348,6 +352,17 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
   const handleSubmit = async (submitStatus: string) => {
     if (!form.title.trim()) { setError('Vui lòng nhập tiêu đề bài viết'); return }
+
+    // Guard against data loss: the post had content when loaded, but the editor
+    // is now empty (e.g. it failed to bind on load). Don't silently overwrite.
+    const stripText = (h: string) => h.replace(/<[^>]+>/g, '').replace(/&nbsp;/gi, ' ').trim()
+    if (stripText(originalContentRef.current).length > 0 && stripText(form.content).length === 0) {
+      const proceed = window.confirm(
+        'Bài viết hiện có nội dung nhưng vùng soạn thảo đang trống (có thể do tải lỗi). ' +
+        'Nhấn OK để vẫn lưu và xóa toàn bộ nội dung, hoặc Cancel để tải lại bài viết.'
+      )
+      if (!proceed) { setLoadAttempt(v => v + 1); return }
+    }
 
     if (submitStatus === 'published') {
       const errors = validateForPublish()

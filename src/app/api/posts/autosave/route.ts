@@ -21,12 +21,10 @@ export async function POST(request: NextRequest) {
       secondary_keywords, has_toc,
     } = body
 
-    const { content: normalizedContent, readingTime, wordCount } = buildPostContentMetrics(content)
-
     const data: any = {
       title: title || 'Bài viết chưa đặt tên',
       slug: slug || `draft-${Date.now()}`,
-      excerpt, content: normalizedContent, featured_image: normalizeOptionalPostImage(featured_image), featured_image_alt,
+      excerpt, featured_image: normalizeOptionalPostImage(featured_image), featured_image_alt,
       featured_image_caption, featured_image_description,
       category_id: category_id ? Number(category_id) : null,
       seo_title, meta_description, focus_keyword,
@@ -37,8 +35,17 @@ export async function POST(request: NextRequest) {
       robots_follow: robots_follow ?? true,
       schema_type: schema_type || 'BlogPosting',
       secondary_keywords: serializeStringArray(secondary_keywords),
-      reading_time: readingTime,
-      word_count: wordCount,
+    }
+
+    // Content handling: a brand-new draft (no id) stores whatever was sent, but an
+    // automatic save must NEVER overwrite an existing post's content with empty
+    // (e.g. if the editor failed to bind on load).
+    const hasContentString = typeof content === 'string'
+    if (!id || (hasContentString && content.trim() !== '')) {
+      const { content: normalizedContent, readingTime, wordCount } = buildPostContentMetrics(content)
+      data.content = normalizedContent
+      data.reading_time = readingTime
+      data.word_count = wordCount
     }
 
     // Remove undefined keys
