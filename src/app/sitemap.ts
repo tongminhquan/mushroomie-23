@@ -1,6 +1,11 @@
 import { MetadataRoute } from 'next'
 import { prisma } from '@/lib/prisma'
 
+// Regenerate the sitemap at most once an hour (ISR) so newly published posts /
+// products and slug fixes appear without needing a full redeploy. The query is
+// small and runs at most once per window, not per request.
+export const revalidate = 3600
+
 // A sitemap <loc> must be a single, well-formed path segment. Skip slugs that are
 // empty or contain characters that would produce a broken/duplicate URL — e.g. a
 // slug accidentally stored as a full "https://..." URL would otherwise emit
