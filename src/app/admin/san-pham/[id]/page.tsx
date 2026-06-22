@@ -11,7 +11,7 @@ function generateSlug(text: string) {
   return text
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .replace(/đ/g, 'd')
     .replace(/[^a-z0-9\s-]/g, '')
     .trim()
@@ -68,7 +68,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         const res = await fetch(`/api/products/${numId}`)
         if (!res.ok) throw new Error('Không tìm thấy sản phẩm')
         const product = await res.json()
-        
+
         setForm({
           name: product.name || '',
           slug: product.slug || '',
@@ -101,7 +101,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
     if (name === 'slug') setSlugEdited(true)
-    
+
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked
       setForm(prev => ({ ...prev, [name]: checked }))
@@ -114,7 +114,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     e.preventDefault()
     if (!form.name.trim()) { setError('Vui lòng nhập tên sản phẩm'); return }
     if (!form.price.trim()) { setError('Vui lòng nhập giá bán'); return }
-    
+
     setIsLoading(true)
     setError('')
 
@@ -167,7 +167,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   if (isFetching) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cream flex items-center justify-center">
         <div className="text-center space-y-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-neutral-500 text-sm">Đang tải sản phẩm...</p>
@@ -177,30 +177,31 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 pb-12">
+    <div className="min-h-screen bg-cream pb-12">
       {/* ── Sticky Top Bar ── */}
-      <div className="sticky top-0 z-40 bg-white border-b border-neutral-200 shadow-sm">
-        <div className="max-w-[1400px] mx-auto px-5 h-14 flex items-center justify-between">
+      <div className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-[#f0e0d6] shadow-card">
+        <div className="max-w-[1400px] mx-auto px-5 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/admin/san-pham" className="p-2 hover:bg-neutral-100 rounded-lg transition-colors text-neutral-500">
+            <Link href="/admin/san-pham" className="p-2 hover:bg-cream rounded-lg transition-colors text-neutral-500 hover:text-primary">
               <ArrowLeft size={18} />
             </Link>
             <div>
-              <h1 className="font-bold text-neutral-800 text-sm leading-none">Chỉnh sửa sản phẩm</h1>
+              <p className="text-[11px] font-semibold text-neutral-400">Cửa hàng / Sản phẩm</p>
+              <h1 className="font-heading text-neutral-800 text-lg leading-tight">Chỉnh sửa sản phẩm</h1>
               <p className="text-xs text-neutral-400 mt-0.5 font-mono truncate max-w-[300px]">/{form.slug}/</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {error && <span className="text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-lg border border-red-100">{error}</span>}
             {form.slug && (
-              <Link href={`/san-pham/${form.slug}`} target="_blank" className="flex items-center gap-1.5 px-3 py-2 border border-neutral-200 rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-50 transition-colors">
+              <Link href={`/san-pham/${form.slug}`} target="_blank" className="flex items-center gap-1.5 px-3 py-2 bg-white border-[1.5px] border-[#e2d3c8] rounded-full text-xs font-semibold text-neutral-600 hover:bg-cream hover:border-primary transition-colors">
                 <ExternalLink size={13} /> Xem trên web
               </Link>
             )}
             <button
               onClick={handleSubmit}
               disabled={isLoading}
-              className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60"
+              className="flex items-center gap-1.5 px-5 py-2 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60 shadow-card"
             >
               <Save size={14} />
               {isLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
@@ -209,25 +210,25 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-5 py-5">
+      <div className="max-w-[1400px] mx-auto px-5 py-6">
         <form onSubmit={handleSubmit} className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-5">
           {/* ══ LEFT: Main Form Content ══ */}
           <div className="space-y-4">
-            
+
             {/* Title & Slug */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-              <div className="px-6 py-5 border-b border-neutral-100">
-                <label className="block text-xs font-bold text-neutral-400 uppercase mb-1">Tên sản phẩm *</label>
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden">
+              <div className="px-6 py-5 border-b border-[#f0e0d6]">
+                <label className="block text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-1.5">Tên sản phẩm *</label>
                 <input
                   name="name"
                   value={form.name}
                   onChange={handleNameChange}
                   placeholder="Nhập tên sản phẩm..."
                   required
-                  className="w-full text-xl font-bold text-neutral-900 border-0 outline-none placeholder:text-neutral-300 leading-tight focus:ring-0 p-0"
+                  className="w-full text-xl font-heading text-neutral-900 border-0 outline-none placeholder:text-neutral-300 leading-tight focus:ring-0 p-0"
                 />
               </div>
-              <div className="px-6 py-3 flex items-center gap-2 bg-neutral-50/50 text-sm">
+              <div className="px-6 py-3 flex items-center gap-2 bg-cream/60 text-sm">
                 <span className="text-neutral-400 text-xs font-medium">Đường dẫn sản phẩm:</span>
                 <span className="text-neutral-300">/san-pham/</span>
                 <input
@@ -242,12 +243,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             </div>
 
             {/* Price & Stock info */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-6 space-y-4">
-              <h2 className="font-bold text-neutral-800 text-base border-b pb-2 mb-2">Giá cả & Tồn kho</h2>
-              
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card p-6 space-y-4">
+              <h2 className="font-heading text-neutral-800 text-base border-b border-[#f0e0d6] pb-2 mb-2">Giá cả & Tồn kho</h2>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-600 mb-1">Giá bán lẻ (VNĐ) *</label>
+                  <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Giá bán lẻ (VNĐ) *</label>
                   <input
                     name="price"
                     type="number"
@@ -256,11 +257,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     required
                     min="0"
                     placeholder="Ví dụ: 120000"
-                    className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none text-sm font-semibold"
+                    className="w-full px-4 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg focus:border-primary outline-none text-sm font-semibold"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-600 mb-1">Giá khuyến mãi (VNĐ)</label>
+                  <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Giá khuyến mãi (VNĐ)</label>
                   <input
                     name="sale_price"
                     type="number"
@@ -268,11 +269,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     onChange={handleChange}
                     min="0"
                     placeholder="Nếu có..."
-                    className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none text-sm text-green-600 font-semibold"
+                    className="w-full px-4 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg focus:border-primary outline-none text-sm text-green-600 font-semibold"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-600 mb-1">Số lượng tồn kho *</label>
+                  <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Số lượng tồn kho *</label>
                   <input
                     name="stock"
                     type="number"
@@ -280,29 +281,29 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     onChange={handleChange}
                     required
                     min="0"
-                    className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none text-sm"
+                    className="w-full px-4 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg focus:border-primary outline-none text-sm"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-600 mb-1">Mã sản phẩm (SKU)</label>
+                  <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Mã sản phẩm (SKU)</label>
                   <input
                     name="sku"
                     value={form.sku}
                     onChange={handleChange}
                     placeholder="MUSH-001..."
-                    className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none text-sm font-mono"
+                    className="w-full px-4 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg focus:border-primary outline-none text-sm font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-600 mb-1">Danh mục sản phẩm</label>
+                  <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Danh mục sản phẩm</label>
                   <select
                     name="category_id"
                     value={form.category_id}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none text-sm bg-white"
+                    className="w-full px-4 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg focus:border-primary outline-none text-sm bg-white"
                   >
                     <option value="">Không phân loại</option>
                     {categories.map(cat => (
@@ -314,30 +315,30 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             </div>
 
             {/* Short description and description */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-6 space-y-4">
-              <h2 className="font-bold text-neutral-800 text-base border-b pb-2 mb-2">Chi tiết sản phẩm</h2>
-              
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card p-6 space-y-4">
+              <h2 className="font-heading text-neutral-800 text-base border-b border-[#f0e0d6] pb-2 mb-2">Chi tiết sản phẩm</h2>
+
               <div>
-                <label className="block text-xs font-semibold text-neutral-600 mb-1">Mô tả ngắn (Hiển thị đầu trang)</label>
+                <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Mô tả ngắn (Hiển thị đầu trang)</label>
                 <textarea
                   name="short_description"
                   value={form.short_description}
                   onChange={handleChange}
                   rows={2}
                   placeholder="Giới thiệu nhanh, thu hút khách hàng..."
-                  className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none resize-none text-sm"
+                  className="w-full px-4 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg focus:border-primary outline-none resize-none text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-neutral-600 mb-1">Mô tả chi tiết sản phẩm</label>
+                <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Mô tả chi tiết sản phẩm</label>
                 <textarea
                   name="description"
                   value={form.description}
                   onChange={handleChange}
                   rows={8}
                   placeholder="Mô tả kỹ về kích thước, chất liệu, cách bảo quản..."
-                  className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none resize-y text-sm font-sans"
+                  className="w-full px-4 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg focus:border-primary outline-none resize-y text-sm font-sans"
                 />
               </div>
             </div>
@@ -346,20 +347,20 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
           {/* ══ RIGHT: Sidebar Panel ══ */}
           <div className="space-y-4">
-            
+
             {/* Publish Actions */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
-                <span className="font-bold text-xs text-neutral-600 uppercase">Trạng thái & Thao tác</span>
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden">
+              <div className="px-4 py-3 bg-cream/60 border-b border-[#f0e0d6]">
+                <span className="font-semibold text-xs uppercase tracking-wide text-neutral-600">Trạng thái & Thao tác</span>
               </div>
               <div className="p-4 space-y-3">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-neutral-500">📌 Trạng thái</span>
+                  <span className="text-neutral-600 font-medium">Trạng thái</span>
                   <select
                     name="status"
                     value={form.status}
                     onChange={handleChange}
-                    className="border border-neutral-200 rounded-lg px-2 py-1 text-sm focus:border-primary outline-none bg-white"
+                    className="border-[1.5px] border-[#e2d3c8] rounded-lg px-2 py-1 text-sm focus:border-primary outline-none bg-white"
                   >
                     <option value="active">Đang bán (Active)</option>
                     <option value="inactive">Ngừng bán (Inactive)</option>
@@ -372,17 +373,17 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                   </select>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-neutral-500">📦 Trạng thái kho</span>
+                  <span className="text-neutral-600 font-medium">Trạng thái kho</span>
                   <span className={`font-semibold ${Number(form.stock) > 0 ? 'text-green-600' : 'text-red-500'}`}>
                     {Number(form.stock) > 0 ? 'Còn hàng' : 'Hết hàng'}
                   </span>
                 </div>
-                
-                <div className="pt-2 border-t border-neutral-100 flex gap-2">
+
+                <div className="pt-2 border-t border-[#f0e0d6] flex gap-2">
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="flex-1 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60 flex items-center justify-center gap-1.5"
+                    className="flex-1 py-2 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60 flex items-center justify-center gap-1.5 shadow-card"
                   >
                     <Save size={14} />
                     {isLoading ? 'Đang lưu...' : 'Lưu lại'}
@@ -390,11 +391,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 </div>
 
                 {/* Delete button */}
-                <div className="pt-2 border-t border-neutral-100">
+                <div className="pt-2 border-t border-[#f0e0d6]">
                   <button
                     type="button"
                     onClick={handleDelete}
-                    className={`w-full py-2 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+                    className={`w-full py-2 rounded-full text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${
                       deleteConfirm
                         ? 'bg-red-500 text-white hover:bg-red-600'
                         : 'text-red-500 hover:bg-red-50'
@@ -408,12 +409,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             </div>
 
             {/* Featured Image */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
-                <span className="font-bold text-xs text-neutral-600 uppercase">Ảnh chính (Tối đa 1 ảnh)</span>
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden">
+              <div className="px-4 py-3 bg-cream/60 border-b border-[#f0e0d6] flex items-center gap-2">
+                <ImageIcon size={13} className="text-neutral-500" />
+                <span className="font-semibold text-xs uppercase tracking-wide text-neutral-600">Ảnh chính (Tối đa 1 ảnh)</span>
               </div>
               <div className="p-4">
-                <SingleImageUploader 
+                <SingleImageUploader
                   value={form.featured_image || ''}
                   onChange={(featured_image) => setForm(prev => ({ ...prev, featured_image }))}
                 />
@@ -421,12 +423,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             </div>
 
             {/* Sub Images */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
-                <span className="font-bold text-xs text-neutral-600 uppercase">Ảnh phụ (Không giới hạn)</span>
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden">
+              <div className="px-4 py-3 bg-cream/60 border-b border-[#f0e0d6] flex items-center gap-2">
+                <ImageIcon size={13} className="text-neutral-500" />
+                <span className="font-semibold text-xs uppercase tracking-wide text-neutral-600">Ảnh phụ (Không giới hạn)</span>
               </div>
               <div className="p-4">
-                <MultiImageUploader 
+                <MultiImageUploader
                   images={form.images}
                   onChange={(images) => setForm(prev => ({ ...prev, images }))}
                 />
@@ -434,9 +437,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             </div>
 
             {/* Additional Attributes */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
-                <span className="font-bold text-xs text-neutral-600 uppercase">Cài đặt nâng cao</span>
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden">
+              <div className="px-4 py-3 bg-cream/60 border-b border-[#f0e0d6]">
+                <span className="font-semibold text-xs uppercase tracking-wide text-neutral-600">Cài đặt nâng cao</span>
               </div>
               <div className="p-4 space-y-3">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -447,9 +450,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     onChange={handleChange}
                     className="w-4 h-4 rounded border-neutral-300 text-primary focus:ring-primary"
                   />
-                  <span className="text-xs font-semibold text-neutral-700">Sản phẩm nổi bật</span>
+                  <span className="text-sm font-semibold text-neutral-700">Sản phẩm nổi bật</span>
                 </label>
-                <p className="text-[10px] text-neutral-400 ml-6 -mt-1 leading-normal">
+                <p className="text-[11px] text-neutral-400 ml-6 -mt-1 leading-normal">
                   Sẽ xuất hiện ở mục &quot;Sản phẩm nổi bật&quot; tại trang chủ.
                 </p>
               </div>

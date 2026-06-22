@@ -13,7 +13,7 @@ import { generateSlug } from '@/lib/utils'
 const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor'), {
   ssr: false,
   loading: () => (
-    <div className="w-full min-h-[450px] border border-neutral-200 rounded-xl bg-neutral-50 flex items-center justify-center text-neutral-400 text-sm">
+    <div className="w-full min-h-[450px] border-[1.5px] border-[#f0e0d6] rounded-xl bg-[#fdfaf7] flex items-center justify-center text-neutral-400 text-sm">
       Đang tải trình soạn thảo...
     </div>
   ),
@@ -285,17 +285,17 @@ export default function AddPostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-secondary">
       {/* ── Sticky Top Bar ── */}
-      <div className="sticky top-0 z-40 bg-white border-b border-neutral-200 shadow-sm">
+      <div className="sticky top-0 z-40 bg-white/92 backdrop-blur border-b-[1.5px] border-[#f0e0d6] shadow-card">
         <div className="max-w-[1400px] mx-auto px-5 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/admin/bai-viet" className="p-2 hover:bg-neutral-100 rounded-lg transition-colors text-neutral-500">
+            <Link href="/admin/bai-viet" className="p-2 hover:bg-primary-light rounded-lg transition-colors text-neutral-500 hover:text-primary">
               <ArrowLeft size={18} />
             </Link>
             <div>
-              <h1 className="font-bold text-neutral-800 text-sm leading-none">Thêm bài viết SEO</h1>
-              <p className="text-xs text-neutral-400 mt-0.5">Soạn thảo và tối ưu SEO cho bài viết</p>
+              <h1 className="font-heading text-neutral-900 text-base leading-none">Thêm bài viết SEO</h1>
+              <p className="text-xs text-neutral-400 mt-1">Soạn thảo và tối ưu SEO cho bài viết</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -303,14 +303,14 @@ export default function AddPostPage() {
             {error && <span className="text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-lg border border-red-100">{error}</span>}
             <button
               onClick={() => handleSubmit('draft')}
-              className="flex items-center gap-1.5 px-4 py-2 border border-neutral-200 bg-white rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 border-[1.5px] border-[#e2d3c8] bg-white rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors"
             >
               <Save size={14} /> Lưu nháp
             </button>
             <button
               onClick={() => handleSubmit('published')}
               disabled={isLoading}
-              className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60"
+              className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60"
             >
               <Eye size={14} />
               {isLoading ? 'Đang lưu...' : 'Xuất bản'}
@@ -325,17 +325,17 @@ export default function AddPostPage() {
           {/* ══ LEFT: Main Editor ══ */}
           <div className="space-y-4">
             {/* Title + Slug */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-              <div className="px-6 py-5 border-b border-neutral-100">
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden">
+              <div className="px-6 py-5 border-b-[1.5px] border-[#f0e0d6]">
                 <input
                   name="title"
                   value={form.title}
                   onChange={handleTitleChange}
                   placeholder="Ví dụ: Top 10 mẫu vòng tay handmade dễ thương cho Gen Z"
-                  className="w-full text-2xl font-bold text-neutral-900 border-0 outline-none placeholder:text-neutral-300 leading-tight"
+                  className="w-full text-2xl font-heading text-neutral-900 border-0 outline-none placeholder:text-neutral-300 leading-tight"
                 />
               </div>
-              <div className="px-6 py-3 flex items-center gap-2 bg-neutral-50/50 text-sm border-t border-neutral-100">
+              <div className="px-6 py-3 flex items-center gap-2 bg-[#fdfaf7] text-sm border-t border-[#f0e0d6]">
                 <span className="text-neutral-400 text-xs font-medium whitespace-nowrap">Đường dẫn:</span>
                 <span className="text-neutral-300">/tin-tuc/</span>
                 <input
@@ -343,7 +343,7 @@ export default function AddPostPage() {
                   value={form.slug}
                   onChange={handleChange}
                   placeholder="duong-dan-bai-viet"
-                  className="flex-1 text-primary font-mono text-xs border-0 outline-none focus:bg-primary/5 rounded px-1 py-0.5 bg-transparent"
+                  className="flex-1 text-accent-kraft font-mono text-xs border-0 outline-none focus:bg-primary/5 rounded px-1 py-0.5 bg-transparent"
                 />
                 {slugEdited && (
                   <button
@@ -352,7 +352,7 @@ export default function AddPostPage() {
                       setSlugEdited(false)
                       markDirty()
                     }}
-                    className="text-[10px] bg-neutral-200 text-neutral-600 px-2 py-0.5 rounded hover:bg-primary/10 hover:text-primary transition-colors whitespace-nowrap"
+                    className="text-[10px] bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded hover:bg-primary/10 hover:text-primary transition-colors whitespace-nowrap"
                   >
                     Tạo lại từ tiêu đề
                   </button>
@@ -361,19 +361,19 @@ export default function AddPostPage() {
             </div>
 
             {/* Rich Text Editor */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden flex flex-col">
-              <div className="px-5 py-3 border-b border-neutral-100 bg-neutral-50 flex items-center justify-between">
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden flex flex-col">
+              <div className="px-5 py-3 border-b-[1.5px] border-[#f0e0d6] bg-[#fdfaf7] flex items-center justify-between">
                 <p className="text-sm font-semibold text-neutral-700">Nội dung bài viết</p>
-                <div className="flex bg-neutral-200/50 p-1 rounded-lg">
-                  <button 
-                    onClick={() => setEditorMode('rich')} 
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${editorMode === 'rich' ? 'bg-white text-primary shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
+                <div className="flex bg-neutral-100 p-1 rounded-lg">
+                  <button
+                    onClick={() => setEditorMode('rich')}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${editorMode === 'rich' ? 'bg-white text-primary shadow-card' : 'text-neutral-500 hover:text-neutral-700'}`}
                   >
                     Văn bản thường
                   </button>
-                  <button 
-                    onClick={() => setEditorMode('html')} 
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${editorMode === 'html' ? 'bg-white text-primary shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
+                  <button
+                    onClick={() => setEditorMode('html')}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${editorMode === 'html' ? 'bg-white text-primary shadow-card' : 'text-neutral-500 hover:text-neutral-700'}`}
                   >
                     Viết thuần HTML
                   </button>
@@ -397,7 +397,7 @@ export default function AddPostPage() {
             </div>
 
             {/* Excerpt */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-5">
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card p-5">
               <div className="flex items-center gap-2 mb-3">
                 <h3 className="text-sm font-semibold text-neutral-700">Tóm tắt (Excerpt)</h3>
                 <span className="text-xs text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-full">Tùy chọn</span>
@@ -408,13 +408,13 @@ export default function AddPostPage() {
                 onChange={handleChange}
                 rows={3}
                 placeholder="Tóm tắt ngắn nội dung bài viết để hiển thị ở trang blog."
-                className="w-full px-4 py-2 border border-neutral-200 rounded-xl focus:border-primary outline-none resize-none text-sm"
+                className="w-full px-4 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg focus:border-primary outline-none resize-none text-sm"
               />
             </div>
 
             {/* Table of Contents Panel */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-              <div className="px-5 py-3 bg-neutral-50 border-b border-neutral-100 flex items-center justify-between">
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden">
+              <div className="px-5 py-3 bg-[#fdfaf7] border-b-[1.5px] border-[#f0e0d6] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <BookOpen size={15} className="text-neutral-500" />
                   <span className="text-sm font-semibold text-neutral-700">Mục lục (Table of Contents)</span>
@@ -428,7 +428,7 @@ export default function AddPostPage() {
                 <div className="p-5 space-y-4 text-sm">
                   <p className="text-neutral-500 text-xs">Mục lục sẽ tự động được tạo từ các tiêu đề trong bài viết.</p>
                   <div>
-                    <p className="font-semibold text-neutral-600 mb-2">Đề mục hiển thị trong Mục lục</p>
+                    <p className="font-semibold text-neutral-700 mb-2">Đề mục hiển thị trong Mục lục</p>
                     <div className="grid grid-cols-3 gap-2">
                       {(['h2', 'h3', 'h4', 'h5'] as const).map(h => (
                         <label key={h} className="flex items-center gap-2 cursor-pointer text-neutral-600">
@@ -452,8 +452,8 @@ export default function AddPostPage() {
             </div>
 
             {/* ── SEO Cơ bản (below editor on mobile, visible on desktop too) ── */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden xl:hidden">
-              <div className="px-5 py-3 bg-neutral-50 border-b border-neutral-100 flex items-center gap-2">
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden xl:hidden">
+              <div className="px-5 py-3 bg-[#fdfaf7] border-b-[1.5px] border-[#f0e0d6] flex items-center gap-2">
                 <Settings2 size={15} className="text-neutral-500" />
                 <span className="text-sm font-semibold text-neutral-700">SEO & Mạng xã hội</span>
               </div>
@@ -466,9 +466,9 @@ export default function AddPostPage() {
           {/* ══ RIGHT: Sidebar ══ */}
           <div className="space-y-4">
             {/* Publish Panel */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
-                <span className="font-semibold text-sm text-neutral-800">Xuất bản</span>
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden">
+              <div className="px-4 py-3 bg-[#fdfaf7] border-b-[1.5px] border-[#f0e0d6]">
+                <span className="font-heading text-sm text-neutral-900">Xuất bản</span>
               </div>
               <div className="p-4 space-y-3">
                 <div className="flex items-center justify-between text-sm">
@@ -477,7 +477,7 @@ export default function AddPostPage() {
                     name="status"
                     value={form.status}
                     onChange={handleChange}
-                    className="border border-neutral-200 rounded-lg px-2 py-1.5 text-sm focus:border-primary outline-none bg-white"
+                    className="border-[1.5px] border-[#e2d3c8] rounded-lg px-2 py-1.5 text-sm focus:border-primary outline-none bg-white"
                   >
                     <option value="draft">Bản nháp</option>
                     <option value="published">Công khai</option>
@@ -490,7 +490,7 @@ export default function AddPostPage() {
                     name="schema_type"
                     value={form.schema_type}
                     onChange={handleChange}
-                    className="border border-neutral-200 rounded-lg px-2 py-1.5 text-sm focus:border-primary outline-none bg-white"
+                    className="border-[1.5px] border-[#e2d3c8] rounded-lg px-2 py-1.5 text-sm focus:border-primary outline-none bg-white"
                   >
                     <option value="BlogPosting">BlogPosting</option>
                     <option value="Article">Article</option>
@@ -500,11 +500,11 @@ export default function AddPostPage() {
                   </select>
                 </div>
                 <AutosaveIndicator />
-                <div className="pt-2 border-t border-neutral-100 flex gap-2">
-                  <button onClick={() => handleSubmit('draft')} className="flex-1 py-2 border border-neutral-200 rounded-xl text-sm font-medium text-neutral-600 hover:bg-neutral-50 transition-colors">
+                <div className="pt-2 border-t border-[#f0e0d6] flex gap-2">
+                  <button onClick={() => handleSubmit('draft')} className="flex-1 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors">
                     Lưu nháp
                   </button>
-                  <button onClick={() => handleSubmit('published')} disabled={isLoading} className="flex-1 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60">
+                  <button onClick={() => handleSubmit('published')} disabled={isLoading} className="flex-1 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60">
                     Xuất bản
                   </button>
                 </div>
@@ -512,14 +512,14 @@ export default function AddPostPage() {
             </div>
 
             {/* Featured Image Panel */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
-                <span className="font-semibold text-sm text-neutral-800">Ảnh đại diện</span>
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden">
+              <div className="px-4 py-3 bg-[#fdfaf7] border-b-[1.5px] border-[#f0e0d6]">
+                <span className="font-heading text-sm text-neutral-900">Ảnh đại diện</span>
               </div>
               <div className="p-4">
                 {form.featured_image ? (
                   <div className="space-y-3">
-                    <div className="relative group rounded-xl overflow-hidden border border-neutral-200">
+                    <div className="relative group rounded-xl overflow-hidden border-[1.5px] border-[#f0e0d6]">
                       <img src={form.featured_image} alt={form.featured_image_alt} className="w-full aspect-video object-cover" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <button onClick={() => openMediaPicker('featured')} className="bg-white text-neutral-800 px-3 py-1.5 rounded-lg text-xs font-semibold">Thay đổi</button>
@@ -527,19 +527,19 @@ export default function AddPostPage() {
                       </div>
                     </div>
                     <p className="text-xs text-neutral-400 text-center">Khuyến nghị: 1200×675px</p>
-                    <div className="space-y-2 pt-2 border-t border-neutral-100">
+                    <div className="space-y-2 pt-2 border-t border-[#f0e0d6]">
                       <div>
-                        <label className="block text-xs font-semibold text-neutral-600 mb-1">Alt text (SEO) <span className="text-red-500">*</span></label>
-                        <input value={form.featured_image_alt} onChange={e => { setForm(p => ({ ...p, featured_image_alt: e.target.value })); markDirty() }} placeholder="Mô tả ảnh, ví dụ: vòng tay handmade charm hoa hồng Mushroomie" className="w-full px-3 py-1.5 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none" />
+                        <label className="block text-xs font-semibold text-neutral-700 mb-1">Alt text (SEO) <span className="text-red-500">*</span></label>
+                        <input value={form.featured_image_alt} onChange={e => { setForm(p => ({ ...p, featured_image_alt: e.target.value })); markDirty() }} placeholder="Mô tả ảnh, ví dụ: vòng tay handmade charm hoa hồng Mushroomie" className="w-full px-3 py-1.5 border-[1.5px] border-[#e2d3c8] rounded-lg text-xs focus:border-primary outline-none" />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-neutral-600 mb-1">Chú thích (Caption)</label>
-                        <input value={form.featured_image_caption} onChange={e => { setForm(p => ({ ...p, featured_image_caption: e.target.value })); markDirty() }} placeholder="Chú thích hiển thị dưới ảnh..." className="w-full px-3 py-1.5 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none" />
+                        <label className="block text-xs font-semibold text-neutral-700 mb-1">Chú thích (Caption)</label>
+                        <input value={form.featured_image_caption} onChange={e => { setForm(p => ({ ...p, featured_image_caption: e.target.value })); markDirty() }} placeholder="Chú thích hiển thị dưới ảnh..." className="w-full px-3 py-1.5 border-[1.5px] border-[#e2d3c8] rounded-lg text-xs focus:border-primary outline-none" />
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <button onClick={() => openMediaPicker('featured')} className="w-full border-2 border-dashed border-neutral-200 rounded-xl py-8 flex flex-col items-center gap-2 text-neutral-400 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all">
+                  <button onClick={() => openMediaPicker('featured')} className="w-full border-[1.5px] border-dashed border-[#d9c7ba] rounded-xl py-8 flex flex-col items-center gap-2 text-neutral-400 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all">
                     <ImageIcon size={28} />
                     <span className="text-sm font-medium">Chọn ảnh đại diện</span>
                     <span className="text-xs">Khuyến nghị: 1200×675px</span>
@@ -552,9 +552,9 @@ export default function AddPostPage() {
             <CategoryPanel selectedIds={selectedCategoryIds} onChange={(ids) => { setSelectedCategoryIds(ids); markDirty() }} />
 
             {/* Tags */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
-                <span className="font-semibold text-sm text-neutral-800">Tags</span>
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden">
+              <div className="px-4 py-3 bg-[#fdfaf7] border-b-[1.5px] border-[#f0e0d6]">
+                <span className="font-heading text-sm text-neutral-900">Tags</span>
               </div>
               <div className="p-4">
                 <div className="flex gap-2 mb-2">
@@ -563,7 +563,7 @@ export default function AddPostPage() {
                     onChange={e => setTagInput(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag() } }}
                     placeholder="Thêm tag..."
-                    className="flex-1 px-3 py-1.5 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none"
+                    className="flex-1 px-3 py-1.5 border-[1.5px] border-[#e2d3c8] rounded-lg text-xs focus:border-primary outline-none"
                   />
                   <button onClick={addTag} className="px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold">+</button>
                 </div>
@@ -587,14 +587,14 @@ export default function AddPostPage() {
             <SeoAnalyzer form={form} setForm={(fn: any) => { setForm(fn); markDirty() }} onScoreChange={setSeoScore} />
 
             {/* ── Social / OG / Twitter Panel ── */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100 flex items-center gap-2">
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden">
+              <div className="px-4 py-3 bg-[#fdfaf7] border-b-[1.5px] border-[#f0e0d6] flex items-center gap-2">
                 <Share2 size={14} className="text-neutral-500" />
-                <span className="font-semibold text-sm text-neutral-800">Mạng xã hội</span>
+                <span className="font-heading text-sm text-neutral-900">Mạng xã hội</span>
               </div>
               <div className="p-4 space-y-4">
                 {/* Social preview card */}
-                <div className="border border-neutral-200 rounded-xl overflow-hidden">
+                <div className="border-[1.5px] border-[#f0e0d6] rounded-xl overflow-hidden">
                   <div className="aspect-[1.91/1] bg-neutral-100 relative">
                     {(form.og_image || form.featured_image) ? (
                       <img src={form.og_image || form.featured_image} alt="" className="w-full h-full object-cover" />
@@ -604,7 +604,7 @@ export default function AddPostPage() {
                       </div>
                     )}
                   </div>
-                  <div className="p-3 bg-neutral-50">
+                  <div className="p-3 bg-[#fdfaf7]">
                     <p className="text-[10px] text-neutral-400 uppercase">mushroomie.io.vn</p>
                     <p className="text-sm font-semibold text-neutral-800 line-clamp-1 mt-0.5">
                       {form.og_title || form.seo_title || form.title || 'Tiêu đề bài viết'}
@@ -617,53 +617,53 @@ export default function AddPostPage() {
 
                 {/* OG fields */}
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-600 mb-1">OG Title</label>
-                  <input name="og_title" value={form.og_title} onChange={handleChange} placeholder="Để trống sẽ dùng SEO title" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none" />
+                  <label className="block text-xs font-semibold text-neutral-700 mb-1">OG Title</label>
+                  <input name="og_title" value={form.og_title} onChange={handleChange} placeholder="Để trống sẽ dùng SEO title" className="w-full px-3 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm focus:border-primary outline-none" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-600 mb-1">OG Description</label>
-                  <textarea name="og_description" value={form.og_description} onChange={handleChange} rows={2} placeholder="Để trống sẽ dùng meta description" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none resize-none" />
+                  <label className="block text-xs font-semibold text-neutral-700 mb-1">OG Description</label>
+                  <textarea name="og_description" value={form.og_description} onChange={handleChange} rows={2} placeholder="Để trống sẽ dùng meta description" className="w-full px-3 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm focus:border-primary outline-none resize-none" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-600 mb-1">OG Image</label>
+                  <label className="block text-xs font-semibold text-neutral-700 mb-1">OG Image</label>
                   <div className="flex gap-2">
-                    <input name="og_image" value={form.og_image} onChange={handleChange} placeholder="Để trống sẽ dùng ảnh đại diện" className="flex-1 px-3 py-2 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none" />
-                    <button onClick={() => openMediaPicker('og')} className="px-3 py-2 border border-primary text-primary rounded-lg text-xs font-semibold hover:bg-primary/5">Chọn</button>
+                    <input name="og_image" value={form.og_image} onChange={handleChange} placeholder="Để trống sẽ dùng ảnh đại diện" className="flex-1 px-3 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-xs focus:border-primary outline-none" />
+                    <button onClick={() => openMediaPicker('og')} className="px-3 py-2 border-[1.5px] border-primary text-primary rounded-lg text-xs font-semibold hover:bg-primary/5">Chọn</button>
                   </div>
                 </div>
 
-                <hr className="border-neutral-100" />
+                <hr className="border-[#f0e0d6]" />
 
                 {/* Twitter fields */}
                 <p className="text-xs font-bold text-neutral-500 uppercase tracking-wide">Twitter Card</p>
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-600 mb-1">Twitter Title</label>
-                  <input name="twitter_title" value={form.twitter_title} onChange={handleChange} placeholder="Để trống sẽ dùng OG title" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none" />
+                  <label className="block text-xs font-semibold text-neutral-700 mb-1">Twitter Title</label>
+                  <input name="twitter_title" value={form.twitter_title} onChange={handleChange} placeholder="Để trống sẽ dùng OG title" className="w-full px-3 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm focus:border-primary outline-none" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-600 mb-1">Twitter Description</label>
-                  <textarea name="twitter_description" value={form.twitter_description} onChange={handleChange} rows={2} placeholder="Để trống sẽ dùng OG description" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none resize-none" />
+                  <label className="block text-xs font-semibold text-neutral-700 mb-1">Twitter Description</label>
+                  <textarea name="twitter_description" value={form.twitter_description} onChange={handleChange} rows={2} placeholder="Để trống sẽ dùng OG description" className="w-full px-3 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm focus:border-primary outline-none resize-none" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-600 mb-1">Twitter Image</label>
+                  <label className="block text-xs font-semibold text-neutral-700 mb-1">Twitter Image</label>
                   <div className="flex gap-2">
-                    <input name="twitter_image" value={form.twitter_image} onChange={handleChange} placeholder="Để trống sẽ dùng OG image" className="flex-1 px-3 py-2 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none" />
-                    <button onClick={() => openMediaPicker('twitter')} className="px-3 py-2 border border-primary text-primary rounded-lg text-xs font-semibold hover:bg-primary/5">Chọn</button>
+                    <input name="twitter_image" value={form.twitter_image} onChange={handleChange} placeholder="Để trống sẽ dùng OG image" className="flex-1 px-3 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-xs focus:border-primary outline-none" />
+                    <button onClick={() => openMediaPicker('twitter')} className="px-3 py-2 border-[1.5px] border-primary text-primary rounded-lg text-xs font-semibold hover:bg-primary/5">Chọn</button>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* ── Technical SEO Panel ── */}
-            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100 flex items-center gap-2">
+            <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden">
+              <div className="px-4 py-3 bg-[#fdfaf7] border-b-[1.5px] border-[#f0e0d6] flex items-center gap-2">
                 <Globe size={14} className="text-neutral-500" />
-                <span className="font-semibold text-sm text-neutral-800">SEO Kỹ thuật</span>
+                <span className="font-heading text-sm text-neutral-900">SEO Kỹ thuật</span>
               </div>
               <div className="p-4 space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-600 mb-1">Canonical URL</label>
-                  <input name="canonical_url" value={form.canonical_url} onChange={handleChange} placeholder="Để trống sẽ tự dùng URL bài viết" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-xs font-mono focus:border-primary outline-none" />
+                  <label className="block text-xs font-semibold text-neutral-700 mb-1">Canonical URL</label>
+                  <input name="canonical_url" value={form.canonical_url} onChange={handleChange} placeholder="Để trống sẽ tự dùng URL bài viết" className="w-full px-3 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-xs font-mono focus:border-primary outline-none" />
                 </div>
                 <div className="flex gap-4">
                   <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
@@ -679,16 +679,16 @@ export default function AddPostPage() {
 
                 {/* Secondary keywords */}
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-600 mb-1">Từ khóa phụ</label>
+                  <label className="block text-xs font-semibold text-neutral-700 mb-1">Từ khóa phụ</label>
                   <div className="flex gap-2 mb-2">
                     <input
                       value={skInput}
                       onChange={e => setSkInput(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSecondaryKeyword() } }}
                       placeholder="Ví dụ: vòng cổ handmade"
-                      className="flex-1 px-3 py-1.5 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none"
+                      className="flex-1 px-3 py-1.5 border-[1.5px] border-[#e2d3c8] rounded-lg text-xs focus:border-primary outline-none"
                     />
-                    <button onClick={addSecondaryKeyword} className="px-3 py-1.5 bg-neutral-200 text-neutral-700 rounded-lg text-xs font-semibold hover:bg-neutral-300">+</button>
+                    <button onClick={addSecondaryKeyword} className="px-3 py-1.5 bg-neutral-100 text-neutral-700 rounded-lg text-xs font-semibold hover:bg-neutral-200">+</button>
                   </div>
                   {secondaryKeywords.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
@@ -720,10 +720,10 @@ export default function AddPostPage() {
       {/* ── Validation Dialog ── */}
       {showValidationDialog && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="px-5 py-4 border-b border-neutral-100 flex items-center gap-2">
+          <div className="bg-white rounded-[16px] shadow-strong w-full max-w-md overflow-hidden border-[1.5px] border-[#f0e0d6]">
+            <div className="px-5 py-4 border-b-[1.5px] border-[#f0e0d6] flex items-center gap-2">
               <AlertTriangle size={18} className="text-orange-500" />
-              <h3 className="font-bold text-neutral-800">Kiểm tra trước khi xuất bản</h3>
+              <h3 className="font-heading text-neutral-900">Kiểm tra trước khi xuất bản</h3>
             </div>
             <div className="p-5 space-y-2 max-h-64 overflow-y-auto">
               {validationErrors.map((err, i) => (
@@ -733,11 +733,11 @@ export default function AddPostPage() {
                 </div>
               ))}
             </div>
-            <div className="px-5 py-4 bg-neutral-50 border-t border-neutral-100 flex justify-end gap-2">
-              <button onClick={() => setShowValidationDialog(false)} className="px-4 py-2 border border-neutral-200 rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-100">
+            <div className="px-5 py-4 bg-[#fdfaf7] border-t-[1.5px] border-[#f0e0d6] flex justify-end gap-2">
+              <button onClick={() => setShowValidationDialog(false)} className="px-4 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100">
                 Quay lại sửa
               </button>
-              <button onClick={() => doSubmit('published')} className="px-4 py-2 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600">
+              <button onClick={() => doSubmit('published')} className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-semibold hover:bg-orange-600">
                 Vẫn xuất bản
               </button>
             </div>

@@ -79,8 +79,8 @@ export default function AdminCreateVoucherPage() {
 
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:p-8 max-w-4xl">
-      <div className="flex items-center gap-4 mb-4">
-        <Link href="/admin/voucher" className="grid h-10 w-10 place-items-center rounded-xl bg-white border border-neutral-200 text-neutral-500 hover:text-primary transition">
+      <div className="flex items-center gap-4 mb-2">
+        <Link href="/admin/voucher" className="grid h-10 w-10 place-items-center rounded-xl bg-white border-[1.5px] border-[#f0e0d6] text-neutral-500 shadow-card hover:text-primary hover:border-primary transition">
           <ArrowLeft size={20} />
         </Link>
         <AdminPageHeader
@@ -89,18 +89,18 @@ export default function AdminCreateVoucherPage() {
         />
       </div>
 
-      <AdminCard className="p-6">
+      <AdminCard className="rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <label className="block text-sm font-bold text-text mb-2">Loại voucher</label>
-              <select name="type" value={form.type} onChange={handleChange} className="w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary">
+              <label className="block text-sm font-semibold text-neutral-700 mb-2">Loại voucher</label>
+              <select name="type" value={form.type} onChange={handleChange} className="w-full rounded-lg border-[1.5px] border-[#e2d3c8] bg-white px-3 py-2.5 text-sm outline-none transition focus:border-primary">
                 <option value="PROMOTION_CODE">Mã khuyến mãi (User tự nhập)</option>
                 <option value="GAME_REWARD">Phần thưởng Mini Game</option>
                 <option value="MANUAL">Cấp thủ công</option>
               </select>
             </div>
-            
+
             <FormInput label="Mã Voucher (Code) *" name="code" value={form.code} onChange={handleChange} required placeholder="VD: TET2026" />
           </div>
 
@@ -108,10 +108,10 @@ export default function AdminCreateVoucherPage() {
           <Textarea label="Mô tả" name="description" value={form.description} onChange={handleChange} rows={2} placeholder="Nhập mô tả..." />
 
           {form.type === 'GAME_REWARD' && (
-            <div className="grid gap-6 md:grid-cols-2 p-4 bg-primary-light/30 rounded-xl border border-primary/20">
+            <div className="grid gap-6 md:grid-cols-2 p-5 bg-primary-light/30 rounded-[14px] border-[1.5px] border-primary/20">
               <div>
-                <label className="block text-sm font-bold text-text mb-2">Game áp dụng</label>
-                <select name="sourceGame" value={form.sourceGame} onChange={handleChange} className="w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary">
+                <label className="block text-sm font-semibold text-neutral-700 mb-2">Game áp dụng</label>
+                <select name="sourceGame" value={form.sourceGame} onChange={handleChange} className="w-full rounded-lg border-[1.5px] border-[#e2d3c8] bg-white px-3 py-2.5 text-sm outline-none transition focus:border-primary">
                   <option value="">Tất cả các game</option>
                   <option value="tetris">Tetris</option>
                   <option value="block-blast">Block Blast 8x8</option>
@@ -123,8 +123,8 @@ export default function AdminCreateVoucherPage() {
 
           <div className="grid gap-6 md:grid-cols-3">
             <div>
-              <label className="block text-sm font-bold text-text mb-2">Loại giảm giá</label>
-              <select name="discountType" value={form.discountType} onChange={handleChange} className="w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary">
+              <label className="block text-sm font-semibold text-neutral-700 mb-2">Loại giảm giá</label>
+              <select name="discountType" value={form.discountType} onChange={handleChange} className="w-full rounded-lg border-[1.5px] border-[#e2d3c8] bg-white px-3 py-2.5 text-sm outline-none transition focus:border-primary">
                 <option value="PERCENT">Phần trăm (%)</option>
                 <option value="FIXED">Số tiền cố định (đ)</option>
               </select>
@@ -143,19 +143,21 @@ export default function AdminCreateVoucherPage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <label className="block text-sm font-bold text-text mb-2">Ngày bắt đầu</label>
-              <input type="datetime-local" name="startsAt" value={form.startsAt} onChange={handleChange} className="w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary" />
+              <label className="block text-sm font-semibold text-neutral-700 mb-2">Ngày bắt đầu</label>
+              <input type="datetime-local" name="startsAt" value={form.startsAt} onChange={handleChange} className="w-full rounded-lg border-[1.5px] border-[#e2d3c8] bg-white px-3 py-2.5 text-sm outline-none transition focus:border-primary" />
             </div>
             <div>
-              <label className="block text-sm font-bold text-text mb-2">Ngày kết thúc</label>
-              <input type="datetime-local" name="expiresAt" value={form.expiresAt} onChange={handleChange} className="w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary" />
+              <label className="block text-sm font-semibold text-neutral-700 mb-2">Ngày kết thúc</label>
+              <input type="datetime-local" name="expiresAt" value={form.expiresAt} onChange={handleChange} className="w-full rounded-lg border-[1.5px] border-[#e2d3c8] bg-white px-3 py-2.5 text-sm outline-none transition focus:border-primary" />
             </div>
           </div>
 
-          {error && <div className="text-red-500 text-sm font-bold">{error}</div>}
-          {success && <div className="text-green-600 text-sm font-bold">{success}</div>}
+          {error && <div className="rounded-lg border-[1.5px] border-red-200 bg-red-50 px-4 py-3 text-red-600 text-sm font-semibold">{error}</div>}
+          {success && <div className="rounded-lg border-[1.5px] border-green-200 bg-green-50 px-4 py-3 text-green-700 text-sm font-semibold">{success}</div>}
 
-          <Button type="submit" isLoading={loading} className="w-full md:w-auto">Tạo Voucher</Button>
+          <div className="flex justify-end border-t border-[#f0e0d6] pt-6">
+            <Button type="submit" isLoading={loading} className="w-full md:w-auto">Tạo Voucher</Button>
+          </div>
         </form>
       </AdminCard>
     </div>
