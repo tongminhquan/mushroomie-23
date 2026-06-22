@@ -146,7 +146,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           </div>
 
           {/* Product info */}
-          <div className="flex h-full flex-col rounded-[24px] border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+          <div className="flex h-full flex-col rounded-[24px] border-[1.5px] border-[#f0e0d6] bg-white p-6 shadow-card sm:p-8">
             <div className="space-y-5">
               {product.category && (
                 <Link href={`/san-pham?category=${product.category.slug}`} className="brand-kicker">{product.category.name}</Link>
@@ -160,7 +160,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               )}
             </div>
 
-            <div className="mt-8 space-y-3 rounded-xl bg-pink/20 p-4 text-sm text-text">
+            <div className="mt-8 space-y-3 rounded-2xl border-[1.5px] border-[#f0e0d6] bg-[#fffaf6] p-4 text-sm text-text">
               <div className="flex items-center gap-3">
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">✓</span>
                 <p><strong>Handmade 100%:</strong> Tỉ mỉ từng chi tiết</p>
@@ -175,8 +175,15 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               </div>
             </div>
 
-            <div className="mt-6 pt-6 border-t border-neutral-100">
+            <div className="mt-6 pt-6 border-t border-[#f0e0d6]">
               <AddToCartButton product={product} />
+            </div>
+
+            <div className="mt-4 flex items-start gap-3 rounded-[16px] border-[1.5px] border-dashed border-[#d9b89e] bg-secondary p-4">
+              <span aria-hidden className="text-xl">🤍</span>
+              <p className="m-0 text-[13px] leading-relaxed text-neutral-600">
+                Sản phẩm được làm thủ công nên mỗi mẫu có thể hơi khác nhau — đó là <strong className="text-accent-kraft">dấu ấn riêng</strong> của bạn.
+              </p>
             </div>
           </div>
         </div>
@@ -188,14 +195,14 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <div className="lg:col-span-2">
               <div className="space-y-8">
                 {product.description && (
-                  <section className="rounded-[24px] border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+                  <section className="rounded-[24px] border-[1.5px] border-[#f0e0d6] bg-white p-6 shadow-card sm:p-8">
                     <h2 className="mb-6 font-heading text-2xl text-text">Mô tả chi tiết</h2>
                     <div className="prose prose-sm max-w-none text-neutral-600 prose-headings:font-heading prose-headings:text-text prose-a:text-primary" dangerouslySetInnerHTML={{ __html: product.description }} />
                   </section>
                 )}
 
                 {product.reviews.length > 0 && (
-                  <section className="rounded-[24px] border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+                  <section className="rounded-[24px] border-[1.5px] border-[#f0e0d6] bg-white p-6 shadow-card sm:p-8">
                     <h2 className="mb-6 font-heading text-2xl text-text">Đánh giá ({product.reviews.length})</h2>
                     <div className="space-y-5">
                       {product.reviews.map((review: any) => (
@@ -217,7 +224,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
         {/* Related */}
         {relatedProducts.length > 0 && (
-            <section className="mt-16 border-t border-neutral-200 pt-12">
+            <section className="mt-16 border-t border-[#f0e0d6] pt-12">
               <SectionHeader eyebrow="Có thể bạn sẽ thích" title="Sản phẩm liên quan" />
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {relatedProducts.map((p: any) => <ProductCard key={p.id} product={p} />)}
