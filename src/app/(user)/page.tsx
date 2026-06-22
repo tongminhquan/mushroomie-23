@@ -77,6 +77,7 @@ export default async function HomePage() {
 
   return (
     <div>
+      <h1 className="sr-only">Mushroomie — Phụ kiện handmade cá nhân hóa: vòng tay, charm, móc khóa, quà tặng</h1>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }} />
       <HomeLanding
