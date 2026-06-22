@@ -60,7 +60,7 @@ export default function HomeCustomProcess({ products }: { products: HomeProduct[
 
             <Link
               href="/lien-he"
-              className="group mt-8 inline-flex min-h-12 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-extrabold text-white transition-colors hover:-translate-y-0.5 hover:bg-white hover:text-primary"
+              className="group mt-8 inline-flex min-h-12 items-center gap-2 rounded-full bg-primary px-6 text-sm font-extrabold text-white transition-colors hover:-translate-y-0.5 hover:bg-white hover:text-primary"
             >
               Custom ngay <ArrowRight size={17} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>

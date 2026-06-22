@@ -21,13 +21,13 @@ export default function HomeFinalCTA() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/san-pham"
-              className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-text px-5 text-sm font-extrabold text-white hover:-translate-y-0.5 hover:bg-primary"
+              className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-extrabold text-white shadow-[0_8px_20px_rgba(201,20,20,0.3)] hover:-translate-y-0.5 hover:bg-primary-dark"
             >
               Khám phá sản phẩm <ArrowRight size={17} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
             <Link
               href="/lien-he"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-text px-5 text-sm font-extrabold text-text hover:-translate-y-0.5 hover:bg-white"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border-[1.5px] border-text px-6 text-sm font-extrabold text-text hover:-translate-y-0.5 hover:bg-white"
             >
               <MessageCircle size={17} /> Custom món riêng
             </Link>

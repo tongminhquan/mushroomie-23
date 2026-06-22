@@ -41,7 +41,7 @@ export default function HomeTrust({ reviews }: { reviews: HomeReview[] }) {
             {reviews.slice(0, 3).map((review, index) => (
               <figure
                 key={review.id}
-                className={`rounded-[18px] border border-white/80 bg-white p-6 shadow-card ${index === 1 ? 'md:-translate-y-4' : ''}`}
+                className={`rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-6 shadow-card ${index === 1 ? 'md:-translate-y-4' : ''}`}
               >
                 <div className="mb-5 flex gap-1 text-primary" role="img" aria-label={`${review.rating} trên 5 sao`}>
                   {Array.from({ length: review.rating }, (_, star) => (
@@ -58,7 +58,7 @@ export default function HomeTrust({ reviews }: { reviews: HomeReview[] }) {
         ) : (
           <div className="grid gap-4 md:grid-cols-3">
             {fallbackReasons.map(({ icon: Icon, title, text }) => (
-              <article key={title} className="rounded-[18px] border border-white/80 bg-white p-6">
+              <article key={title} className="rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-6">
                 <div className="grid h-11 w-11 place-items-center rounded-lg bg-primary-light text-primary">
                   <Icon size={21} />
                 </div>

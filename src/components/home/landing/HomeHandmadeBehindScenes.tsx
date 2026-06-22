@@ -32,7 +32,7 @@ export default function HomeHandmadeBehindScenes({ products }: { products: HomeP
             return (
               <article
                 key={label}
-                className={`group overflow-hidden rounded-[18px] border border-neutral-200 bg-white ${
+                className={`group overflow-hidden rounded-[20px] border-[1.5px] border-[#f0e0d6] bg-white ${
                   index === 1 || index === 3 ? 'lg:translate-y-7' : ''
                 }`}
               >

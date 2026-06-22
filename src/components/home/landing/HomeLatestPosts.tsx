@@ -24,7 +24,7 @@ export default function HomeLatestPosts({ posts }: { posts: HomePost[] }) {
         <div className="mt-8">
           <Link
             href="/tin-tuc"
-            className="inline-flex min-h-12 items-center gap-2 rounded-lg border border-primary px-5 text-sm font-extrabold text-primary hover:bg-primary hover:text-white"
+            className="inline-flex min-h-12 items-center gap-2 rounded-full border-[1.5px] border-primary px-6 text-sm font-extrabold text-primary hover:bg-primary hover:text-white"
           >
             Xem tất cả bài viết <ArrowRight size={17} />
           </Link>

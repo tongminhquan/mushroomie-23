@@ -7,30 +7,31 @@ import AnimatedDoodle from './AnimatedDoodle'
 
 export default function HomeCustomCTA() {
   return (
-    <section className="brand-container my-8 lg:my-12">
-      <div className="relative overflow-hidden rounded-[32px] bg-[#fff7f2] border border-pink px-6 py-8 shadow-sm sm:px-10 sm:py-12">
-        <AnimatedDoodle icon="sparkle" className="right-[7%] top-5 h-8 w-8 rotate-12 text-yellow" />
-        <AnimatedDoodle icon="heart" className="bottom-6 right-[19%] hidden h-7 w-7 -rotate-12 text-pink sm:block" />
-        <div className="relative z-10 grid items-end gap-6 lg:grid-cols-[1fr_auto]">
-          <div className="max-w-4xl">
-            <BrandSticker tone="pink">Made for you</BrandSticker>
-            <h2 className="mt-5 max-w-4xl text-balance font-heading text-3xl leading-[1.1] text-text sm:text-4xl lg:text-[2.75rem]">
-              Từ từng hạt nhỏ,<br className="sm:hidden" /> tạo phong cách riêng
-            </h2>
-            <p className="mt-4 max-w-2xl font-body text-base leading-7 text-neutral-600 sm:text-lg">
-              Phụ kiện handmade cá nhân hóa từ hạt, charm và màu bạn yêu. Nhắn ngay cho Mushroomie để thiết kế mẫu độc nhất vô nhị.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row lg:justify-end">
+    <section className="brand-container my-12 lg:my-20">
+      <div
+        className="relative overflow-hidden rounded-[32px] px-6 py-12 text-center text-white shadow-[0_22px_50px_rgba(201,20,20,0.3)] sm:px-10 sm:py-16"
+        style={{ background: 'radial-gradient(120% 140% at 15% 20%, #ff6b6b, var(--color-primary))' }}
+      >
+        <AnimatedDoodle icon="heart" className="left-[8%] top-[24%] h-7 w-7 rotate-6 text-white/50" />
+        <AnimatedDoodle icon="sparkle" className="bottom-[22%] right-[10%] hidden h-8 w-8 -rotate-12 text-white/50 sm:block" />
+        <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center">
+          <BrandSticker tone="white">Made for you</BrandSticker>
+          <h2 className="mt-5 text-balance font-heading text-3xl leading-[1.1] sm:text-4xl lg:text-[2.75rem]">
+            Từ từng hạt nhỏ,<br className="sm:hidden" /> tạo phong cách riêng
+          </h2>
+          <p className="mt-4 max-w-xl text-base leading-7 text-white/95 sm:text-lg">
+            Phụ kiện handmade cá nhân hóa từ hạt, charm và màu bạn yêu. Nhắn ngay cho Mushroomie để thiết kế mẫu độc nhất vô nhị.
+          </p>
+          <div className="mt-8 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
             <Link
               href="/san-pham"
-              className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-extrabold text-white shadow-card hover:-translate-y-0.5 hover:bg-text sm:min-h-[56px] sm:text-base transition-all"
+              className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-7 text-sm font-bold text-primary shadow-card hover:-translate-y-0.5 hover:shadow-[0_12px_26px_rgba(0,0,0,0.18)] sm:min-h-[56px] sm:text-base transition-all"
             >
               Khám phá sản phẩm <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
             <Link
               href="/lien-he"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-primary/20 bg-white px-6 text-sm font-extrabold text-primary hover:-translate-y-0.5 hover:border-primary hover:bg-primary/5 sm:min-h-[56px] sm:text-base transition-all"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-white/60 bg-white/15 px-7 text-sm font-bold text-white hover:-translate-y-0.5 hover:bg-white/25 sm:min-h-[56px] sm:text-base transition-all"
             >
               <MessageCircle size={18} /> Custom món riêng
             </Link>

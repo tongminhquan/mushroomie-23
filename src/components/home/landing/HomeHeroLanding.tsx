@@ -58,18 +58,41 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
   const next = () => setCurrent((value) => (value + 1) % slides.length)
 
   return (
-    <section className="overflow-hidden bg-secondary pt-3 md:pt-5">
+    <section
+      className="relative overflow-hidden bg-secondary pt-3 md:pt-5"
+      style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
+    >
+      {/* Decorative floats — purely presentational */}
+      <Sparkles
+        aria-hidden
+        className="animate-float-soft pointer-events-none absolute left-[6%] top-[14%] h-6 w-6 text-coral/70"
+      />
+      <span
+        aria-hidden
+        className="animate-float-soft pointer-events-none absolute right-[8%] top-[22%] h-4 w-4 rounded-full bg-yellow"
+      />
+      <Sparkles
+        aria-hidden
+        className="animate-float-soft pointer-events-none absolute right-[14%] bottom-[12%] h-5 w-5 text-primary/40"
+      />
+
       <div
-        className="brand-container relative overflow-hidden rounded-[18px] border border-neutral-200 bg-white shadow-strong"
+        className="brand-container relative overflow-hidden rounded-[24px] border-[1.5px] border-[#f0e0d6] bg-white shadow-strong"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
         <div
-          className="relative overflow-hidden bg-pink aspect-[4/3] sm:aspect-auto sm:h-[300px] md:h-[540px]"
+          className="relative overflow-hidden bg-secondary aspect-[4/3] sm:aspect-auto sm:h-[300px] md:h-[540px]"
           aria-roledescription="carousel"
           aria-label="Bộ sưu tập Mushroomie"
           aria-live="polite"
         >
+          {/* Soft diagonal paper texture behind banners — presentational */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{ background: 'repeating-linear-gradient(45deg,#fbf0e9,#fbf0e9 13px,#fff 13px,#fff 26px)', opacity: 0.5 }}
+          />
           {slides.map((banner, index) => {
             const active = index === current
             return (
@@ -102,7 +125,7 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
                 type="button"
                 onClick={previous}
                 aria-label="Banner trước"
-                className="absolute left-3 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-lg border border-neutral-200 bg-white/95 text-text shadow-card hover:bg-yellow min-h-[44px] min-w-[44px]"
+                className="absolute left-3 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border-[1.5px] border-[#f0e0d6] bg-white/95 text-text shadow-card transition-transform hover:-translate-y-1/2 hover:scale-105 hover:bg-pink min-h-[44px] min-w-[44px]"
               >
                 <ChevronLeft size={20} />
               </button>
@@ -110,11 +133,11 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
                 type="button"
                 onClick={next}
                 aria-label="Banner tiếp theo"
-                className="absolute right-3 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-lg border border-neutral-200 bg-white/95 text-text shadow-card hover:bg-yellow min-h-[44px] min-w-[44px]"
+                className="absolute right-3 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border-[1.5px] border-[#f0e0d6] bg-white/95 text-text shadow-card transition-transform hover:-translate-y-1/2 hover:scale-105 hover:bg-pink min-h-[44px] min-w-[44px]"
               >
                 <ChevronRight size={20} />
               </button>
-              <div className="absolute bottom-3 right-3 z-20 flex rounded-lg border border-white/70 bg-white/90 p-1 shadow-card md:bottom-[204px]">
+              <div className="absolute bottom-3 right-3 z-20 flex rounded-full border-[1.5px] border-[#f0e0d6] bg-white/90 p-1 shadow-card md:bottom-[204px]">
                 {slides.map((banner, index) => (
                   <button
                     key={banner.id}
@@ -131,16 +154,18 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
             </>
           )}
         </div>
-      </div>      <div className="brand-container grid grid-cols-2 rounded-b-[18px] border-x border-b border-neutral-200 bg-white sm:grid-cols-4">
+      </div>
+
+      <div className="brand-container relative grid grid-cols-2 rounded-b-[24px] border-x-[1.5px] border-b-[1.5px] border-[#f0e0d6] bg-white sm:grid-cols-4">
         {proofItems.map(({ icon: Icon, label }, index) => (
           <div
             key={label}
-            className={`flex min-h-20 items-center gap-3 px-4 py-3 hover-lift ${index % 2 === 0 ? 'border-r border-neutral-200' : ''} ${index < 2 ? 'border-b border-neutral-200 sm:border-b-0' : ''} sm:border-r sm:last:border-r-0`}
+            className={`flex min-h-20 items-center gap-3 px-4 py-3 hover-lift ${index % 2 === 0 ? 'border-r border-[#f0e0d6]' : ''} ${index < 2 ? 'border-b border-[#f0e0d6] sm:border-b-0' : ''} sm:border-r sm:last:border-r-0`}
           >
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary-light text-primary">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[14px] bg-pink text-primary">
               <Icon size={18} />
             </span>
-            <span className="text-xs font-extrabold leading-5 text-text sm:text-sm">{label}</span>
+            <span className="font-heading text-xs leading-5 text-text sm:text-sm">{label}</span>
           </div>
         ))}
       </div>

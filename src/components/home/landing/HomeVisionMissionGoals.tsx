@@ -25,7 +25,20 @@ const directions = [
 
 export default function HomeVisionMissionGoals() {
   return (
-    <section className="paper-surface py-16 md:py-24">
+    <section
+      className="relative overflow-hidden py-16 md:py-24"
+      style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
+    >
+      <span
+        aria-hidden
+        className="animate-float-soft pointer-events-none absolute right-[7%] top-[14%] text-3xl text-coral"
+      >
+        ❤
+      </span>
+      <span
+        aria-hidden
+        className="animate-float-soft pointer-events-none absolute left-[6%] bottom-[16%] h-4 w-4 rounded-full bg-yellow"
+      />
       <BrandContainer>
         <LandingSectionHeader
           eyebrow="Hướng đi của tụi mình"
@@ -33,16 +46,18 @@ export default function HomeVisionMissionGoals() {
           description="Nơi người trẻ chọn điều mình thích, biến nó thành món đồ có dấu ấn và tự tin mang phong cách riêng mỗi ngày."
           align="center"
         />
-        <div className="grid items-stretch gap-4 md:grid-cols-3">
+        <div className="grid items-stretch gap-5 md:grid-cols-3">
           {directions.map(({ icon: Icon, title, text, accent }, index) => (
             <article
               key={title}
-              className="group flex min-h-[280px] flex-col rounded-[18px] border border-neutral-200 bg-white p-6 transition duration-200 hover:-translate-y-1 hover:border-primary hover:shadow-hover md:p-7"
+              className="group relative flex min-h-[280px] flex-col rounded-[22px] border-[1.5px] border-[#f0e0d6] bg-white p-6 shadow-card transition duration-200 hover:-translate-y-1 hover:shadow-hover md:p-7"
             >
-              <div className={`mb-8 grid h-12 w-12 place-items-center rounded-xl text-primary ${accent}`}>
-                <Icon size={23} />
+              <span className="absolute right-6 top-6 grid h-9 w-9 place-items-center rounded-full bg-primary font-heading text-sm text-white shadow-[0_8px_20px_rgba(201,20,20,0.3)] md:right-7 md:top-7">
+                0{index + 1}
+              </span>
+              <div className={`mb-8 grid h-14 w-14 place-items-center rounded-2xl text-primary ${accent}`}>
+                <Icon size={26} />
               </div>
-              <span className="mb-3 text-xs font-extrabold uppercase tracking-[0.08em] text-kraft">0{index + 1}</span>
               <h3 className="font-heading text-2xl leading-tight text-text">{title}</h3>
               <p className="mt-3 text-sm leading-7 text-neutral-500">{text}</p>
             </article>
