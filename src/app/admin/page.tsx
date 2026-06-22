@@ -28,10 +28,10 @@ const statusLabels: Record<string, string> = {
 }
 
 export default async function AdminDashboard() {
-  const recentOrders = await prisma.order.findMany({ 
-    take: 8, 
-    orderBy: { created_at: 'desc' }, 
-    include: { payment: true } 
+  const recentOrders = await prisma.order.findMany({
+    take: 8,
+    orderBy: { created_at: 'desc' },
+    include: { payment: true }
   }).catch(() => [])
 
   return (
@@ -42,47 +42,58 @@ export default async function AdminDashboard() {
       <DashboardContent />
 
       {/* Recent orders table */}
-      <AdminCard className="p-4 sm:p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-heading font-bold text-lg">Đơn hàng gần đây</h2>
-          <Link href="/admin/don-hang" className="text-primary text-sm font-semibold hover:underline">Xem tất cả →</Link>
+      <AdminCard className="overflow-hidden rounded-[16px] border-[1.5px] border-[#f0e0d6]">
+        <div className="flex items-center justify-between gap-4 border-b border-[#f0e0d6] px-5 py-4 sm:px-6">
+          <h2 className="font-heading text-base text-neutral-900 sm:text-lg">Đơn hàng gần đây</h2>
+          <Link
+            href="/admin/don-hang"
+            className="text-sm font-semibold text-primary transition-colors hover:text-primary-dark"
+          >
+            Xem tất cả →
+          </Link>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[640px] text-sm">
             <thead>
-              <tr className="border-b border-neutral-100">
-                <th className="text-left py-2 px-2 text-neutral-500 font-medium">Mã đơn</th>
-                <th className="text-left py-2 px-2 text-neutral-500 font-medium">Khách hàng</th>
-                <th className="text-left py-2 px-2 text-neutral-500 font-medium">Tổng tiền</th>
-                <th className="text-left py-2 px-2 text-neutral-500 font-medium">Trạng thái</th>
-                <th className="text-left py-2 px-2 text-neutral-500 font-medium">Ngày tạo</th>
+              <tr className="bg-secondary text-left">
+                <th className="px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.06em] text-neutral-400 sm:px-6">Mã đơn</th>
+                <th className="px-4 py-3 text-[11px] font-extrabold uppercase tracking-[0.06em] text-neutral-400">Khách hàng</th>
+                <th className="px-4 py-3 text-[11px] font-extrabold uppercase tracking-[0.06em] text-neutral-400">Tổng tiền</th>
+                <th className="px-4 py-3 text-[11px] font-extrabold uppercase tracking-[0.06em] text-neutral-400">Trạng thái</th>
+                <th className="px-4 py-3 text-[11px] font-extrabold uppercase tracking-[0.06em] text-neutral-400">Ngày tạo</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-50">
+            <tbody>
               {recentOrders.map((order) => (
-                <tr key={order.id} className="hover:bg-neutral-50 transition-colors">
-                  <td className="py-3 px-2">
-                    <Link href={`/admin/don-hang/${order.id}`} className="font-mono text-primary hover:underline font-semibold text-xs">
+                <tr
+                  key={order.id}
+                  className="border-t border-[#f0e0d6] transition-colors hover:bg-secondary"
+                >
+                  <td className="px-5 py-3 sm:px-6">
+                    <Link
+                      href={`/admin/don-hang/${order.id}`}
+                      className="font-mono text-xs font-semibold text-primary hover:underline"
+                    >
                       #{order.order_code}
                     </Link>
                   </td>
-                  <td className="py-3 px-2">
-                    <div className="font-medium">{order.customer_name}</div>
-                    <div className="text-xs text-neutral-500">{order.customer_phone}</div>
+                  <td className="px-4 py-3">
+                    <div className="font-medium text-neutral-900">{order.customer_name}</div>
+                    <div className="text-xs text-neutral-400">{order.customer_phone}</div>
                   </td>
-                  <td className="py-3 px-2 font-semibold">{formatPrice(Number(order.total))}</td>
-                  <td className="py-3 px-2">
+                  <td className="px-4 py-3 font-semibold text-neutral-900">{formatPrice(Number(order.total))}</td>
+                  <td className="px-4 py-3">
                     <AdminStatusBadge tone={statusTones[order.order_status] || 'neutral'}>
                       {statusLabels[order.order_status] || order.order_status}
                     </AdminStatusBadge>
                   </td>
-                  <td className="py-3 px-2 text-neutral-500 text-xs">{formatDate(order.created_at)}</td>
+                  <td className="px-4 py-3 text-xs text-neutral-400">{formatDate(order.created_at)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
           {recentOrders.length === 0 && (
-            <div className="text-center py-8 text-neutral-500 text-sm">Chưa có đơn hàng nào</div>
+            <div className="py-8 text-center text-sm text-neutral-400">Chưa có đơn hàng nào</div>
           )}
         </div>
       </AdminCard>

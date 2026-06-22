@@ -38,7 +38,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
     inactive: 'bg-neutral-100 text-neutral-700',
     draft: 'bg-yellow-100 text-yellow-700',
   }
-  
+
   const getStatusLabel = (status: string) => {
     if (status === 'active') return 'Đang bán'
     if (status === 'inactive') return 'Ngừng bán'
@@ -51,8 +51,9 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
     <div className="p-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="font-heading text-2xl font-bold">Quản lý sản phẩm</h1>
-          <p className="text-neutral-500 text-sm">{total} sản phẩm</p>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-neutral-400 mb-1">Cửa hàng / Sản phẩm</div>
+          <h1 className="font-heading text-2xl font-bold text-neutral-900">Quản lý sản phẩm</h1>
+          <p className="text-neutral-500 text-sm mt-0.5">{total} sản phẩm</p>
         </div>
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <ManageCategoriesModal />
@@ -64,64 +65,70 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
       </div>
 
       {/* Filters */}
-      <form className="bg-white rounded-2xl p-4 shadow-card mb-6 flex flex-wrap gap-3">
+      <form className="bg-white rounded-[16px] p-4 border-[1.5px] border-[#f0e0d6] shadow-card mb-6 flex flex-wrap gap-3">
         <div className="flex-1 min-w-0">
           <input
             name="search"
             defaultValue={sp.search}
             placeholder="Tìm kiếm sản phẩm..."
-            className="w-full px-4 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full px-4 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm focus:outline-none focus:border-primary"
           />
         </div>
-        <select name="category" defaultValue={sp.category} className="px-3 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+        <select name="category" defaultValue={sp.category} className="px-3 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm focus:outline-none focus:border-primary">
           <option value="">Tất cả danh mục</option>
           {categories.map((c) => <option key={c.id} value={c.slug}>{c.name}</option>)}
         </select>
-        <select name="status" defaultValue={sp.status} className="px-3 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+        <select name="status" defaultValue={sp.status} className="px-3 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm focus:outline-none focus:border-primary">
           <option value="">Tất cả trạng thái</option>
           <option value="active">Đang bán</option>
           <option value="inactive">Ngừng bán</option>
           <option value="draft">Bản nháp</option>
           {customStatuses.map((s) => <option key={s.id} value={s.slug}>{s.name}</option>)}
         </select>
-        <button type="submit" className="px-4 py-2 bg-neutral-100 rounded-xl text-sm font-semibold hover:bg-neutral-200">Lọc</button>
+        <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary-dark transition-colors">Lọc</button>
       </form>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+      <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm whitespace-nowrap">
-            <thead className="bg-neutral-50 border-b border-neutral-100">
+            <thead className="bg-secondary border-b-[1.5px] border-[#f0e0d6]">
               <tr>
-                <th className="text-left py-3 px-4 text-neutral-500 font-medium">Sản phẩm</th>
-                <th className="text-left py-3 px-4 text-neutral-500 font-medium">Danh mục</th>
-                <th className="text-left py-3 px-4 text-neutral-500 font-medium">Giá</th>
-                <th className="text-left py-3 px-4 text-neutral-500 font-medium">Tồn kho</th>
-                <th className="text-left py-3 px-4 text-neutral-500 font-medium">Trạng thái</th>
-                <th className="text-left py-3 px-4 text-neutral-500 font-medium">Ngày tạo</th>
-                <th className="text-right py-3 px-4 text-neutral-500 font-medium">Hành động</th>
+                <th className="text-left py-3 px-4 text-neutral-500 font-bold text-[11px] uppercase tracking-[0.05em]">Sản phẩm</th>
+                <th className="text-left py-3 px-4 text-neutral-500 font-bold text-[11px] uppercase tracking-[0.05em]">Danh mục</th>
+                <th className="text-left py-3 px-4 text-neutral-500 font-bold text-[11px] uppercase tracking-[0.05em]">Giá</th>
+                <th className="text-left py-3 px-4 text-neutral-500 font-bold text-[11px] uppercase tracking-[0.05em]">Tồn kho</th>
+                <th className="text-left py-3 px-4 text-neutral-500 font-bold text-[11px] uppercase tracking-[0.05em]">Trạng thái</th>
+                <th className="text-left py-3 px-4 text-neutral-500 font-bold text-[11px] uppercase tracking-[0.05em]">Ngày tạo</th>
+                <th className="text-right py-3 px-4 text-neutral-500 font-bold text-[11px] uppercase tracking-[0.05em]">Hành động</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-50">
+            <tbody className="divide-y divide-[#f5ece5]">
               {products.map((product: any) => (
-                <tr key={product.id} className="hover:bg-neutral-50 transition-colors">
+                <tr key={product.id} className="hover:bg-[#fff7f2] transition-colors">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
                       {(product.featured_image || product.images[0]?.image_url) && (
-                        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-neutral-100">
+                        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-secondary border border-[#f0e0d6]">
                           <img src={product.featured_image || product.images[0]?.image_url} alt={product.name} className="w-full h-full object-cover" />
                         </div>
                       )}
                       <div>
-                        <div className="font-semibold text-sm">{product.name}</div>
+                        <div className="font-semibold text-sm text-neutral-900">{product.name}</div>
                         <div className="text-xs text-neutral-400 font-mono">{product.slug}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-neutral-600">{product.category?.name || '—'}</td>
-                  <td className="py-3 px-4 font-semibold">{formatPrice(Number(product.price))}</td>
                   <td className="py-3 px-4">
-                    <span className={product.stock <= 5 ? 'text-red-600 font-bold' : 'text-neutral-700'}>{product.stock}</span>
+                    {product.category?.name ? (
+                      <span className="inline-block text-[11.5px] font-semibold text-[#b9794b] bg-[#fff7f2] border border-[#f0e0d6] px-2.5 py-1 rounded-full">{product.category.name}</span>
+                    ) : (
+                      <span className="text-neutral-400">—</span>
+                    )}
+                  </td>
+                  <td className="py-3 px-4 font-bold text-primary">{formatPrice(Number(product.price))}</td>
+                  <td className="py-3 px-4">
+                    <span className={product.stock <= 5 ? 'text-red-600 font-bold' : 'text-neutral-700 font-semibold'}>{product.stock}</span>
                   </td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors[product.status] || 'bg-neutral-100'}`}>
@@ -144,11 +151,11 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
 
         {/* Pagination */}
         {Math.ceil(total / limit) > 1 && (
-          <div className="flex justify-center gap-2 p-4 border-t border-neutral-50">
+          <div className="flex justify-center gap-2 p-4 border-t-[1.5px] border-[#f0e0d6]">
             {Array.from({ length: Math.ceil(total / limit) }, (_, i) => i + 1).map((p) => (
               <Link key={p} href={`/admin/san-pham?${new URLSearchParams({ ...sp, page: String(p) })}`}
                 className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold transition-colors ${
-                  p === page ? 'bg-primary text-white' : 'bg-neutral-100 hover:bg-neutral-200'
+                  p === page ? 'bg-primary text-white' : 'bg-white border-[1.5px] border-[#e2d3c8] text-neutral-600 hover:border-primary hover:text-primary'
                 }`}>{p}
               </Link>
             ))}

@@ -63,7 +63,7 @@ export default function AdminSidebar() {
   return (
     <>
       <button
-        className="fixed left-4 top-3 z-40 rounded-xl border border-neutral-200 bg-white p-2 text-neutral-900 shadow-md md:hidden"
+        className="fixed left-4 top-3 z-40 rounded-xl border-[1.5px] border-[#f0e0d6] bg-white p-2 text-neutral-900 shadow-card md:hidden"
         onClick={() => setIsOpen(true)}
         aria-label="Mở menu admin"
       >
@@ -81,22 +81,23 @@ export default function AdminSidebar() {
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex h-screen flex-shrink-0 transform flex-col overflow-hidden border-r border-neutral-200 bg-white shadow-2xl transition-all duration-300 ease-in-out md:relative md:translate-x-0 md:shadow-none',
+          'fixed inset-y-0 left-0 z-50 flex h-screen flex-shrink-0 transform flex-col overflow-hidden border-r-[1.5px] border-[#f0e0d6] bg-white shadow-card transition-all duration-300 ease-in-out md:relative md:translate-x-0 md:shadow-none',
           isOpen ? 'translate-x-0' : '-translate-x-full',
           isCollapsed ? 'w-20' : 'w-64',
         )}
       >
-        <div className={cn('flex h-[77px] items-center border-b border-neutral-200 transition-all duration-300', isCollapsed ? 'justify-center' : 'justify-between px-5')}>
+        <div className={cn('flex h-[77px] items-center border-b-[1.5px] border-[#f0e0d6] transition-all duration-300', isCollapsed ? 'justify-center' : 'justify-between px-5')}>
           <Link href="/admin" className={cn('flex items-center gap-3 overflow-hidden', isCollapsed ? 'hidden' : 'flex')}>
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-secondary">
               <Image src="/logo.webp" alt="Mushroomie" width={40} height={40} className="h-9 w-9 object-contain" />
             </div>
-            <div className="whitespace-nowrap text-[11px] font-extrabold uppercase tracking-[0.1em] text-primary">
-              Quản trị
+            <div className="flex flex-col leading-tight">
+              <span className="whitespace-nowrap font-heading text-[15px] text-primary">Mushroomie</span>
+              <span className="whitespace-nowrap text-[10px] font-extrabold uppercase tracking-[0.12em] text-neutral-400">Quản trị</span>
             </div>
           </Link>
           <button
-            className="hidden p-2 text-neutral-400 hover:text-primary md:flex"
+            className="hidden rounded-lg p-2 text-neutral-400 transition-colors hover:bg-secondary hover:text-primary md:flex"
             onClick={() => setIsCollapsed(!isCollapsed)}
             aria-label="Thu gọn menu"
           >
@@ -104,7 +105,7 @@ export default function AdminSidebar() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <button className="mr-4 p-1 text-neutral-400 md:hidden" onClick={() => setIsOpen(false)} aria-label="Đóng menu admin">
+          <button className="mr-4 rounded-lg p-1 text-neutral-400 transition-colors hover:text-primary md:hidden" onClick={() => setIsOpen(false)} aria-label="Đóng menu admin">
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -122,8 +123,8 @@ export default function AdminSidebar() {
                 'group flex items-center gap-3 rounded-xl py-3 transition-all',
                 isCollapsed ? 'justify-center px-3' : 'px-4',
                 isActive(item.href, item.exact)
-                  ? 'bg-primary-light text-primary'
-                  : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900',
+                  ? 'bg-primary text-white shadow-card'
+                  : 'text-neutral-600 hover:bg-secondary hover:text-primary',
               )}
             >
               <item.icon size={isCollapsed ? 22 : 18} className="flex-shrink-0 transition-all duration-300" />
@@ -135,15 +136,15 @@ export default function AdminSidebar() {
           ))}
         </nav>
 
-        <div className="space-y-1 border-t border-neutral-200 p-3">
-          <Link href="/" target="_blank" title="Xem website" className={cn('flex items-center gap-3 rounded-xl py-3 text-sm text-neutral-500 transition-all hover:bg-neutral-100 hover:text-neutral-900', isCollapsed ? 'justify-center px-3' : 'px-4')}>
+        <div className="space-y-1 border-t-[1.5px] border-[#f0e0d6] p-3">
+          <Link href="/" target="_blank" title="Xem website" className={cn('flex items-center gap-3 rounded-xl py-3 text-sm text-neutral-500 transition-all hover:bg-secondary hover:text-primary', isCollapsed ? 'justify-center px-3' : 'px-4')}>
             <ExternalLink size={isCollapsed ? 22 : 18} className="flex-shrink-0" />
             {!isCollapsed && <span className="whitespace-nowrap">Xem website</span>}
           </Link>
           <button
             onClick={() => signOut({ callbackUrl: '/' })}
             title="Đăng xuất"
-            className={cn('flex w-full items-center gap-3 rounded-xl py-3 text-sm text-neutral-500 transition-all hover:bg-red-50 hover:text-red-600', isCollapsed ? 'justify-center px-3' : 'px-4')}
+            className={cn('flex w-full items-center gap-3 rounded-xl py-3 text-sm text-neutral-500 transition-all hover:bg-[#ffece6] hover:text-primary', isCollapsed ? 'justify-center px-3' : 'px-4')}
           >
             <LogOut size={isCollapsed ? 22 : 18} className="flex-shrink-0" />
             {!isCollapsed && <span className="whitespace-nowrap">Đăng xuất</span>}
