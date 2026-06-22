@@ -87,12 +87,12 @@ export default function AdminAccountsPage() {
 
   const handleDeleteUser = async (userId: number) => {
     if (!confirm('Bạn có chắc chắn muốn xóa tài khoản này? Hành động này không thể hoàn tác.')) return
-    
+
     try {
       const res = await fetch(`/api/users/${userId}`, { method: 'DELETE' })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Lỗi khi xóa')
-      
+
       alert('Xóa tài khoản thành công')
       setUsers(users.filter(u => u.id !== userId))
     } catch (error: any) {
@@ -111,13 +111,14 @@ export default function AdminAccountsPage() {
     <div className="p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-heading text-2xl font-bold">Quản lý Tài khoản</h1>
-          <p className="text-neutral-500 mt-1">Cấp quyền và quản lý tài khoản người dùng</p>
+          <div className="text-[11px] font-semibold text-neutral-400">Hệ thống / Người dùng</div>
+          <h1 className="font-heading text-2xl text-neutral-800 mt-0.5">Quản lý Tài khoản</h1>
+          <p className="text-neutral-500 text-sm mt-1">Cấp quyền và quản lý tài khoản người dùng</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
-        <div className="p-4 border-b border-neutral-200">
+      <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card overflow-hidden">
+        <div className="p-4 border-b-[1.5px] border-[#f0e0d6]">
           <form onSubmit={handleSearch} className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={18} />
             <input
@@ -125,22 +126,22 @@ export default function AdminAccountsPage() {
               placeholder="Tìm kiếm theo tên hoặc email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-neutral-50 border-transparent rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+              className="w-full pl-10 pr-4 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm focus:outline-none focus:border-primary transition-colors"
             />
           </form>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left whitespace-nowrap">
-            <thead className="text-xs text-neutral-500 uppercase bg-neutral-50/50">
+            <thead className="bg-secondary border-b-[1.5px] border-[#f0e0d6]">
               <tr>
-                <th className="px-6 py-4 font-medium">Người dùng</th>
-                <th className="px-6 py-4 font-medium">Ngày đăng ký</th>
-                <th className="px-6 py-4 font-medium">Vai trò</th>
-                <th className="px-6 py-4 font-medium text-right">Thao tác</th>
+                <th className="px-6 py-3 text-neutral-500 font-bold text-[11px] uppercase tracking-wide">Người dùng</th>
+                <th className="px-6 py-3 text-neutral-500 font-bold text-[11px] uppercase tracking-wide">Ngày đăng ký</th>
+                <th className="px-6 py-3 text-neutral-500 font-bold text-[11px] uppercase tracking-wide">Vai trò</th>
+                <th className="px-6 py-3 text-neutral-500 font-bold text-[11px] uppercase tracking-wide text-right">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100">
+            <tbody className="divide-y divide-[#f6ece5]">
               {isLoading ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-8 text-center text-neutral-500">
@@ -156,26 +157,26 @@ export default function AdminAccountsPage() {
                 </tr>
               ) : (
                 users.map((user) => (
-                  <tr key={user.id} className="hover:bg-neutral-50/50 transition-colors">
+                  <tr key={user.id} className="hover:bg-[#fff7f2] transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         {user.avatar ? (
-                          <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover border border-neutral-100 shadow-sm" />
+                          <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover border-[1.5px] border-[#f0e0d6] shadow-sm" />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                          <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center text-primary font-bold">
                             {user.name.charAt(0).toUpperCase()}
                           </div>
                         )}
                         <div className="max-w-xs whitespace-normal">
-                          <div className="font-medium text-neutral-900 flex items-center gap-1.5 flex-wrap">
+                          <div className="font-semibold text-neutral-800 flex items-center gap-1.5 flex-wrap">
                             {user.name}
                             {user.email.toLowerCase() === PROTECTED_SUPER_ADMIN_EMAIL.toLowerCase() && (
-                              <span className="bg-red-100 text-red-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide whitespace-nowrap">
+                              <span className="bg-[#ffd6d6] text-[#c0392b] text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide whitespace-nowrap">
                                 Super Admin được bảo vệ
                               </span>
                             )}
                             {user.google_id && (
-                              <span title="Tài khoản liên kết Google" className="flex items-center justify-center bg-white border border-neutral-200 rounded-full p-0.5">
+                              <span title="Tài khoản liên kết Google" className="flex items-center justify-center bg-white border-[1.5px] border-[#f0e0d6] rounded-full p-0.5">
                                 <svg className="w-3 h-3" viewBox="0 0 24 24">
                                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -187,22 +188,22 @@ export default function AdminAccountsPage() {
                           </div>
                           <div className="text-neutral-500 flex items-center gap-1.5">
                             {user.email}
-                            {user.is_email_verified && <span title="Email đã xác minh"><Shield size={12} className="text-green-500" /></span>}
+                            {user.is_email_verified && <span title="Email đã xác minh"><Shield size={12} className="text-[#1f8a5b]" /></span>}
                           </div>
                           {user.phone && <div className="text-xs text-neutral-500 mt-1">SĐT: <span className="font-medium text-neutral-700">{user.phone}</span></div>}
                           {user.address && <div className="text-xs text-neutral-500 line-clamp-2" title={user.address}>Đ/c: <span className="font-medium text-neutral-700">{user.address}</span></div>}
-                          <div className="text-xs text-neutral-500 mt-0.5">MK (Mã hóa): <span className="font-mono bg-neutral-100 px-1 py-0.5 rounded text-[10px] break-all border border-neutral-200 inline-block mt-1" title={user.password_hash}>{user.password_hash ? user.password_hash.substring(0, 20) + '...' : 'Không có'}</span></div>
+                          <div className="text-xs text-neutral-500 mt-0.5">MK (Mã hóa): <span className="font-mono bg-secondary px-1 py-0.5 rounded text-[10px] break-all border-[1.5px] border-[#f0e0d6] inline-block mt-1" title={user.password_hash}>{user.password_hash ? user.password_hash.substring(0, 20) + '...' : 'Không có'}</span></div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-neutral-500">
+                    <td className="px-6 py-4 text-neutral-500 text-xs">
                       {format(new Date(user.created_at), 'dd/MM/yyyy HH:mm', { locale: vi })}
                     </td>
                     <td className="px-6 py-4">
-                      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                        ['super_admin', 'admin', 'viewer'].includes(user.role) 
-                          ? 'bg-blue-100 text-blue-700' 
-                          : 'bg-neutral-100 text-neutral-700'
+                      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
+                        ['super_admin', 'admin', 'viewer'].includes(user.role)
+                          ? 'bg-[#eaf1fd] text-[#2a6fdb]'
+                          : 'bg-secondary text-neutral-600'
                       }`}>
                         {['super_admin', 'admin', 'viewer'].includes(user.role) ? <Shield size={12} /> : <UserIcon size={12} />}
                         {roleLabels[user.role] || user.role}
@@ -214,7 +215,7 @@ export default function AdminAccountsPage() {
                           value={user.role}
                           onChange={(e) => handleUpdateRole(user.id, e.target.value)}
                           disabled={updatingId === user.id || user.email.toLowerCase() === PROTECTED_SUPER_ADMIN_EMAIL.toLowerCase()}
-                          className="bg-neutral-50 border border-neutral-200 text-neutral-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-32 p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="bg-white border-[1.5px] border-[#e2d3c8] text-neutral-800 text-sm rounded-lg focus:outline-none focus:border-primary block w-32 p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <option value="user">User</option>
                           <option value="viewer">Viewer</option>
@@ -224,7 +225,7 @@ export default function AdminAccountsPage() {
                         {user.id !== (session?.user as any)?.id && user.email.toLowerCase() !== PROTECTED_SUPER_ADMIN_EMAIL.toLowerCase() && (
                           <button
                             onClick={() => handleDeleteUser(user.id)}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 text-primary hover:bg-primary-light rounded-lg transition-colors"
                             title="Xóa tài khoản"
                           >
                             <Trash2 size={18} />

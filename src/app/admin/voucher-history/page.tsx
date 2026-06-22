@@ -127,29 +127,29 @@ export default async function AdminVoucherHistoryPage({ searchParams }: { search
           ['Đã thu hồi', totalRevoked],
           ['Hết hạn', totalExpired],
         ].map(([label, value]) => (
-          <AdminCard key={label} className="p-4">
-            <div className="text-xs font-bold uppercase tracking-[0.12em] text-neutral-400">{label}</div>
-            <div className="mt-3 text-2xl font-black text-neutral-900">{value}</div>
+          <AdminCard key={label} className="rounded-[14px] border-[1.5px] border-[#f0e0d6] p-4 shadow-card">
+            <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-neutral-400">{label}</div>
+            <div className="mt-3 font-heading text-2xl text-neutral-900">{value}</div>
           </AdminCard>
         ))}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
-        <AdminCard className="p-5">
-          <div className="text-xs font-bold uppercase tracking-[0.12em] text-neutral-400">Tổng giá trị giảm đã dùng</div>
-          <div className="mt-3 text-3xl font-black text-primary">{formatPrice(totalDiscountUsed)}</div>
+        <AdminCard className="rounded-[16px] border-[1.5px] border-[#f0e0d6] p-5 shadow-card">
+          <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-neutral-400">Tổng giá trị giảm đã dùng</div>
+          <div className="mt-3 font-heading text-3xl text-primary">{formatPrice(totalDiscountUsed)}</div>
           <div className="mt-2 text-sm font-semibold text-neutral-500">Tỷ lệ sử dụng: {usageRate}%</div>
         </AdminCard>
-        <AdminCard className="p-5">
-          <div className="text-xs font-bold uppercase tracking-[0.12em] text-neutral-400">Voucher theo game</div>
+        <AdminCard className="rounded-[16px] border-[1.5px] border-[#f0e0d6] p-5 shadow-card">
+          <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-neutral-400">Voucher theo game</div>
           <div className="mt-4 space-y-3">
             {byGame.length > 0 ? byGame.map((item) => (
               <div key={item.sourceGame || 'none'}>
-                <div className="mb-1 flex justify-between text-sm font-semibold">
+                <div className="mb-1 flex justify-between text-sm font-semibold text-neutral-700">
                   <span>{gameLabel[item.sourceGame || ''] || item.sourceGame}</span>
-                  <span>{item._count._all}</span>
+                  <span className="text-neutral-500">{item._count._all}</span>
                 </div>
-                <div className="h-2 rounded-full bg-neutral-100">
+                <div className="h-2 overflow-hidden rounded-full bg-[#f5ece6]">
                   <div className="h-2 rounded-full bg-primary" style={{ width: `${(item._count._all / gameMax) * 100}%` }} />
                 </div>
               </div>
@@ -158,35 +158,35 @@ export default async function AdminVoucherHistoryPage({ searchParams }: { search
         </AdminCard>
       </div>
 
-      <AdminCard className="p-4">
+      <AdminCard className="rounded-[16px] border-[1.5px] border-[#f0e0d6] p-4 shadow-card">
         <form className="grid gap-3 md:grid-cols-6" method="get">
-          <input name="user" defaultValue={sp.user || ''} placeholder="User/email/SDT" className="rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary" />
-          <input name="code" defaultValue={sp.code || ''} placeholder="Mã voucher" className="rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary" />
-          <input name="order" defaultValue={sp.order || ''} placeholder="Mã đơn hàng" className="rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary" />
-          <select name="game" defaultValue={sp.game || ''} className="rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary">
+          <input name="user" defaultValue={sp.user || ''} placeholder="User/email/SDT" className="rounded-lg border-[1.5px] border-[#e2d3c8] px-3 py-2 text-sm outline-none transition-colors focus:border-primary" />
+          <input name="code" defaultValue={sp.code || ''} placeholder="Mã voucher" className="rounded-lg border-[1.5px] border-[#e2d3c8] px-3 py-2 text-sm outline-none transition-colors focus:border-primary" />
+          <input name="order" defaultValue={sp.order || ''} placeholder="Mã đơn hàng" className="rounded-lg border-[1.5px] border-[#e2d3c8] px-3 py-2 text-sm outline-none transition-colors focus:border-primary" />
+          <select name="game" defaultValue={sp.game || ''} className="rounded-lg border-[1.5px] border-[#e2d3c8] px-3 py-2 text-sm outline-none transition-colors focus:border-primary">
             <option value="">Tất cả game</option>
             <option value="tetris">Tetris</option>
             <option value="block-blast">Block Blast</option>
           </select>
-          <select name="status" defaultValue={sp.status || ''} className="rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-primary">
+          <select name="status" defaultValue={sp.status || ''} className="rounded-lg border-[1.5px] border-[#e2d3c8] px-3 py-2 text-sm outline-none transition-colors focus:border-primary">
             <option value="">Tất cả trạng thái</option>
             <option value="AVAILABLE">AVAILABLE</option>
             <option value="USED">USED</option>
             <option value="REVOKED">REVOKED</option>
             <option value="EXPIRED">EXPIRED</option>
           </select>
-          <button className="rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white">Lọc</button>
+          <button className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-primary/90">Lọc</button>
         </form>
       </AdminCard>
 
-      <AdminCard className="overflow-hidden">
-        <div className="border-b border-neutral-100 p-5">
-          <h2 className="font-heading text-lg font-bold">Lịch sử nhận voucher</h2>
+      <AdminCard className="overflow-hidden rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card">
+        <div className="border-b-[1.5px] border-[#f0e0d6] p-5">
+          <h2 className="font-heading text-lg text-neutral-900">Lịch sử nhận voucher</h2>
           <p className="text-sm text-neutral-500">{total} kết quả</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full whitespace-nowrap text-sm">
-            <thead className="border-b border-neutral-100 bg-neutral-50 text-left text-xs text-neutral-500">
+            <thead className="border-b-[1.5px] border-[#f0e0d6] bg-[#faf4f0] text-left text-[11px] font-bold uppercase tracking-[0.04em] text-neutral-500">
               <tr>
                 <th className="px-4 py-3">Thời gian</th>
                 <th className="px-4 py-3">User</th>
@@ -197,12 +197,12 @@ export default async function AdminVoucherHistoryPage({ searchParams }: { search
                 <th className="px-4 py-3">Hạn dùng</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-50">
+            <tbody className="divide-y divide-[#f5ece6]">
               {vouchers.map((uv: any) => (
-                <tr key={uv.id} className="hover:bg-neutral-50">
+                <tr key={uv.id} className="transition-colors hover:bg-[#faf4f0]">
                   <td className="px-4 py-3 text-xs text-neutral-500">{formatDate(uv.createdAt)}</td>
                   <td className="px-4 py-3">
-                    <div className="font-semibold">{uv.user?.name || 'Khách'}</div>
+                    <div className="font-semibold text-neutral-800">{uv.user?.name || 'Khách'}</div>
                     <div className="text-xs text-neutral-400">{uv.user?.email || uv.user?.phone || '-'}</div>
                   </td>
                   <td className="px-4 py-3">
@@ -212,10 +212,10 @@ export default async function AdminVoucherHistoryPage({ searchParams }: { search
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="font-semibold">{uv.source}</div>
+                    <div className="font-semibold text-neutral-800">{uv.source}</div>
                     <div className="text-xs text-neutral-500">{gameLabel[uv.sourceGame || ''] || uv.sourceGame || '-'}</div>
                   </td>
-                  <td className="px-4 py-3 font-semibold">{uv.score || '-'}</td>
+                  <td className="px-4 py-3 font-semibold text-neutral-800">{uv.score || '-'}</td>
                   <td className="px-4 py-3">
                     <AdminStatusBadge tone={statusTone[uv.status] || 'neutral'}>{uv.status}</AdminStatusBadge>
                   </td>
@@ -227,12 +227,12 @@ export default async function AdminVoucherHistoryPage({ searchParams }: { search
           {vouchers.length === 0 && <div className="p-8 text-center text-sm text-neutral-500">Không có voucher phù hợp.</div>}
         </div>
         {totalPages > 1 && (
-          <div className="flex justify-center gap-2 border-t border-neutral-100 p-4">
+          <div className="flex justify-center gap-2 border-t-[1.5px] border-[#f0e0d6] p-4">
             {Array.from({ length: totalPages }, (_, index) => index + 1).map((value) => {
               const params = new URLSearchParams(currentParams)
               params.set('page', String(value))
               return (
-                <Link key={value} href={`/admin/voucher-history?${params.toString()}`} className={`grid h-8 w-8 place-items-center rounded-lg text-xs font-bold ${page === value ? 'bg-primary text-white' : 'bg-neutral-100 text-neutral-600'}`}>
+                <Link key={value} href={`/admin/voucher-history?${params.toString()}`} className={`grid h-8 w-8 place-items-center rounded-lg text-xs font-bold transition-colors ${page === value ? 'bg-primary text-white' : 'border-[1.5px] border-[#e2d3c8] bg-white text-neutral-600 hover:border-primary hover:text-primary'}`}>
                   {value}
                 </Link>
               )
@@ -241,14 +241,14 @@ export default async function AdminVoucherHistoryPage({ searchParams }: { search
         )}
       </AdminCard>
 
-      <AdminCard className="overflow-hidden">
-        <div className="border-b border-neutral-100 p-5">
-          <h2 className="font-heading text-lg font-bold">Lịch sử dùng voucher</h2>
+      <AdminCard className="overflow-hidden rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card">
+        <div className="border-b-[1.5px] border-[#f0e0d6] p-5">
+          <h2 className="font-heading text-lg text-neutral-900">Lịch sử dùng voucher</h2>
           <p className="text-sm text-neutral-500">20 giao dịch gần nhất</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full whitespace-nowrap text-sm">
-            <thead className="border-b border-neutral-100 bg-neutral-50 text-left text-xs text-neutral-500">
+            <thead className="border-b-[1.5px] border-[#f0e0d6] bg-[#faf4f0] text-left text-[11px] font-bold uppercase tracking-[0.04em] text-neutral-500">
               <tr>
                 <th className="px-4 py-3">Thời gian dùng</th>
                 <th className="px-4 py-3">User</th>
@@ -259,12 +259,12 @@ export default async function AdminVoucherHistoryPage({ searchParams }: { search
                 <th className="px-4 py-3">Game nguồn</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-50">
+            <tbody className="divide-y divide-[#f5ece6]">
               {usedVouchers.map((uv: any) => (
-                <tr key={uv.id} className="hover:bg-neutral-50">
+                <tr key={uv.id} className="transition-colors hover:bg-[#faf4f0]">
                   <td className="px-4 py-3 text-xs text-neutral-500">{uv.usedAt ? formatDate(uv.usedAt) : '-'}</td>
                   <td className="px-4 py-3">
-                    <div className="font-semibold">{uv.user?.name || 'Khách'}</div>
+                    <div className="font-semibold text-neutral-800">{uv.user?.name || 'Khách'}</div>
                     <div className="text-xs text-neutral-400">{uv.user?.email || uv.user?.phone || '-'}</div>
                   </td>
                   <td className="px-4 py-3 font-mono font-bold text-primary">{uv.voucher?.code || '-'}</td>
@@ -273,9 +273,9 @@ export default async function AdminVoucherHistoryPage({ searchParams }: { search
                       <Link className="font-mono text-primary hover:underline" href={`/admin/don-hang/${uv.order.id}`}>#{uv.order.order_code}</Link>
                     ) : '-'}
                   </td>
-                  <td className="px-4 py-3 font-semibold">{formatPrice(Number(uv.order?.voucher_discount_amount || 0))}</td>
-                  <td className="px-4 py-3 font-semibold">{formatPrice(Number(uv.order?.total || 0))}</td>
-                  <td className="px-4 py-3">{gameLabel[uv.sourceGame || ''] || uv.sourceGame || '-'}</td>
+                  <td className="px-4 py-3 font-semibold text-neutral-800">{formatPrice(Number(uv.order?.voucher_discount_amount || 0))}</td>
+                  <td className="px-4 py-3 font-semibold text-neutral-800">{formatPrice(Number(uv.order?.total || 0))}</td>
+                  <td className="px-4 py-3 text-neutral-700">{gameLabel[uv.sourceGame || ''] || uv.sourceGame || '-'}</td>
                 </tr>
               ))}
             </tbody>

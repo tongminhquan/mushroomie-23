@@ -5,7 +5,7 @@ import { AlertCircle, CreditCard, Mail, Globe, Save, Loader2 } from 'lucide-reac
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('payment')
-  
+
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -57,34 +57,41 @@ export default function SettingsPage() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold font-heading">Cài đặt Hệ thống</h1>
+      <div className="mb-6">
+        <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">Hệ thống / Cài đặt</p>
+        <h1 className="text-2xl font-heading mt-1 text-neutral-900">Cài đặt Hệ thống</h1>
         <p className="text-neutral-500 text-sm mt-1">Cấu hình thanh toán, gửi email và các thông số kỹ thuật.</p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
         {/* Sidebar */}
-        <div className="w-full md:w-64 flex-shrink-0 space-y-1">
+        <div className="w-full md:w-64 flex-shrink-0 space-y-1.5">
           <button
             onClick={() => setActiveTab('payment')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold ${
-              activeTab === 'payment' ? 'bg-primary text-white shadow-sm' : 'text-neutral-600 hover:bg-neutral-100'
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold border-[1.5px] ${
+              activeTab === 'payment'
+                ? 'bg-primary text-white border-primary shadow-card'
+                : 'bg-white text-neutral-600 border-[#f0e0d6] hover:border-primary hover:text-primary'
             }`}
           >
             <CreditCard size={18} /> Cổng thanh toán
           </button>
           <button
             onClick={() => setActiveTab('email')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold ${
-              activeTab === 'email' ? 'bg-primary text-white shadow-sm' : 'text-neutral-600 hover:bg-neutral-100'
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold border-[1.5px] ${
+              activeTab === 'email'
+                ? 'bg-primary text-white border-primary shadow-card'
+                : 'bg-white text-neutral-600 border-[#f0e0d6] hover:border-primary hover:text-primary'
             }`}
           >
             <Mail size={18} /> Cấu hình Email
           </button>
           <button
             onClick={() => setActiveTab('general')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold ${
-              activeTab === 'general' ? 'bg-primary text-white shadow-sm' : 'text-neutral-600 hover:bg-neutral-100'
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold border-[1.5px] ${
+              activeTab === 'general'
+                ? 'bg-primary text-white border-primary shadow-card'
+                : 'bg-white text-neutral-600 border-[#f0e0d6] hover:border-primary hover:text-primary'
             }`}
           >
             <Globe size={18} /> Thông tin Website
@@ -93,42 +100,42 @@ export default function SettingsPage() {
 
         {/* Content */}
         <div className="flex-1">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-neutral-200">
-            
+          <div className="bg-white p-6 rounded-[16px] shadow-card border-[1.5px] border-[#f0e0d6]">
+
             {activeTab === 'payment' && (
               <div className="space-y-6">
-                <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
+                <div className="flex items-center justify-between border-b border-[#f0e0d6] pb-4">
                   <div>
-                    <h2 className="font-bold text-lg">Cổng thanh toán tự động (Webhook)</h2>
-                    <p className="text-neutral-500 text-sm">Cấu hình kết nối với Casso hoặc SePay.</p>
+                    <h2 className="font-heading text-lg text-neutral-900">Cổng thanh toán tự động (Webhook)</h2>
+                    <p className="text-neutral-500 text-sm mt-0.5">Cấu hình kết nối với Casso hoặc SePay.</p>
                   </div>
-                  <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-lg border border-green-200">
+                  <span className="px-3 py-1 bg-yellow text-kraft text-xs font-bold rounded-lg border-[1.5px] border-[#f0e0d6]">
                     Sẵn sàng
                   </span>
                 </div>
 
-                <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-xl text-sm flex gap-3">
-                  <AlertCircle size={20} className="flex-shrink-0" />
+                <div className="bg-cream border-[1.5px] border-[#f0e0d6] text-neutral-700 p-4 rounded-xl text-sm flex gap-3">
+                  <AlertCircle size={20} className="flex-shrink-0 text-primary" />
                   <div>
-                    <p className="font-semibold mb-1">Lưu ý bảo mật</p>
-                    <p>Các thông số API Key, Webhook Secret và thông tin Ngân hàng hiện được lưu an toàn trong file <code>.env</code> trên máy chủ. Bạn không thể chỉnh sửa trực tiếp các thông số nhạy cảm này từ giao diện Web để đảm bảo an toàn.</p>
+                    <p className="font-semibold mb-1 text-neutral-900">Lưu ý bảo mật</p>
+                    <p className="text-neutral-600">Các thông số API Key, Webhook Secret và thông tin Ngân hàng hiện được lưu an toàn trong file <code className="font-mono text-primary bg-primary-light px-1.5 py-0.5 rounded">.env</code> trên máy chủ. Bạn không thể chỉnh sửa trực tiếp các thông số nhạy cảm này từ giao diện Web để đảm bảo an toàn.</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold mb-1 text-neutral-700">Ngân hàng thụ hưởng</label>
-                    <input disabled value={loading ? 'Đang tải...' : (data?.env?.bank_name || 'Đang lấy từ file .env')} className="w-full px-4 py-2 border rounded-xl bg-neutral-50 text-neutral-500 cursor-not-allowed" />
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1.5 text-neutral-500">Ngân hàng thụ hưởng</label>
+                    <input disabled value={loading ? 'Đang tải...' : (data?.env?.bank_name || 'Đang lấy từ file .env')} className="w-full px-4 py-2.5 border-[1.5px] border-[#e2d3c8] rounded-lg bg-neutral-100 text-neutral-500 cursor-not-allowed" />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1 text-neutral-700">Số tài khoản</label>
-                    <input disabled value={loading ? 'Đang tải...' : (data?.env?.bank_account || 'Đang lấy từ file .env')} className="w-full px-4 py-2 border rounded-xl bg-neutral-50 text-neutral-500 cursor-not-allowed font-mono" />
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1.5 text-neutral-500">Số tài khoản</label>
+                    <input disabled value={loading ? 'Đang tải...' : (data?.env?.bank_account || 'Đang lấy từ file .env')} className="w-full px-4 py-2.5 border-[1.5px] border-[#e2d3c8] rounded-lg bg-neutral-100 text-neutral-500 cursor-not-allowed font-mono" />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold mb-1 text-neutral-700">Webhook URL (Dành cho Casso/SePay)</label>
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1.5 text-neutral-500">Webhook URL (Dành cho Casso/SePay)</label>
                     <div className="flex">
-                      <input readOnly value={webhookUrl} className="w-full px-4 py-2 border rounded-l-xl bg-neutral-50 font-mono text-sm text-neutral-600 outline-none" />
-                      <button onClick={handleCopyWebhook} className="px-4 bg-neutral-200 border-y border-r rounded-r-xl text-sm font-semibold hover:bg-neutral-300">Copy</button>
+                      <input readOnly value={webhookUrl} className="w-full px-4 py-2.5 border-[1.5px] border-[#e2d3c8] rounded-l-lg bg-neutral-100 font-mono text-sm text-neutral-600 outline-none" />
+                      <button onClick={handleCopyWebhook} className="px-4 bg-primary text-white border-[1.5px] border-primary rounded-r-lg text-sm font-semibold hover:bg-primary-dark transition-colors">Copy</button>
                     </div>
                   </div>
                 </div>
@@ -137,19 +144,19 @@ export default function SettingsPage() {
 
             {activeTab === 'email' && (
               <div className="space-y-6">
-                <div className="border-b border-neutral-100 pb-4">
-                  <h2 className="font-bold text-lg">Cấu hình gửi Email</h2>
-                  <p className="text-neutral-500 text-sm">Gửi mail xác nhận đơn hàng tự động cho khách.</p>
+                <div className="border-b border-[#f0e0d6] pb-4">
+                  <h2 className="font-heading text-lg text-neutral-900">Cấu hình gửi Email</h2>
+                  <p className="text-neutral-500 text-sm mt-0.5">Gửi mail xác nhận đơn hàng tự động cho khách.</p>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold mb-1 text-neutral-700">Nhà cung cấp Email (SMTP)</label>
-                    <input disabled value={loading ? 'Đang tải...' : (data?.env?.email_provider || 'Đang lấy từ file .env')} className="w-full px-4 py-2 border rounded-xl bg-neutral-50 text-neutral-500 cursor-not-allowed font-mono" />
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1.5 text-neutral-500">Nhà cung cấp Email (SMTP)</label>
+                    <input disabled value={loading ? 'Đang tải...' : (data?.env?.email_provider || 'Đang lấy từ file .env')} className="w-full px-4 py-2.5 border-[1.5px] border-[#e2d3c8] rounded-lg bg-neutral-100 text-neutral-500 cursor-not-allowed font-mono" />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1 text-neutral-700">Địa chỉ Email người gửi</label>
-                    <input disabled value={loading ? 'Đang tải...' : (data?.env?.email_sender || 'Đang lấy từ file .env')} className="w-full px-4 py-2 border rounded-xl bg-neutral-50 text-neutral-500 cursor-not-allowed font-mono" />
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1.5 text-neutral-500">Địa chỉ Email người gửi</label>
+                    <input disabled value={loading ? 'Đang tải...' : (data?.env?.email_sender || 'Đang lấy từ file .env')} className="w-full px-4 py-2.5 border-[1.5px] border-[#e2d3c8] rounded-lg bg-neutral-100 text-neutral-500 cursor-not-allowed font-mono" />
                   </div>
                 </div>
               </div>
@@ -157,37 +164,37 @@ export default function SettingsPage() {
 
             {activeTab === 'general' && (
               <div className="space-y-6">
-                <div className="border-b border-neutral-100 pb-4">
-                  <h2 className="font-bold text-lg">Thông tin Website</h2>
-                  <p className="text-neutral-500 text-sm">Thông tin hiển thị trên chân trang và liên hệ.</p>
+                <div className="border-b border-[#f0e0d6] pb-4">
+                  <h2 className="font-heading text-lg text-neutral-900">Thông tin Website</h2>
+                  <p className="text-neutral-500 text-sm mt-0.5">Thông tin hiển thị trên chân trang và liên hệ.</p>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold mb-1 text-neutral-700">Tên thương hiệu</label>
-                    <input 
-                      value={settings.brand_name} 
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1.5 text-neutral-500">Tên thương hiệu</label>
+                    <input
+                      value={settings.brand_name}
                       onChange={e => setSettings({...settings, brand_name: e.target.value})}
-                      className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" 
+                      className="w-full px-4 py-2.5 border-[1.5px] border-[#e2d3c8] rounded-lg focus:border-primary outline-none transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1 text-neutral-700">Số điện thoại Hotline</label>
-                    <input 
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1.5 text-neutral-500">Số điện thoại Hotline</label>
+                    <input
                       value={settings.hotline}
                       onChange={e => setSettings({...settings, hotline: e.target.value})}
-                      className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" 
+                      className="w-full px-4 py-2.5 border-[1.5px] border-[#e2d3c8] rounded-lg focus:border-primary outline-none transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1 text-neutral-700">Email hỗ trợ</label>
-                    <input 
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1.5 text-neutral-500">Email hỗ trợ</label>
+                    <input
                       value={settings.support_email}
                       onChange={e => setSettings({...settings, support_email: e.target.value})}
-                      className="w-full px-4 py-2 border rounded-xl focus:border-primary outline-none" 
+                      className="w-full px-4 py-2.5 border-[1.5px] border-[#e2d3c8] rounded-lg focus:border-primary outline-none transition-colors"
                     />
                   </div>
-                  <div className="pt-4 flex justify-end">
+                  <div className="pt-4 flex justify-end border-t border-[#f0e0d6]">
                     <Button onClick={handleSave} disabled={saving} className="flex items-center gap-2">
                       {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
                       {saving ? 'Đang lưu...' : 'Lưu thay đổi'}

@@ -30,8 +30,14 @@ export default async function AdminContactsPage({ searchParams }: { searchParams
     <div className="p-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="font-heading text-2xl font-bold">Quản lý liên hệ</h1>
-          {unreadCount > 0 && <p className="text-red-600 text-sm font-semibold">{unreadCount} tin chưa đọc</p>}
+          <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">Nội dung &amp; hệ thống</p>
+          <h1 className="font-heading text-2xl font-bold text-neutral-900 mt-0.5">Quản lý liên hệ</h1>
+          {unreadCount > 0 && (
+            <p className="text-red-600 text-sm font-semibold mt-1 flex items-center gap-1.5">
+              <span className="inline-block w-2 h-2 rounded-full bg-red-500" />
+              {unreadCount} tin chưa đọc
+            </p>
+          )}
         </div>
       </div>
 
@@ -44,8 +50,10 @@ export default async function AdminContactsPage({ searchParams }: { searchParams
           { value: 'replied', label: '✅ Đã trả lời' },
         ].map((tab) => (
           <a key={tab.value} href={`/admin/lien-he${tab.value ? `?status=${tab.value}` : ''}`}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-              (sp.status || '') === tab.value ? 'bg-primary text-white' : 'bg-white text-neutral-700 hover:bg-neutral-100 shadow-sm'
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border-[1.5px] ${
+              (sp.status || '') === tab.value
+                ? 'bg-primary text-white border-primary'
+                : 'bg-white text-neutral-700 border-[#f0e0d6] hover:border-primary hover:text-primary'
             }`}>
             {tab.label}
           </a>
@@ -54,26 +62,31 @@ export default async function AdminContactsPage({ searchParams }: { searchParams
 
       <div className="space-y-3">
         {contacts.map((contact) => (
-          <div key={contact.id} className="bg-white rounded-2xl p-5 shadow-card hover:shadow-hover transition-all">
+          <div key={contact.id} className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] p-5 shadow-card hover:shadow-hover transition-all">
             <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-              <div>
-                <span className="font-semibold text-neutral-900">{contact.name}</span>
-                <span className="text-neutral-500 text-sm ml-2">{contact.email}</span>
-                {contact.phone && <span className="text-neutral-500 text-sm ml-2">· {contact.phone}</span>}
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-full bg-[#ffece6] flex items-center justify-center text-primary font-semibold text-sm shrink-0">
+                  {contact.name?.trim()?.charAt(0)?.toUpperCase() || '?'}
+                </div>
+                <div>
+                  <span className="font-semibold text-neutral-900">{contact.name}</span>
+                  <span className="text-neutral-500 text-sm ml-2">{contact.email}</span>
+                  {contact.phone && <span className="text-neutral-500 text-sm ml-2">· {contact.phone}</span>}
+                </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors[contact.status] || ''}`}>
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusColors[contact.status] || ''}`}>
                   {contact.status === 'unread' ? 'Chưa đọc' : contact.status === 'read' ? 'Đã đọc' : 'Đã trả lời'}
                 </span>
                 <span className="text-neutral-400 text-xs">{formatDate(contact.created_at)}</span>
               </div>
             </div>
-            <p className="text-neutral-600 text-sm leading-relaxed bg-neutral-50 rounded-xl p-3">{contact.message}</p>
+            <p className="text-neutral-600 text-sm leading-relaxed bg-neutral-50 border-[1.5px] border-[#f0e0d6] rounded-lg p-3">{contact.message}</p>
               <ContactActions contact={contact} />
           </div>
         ))}
         {contacts.length === 0 && (
-          <div className="text-center py-12 text-neutral-500 bg-white rounded-2xl">Không có liên hệ nào</div>
+          <div className="text-center py-12 text-neutral-500 bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card">Không có liên hệ nào</div>
         )}
       </div>
     </div>
