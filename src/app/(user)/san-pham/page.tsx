@@ -66,27 +66,34 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   }
 
   return (
-    <div className="min-h-screen bg-secondary py-5 md:py-8">
-      <BrandContainer>
-        <Breadcrumb items={[{ label: 'Sản phẩm' }]} />
-
-        <header className="mt-5 border-b border-neutral-200 pb-7 md:flex md:items-end md:justify-between">
-          <div>
-            <p className="brand-kicker mb-3">Bộ sưu tập Mushroomie</p>
-            <h1 className="text-balance font-heading text-3xl leading-[1.1] text-text md:text-5xl">{title}</h1>
-            <p className="mt-3 text-sm text-neutral-500">{total} sản phẩm đang có sẵn</p>
+    <div className="min-h-screen bg-secondary pb-14">
+      {/* Page head */}
+      <section
+        className="relative overflow-hidden border-b border-[#f0e0d6]"
+        style={{ background: 'radial-gradient(120% 120% at 85% 0%, #ffeee6, var(--color-secondary))' }}
+      >
+        <BrandContainer>
+          <div className="py-7">
+            <Breadcrumb items={[{ label: 'Sản phẩm' }]} />
+            <p className="mt-1 mb-2 text-xs font-extrabold uppercase tracking-[0.14em] text-primary">Bộ sưu tập Mushroomie</p>
+            <h1 className="text-balance font-heading text-3xl leading-tight text-neutral-900 md:text-4xl">{title}</h1>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <p className="text-sm text-neutral-500">{total} sản phẩm đang có sẵn</p>
+              {sp.search && (
+                <Link href="/san-pham" className="inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-[#e2d3c8] bg-white px-3.5 py-1.5 text-xs font-bold text-neutral-700 hover:border-primary hover:text-primary">
+                  Xóa tìm kiếm <X size={14} />
+                </Link>
+              )}
+            </div>
           </div>
-          {sp.search && (
-            <Link href="/san-pham" className="mt-4 inline-flex items-center gap-2 rounded-xl border border-neutral-300 bg-white px-4 py-2 text-sm font-bold text-text md:mt-0">
-              Xóa tìm kiếm <X size={15} />
-            </Link>
-          )}
-        </header>
+        </BrandContainer>
+      </section>
 
+      <BrandContainer>
         <div className="mt-6 grid gap-6 lg:grid-cols-[230px_1fr]">
           <aside>
-            <div className="sticky top-5 rounded-[18px] border border-neutral-200 bg-white p-4 shadow-card">
-              <div className="mb-4 flex items-center gap-2 border-b border-neutral-100 pb-3">
+            <div className="sticky top-5 rounded-[20px] border-[1.5px] border-[#f0e0d6] bg-white p-4 shadow-card">
+              <div className="mb-4 flex items-center gap-2 border-b border-[#f0e0d6] pb-3">
                 <SlidersHorizontal size={18} className="text-primary" />
                 <h2 className="text-sm font-extrabold text-text">Lọc sản phẩm</h2>
               </div>
@@ -108,7 +115,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
                   { value: 'price_asc', label: 'Giá thấp' },
                   { value: 'price_desc', label: 'Giá cao' },
                 ].map((option) => (
-                  <Link key={option.value} href={buildUrl({ sort: option.value, page: undefined })} className={`rounded-lg px-3 py-2 text-center text-xs font-bold lg:text-left lg:text-sm ${(sp.sort || 'newest') === option.value ? 'bg-text text-white' : 'text-neutral-600 hover:bg-neutral-100'}`}>
+                  <Link key={option.value} href={buildUrl({ sort: option.value, page: undefined })} className={`rounded-lg px-3 py-2 text-center text-xs font-bold lg:text-left lg:text-sm ${(sp.sort || 'newest') === option.value ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-neutral-100'}`}>
                     {option.label}
                   </Link>
                 ))}
@@ -121,7 +128,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
               <EmptyState
                 title="Chưa tìm thấy món phù hợp"
                 description="Thử một từ khóa khác hoặc xem toàn bộ bộ sưu tập nhé."
-                action={<Link href="/san-pham" className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white">Xem tất cả sản phẩm</Link>}
+                action={<Link href="/san-pham" className="rounded-full bg-primary px-5 py-3 text-sm font-bold text-white">Xem tất cả sản phẩm</Link>}
               />
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
@@ -136,7 +143,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
                     key={pageNumber}
                     href={buildUrl({ page: String(pageNumber) })}
                     aria-current={pageNumber === page ? 'page' : undefined}
-                    className={`grid h-10 w-10 place-items-center rounded-xl text-sm font-extrabold ${pageNumber === page ? 'bg-primary text-white' : 'border border-neutral-200 bg-white text-text hover:border-primary hover:text-primary'}`}
+                    className={`grid h-10 w-10 place-items-center rounded-full text-sm font-extrabold ${pageNumber === page ? 'bg-primary text-white' : 'border-[1.5px] border-[#f0e0d6] bg-white text-text hover:border-primary hover:text-primary'}`}
                   >
                     {pageNumber}
                   </Link>

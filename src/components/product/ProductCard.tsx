@@ -86,7 +86,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-[18px] border border-neutral-200 bg-white transition duration-200 hover:-translate-y-1 hover:border-pink hover:shadow-hover">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border-[1.5px] border-[#f0e0d6] bg-white transition duration-200 hover:-translate-y-1.5 hover:border-pink hover:shadow-hover">
       <Link href={`/san-pham/${product.slug}`} className="relative block aspect-[3/4] w-full shrink-0 overflow-hidden bg-secondary">
         <SafeImage
           src={imageUrl}
@@ -131,7 +131,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             onClick={handleAddToCart}
             disabled={isOutOfStock}
             className={`mt-2 flex min-h-10 w-full items-center justify-center gap-2 rounded-xl px-3 text-xs font-extrabold transition duration-200 active:translate-y-px ${
-              added ? 'bg-yellow text-text' : isOutOfStock ? 'cursor-not-allowed bg-neutral-200 text-neutral-500' : 'bg-text text-white hover:bg-primary'
+              added ? 'bg-yellow text-text' : isOutOfStock ? 'cursor-not-allowed bg-neutral-200 text-neutral-500' : 'bg-primary text-white hover:bg-primary-dark'
             }`}
             aria-label={added ? 'Đã thêm' : isOutOfStock ? 'Hết hàng' : 'Chọn mua'}
           >
