@@ -124,71 +124,82 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
   const jsonLd = generateJsonLd(post, structuredImageUrl)
 
   return (
-    <div className="min-h-screen bg-secondary">
+    <div className="min-h-screen bg-secondary pb-16">
       {/* JSON-LD Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      {/* Article hero */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-4">
         <Breadcrumb items={[
           { label: 'Tin tức', href: '/tin-tuc' },
           ...(post.category ? [{ label: post.category.name, href: `/tin-tuc?category=${post.category.slug}` }] : []),
           { label: post.title },
         ]} />
 
-        <article className="bg-white rounded-3xl shadow-card overflow-hidden mt-4">
-          <div className="relative aspect-[16/9] w-full overflow-hidden bg-secondary">
-            <SafeImage
-              src={coverImage.renderSrc}
-              alt={post.featured_image_alt || post.title}
-              fill
-              imageKind="post"
-              priority
-              sizes="(min-width: 1024px) 896px, 100vw"
-              className="object-cover"
-            />
-          </div>
-          <div className="p-6 md:p-10">
-            {post.category && (
-              <Link href={`/tin-tuc?category=${post.category.slug}`}
-                className="inline-block bg-primary-light text-primary text-xs font-bold px-3 py-1 rounded-full mb-4 hover:bg-primary hover:text-white transition-colors">
-                {post.category.name}
-              </Link>
-            )}
-            <h1 className="font-heading text-3xl md:text-4xl font-bold text-neutral-900 mb-4 leading-tight">{post.title}</h1>
-            <div className="flex items-center gap-3 text-sm text-neutral-500 mb-6 pb-6 border-b border-neutral-100">
-              {post.author && <span>✍️ {post.author.name}</span>}
-              {post.published_at && <span>📅 {formatDate(post.published_at)}</span>}
-              {post.reading_time && <span>⏱ {post.reading_time} phút đọc</span>}
-            </div>
-            <div
-              className="prose prose-neutral max-w-none prose-headings:font-heading prose-img:rounded-2xl"
-              dangerouslySetInnerHTML={{ __html: articleHtml }}
-            />
-          </div>
-        </article>
+        <div className="flex flex-wrap items-center gap-2.5 mt-2 mb-3">
+          {post.category && (
+            <Link href={`/tin-tuc?category=${post.category.slug}`}
+              className="text-[11px] font-bold text-accent-kraft bg-accent-mint px-3 py-1 rounded-full hover:opacity-90 transition-opacity">
+              {post.category.name}
+            </Link>
+          )}
+          {post.reading_time && <span className="text-xs text-neutral-400">· {post.reading_time} phút đọc</span>}
+        </div>
 
-        {relatedPosts.length > 0 && (
-          <section className="mt-12">
-            <h2 className="font-heading text-2xl font-bold text-neutral-900 mb-6">Bài viết liên quan</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedPostsWithImages.map((p: any) => (
-                <Link key={p.id} href={`/tin-tuc/${p.slug}`}
-                  className="bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-hover transition-all hover:-translate-y-1">
-                  <div className="relative h-40 bg-secondary">
-                    <SafeImage src={p.resolved_featured_image} alt={p.featured_image_alt || p.title} fill imageKind="post" className="object-cover" />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-heading font-bold text-sm line-clamp-2">{p.title}</h3>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+        <h1 className="font-heading text-3xl md:text-[40px] leading-tight text-neutral-900 mb-4">{post.title}</h1>
+
+        <div className="flex items-center gap-3 mb-6">
+          <span aria-hidden className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-pink text-lg">🌸</span>
+          <div className="text-sm">
+            <div className="font-bold text-neutral-900">{post.author?.name || 'Mushroomie Team'}</div>
+            {post.published_at && <div className="text-xs text-neutral-400" suppressHydrationWarning>Đăng {formatDate(post.published_at)}</div>}
+          </div>
+        </div>
+
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[24px] border-[1.5px] border-[#f0e0d6] shadow-card bg-secondary">
+          <SafeImage
+            src={coverImage.renderSrc}
+            alt={post.featured_image_alt || post.title}
+            fill
+            imageKind="post"
+            priority
+            sizes="(min-width: 768px) 768px, 100vw"
+            className="object-cover"
+          />
+        </div>
       </div>
+
+      {/* Body */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 mt-8">
+        <article
+          className="prose prose-neutral max-w-none prose-headings:font-heading prose-headings:text-neutral-800 prose-img:rounded-2xl prose-a:text-primary hover:prose-a:text-primary-dark prose-strong:text-accent-kraft"
+          dangerouslySetInnerHTML={{ __html: articleHtml }}
+        />
+      </div>
+
+      {/* Related */}
+      {relatedPosts.length > 0 && (
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 mt-14">
+          <h2 className="font-heading text-2xl text-neutral-900 mb-6">Bài viết liên quan</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {relatedPostsWithImages.map((p: any) => (
+              <Link key={p.id} href={`/tin-tuc/${p.slug}`}
+                className="group bg-white rounded-[20px] overflow-hidden border-[1.5px] border-[#f0e0d6] shadow-card transition hover:-translate-y-1 hover:shadow-hover">
+                <div className="relative aspect-[16/9] bg-secondary overflow-hidden">
+                  <SafeImage src={p.resolved_featured_image} alt={p.featured_image_alt || p.title} fill imageKind="post" className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" sizes="(max-width:768px) 100vw, 33vw" />
+                  {p.category && <span className="absolute left-3 top-3 rounded-full bg-primary px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.06em] text-white">{p.category.name}</span>}
+                </div>
+                <div className="p-4">
+                  <h3 className="font-heading text-[15px] leading-snug line-clamp-2 text-neutral-900 transition-colors group-hover:text-primary">{p.title}</h3>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }
