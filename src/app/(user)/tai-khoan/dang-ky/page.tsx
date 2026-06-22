@@ -47,20 +47,28 @@ export default function RegisterPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div
+      className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden"
+      style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
+    >
+      {/* Decorative floating emoji */}
+      <span className="animate-float-soft pointer-events-none absolute left-[8%] top-[18%] text-3xl text-coral/80 select-none" aria-hidden>❤</span>
+      <span className="animate-float-soft pointer-events-none absolute right-[10%] bottom-[16%] text-2xl text-pink select-none" aria-hidden>🍄</span>
+
+      <div className="relative w-full max-w-md">
         <div className="text-center mb-8 flex flex-col items-center">
           <div className="relative h-20 w-48 mb-4"><Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority /></div>
+          <span className="text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-2">Nhà Nấm nhỏ ♡</span>
           <h1 className="font-heading text-2xl font-bold">Tạo tài khoản Mushroomie</h1>
           <p className="text-neutral-500 text-sm mt-1">Tham gia cộng đồng phụ kiện handmade!</p>
         </div>
-        <div className="bg-white rounded-3xl shadow-card p-8">
+        <div className="bg-white rounded-[24px] shadow-card border-[1.5px] p-8" style={{ borderColor: '#f0e0d6' }}>
           {/* Nút đăng ký bằng Google */}
           <button
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isGoogleLoading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-neutral-200 rounded-xl text-sm font-semibold hover:bg-neutral-50 hover:border-neutral-300 transition-all disabled:opacity-60 disabled:cursor-not-allowed mb-4"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 border-[1.5px] border-[#e2d3c8] rounded-xl text-sm font-semibold bg-[#fffdfb] hover:border-primary hover:bg-primary-light transition-all disabled:opacity-60 disabled:cursor-not-allowed mb-5"
           >
             {isGoogleLoading ? (
               <span className="w-5 h-5 border-2 border-neutral-400 border-t-transparent rounded-full animate-spin" />
@@ -77,23 +85,23 @@ export default function RegisterPage() {
 
 
           {/* Đường phân cách */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex-1 h-px bg-neutral-200" />
-            <span className="text-xs text-neutral-400 font-medium">hoặc đăng ký bằng email</span>
-            <div className="flex-1 h-px bg-neutral-200" />
+          <div className="flex items-center gap-3 mb-5">
+            <div className="flex-1 h-px bg-[#f0e0d6]" />
+            <span className="text-xs text-neutral-400 font-semibold uppercase tracking-wide">hoặc đăng ký bằng email</span>
+            <div className="flex-1 h-px bg-[#f0e0d6]" />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {fields.map((field) => (
               <div key={field.name}>
-                <label className="block text-sm font-semibold mb-1">{field.label}</label>
+                <label className="block text-sm font-semibold mb-1.5 text-neutral-700">{field.label}</label>
                 <input
                   type={field.type}
                   value={(form as any)[field.name]}
                   onChange={(e) => setForm((p) => ({ ...p, [field.name]: e.target.value }))}
                   required={field.required}
-                  className={`w-full px-4 py-3 border-2 rounded-xl text-sm focus:outline-none transition-colors ${
-                    errors[field.name] ? 'border-red-400 focus:border-red-400' : 'border-neutral-200 focus:border-primary'
+                  className={`w-full px-4 py-3 border-[1.5px] rounded-xl text-sm bg-[#fffdfb] focus:outline-none transition-colors ${
+                    errors[field.name] ? 'border-red-400 focus:border-red-400' : 'border-[#e2d3c8] focus:border-primary'
                   }`}
                   placeholder={field.placeholder}
                 />
@@ -102,13 +110,14 @@ export default function RegisterPage() {
                 )}
               </div>
             ))}
-            <Button type="submit" isLoading={isLoading} className="w-full" size="lg">Tạo tài khoản</Button>
+            <Button type="submit" isLoading={isLoading} className="w-full rounded-full font-bold shadow-[0_8px_20px_rgba(201,20,20,0.3)]" size="lg">Tạo tài khoản</Button>
           </form>
-          <p className="text-center text-sm text-neutral-500 mt-4">
+          <p className="text-center text-sm text-neutral-500 mt-5">
             Đã có tài khoản?{' '}
             <Link href="/tai-khoan/dang-nhap" className="text-primary font-semibold hover:underline">Đăng nhập</Link>
           </p>
         </div>
+        <p className="text-center text-xs text-accent-kraft mt-5">Làm bằng tay, trao bằng tim 🍄</p>
       </div>
     </div>
   )

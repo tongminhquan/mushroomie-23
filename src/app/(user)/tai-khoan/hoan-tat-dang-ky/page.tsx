@@ -37,7 +37,7 @@ function RegistrationForm() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Lỗi gửi OTP')
-      
+
       setOtpSent(true)
       setSuccess('Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.')
     } catch (err: any) {
@@ -75,7 +75,7 @@ function RegistrationForm() {
       if (!res.ok) throw new Error(data.error || 'Lỗi đăng ký')
 
       setSuccess('Đăng ký thành công! Đang tự động đăng nhập...')
-      
+
       // Auto login with Google to create session
       await signIn('google', { callbackUrl: '/tai-khoan' })
     } catch (err: any) {
@@ -94,61 +94,63 @@ function RegistrationForm() {
   }
 
   return (
-    <form onSubmit={handleRegister} className="space-y-6">
+    <form onSubmit={handleRegister} className="space-y-5">
       {error && (
-        <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+        <div className="p-3 rounded-xl text-sm bg-red-50 text-red-600 border-[1.5px]" style={{ borderColor: '#f7c9c9' }}>
           {error}
         </div>
       )}
-      
+
       {success && (
-        <div className="p-3 bg-green-50 text-green-600 rounded-lg text-sm">
+        <div className="p-3 rounded-xl text-sm bg-green-50 text-green-700 border-[1.5px]" style={{ borderColor: '#bce3cd' }}>
           {success}
         </div>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1">Họ và tên</label>
-        <input 
-          type="text" 
-          value={name} 
-          disabled 
-          className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-100 text-stone-500 focus:outline-none"
+        <label className="block text-xs font-extrabold uppercase tracking-[0.06em] text-neutral-500 mb-1.5">Họ và tên</label>
+        <input
+          type="text"
+          value={name}
+          disabled
+          className="w-full px-4 py-3 rounded-xl border-[1.5px] text-neutral-500 focus:outline-none"
+          style={{ borderColor: '#e2d3c8', background: '#f7efe9' }}
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1">Email</label>
-        <input 
-          type="email" 
-          value={email} 
-          disabled 
-          className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-100 text-stone-500 focus:outline-none"
+        <label className="block text-xs font-extrabold uppercase tracking-[0.06em] text-neutral-500 mb-1.5">Email</label>
+        <input
+          type="email"
+          value={email}
+          disabled
+          className="w-full px-4 py-3 rounded-xl border-[1.5px] text-neutral-500 focus:outline-none"
+          style={{ borderColor: '#e2d3c8', background: '#f7efe9' }}
         />
-        <p className="text-xs text-stone-500 mt-1">Email đã được xác thực bởi Google</p>
+        <p className="text-xs text-neutral-500 mt-1.5">Email đã được xác thực bởi Google</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1">Số điện thoại <span className="text-red-500">*</span></label>
-        <input 
-          type="tel" 
+        <label className="block text-xs font-extrabold uppercase tracking-[0.06em] text-neutral-500 mb-1.5">Số điện thoại <span className="text-primary">*</span></label>
+        <input
+          type="tel"
           value={phone}
           onChange={e => setPhone(e.target.value)}
           disabled={otpSent}
-          className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all disabled:bg-stone-100"
+          className="w-full px-4 py-3 rounded-xl border-[1.5px] border-[#e2d3c8] bg-[#fffdfb] focus:border-primary outline-none transition-all disabled:bg-[#f7efe9] disabled:text-neutral-500"
           placeholder="Ví dụ: 0912345678"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1">Địa chỉ nhận hàng <span className="text-red-500">*</span></label>
-        <textarea 
+        <label className="block text-xs font-extrabold uppercase tracking-[0.06em] text-neutral-500 mb-1.5">Địa chỉ nhận hàng <span className="text-primary">*</span></label>
+        <textarea
           value={address}
           onChange={e => setAddress(e.target.value)}
           disabled={otpSent}
           rows={3}
-          className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all disabled:bg-stone-100 resize-none"
+          className="w-full px-4 py-3 rounded-xl border-[1.5px] border-[#e2d3c8] bg-[#fffdfb] focus:border-primary outline-none transition-all disabled:bg-[#f7efe9] disabled:text-neutral-500 resize-none"
           placeholder="Nhập địa chỉ nhận hàng chi tiết..."
           required
         />
@@ -159,29 +161,30 @@ function RegistrationForm() {
           type="button"
           onClick={handleSendOtp}
           disabled={loading}
-          className="w-full py-3 bg-stone-800 hover:bg-black text-white rounded-xl font-bold transition-all disabled:opacity-50"
+          className="w-full py-3.5 bg-primary text-white rounded-full font-bold shadow-[0_8px_20px_rgba(201,20,20,0.3)] transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
         >
           {loading ? 'Đang xử lý...' : 'Gửi mã xác nhận (OTP) về Email'}
         </button>
       ) : (
-        <div className="p-4 bg-yellow-50 rounded-xl space-y-4 border border-yellow-100">
+        <div className="p-4 rounded-[18px] space-y-4 border-[1.5px]" style={{ background: '#fffaf0', borderColor: '#ffe0b3' }}>
           <div>
-            <label className="block text-sm font-bold text-yellow-800 mb-1">Nhập mã OTP (6 số) <span className="text-red-500">*</span></label>
-            <input 
-              type="text" 
+            <label className="block text-xs font-extrabold uppercase tracking-[0.06em] mb-1.5" style={{ color: '#b9794b' }}>Nhập mã OTP (6 số) <span className="text-primary">*</span></label>
+            <input
+              type="text"
               value={otp}
               onChange={e => setOtp(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-yellow-200 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 outline-none transition-all text-center tracking-widest font-bold text-xl"
+              className="w-full px-4 py-3 rounded-xl border-[1.5px] outline-none transition-all text-center tracking-[0.4em] font-bold text-xl bg-[#fffdfb] focus:border-primary"
+              style={{ borderColor: '#ffe0b3' }}
               placeholder="••••••"
               maxLength={6}
               required
             />
-            <p className="text-xs text-yellow-700 mt-2 text-center">Vui lòng kiểm tra email <strong>{email}</strong> để lấy mã xác nhận.</p>
+            <p className="text-xs mt-2 text-center text-neutral-500">Vui lòng kiểm tra email <strong className="text-accent-kraft">{email}</strong> để lấy mã xác nhận.</p>
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold transition-all disabled:opacity-50"
+            className="w-full py-3.5 bg-primary text-white rounded-full font-bold shadow-[0_8px_20px_rgba(201,20,20,0.3)] transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
           >
             {loading ? 'Đang xử lý...' : 'Xác Nhận & Hoàn Tất Đăng Ký'}
           </button>
@@ -193,13 +196,21 @@ function RegistrationForm() {
 
 export default function CompleteRegistrationPage() {
   return (
-    <div className="min-h-screen bg-stone-50 py-12 px-4 flex items-center justify-center">
-      <div className="max-w-md w-full bg-white p-8 rounded-3xl shadow-sm border border-stone-100">
+    <div
+      className="min-h-screen bg-secondary py-12 px-4 flex items-center justify-center relative overflow-hidden"
+      style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
+    >
+      <span className="animate-float-soft absolute left-[10%] top-[18%] text-3xl" aria-hidden style={{ pointerEvents: 'none', color: '#ffd6d6' }}>🍄</span>
+      <span className="animate-float-soft absolute right-[12%] bottom-[20%] text-2xl" aria-hidden style={{ pointerEvents: 'none', color: '#ff6b6b' }}>❤</span>
+
+      <div className="max-w-md w-full bg-white p-8 rounded-[24px] shadow-card border-[1.5px] relative z-10" style={{ borderColor: '#f0e0d6' }}>
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-heading font-bold text-primary mb-2">Hoàn Tất Đăng Ký</h1>
-          <p className="text-stone-500 text-sm">Vui lòng bổ sung các thông tin còn thiếu để hoàn thiện hồ sơ của bạn</p>
+          <div className="mx-auto mb-4 w-16 h-16 rounded-full flex items-center justify-center text-3xl" style={{ background: '#ffd6d6' }} aria-hidden>🍄</div>
+          <div className="text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-2">Nhà Nấm nhỏ chào bạn</div>
+          <h1 className="text-2xl font-heading text-accent-kraft mb-2">Hoàn Tất Đăng Ký</h1>
+          <p className="text-neutral-500 text-sm">Vui lòng bổ sung các thông tin còn thiếu để hoàn thiện hồ sơ của bạn</p>
         </div>
-        <Suspense fallback={<div className="text-center text-stone-500">Đang tải dữ liệu...</div>}>
+        <Suspense fallback={<div className="text-center text-neutral-500">Đang tải dữ liệu...</div>}>
           <RegistrationForm />
         </Suspense>
       </div>

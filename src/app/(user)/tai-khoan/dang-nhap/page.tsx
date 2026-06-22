@@ -38,20 +38,27 @@ export default function LoginPage() {
 
 
   return (
-    <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div
+      className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden"
+      style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
+    >
+      <span className="animate-float-soft absolute left-[10%] top-[16%] text-3xl text-[#ffb3b3]" aria-hidden style={{ pointerEvents: 'none' }}>🍄</span>
+      <span className="animate-float-soft absolute right-[12%] top-[24%] text-2xl text-[#ff6b6b]" aria-hidden style={{ pointerEvents: 'none' }}>❤</span>
+
+      <div className="relative w-full max-w-md">
         <div className="text-center mb-8 flex flex-col items-center">
           <div className="relative h-20 w-48 mb-4"><Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority /></div>
-          <h1 className="font-heading text-2xl font-bold">Đăng nhập Mushroomie</h1>
-          <p className="text-neutral-500 text-sm mt-1">Chào mừng bạn trở lại!</p>
+          <span className="text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-2">Ghé Nhà Nấm nhỏ</span>
+          <h1 className="font-heading text-3xl font-bold">Đăng nhập Mushroomie</h1>
+          <p className="text-neutral-500 text-sm mt-2">Chào mừng bạn trở lại! ♡</p>
         </div>
-        <div className="bg-white rounded-3xl shadow-card p-8">
+        <div className="bg-white rounded-[24px] shadow-card p-8 border-[1.5px]" style={{ borderColor: '#f0e0d6' }}>
           {/* Nút đăng nhập Google */}
           <button
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isGoogleLoading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-neutral-200 rounded-xl text-sm font-semibold hover:bg-neutral-50 hover:border-neutral-300 transition-all disabled:opacity-60 disabled:cursor-not-allowed mb-4"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 border-[1.5px] border-[#e2d3c8] rounded-xl bg-[#fffdfb] text-sm font-semibold hover:border-primary hover:bg-[#fff7f2] transition-all disabled:opacity-60 disabled:cursor-not-allowed mb-4"
           >
             {isGoogleLoading ? (
               <span className="w-5 h-5 border-2 border-neutral-400 border-t-transparent rounded-full animate-spin" />
@@ -69,9 +76,9 @@ export default function LoginPage() {
 
           {/* Đường phân cách */}
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex-1 h-px bg-neutral-200" />
+            <div className="flex-1 h-px bg-[#f0e0d6]" />
             <span className="text-xs text-neutral-400 font-medium">hoặc đăng nhập bằng email</span>
-            <div className="flex-1 h-px bg-neutral-200" />
+            <div className="flex-1 h-px bg-[#f0e0d6]" />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -82,7 +89,7 @@ export default function LoginPage() {
                 value={form.email}
                 onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                 required
-                className="w-full px-4 py-3 border-2 border-neutral-200 rounded-xl text-sm focus:outline-none focus:border-primary transition-colors"
+                className="w-full px-4 py-3 border-[1.5px] border-[#e2d3c8] rounded-xl bg-[#fffdfb] text-sm focus:outline-none focus:border-primary transition-colors"
                 placeholder="email@example.com"
               />
             </div>
@@ -98,7 +105,7 @@ export default function LoginPage() {
                 value={form.password}
                 onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
                 required
-                className="w-full px-4 py-3 border-2 border-neutral-200 rounded-xl text-sm focus:outline-none focus:border-primary transition-colors"
+                className="w-full px-4 py-3 border-[1.5px] border-[#e2d3c8] rounded-xl bg-[#fffdfb] text-sm focus:outline-none focus:border-primary transition-colors"
                 placeholder="Nhập mật khẩu"
               />
             </div>
@@ -109,11 +116,12 @@ export default function LoginPage() {
               Đăng nhập
             </Button>
           </form>
-          <p className="text-center text-sm text-neutral-500 mt-4">
+          <p className="text-center text-sm text-neutral-500 mt-5">
             Chưa có tài khoản?{' '}
             <Link href="/tai-khoan/dang-ky" className="text-primary font-semibold hover:underline">Đăng ký ngay</Link>
           </p>
         </div>
+        <p className="text-center text-xs text-neutral-400 mt-6">Làm bằng tay, trao bằng tim 🍄</p>
       </div>
     </div>
   )
