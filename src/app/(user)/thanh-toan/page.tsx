@@ -233,7 +233,7 @@ export default function CheckoutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             {/* Customer info */}
             <div className="space-y-4 lg:col-span-3">
-              <section className="rounded-[18px] border border-neutral-200 bg-white p-5 shadow-card md:p-7">
+              <section className="rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-5 shadow-card md:p-7">
                 <div className="mb-5 flex items-center gap-3">
                   <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary-light text-primary"><PackageCheck size={20} /></div>
                   <div><h2 className="font-heading text-xl text-text">Thông tin giao hàng</h2><p className="text-xs text-neutral-500">Điền thông tin người nhận chính xác</p></div>
@@ -250,14 +250,14 @@ export default function CheckoutPage() {
               </section>
 
               {/* Payment method */}
-              <section className="rounded-[18px] border border-neutral-200 bg-white p-5 shadow-card md:p-7">
+              <section className="rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-5 shadow-card md:p-7">
                 <h2 className="mb-4 font-heading text-xl text-text">Phương thức thanh toán</h2>
                 <div className="space-y-3">
                   {/* Bank Transfer */}
                   <button type="button"
                     onClick={() => setPaymentMethod('bank_transfer')}
                     className={`flex w-full items-center gap-3 rounded-xl border p-4 text-left ${
-                      paymentMethod === 'bank_transfer' ? 'border-primary bg-primary-light ring-2 ring-primary/10' : 'border-neutral-200 hover:border-primary'
+                      paymentMethod === 'bank_transfer' ? 'border-primary bg-primary-light ring-2 ring-primary/10' : 'border-[#e2d3c8] hover:border-primary'
                     }`}
                   >
                     <Landmark size={23} className="shrink-0 text-primary" />
@@ -276,7 +276,7 @@ export default function CheckoutPage() {
                   <button type="button"
                     onClick={() => setPaymentMethod('cod')}
                     className={`flex w-full items-center gap-3 rounded-xl border p-4 text-left ${
-                      paymentMethod === 'cod' ? 'border-primary bg-primary-light ring-2 ring-primary/10' : 'border-neutral-200 hover:border-primary'
+                      paymentMethod === 'cod' ? 'border-primary bg-primary-light ring-2 ring-primary/10' : 'border-[#e2d3c8] hover:border-primary'
                     }`}
                   >
                     <PackageCheck size={23} className="shrink-0 text-primary" />
@@ -300,7 +300,7 @@ export default function CheckoutPage() {
 
             {/* Order summary */}
             <div className="lg:col-span-2">
-              <div className="sticky top-5 rounded-[18px] border border-neutral-200 bg-white p-5 shadow-card md:p-6">
+              <div className="sticky top-5 rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-5 shadow-card md:p-6">
                 <h2 className="font-heading font-bold text-lg mb-4">Đơn hàng ({items.length} sản phẩm)</h2>
                 <div className="space-y-3 mb-4 max-h-64 overflow-y-auto pr-1">
                   {items.map((item) => (

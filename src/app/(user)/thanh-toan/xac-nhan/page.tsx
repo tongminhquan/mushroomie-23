@@ -229,7 +229,7 @@ export default function ConfirmPage() {
   if (paymentStatus?.status === 'PAID') {
     return (
       <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-[18px] border border-neutral-200 bg-white p-8 text-center shadow-strong">
+        <div className="w-full max-w-md rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-8 text-center shadow-strong">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h1 className="mb-2 font-heading text-2xl text-neutral-900">Thanh toán thành công</h1>
           <p className="text-neutral-500 mb-2">Mã đơn hàng: <strong>#{orderCode}</strong></p>
@@ -250,7 +250,7 @@ export default function ConfirmPage() {
   if (orderInfo?.payment_method === 'cod') {
     return (
       <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-[18px] border border-neutral-200 bg-white p-8 text-center shadow-strong">
+        <div className="w-full max-w-md rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-8 text-center shadow-strong">
           <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
           <h1 className="mb-2 font-heading text-2xl text-neutral-900">Đặt hàng thành công</h1>
           <p className="text-neutral-500 mb-2">Mã đơn hàng: <strong>#{orderCode}</strong></p>
@@ -271,7 +271,7 @@ export default function ConfirmPage() {
   if (paymentStatus?.status === 'EXPIRED') {
     return (
       <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-[18px] border border-neutral-200 bg-white p-8 text-center shadow-strong">
+        <div className="w-full max-w-md rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-8 text-center shadow-strong">
           <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h1 className="font-heading text-2xl font-bold text-neutral-900 mb-2">Đã hết hạn thanh toán</h1>
           <p className="text-neutral-500 mb-6">Thời gian thanh toán đã hết hạn. Vui lòng đặt lại đơn hàng.</p>
@@ -284,7 +284,7 @@ export default function ConfirmPage() {
   return (
     <div className="min-h-screen bg-secondary py-6 md:py-10">
       <div className="max-w-xl mx-auto px-4">
-        <div className="overflow-hidden rounded-[18px] border border-neutral-200 bg-white shadow-strong">
+        <div className="overflow-hidden rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white shadow-strong">
           {/* Header */}
           <div className="bg-primary p-6 text-center text-white">
             <Landmark className="mx-auto mb-3" size={28} />
