@@ -19,7 +19,7 @@ export default function MobileBottomNav() {
   ]
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-neutral-100 z-50 px-6 py-3 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-secondary/85 backdrop-blur-md border-t border-[#f0e0d6] z-50 px-6 py-3 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
       <div className="flex justify-between items-center">
         {navItems.map((item, index) => {
           const isActive = pathname === item.href

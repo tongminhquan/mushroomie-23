@@ -77,7 +77,7 @@ export default function Header() {
   const totalItems = hydrated ? getTotalItems() : 0
 
   return (
-    <header className="relative z-50 border-b border-neutral-200/80 bg-white">
+    <header className="relative z-50 border-b border-[#f0e0d6] bg-secondary">
       <div className="hidden bg-text text-white md:block">
         <div className="brand-container flex h-9 items-center justify-between text-[11px] font-semibold">
           <p>Từ từng hạt nhỏ, tạo phong cách riêng.</p>
@@ -88,7 +88,7 @@ export default function Header() {
         </div>
       </div>
 
-      <div className="sticky top-0 border-b border-neutral-100 bg-white/95 backdrop-blur-md">
+      <div className="sticky top-0 border-b border-[#f0e0d6] bg-secondary/92 backdrop-blur-md">
         <div className="brand-container flex h-[74px] items-center gap-3 md:h-[82px] md:gap-6">
           <button
             type="button"
@@ -196,7 +196,7 @@ export default function Header() {
         )}
       </div>
 
-      <nav aria-label="Điều hướng chính" className="hidden bg-white md:block">
+      <nav aria-label="Điều hướng chính" className="hidden bg-secondary md:block">
         <div className="brand-container flex h-12 items-center gap-1">
           <div className="group relative mr-2 h-full">
             <Link href="/san-pham" className="flex h-full items-center gap-2 border-b-2 border-primary px-3 text-sm font-extrabold text-primary">
