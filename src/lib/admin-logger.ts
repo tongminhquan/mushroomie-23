@@ -1,13 +1,13 @@
 import { prisma } from './prisma'
 
 type AdminAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | 'OTHER'
-type AdminEntity = 'PRODUCT' | 'ORDER' | 'POST' | 'USER' | 'BANNER' | 'CATEGORY' | 'SETTINGS' | 'SYSTEM'
+type AdminEntity = 'PRODUCT' | 'ORDER' | 'POST' | 'USER' | 'BANNER' | 'CATEGORY' | 'VOUCHER' | 'SETTINGS' | 'SYSTEM'
 
 interface AdminLogPayload {
   userId: number
   action: AdminAction
   entity: AdminEntity
-  details?: Record<string, any>
+  details?: Record<string, unknown>
   ipAddress?: string
 }
 

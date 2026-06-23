@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import type { Voucher } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { formatPrice } from '@/lib/utils'
 import { AdminCard, AdminPageHeader, AdminStatusBadge } from '@/components/admin/AdminUI'
@@ -13,14 +14,33 @@ const statusTone: Record<string, 'neutral' | 'success' | 'warning' | 'danger' | 
   REVOKED: 'warning',
 }
 
+type VoucherWithCount = Voucher & {
+  _count?: {
+    userVouchers: number
+  }
+}
+
+function getVoucherTypeLabel(voucher: VoucherWithCount) {
+  if (voucher.type === 'GAME_REWARD') return `Mini game (${voucher.sourceGame || 'Tất cả'})`
+  if (voucher.type === 'MANUAL') return 'Cấp thủ công'
+  if (voucher.type === 'AUTO_CAMPAIGN') return 'Tự động'
+  return 'Khuyến mãi'
+}
+
+function getDiscountLabel(voucher: VoucherWithCount) {
+  if (voucher.discountType === 'FREE_SHIPPING') return 'Miễn phí vận chuyển'
+  if (voucher.discountType === 'PERCENT') return `Giảm ${Number(voucher.discountValue)}%`
+  return `Giảm ${formatPrice(Number(voucher.discountValue))}`
+}
+
 export default async function AdminVoucherPage() {
-  const vouchers = await prisma.voucher.findMany({
+  const vouchers: VoucherWithCount[] = await prisma.voucher.findMany({
     orderBy: { createdAt: 'desc' },
     include: {
       _count: {
-        select: { userVouchers: true }
-      }
-    }
+        select: { userVouchers: true },
+      },
+    },
   }).catch(() => [])
 
   return (
@@ -56,32 +76,32 @@ export default async function AdminVoucherPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f6ece5]">
-              {vouchers.map((v: any) => (
-                <tr key={v.id} className="transition-colors hover:bg-[#fff7f2]">
+              {vouchers.map((voucher) => (
+                <tr key={voucher.id} className="transition-colors hover:bg-[#fff7f2]">
                   <td className="px-5 py-3">
-                    <div className="font-mono font-bold text-primary">{v.code}</div>
-                    <div className="line-clamp-1 max-w-[200px] text-xs text-neutral-500">{v.title}</div>
+                    <div className="font-mono font-bold text-primary">{voucher.code}</div>
+                    <div className="line-clamp-1 max-w-[200px] text-xs text-neutral-500">{voucher.title}</div>
                   </td>
-                  <td className="px-4 py-3 font-semibold text-neutral-700">{v.type === 'GAME_REWARD' ? `Mini game (${v.sourceGame || 'Tất cả'})` : 'Khuyến mãi'}</td>
+                  <td className="px-4 py-3 font-semibold text-neutral-700">{getVoucherTypeLabel(voucher)}</td>
+                  <td className="px-4 py-3 text-neutral-700">{getDiscountLabel(voucher)}</td>
                   <td className="px-4 py-3 text-neutral-700">
-                    {v.discountType === 'PERCENT' ? `Giảm ${Number(v.discountValue)}%` : `Giảm ${formatPrice(Number(v.discountValue))}`}
-                  </td>
-                  <td className="px-4 py-3 text-neutral-700">
-                    {v.minOrderValue ? `Từ ${formatPrice(Number(v.minOrderValue))}` : 'Mọi đơn hàng'}
+                    {voucher.minOrderValue ? `Từ ${formatPrice(Number(voucher.minOrderValue))}` : 'Mọi đơn hàng'}
                   </td>
                   <td className="px-4 py-3 text-xs text-neutral-500">
-                    <p>Tổng: {v.usageLimit ? v.usageLimit : 'Không giới hạn'}</p>
-                    <p>User: {v.perUserLimit}/người</p>
+                    <p>Tổng: {voucher.usageLimit ? voucher.usageLimit : 'Không giới hạn'}</p>
+                    <p>User: {voucher.perUserLimit}/người</p>
                   </td>
-                  <td className="px-4 py-3 font-semibold text-primary">{v._count?.userVouchers || 0}</td>
+                  <td className="px-4 py-3 font-semibold text-primary">{voucher._count?.userVouchers || 0}</td>
                   <td className="px-4 py-3">
-                    <AdminStatusBadge tone={statusTone[v.status] || 'neutral'}>{v.status}</AdminStatusBadge>
+                    <AdminStatusBadge tone={statusTone[voucher.status] || 'neutral'}>{voucher.status}</AdminStatusBadge>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {vouchers.length === 0 && <div className="p-10 text-center text-sm text-neutral-500">Chưa có voucher template nào.</div>}
+          {vouchers.length === 0 && (
+            <div className="p-10 text-center text-sm text-neutral-500">Chưa có voucher template nào.</div>
+          )}
         </div>
       </AdminCard>
     </div>
