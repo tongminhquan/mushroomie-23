@@ -5,7 +5,7 @@ import { safeJsonLd } from '@/lib/security'
 
 export const metadata: Metadata = {
   title: 'Mushroomie - Phụ kiện handmade cá nhân hóa',
-  description: 'Mushroomie mang đến vòng tay, charm, móc khóa và phụ kiện handmade cá nhân hóa, giúp bạn tạo phong cách riêng từ từng hạt nhỏ.',
+  description: 'Mushroomie mang đến vòng tay, charm, móc khóa và phụ kiện handmade cá nhân hóa. Làm bằng tay, Trao bằng tim.',
 }
 
 export const revalidate = 3600 // Revalidate every hour

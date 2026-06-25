@@ -8,7 +8,7 @@ import { Category } from '@prisma/client'
 
 export const metadata: Metadata = {
   title: 'Câu chuyện Mushroomie | Phụ kiện handmade',
-  description: 'Từ từng hạt nhỏ, tạo phong cách riêng. Khám phá hành trình và giá trị cốt lõi của Mushroomie - thương hiệu phụ kiện handmade cá nhân hóa.',
+  description: 'Làm bằng tay, Trao bằng tim. Khám phá hành trình và giá trị cốt lõi của Mushroomie - thương hiệu phụ kiện handmade cá nhân hóa.',
 }
 
 const LINE = '#f0e0d6'

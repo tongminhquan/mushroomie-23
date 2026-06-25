@@ -17,7 +17,7 @@ export default function HomeCustomCTA() {
         <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center">
           <BrandSticker tone="white">Made for you</BrandSticker>
           <h2 className="mt-5 text-balance font-heading text-3xl leading-[1.1] sm:text-4xl lg:text-[2.75rem]">
-            Từ từng hạt nhỏ,<br className="sm:hidden" /> tạo phong cách riêng
+            Làm bằng tay, Trao bằng tim
           </h2>
           <p className="mt-4 max-w-xl text-base leading-7 text-white/95 sm:text-lg">
             Phụ kiện handmade cá nhân hóa từ hạt, charm và màu bạn yêu. Nhắn ngay cho Mushroomie để thiết kế mẫu độc nhất vô nhị.

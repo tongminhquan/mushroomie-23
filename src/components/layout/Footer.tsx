@@ -23,7 +23,7 @@ export default async function Footer() {
               Phụ kiện handmade được làm chậm, làm kỹ và cá nhân hóa theo câu chuyện riêng của bạn.
             </p>
             <p className="mt-5 inline-flex rounded-lg bg-white/8 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-yellow">
-              Từ từng hạt nhỏ, tạo phong cách riêng
+              Làm bằng tay, Trao bằng tim
             </p>
           </div>
 
