@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, useCallback, useState } from 'react'
-import { ImageIcon, AlignLeft, AlignCenter, AlignRight, AlignJustify, Edit2, X } from 'lucide-react'
+import { ImageIcon, AlignLeft, AlignCenter, AlignRight, AlignJustify, Edit2, X, Upload } from 'lucide-react'
 import MediaPicker from './MediaPicker'
 import ImageEditorModal from './ImageEditorModal'
 import { normalizeArticleImages } from '@/lib/sanitize'
@@ -55,20 +55,18 @@ const TOOLBAR_BUTTONS = [
 export default function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const isComposing = useRef(false)
-  // Seed with null (not `value`): otherwise the first sync effect sees
-  // lastValue === value and skips writing the loaded content into the empty
-  // contenteditable surface, leaving the editor blank on edit pages.
   const lastValue = useRef<string | null>(null)
   const [showMediaPicker, setShowMediaPicker] = useState(false)
   const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null)
   const [imgOffset, setImgOffset] = useState({ top: 0, left: 0 })
   const [showImageDetails, setShowImageDetails] = useState(false)
   const [showImageEditor, setShowImageEditor] = useState(false)
-  // Used to replace the current selected image instead of inserting a new one
   const [isReplacingImage, setIsReplacingImage] = useState(false)
   const [wordCount, setWordCount] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const [uploadingCount, setUploadingCount] = useState(0)
+  const dragCounter = useRef(0)
 
-  // Keep the contenteditable surface in sync with data loaded asynchronously.
   useEffect(() => {
     if (!editorRef.current) return
     const normalizedValue = normalizeArticleImages(value || '', 'storage')
@@ -107,7 +105,6 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     }
   }, [onChange])
 
-  // Forecolor/backcolor pickers
   const handleForeColor = (e: React.ChangeEvent<HTMLInputElement>) => {
     editorRef.current?.focus()
     document.execCommand('foreColor', false, e.target.value)
@@ -120,6 +117,68 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     onChange(editorRef.current?.innerHTML || '')
   }
 
+  // Upload a File and insert/replace blob URL with server URL
+  const uploadImageFile = useCallback(async (file: File, savedRange?: Range) => {
+    if (!editorRef.current) return
+    if (!file.type.startsWith('image/')) return
+
+    // Show the image immediately via blob URL so there's no waiting
+    const blobUrl = URL.createObjectURL(file)
+    const placeholderId = `img-upload-${Date.now()}-${Math.random().toString(36).slice(2)}`
+
+    editorRef.current.focus()
+    if (savedRange) {
+      const sel = window.getSelection()
+      sel?.removeAllRanges()
+      sel?.addRange(savedRange)
+    }
+    document.execCommand(
+      'insertHTML', false,
+      `<img id="${placeholderId}" src="${blobUrl}" alt="" data-uploading="true" />`
+    )
+    // Sync immediately so the placeholder is visible
+    const htmlWithBlob = editorRef.current.innerHTML
+    lastValue.current = htmlWithBlob
+    onChange(htmlWithBlob)
+
+    setUploadingCount(c => c + 1)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      form.append('purpose', 'post')
+      const res = await fetch('/api/upload', { method: 'POST', body: form })
+      if (!res.ok) throw new Error('Upload thất bại')
+      const data = await res.json()
+
+      // Swap blob URL → server URL
+      const el = editorRef.current?.querySelector(`#${placeholderId}`) as HTMLImageElement | null
+      if (el) {
+        el.src = data.url
+        el.removeAttribute('data-uploading')
+        el.removeAttribute('id')
+      }
+    } catch {
+      // Remove broken placeholder
+      const el = editorRef.current?.querySelector(`#${placeholderId}`)
+      el?.remove()
+    } finally {
+      URL.revokeObjectURL(blobUrl)
+      setUploadingCount(c => c - 1)
+      const final = editorRef.current?.innerHTML || ''
+      lastValue.current = final
+      onChange(final)
+    }
+  }, [onChange])
+
+  // Upload multiple files, preserving insertion order
+  const uploadFiles = useCallback((files: File[], savedRange?: Range) => {
+    const images = files.filter(f => f.type.startsWith('image/'))
+    images.reduce(
+      (chain, file) => chain.then(() => uploadImageFile(file, savedRange)),
+      Promise.resolve()
+    )
+  }, [uploadImageFile])
+
   useEffect(() => {
     const editor = editorRef.current
     if (!editor) return
@@ -127,12 +186,12 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     const handleGlobalClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       if (
-        target.closest('.img-floating-toolbar') || 
+        target.closest('.img-floating-toolbar') ||
         target.closest('.img-details-modal') ||
         target.closest('.image-editor-modal') ||
         target.closest('.media-picker-modal')
       ) return
-      
+
       if (target.tagName === 'IMG' && editor.contains(target)) {
         setSelectedImage(target as HTMLImageElement)
         setImgOffset({
@@ -147,7 +206,6 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     const handleKeydown = (e: KeyboardEvent) => {
       if (selectedImage) {
         if (e.key === 'Backspace' || e.key === 'Delete') {
-          // If wrapped in figure, delete figure
           const parent = selectedImage.parentElement
           if (parent && parent.tagName === 'FIGURE') {
             parent.remove()
@@ -174,7 +232,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
   const handleAlign = (align: 'left' | 'center' | 'right' | 'none') => {
     if (!selectedImage) return
     const target = (selectedImage.parentElement?.tagName === 'FIGURE') ? selectedImage.parentElement : selectedImage
-    
+
     target.style.display = ''
     target.style.margin = ''
     target.style.float = ''
@@ -198,6 +256,53 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       left: target.offsetLeft + target.offsetWidth / 2
     })
   }
+
+  // Drag-and-drop handlers
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    if (!e.dataTransfer.types.includes('Files')) return
+    e.preventDefault()
+    dragCounter.current++
+    setIsDragging(true)
+  }, [])
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    if (!e.dataTransfer.types.includes('Files')) return
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'copy'
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    dragCounter.current--
+    if (dragCounter.current === 0) setIsDragging(false)
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    dragCounter.current = 0
+    setIsDragging(false)
+
+    const files = Array.from(e.dataTransfer.files)
+    if (!files.length) return
+
+    // Capture caret position at drop coordinates
+    let savedRange: Range | undefined
+    const x = e.clientX
+    const y = e.clientY
+    if (document.caretRangeFromPoint) {
+      savedRange = document.caretRangeFromPoint(x, y) ?? undefined
+    } else {
+      // Firefox
+      const pos = (document as unknown as { caretPositionFromPoint?: (x: number, y: number) => { offsetNode: Node; offset: number } | null }).caretPositionFromPoint?.(x, y)
+      if (pos) {
+        savedRange = document.createRange()
+        savedRange.setStart(pos.offsetNode, pos.offset)
+        savedRange.collapse(true)
+      }
+    }
+
+    uploadFiles(files, savedRange)
+  }, [uploadFiles])
 
   return (
     <div className="rich-editor border border-neutral-200 rounded-xl overflow-hidden bg-white relative">
@@ -249,6 +354,11 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           display: block; margin: 1em 0; text-align: center;
         }
         .rich-editor .ql-editor-area img { max-width: 100%; border-radius: 8px; margin: 0.5em 0; }
+        .rich-editor .ql-editor-area img[data-uploading] {
+          opacity: 0.6; outline: 2px dashed #e5305b; outline-offset: 2px;
+          animation: pulse-upload 1s ease-in-out infinite;
+        }
+        @keyframes pulse-upload { 0%,100% { opacity: 0.6; } 50% { opacity: 0.9; } }
         .rich-editor .ql-editor-area figcaption {
           font-size: 13px; color: #6b7280; margin-top: 0.5em; font-style: italic; text-align: center;
         }
@@ -256,9 +366,27 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         .rich-editor .ql-editor-area hr { border: none; border-top: 2px solid #e5e7eb; margin: 1em 0; }
         .rich-editor .status-bar {
           padding: 4px 12px; font-size: 11px; color: #9ca3af; background: #f9fafb;
-          border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between;
+          border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;
         }
+        .rich-editor .drag-overlay {
+          position: absolute; inset: 0; z-index: 20;
+          background: rgba(229,48,91,0.08); border: 2px dashed #e5305b;
+          border-radius: 11px; pointer-events: none;
+          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+        }
+        .rich-editor .drag-overlay svg { color: #e5305b; }
+        .rich-editor .drag-overlay span { font-size: 15px; font-weight: 600; color: #e5305b; }
+        .rich-editor .drag-overlay small { font-size: 12px; color: #9ca3af; }
       `}</style>
+
+      {/* Drag-over overlay */}
+      {isDragging && (
+        <div className="drag-overlay" aria-hidden>
+          <Upload size={36} />
+          <span>Thả ảnh vào đây</span>
+          <small>Hỗ trợ JPG, PNG, WebP, AVIF — không giới hạn số lượng</small>
+        </div>
+      )}
 
       {/* Media Button */}
       <div className="p-2 border-b border-neutral-200 bg-neutral-50 flex items-center">
@@ -269,7 +397,6 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
 
       {/* Toolbar */}
       <div className="editor-toolbar">
-        {/* Block format select */}
         <select
           className="toolbar-select"
           onChange={e => execCmd('formatBlock', e.target.value)}
@@ -289,7 +416,6 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
 
         <div className="sep" />
 
-        {/* Inline formatting */}
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('bold') }} title="In đậm (Ctrl+B)">
           <strong>B</strong>
         </button>
@@ -303,13 +429,11 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           <s>S</s>
         </button>
 
-        {/* Forecolor */}
         <label className="color-btn" title="Màu chữ" style={{ background: '#374151' }}>
           <span style={{ color: 'white', pointerEvents: 'none' }}>A</span>
           <input type="color" style={{ position: 'absolute', width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} onChange={handleForeColor} />
         </label>
 
-        {/* Backcolor */}
         <label className="color-btn" title="Màu nền chữ" style={{ background: '#fbbf24' }}>
           <span style={{ pointerEvents: 'none', fontSize: 10 }}>A▲</span>
           <input type="color" style={{ position: 'absolute', width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} onChange={handleBackColor} />
@@ -317,7 +441,6 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
 
         <div className="sep" />
 
-        {/* Align */}
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('justifyLeft') }} title="Căn trái">⬛◻◻</button>
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('justifyCenter') }} title="Căn giữa">◻⬛◻</button>
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('justifyRight') }} title="Căn phải">◻◻⬛</button>
@@ -325,7 +448,6 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
 
         <div className="sep" />
 
-        {/* Lists */}
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('insertUnorderedList') }} title="Danh sách dấu chấm">• ≡</button>
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('insertOrderedList') }} title="Danh sách số">1.≡</button>
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('outdent') }} title="Giảm thụt">⇤</button>
@@ -333,13 +455,11 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
 
         <div className="sep" />
 
-        {/* Insert */}
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('createLink') }} title="Chèn liên kết">🔗</button>
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('insertHorizontalRule') }} title="Kẻ ngang">—</button>
 
         <div className="sep" />
 
-        {/* History */}
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('undo') }} title="Hoàn tác (Ctrl+Z)">↩</button>
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('redo') }} title="Làm lại (Ctrl+Y)">↪</button>
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('removeFormat') }} title="Xóa định dạng">✕A</button>
@@ -358,19 +478,29 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           isComposing.current = false
           handleInput()
         }}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         onPaste={e => {
+          // Handle image files pasted from clipboard (e.g. screenshot)
+          const imageFiles = Array.from(e.clipboardData.files).filter(f => f.type.startsWith('image/'))
+          if (imageFiles.length > 0) {
+            e.preventDefault()
+            uploadFiles(imageFiles)
+            return
+          }
+          // Fallback: HTML / plain text
           e.preventDefault()
           const text = e.clipboardData.getData('text/html') || e.clipboardData.getData('text/plain')
           document.execCommand('insertHTML', false, text)
-          setTimeout(() => {
-            onChange(editorRef.current?.innerHTML || '')
-          }, 0)
+          setTimeout(() => { onChange(editorRef.current?.innerHTML || '') }, 0)
         }}
       />
 
       {/* Floating Image Toolbar */}
       {selectedImage && !showImageDetails && (
-        <div 
+        <div
           className="img-floating-toolbar absolute z-10 flex items-center bg-white border border-neutral-200 shadow-lg rounded-lg overflow-hidden transition-all"
           style={{ top: Math.max(0, imgOffset.top - 45), left: imgOffset.left, transform: 'translateX(-50%)' }}
         >
@@ -380,19 +510,23 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           <button className="p-2 hover:bg-neutral-100 text-neutral-600" onClick={() => handleAlign('none')} title="Không căn lề"><AlignJustify size={16} /></button>
           <div className="w-px h-6 bg-neutral-200 mx-1" />
           <button className="p-2 hover:bg-neutral-100 text-neutral-600" onClick={() => setShowImageDetails(true)} title="Chỉnh sửa chi tiết"><Edit2 size={16} /></button>
-          <button className="p-2 hover:bg-red-50 text-red-500" onClick={() => { 
+          <button className="p-2 hover:bg-red-50 text-red-500" onClick={() => {
             const p = selectedImage.parentElement
             if (p && p.tagName === 'FIGURE') p.remove()
             else selectedImage.remove()
             setSelectedImage(null)
-            onChange(editorRef.current?.innerHTML || '') 
+            onChange(editorRef.current?.innerHTML || '')
           }} title="Xóa"><X size={16} /></button>
         </div>
       )}
 
       {/* Status bar */}
       <div className="status-bar">
-        <span>Hỗ trợ định dạng HTML</span>
+        <span>
+          {uploadingCount > 0
+            ? `⏳ Đang tải lên ${uploadingCount} ảnh…`
+            : 'Kéo ảnh vào đây hoặc dán (Ctrl+V) để chèn trực tiếp'}
+        </span>
         <span>{wordCount} từ</span>
       </div>
 
@@ -414,15 +548,13 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
               if (meta?.alt_text || meta?.seo_title) {
                 selectedImage.alt = (meta?.alt_text || meta?.seo_title) as string
               }
-              // We keep the old caption if there is one, or replace it?
-              // The user is replacing the image, so updating src is usually enough.
               onChange(editorRef.current?.innerHTML || '')
               setIsReplacingImage(false)
               return
             }
 
             editorRef.current?.focus()
-            
+
             const alt = meta?.alt_text || meta?.seo_title || ''
             let html = `<img src="${url}" alt="${alt}" />`
             if (meta?.caption) {
@@ -482,7 +614,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                 const caption = (document.getElementById('img-details-caption') as HTMLTextAreaElement).value
                 const width = (document.getElementById('img-details-width') as HTMLInputElement).value
                 const height = (document.getElementById('img-details-height') as HTMLInputElement).value
-                
+
                 selectedImage.alt = alt
                 if (width) selectedImage.setAttribute('width', width); else selectedImage.removeAttribute('width')
                 if (height) selectedImage.setAttribute('height', height); else selectedImage.removeAttribute('height')
@@ -499,7 +631,6 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                   } else {
                     const figure = document.createElement('figure')
                     figure.className = 'image'
-                    // copy alignment styles if any
                     if (selectedImage.style.float) {
                       figure.style.float = selectedImage.style.float
                       figure.style.margin = selectedImage.style.margin
@@ -521,7 +652,6 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                   }
                 } else {
                   if (parent && parent.tagName === 'FIGURE') {
-                    // move styles back
                     if (parent.style.float) {
                       selectedImage.style.float = parent.style.float
                       selectedImage.style.margin = parent.style.margin
