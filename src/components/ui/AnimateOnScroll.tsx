@@ -25,6 +25,13 @@ export default function AnimateOnScroll({
     const el = ref.current
     if (!el) return
 
+    // If already in viewport on mount, show immediately (no flash of invisible content)
+    const rect = el.getBoundingClientRect()
+    if (rect.top < window.innerHeight - 40 && rect.bottom > 0) {
+      setIsVisible(true)
+      return
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
