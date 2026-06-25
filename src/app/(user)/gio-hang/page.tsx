@@ -13,7 +13,7 @@ export default function CartPage() {
   return (
     <div className="min-h-screen bg-secondary py-8 md:py-12">
       <div className="brand-container max-w-5xl">
-        <p className="brand-kicker mb-3 text-xs font-extrabold uppercase tracking-[0.14em] text-primary">Gio hang</p>
+        <p className="brand-kicker mb-3 text-xs font-extrabold uppercase tracking-[0.14em] text-primary">Giỏ hàng</p>
         <h1 className="mb-2 font-heading text-3xl text-text md:text-4xl">Giỏ hàng</h1>
         <p className="mb-7 text-sm text-neutral-500">Kiểm tra lại những món phụ kiện đáng yêu trước khi thanh toán nhé.</p>
 
@@ -98,7 +98,7 @@ export default function CartPage() {
                             <Plus size={14} />
                           </button>
                         </div>
-                        <span className="ml-auto font-heading text-base text-primary">{formatPrice(item.price)}</span>
+                        <span className="ml-auto font-heading text-base text-primary">{formatPrice(item.price * item.quantity)}</span>
                         <button
                           type="button"
                           aria-label="Xóa sản phẩm"

@@ -180,15 +180,6 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <div className="mt-6 pt-6 border-t border-[#f0e0d6]">
               <AddToCartButton product={product} />
             </div>
-            {product.description && (
-              <section className="mt-6 rounded-[18px] border border-neutral-200 bg-white p-6">
-                <h2 className="mb-4 font-heading text-xl text-text">Mô tả chi tiết</h2>
-                <div
-                  className="prose prose-sm max-w-none text-neutral-600 prose-headings:font-heading prose-headings:text-text prose-a:text-primary"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description) }}
-                />
-              </section>
-            )}
 
             <div className="mt-4 flex items-start gap-3 rounded-[16px] border-[1.5px] border-dashed border-[#d9b89e] bg-secondary p-4">
               <span aria-hidden className="text-xl">🤍</span>
@@ -208,7 +199,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 {product.description && (
                   <section className="rounded-[24px] border-[1.5px] border-[#f0e0d6] bg-white p-6 shadow-card sm:p-8">
                     <h2 className="mb-6 font-heading text-2xl text-text">Mô tả chi tiết</h2>
-                    <div className="prose prose-sm max-w-none text-neutral-600 prose-headings:font-heading prose-headings:text-text prose-a:text-primary" dangerouslySetInnerHTML={{ __html: product.description }} />
+                    <div className="prose prose-sm max-w-none text-neutral-600 prose-headings:font-heading prose-headings:text-text prose-a:text-primary" dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description) }} />
                   </section>
                 )}
 

@@ -301,7 +301,7 @@ export default function CheckoutPage() {
             {/* Order summary */}
             <div className="lg:col-span-2">
               <div className="sticky top-5 rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-5 shadow-card md:p-6">
-                <h2 className="font-heading font-bold text-lg mb-4">Đơn hàng ({items.length} sản phẩm)</h2>
+                <h2 className="font-heading font-bold text-lg mb-4">Đơn hàng ({items.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm)</h2>
                 <div className="space-y-3 mb-4 max-h-64 overflow-y-auto pr-1">
                   {items.map((item) => (
                     <div key={item.id} className="flex gap-3">
