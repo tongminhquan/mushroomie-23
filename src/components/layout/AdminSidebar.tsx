@@ -86,22 +86,22 @@ export default function AdminSidebar() {
           isCollapsed ? 'w-20' : 'w-64',
         )}
       >
-        <div className={cn('flex h-[77px] items-center border-b-[1.5px] border-[#f0e0d6] transition-all duration-300', isCollapsed ? 'justify-center' : 'justify-between px-5')}>
-          <Link href="/admin" className={cn('flex items-center gap-3 overflow-hidden', isCollapsed ? 'hidden' : 'flex')}>
+        <div className={cn('flex h-[77px] flex-shrink-0 border-b-[1.5px] border-[#f0e0d6] transition-all duration-300', isCollapsed ? 'flex-col items-center justify-center gap-1' : 'items-center justify-between px-5')}>
+          <Link href="/admin" className="flex items-center gap-3 overflow-hidden">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-secondary">
               <Image src="/logo.webp" alt="Mushroomie" width={40} height={40} className="h-9 w-9 object-contain" />
             </div>
-            <div className="flex flex-col leading-tight">
+            <div className={cn('flex flex-col leading-tight overflow-hidden transition-all duration-300', isCollapsed ? 'w-0 opacity-0' : 'opacity-100')}>
               <span className="whitespace-nowrap font-heading text-[15px] text-primary">Mushroomie</span>
               <span className="whitespace-nowrap text-[10px] font-extrabold uppercase tracking-[0.12em] text-neutral-400">Quản trị</span>
             </div>
           </Link>
           <button
-            className="hidden rounded-lg p-2 text-neutral-400 transition-colors hover:bg-secondary hover:text-primary md:flex"
+            className="hidden rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-secondary hover:text-primary md:flex"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            aria-label="Thu gọn menu"
+            aria-label={isCollapsed ? 'Mở rộng menu' : 'Thu gọn menu'}
           >
-            <svg className={cn('h-5 w-5 transition-transform duration-300', isCollapsed ? 'rotate-180' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={cn('h-4 w-4 transition-transform duration-300', isCollapsed ? 'rotate-180' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
