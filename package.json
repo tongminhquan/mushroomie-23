@@ -21,6 +21,9 @@
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
+  "overrides": {
+    "es-toolkit": "1.47.1"
+  },
   "browserslist": [
     "last 2 Chrome versions",
     "last 2 Edge versions",
