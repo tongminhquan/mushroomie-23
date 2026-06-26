@@ -5,6 +5,7 @@ import { formatPrice } from '@/lib/utils'
 import { AlertTriangle, CheckCircle, Clock, Landmark, RefreshCw, XCircle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Link from 'next/link'
+import CheckoutStepper from '@/components/checkout/CheckoutStepper'
 
 interface Payment {
   status: string
@@ -285,6 +286,7 @@ export default function ConfirmPage() {
   return (
     <div className="min-h-screen bg-secondary py-6 md:py-10">
       <div className="max-w-xl mx-auto px-4">
+        <CheckoutStepper currentStep={3} />
         <div className="overflow-hidden rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white shadow-strong">
           {/* Header */}
           <div className="bg-primary p-6 text-center text-white">

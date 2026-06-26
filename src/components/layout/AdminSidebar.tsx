@@ -26,22 +26,37 @@ import {
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 
-const navItems = [
-  { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-  { href: '/admin/san-pham', icon: Package, label: 'Sản phẩm' },
-  { href: '/admin/bai-viet', icon: FileText, label: 'Bài viết' },
-  { href: '/admin/don-hang', icon: ShoppingCart, label: 'Đơn hàng' },
-  { href: '/admin/voucher', icon: TicketPercent, label: 'Quản lý voucher' },
-  { href: '/admin/voucher-history', icon: Activity, label: 'Lịch sử voucher' },
-  { href: '/admin/thanh-toan', icon: CreditCard, label: 'Thanh toán', exact: true },
-  { href: '/admin/thanh-toan/webhook-logs', icon: Activity, label: 'Webhook Logs' },
-  { href: '/admin/lien-he', icon: MessageSquare, label: 'Liên hệ' },
-  { href: '/admin/danh-gia', icon: Star, label: 'Đánh giá' },
-  { href: '/admin/banner', icon: ImageIcon, label: 'Banners' },
-  { href: '/admin/thu-vien', icon: FolderOpen, label: 'Thư viện' },
-  { href: '/admin/tai-khoan', icon: Users, label: 'Tài khoản' },
-  { href: '/admin/nhat-ky', icon: ClipboardList, label: 'Nhật ký HĐ' },
-  { href: '/admin/cai-dat', icon: Settings, label: 'Cài đặt' },
+const navGroups = [
+  {
+    label: 'TỔNG QUAN',
+    items: [
+      { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+      { href: '/admin/don-hang', icon: ShoppingCart, label: 'Đơn hàng' },
+      { href: '/admin/thanh-toan', icon: CreditCard, label: 'Thanh toán', exact: true },
+    ],
+  },
+  {
+    label: 'CỬA HÀNG',
+    items: [
+      { href: '/admin/san-pham', icon: Package, label: 'Sản phẩm' },
+      { href: '/admin/banner', icon: ImageIcon, label: 'Banner' },
+      { href: '/admin/voucher', icon: TicketPercent, label: 'Voucher' },
+      { href: '/admin/voucher-history', icon: Activity, label: 'Lịch sử voucher' },
+      { href: '/admin/thanh-toan/webhook-logs', icon: Activity, label: 'Webhook Logs' },
+    ],
+  },
+  {
+    label: 'NỘI DUNG & HỆ THỐNG',
+    items: [
+      { href: '/admin/bai-viet', icon: FileText, label: 'Bài viết' },
+      { href: '/admin/thu-vien', icon: FolderOpen, label: 'Media' },
+      { href: '/admin/danh-gia', icon: Star, label: 'Đánh giá' },
+      { href: '/admin/lien-he', icon: MessageSquare, label: 'Liên hệ' },
+      { href: '/admin/tai-khoan', icon: Users, label: 'Người dùng', superAdminOnly: true },
+      { href: '/admin/nhat-ky', icon: ClipboardList, label: 'Nhật ký HĐ', superAdminOnly: true },
+      { href: '/admin/cai-dat', icon: Settings, label: 'Cài đặt' },
+    ],
+  },
 ]
 
 export default function AdminSidebar() {
@@ -53,12 +68,13 @@ export default function AdminSidebar() {
 
   const isActive = (href: string, exact?: boolean) => exact ? pathname === href : pathname.startsWith(href)
 
-  const filteredNavItems = navItems.filter((item) => {
-    if ((item.href === '/admin/tai-khoan' || item.href === '/admin/nhat-ky') && role !== 'super_admin') {
-      return false
-    }
-    return true
-  })
+  const filteredGroups = navGroups.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => {
+      if ((item as any).superAdminOnly && role !== 'super_admin') return false
+      return true
+    }),
+  })).filter((group) => group.items.length > 0)
 
   return (
     <>
@@ -116,7 +132,7 @@ export default function AdminSidebar() {
           </button>
         </div>
 
-        <nav className="no-scrollbar flex-1 space-y-1 overflow-y-auto overflow-x-hidden p-3">
+        <nav className="no-scrollbar flex-1 overflow-y-auto overflow-x-hidden p-3">
           {isCollapsed && (
             <button
               onClick={() => setIsCollapsed(false)}
@@ -127,26 +143,34 @@ export default function AdminSidebar() {
               <ChevronRight size={20} className="flex-shrink-0" />
             </button>
           )}
-          {filteredNavItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setIsOpen(false)}
-              title={item.label}
-              className={cn(
-                'group flex items-center gap-3 rounded-xl py-3 transition-all',
-                isCollapsed ? 'justify-center px-3' : 'px-4',
-                isActive(item.href, item.exact)
-                  ? 'bg-primary text-white shadow-card'
-                  : 'text-neutral-600 hover:bg-secondary hover:text-primary',
+          {filteredGroups.map((group) => (
+            <div key={group.label} className="mb-4">
+              {!isCollapsed && (
+                <p className="mb-1 px-4 text-[10px] font-extrabold uppercase tracking-[0.1em] text-neutral-400">{group.label}</p>
               )}
-            >
-              <item.icon size={isCollapsed ? 22 : 18} className="flex-shrink-0 transition-all duration-300" />
-              <span className={cn('whitespace-nowrap text-sm font-medium transition-all duration-300', isCollapsed ? 'w-0 overflow-hidden opacity-0' : 'flex-1 opacity-100')}>
-                {item.label}
-              </span>
-              <ChevronRight size={14} className={cn('flex-shrink-0 transition-all duration-300', isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-0 group-hover:opacity-100')} />
-            </Link>
+              <div className="space-y-0.5">
+                {group.items.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                    title={item.label}
+                    className={cn(
+                      'group flex items-center gap-3 rounded-xl py-2.5 transition-all',
+                      isCollapsed ? 'justify-center px-3' : 'px-4',
+                      isActive(item.href, (item as { exact?: boolean }).exact)
+                        ? 'bg-primary text-white shadow-card'
+                        : 'text-neutral-600 hover:bg-secondary hover:text-primary',
+                    )}
+                  >
+                    <item.icon size={isCollapsed ? 20 : 17} className="flex-shrink-0 transition-all duration-300" />
+                    <span className={cn('whitespace-nowrap text-sm font-medium transition-all duration-300', isCollapsed ? 'w-0 overflow-hidden opacity-0' : 'flex-1 opacity-100')}>
+                      {item.label}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 

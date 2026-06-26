@@ -11,6 +11,7 @@ import HomeHandmadeBehindScenes from './HomeHandmadeBehindScenes'
 import HomeLatestPosts from './HomeLatestPosts'
 import HomeTrust from './HomeTrust'
 import HomeFinalCTA from './HomeFinalCTA'
+import HomeMiniGameCTA from './HomeMiniGameCTA'
 import type {
   HomeBanner,
   HomeCategory,
@@ -49,6 +50,9 @@ export default function HomeLanding({
         <HomeCustomProcess products={products} />
       </AnimateOnScroll>
       <HomeHandmadeBehindScenes products={products} />
+      <AnimateOnScroll duration={500}>
+        <HomeMiniGameCTA />
+      </AnimateOnScroll>
       <AnimateOnScroll duration={500}>
         <HomeTrust reviews={reviews} />
       </AnimateOnScroll>
