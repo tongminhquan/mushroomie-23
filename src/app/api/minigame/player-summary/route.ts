@@ -53,7 +53,13 @@ export async function GET() {
         email: session.user.email,
       },
       points: userPoint?.points ?? 0,
-      vouchers,
+      vouchers: vouchers.map((uv) => ({
+        id: uv.id,
+        code: uv.voucher.code,
+        discount_percent: Number(uv.voucher.discountValue),
+        status: uv.status,
+        expiresAt: uv.expiresAt,
+      })),
       games,
     })
   } catch (error) {

@@ -79,20 +79,19 @@ export async function issueGameVoucher(
   const percent = getVoucherPercentForScore(input.game, input.score)
   if (!percent) return null
 
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  const existingToday = await tx.userVoucher.findMany({
+  // Don't issue if user already has an AVAILABLE voucher at this tier or higher for this game
+  const existingAvailable = await tx.userVoucher.findMany({
     where: {
       userId: input.userId,
+      status: 'AVAILABLE',
       sourceGame: input.game,
-      createdAt: { gte: today },
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
     },
     include: { voucher: true }
   })
 
-  const highestToday = existingToday.reduce((max, item) => Math.max(max, Number(item.voucher.discountValue)), 0)
-  if (highestToday >= percent) return null
+  const highestAvailable = existingAvailable.reduce((max, item) => Math.max(max, Number(item.voucher.discountValue)), 0)
+  if (highestAvailable >= percent) return null
 
   let template = await tx.voucher.findFirst({
     where: { type: 'GAME_REWARD', sourceGame: input.game, discountValue: percent, discountType: 'PERCENT', status: 'ACTIVE' }
@@ -115,14 +114,23 @@ export async function issueGameVoucher(
 
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days
 
-  return tx.userVoucher.create({
-    data: {
+  // upsert: avoids P2002 unique([userId, voucherId]) if user previously held and used this tier
+  return tx.userVoucher.upsert({
+    where: { userId_voucherId: { userId: input.userId, voucherId: template.id } },
+    update: {
+      status: 'AVAILABLE',
+      source: 'mini_game',
+      sourceGame: input.game,
+      score: input.scoreId,
+      expiresAt,
+    },
+    create: {
       userId: input.userId,
       voucherId: template.id,
       source: 'mini_game',
       sourceGame: input.game,
       score: input.scoreId,
-      expiresAt: expiresAt,
+      expiresAt,
     },
     include: { voucher: true }
   })
