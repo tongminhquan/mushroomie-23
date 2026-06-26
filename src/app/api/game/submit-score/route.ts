@@ -80,7 +80,12 @@ export async function POST(request: NextRequest) {
       success: true,
       score: result.gameScore,
       points: result.points.points,
-      voucher: result.voucher,
+      voucher: result.voucher
+        ? {
+            code: result.voucher.voucher.code,
+            discount_percent: Number(result.voucher.voucher.discountValue),
+          }
+        : null,
     })
   } catch (error) {
     console.error('[GAME SUBMIT SCORE]', error)
