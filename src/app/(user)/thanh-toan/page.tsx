@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { Landmark, PackageCheck, ShieldCheck } from 'lucide-react'
 import FormInput from '@/components/ui/FormInput'
 import Textarea from '@/components/ui/Textarea'
+import CheckoutStepper from '@/components/checkout/CheckoutStepper'
 
 interface CheckoutUser {
   name?: string | null
@@ -227,8 +228,8 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-secondary py-6 md:py-10">
       <div className="brand-container max-w-6xl">
-        <p className="brand-kicker mb-3">Hoàn tất đơn hàng</p>
-        <h1 className="mb-7 font-heading text-3xl text-text md:text-4xl">Thanh toán</h1>
+        <CheckoutStepper currentStep={2} />
+        <h1 className="sr-only">Thanh toán</h1>
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             {/* Customer info */}

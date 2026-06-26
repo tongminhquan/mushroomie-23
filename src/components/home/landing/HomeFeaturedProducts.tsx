@@ -30,9 +30,9 @@ export default function HomeFeaturedProducts({ products }: { products: HomeProdu
 
       <BrandContainer className="relative">
         <LandingSectionHeader
-          eyebrow="Đang được yêu thích"
-          title="Những món nhỏ có cá tính thật to"
-          description="Thiết kế nổi bật, dễ phối và có thể thêm dấu ấn riêng cho bạn hoặc người nhận quà."
+          eyebrow="Best Seller"
+          title="Sản phẩm nổi bật"
+          description="Được yêu thích nhất — thiết kế nổi bật, dễ phối và có thể thêm dấu ấn riêng."
           align="center"
         />
         <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">

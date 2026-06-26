@@ -14,7 +14,7 @@ export default async function Footer() {
   return (
     <footer className="border-t border-neutral-200 bg-text text-white">
       <div className="brand-container py-12 md:py-16">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.4fr_0.7fr_0.7fr_1fr]">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.4fr_0.6fr_0.6fr_0.6fr_1fr]">
           <div>
             <Link href="/" className="relative mb-5 block h-14 w-36">
               <SafeImage src="/logo.webp" fallbackSrc="/logo.webp" alt="Mushroomie" fill sizes="144px" className="object-contain object-left" />
@@ -40,13 +40,22 @@ export default async function Footer() {
           </div>
 
           <div>
-            <h2 className="mb-4 text-sm font-extrabold text-white">Mushroomie</h2>
+            <h2 className="mb-4 text-sm font-extrabold text-white">Khám phá</h2>
             <ul className="space-y-3 text-sm text-white/60">
-              <li><Link href="/gioi-thieu" className="hover:text-white">Câu chuyện thương hiệu</Link></li>
-              <li><Link href="/tin-tuc" className="hover:text-white">Tin tức</Link></li>
+              <li><Link href="/san-pham" className="hover:text-white">Sản phẩm</Link></li>
+              <li><Link href="/gioi-thieu" className="hover:text-white">Câu chuyện</Link></li>
               <li><Link href="/mini-game" className="hover:text-white">Mini game</Link></li>
-              <li><Link href="/chinh-sach-bao-mat" className="hover:text-white">Chính sách bảo mật</Link></li>
-              <li><Link href="/dieu-khoan-dich-vu" className="hover:text-white">Điều khoản dịch vụ</Link></li>
+              <li><Link href="/voucher" className="hover:text-white">Voucher</Link></li>
+              <li><Link href="/lien-he" className="hover:text-white">Liên hệ</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h2 className="mb-4 text-sm font-extrabold text-white">Chính sách</h2>
+            <ul className="space-y-3 text-sm text-white/60">
+              <li><Link href="/chinh-sach-doi-tra" className="hover:text-white">Giao hàng & Đổi trả</Link></li>
+              <li><Link href="/chinh-sach-bao-mat" className="hover:text-white">Bảo mật</Link></li>
+              <li><Link href="/dieu-khoan-dich-vu" className="hover:text-white">Điều khoản</Link></li>
             </ul>
           </div>
 
@@ -62,10 +71,11 @@ export default async function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-white/65 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Mushroomie. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Mushroomie · Làm bằng tay, trao bằng tim 🍄</p>
           <div className="flex gap-5">
             <a href="https://www.facebook.com/mushr00mie" target="_blank" rel="noopener noreferrer" className="hover:text-white">Facebook</a>
             <a href="https://www.instagram.com/mushr00mie._/" target="_blank" rel="noopener noreferrer" className="hover:text-white">Instagram</a>
+            <a href="https://www.tiktok.com/@mushr00mie" target="_blank" rel="noopener noreferrer" className="hover:text-white">TikTok</a>
             <a href="https://shopee.vn/shop/475544379" target="_blank" rel="noopener noreferrer" className="hover:text-white">Shopee</a>
           </div>
         </div>

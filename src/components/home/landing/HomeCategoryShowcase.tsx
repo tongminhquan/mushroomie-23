@@ -26,14 +26,14 @@ export default function HomeCategoryShowcase({ categories }: { categories: HomeC
 
       <BrandContainer>
         <LandingSectionHeader
-          eyebrow="Chọn món hợp mood"
-          title="Bắt đầu từ món bạn thích"
+          eyebrow="Danh mục"
+          title="Bạn đang tìm gì hôm nay?"
           description="Mỗi danh mục là một cách khác để kể câu chuyện riêng bằng hạt, màu và những chiếc charm nhỏ."
         />
 
         {categories.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-            {categories.slice(0, 4).map((category, index) => (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 md:gap-4">
+            {categories.slice(0, 8).map((category, index) => (
               <Link
                 key={category.id}
                 href={`/san-pham?category=${category.slug}`}

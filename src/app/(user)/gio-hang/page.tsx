@@ -6,6 +6,7 @@ import { Minus, PackageCheck, Plus, ShoppingBag, Trash2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { formatPrice, getPublicImageUrl } from '@/lib/utils'
 import { useCartStore } from '@/store/cart'
+import CheckoutStepper from '@/components/checkout/CheckoutStepper'
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotalPrice } = useCartStore()
@@ -13,9 +14,8 @@ export default function CartPage() {
   return (
     <div className="min-h-screen bg-secondary py-8 md:py-12">
       <div className="brand-container max-w-5xl">
-        <p className="brand-kicker mb-3 text-xs font-extrabold uppercase tracking-[0.14em] text-primary">Giỏ hàng</p>
-        <h1 className="mb-2 font-heading text-3xl text-text md:text-4xl">Giỏ hàng</h1>
-        <p className="mb-7 text-sm text-neutral-500">Kiểm tra lại những món phụ kiện đáng yêu trước khi thanh toán nhé.</p>
+        <CheckoutStepper currentStep={1} />
+        <h1 className="mb-2 font-heading text-3xl text-text md:text-4xl sr-only">Giỏ hàng</h1>
 
         {items.length === 0 ? (
           <section
