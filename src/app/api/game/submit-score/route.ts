@@ -47,6 +47,14 @@ export async function POST(request: NextRequest) {
 
     const safeDurationSec = normalizeDurationSec(durationSec, verified.elapsedMs)
 
+    // DB-based rate-limit: max 10 submissions per 60s per user (uses existing game_scores index)
+    const recentCount = await prisma.gameScore.count({
+      where: { user_id: userId, created_at: { gt: new Date(Date.now() - 60_000) } },
+    })
+    if (recentCount >= 10) {
+      return NextResponse.json({ error: 'Bạn thao tác quá nhanh, vui lòng thử lại sau.' }, { status: 429 })
+    }
+
     const result = await prisma.$transaction(async (tx) => {
       const gameScore = await tx.gameScore.create({
         data: {

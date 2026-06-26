@@ -50,15 +50,16 @@ export async function POST(request: NextRequest) {
         data: { points: { decrement: requiredPoints } }
       })
 
-      // Find or create template
-      let template = await tx.voucher.findFirst({
-        where: { type: 'GAME_REWARD', discountValue: percent, discountType: 'PERCENT', status: 'ACTIVE' }
-      })
-
+      // Find or create the exchange-specific template (code-scoped to avoid grabbing TETRIS_X)
+      const exchangeCode = `GAME_EXCHANGE_${percent}`
+      let template = await tx.voucher.findUnique({ where: { code: exchangeCode } })
+      if (template && template.status !== 'ACTIVE') {
+        throw new Error('Mức đổi điểm này tạm dừng')
+      }
       if (!template) {
         template = await tx.voucher.create({
           data: {
-            code: `GAME_EXCHANGE_${percent}`,
+            code: exchangeCode,
             title: `Voucher đổi điểm ${percent}%`,
             type: 'GAME_REWARD',
             discountType: 'PERCENT',
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, voucher: result })
   } catch (error: any) {
     console.error('Lỗi đổi voucher:', error)
-    if (error.message === 'Không đủ điểm để đổi voucher') {
+    if (error.message === 'Không đủ điểm để đổi voucher' || error.message === 'Mức đổi điểm này tạm dừng') {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
     return NextResponse.json({ error: 'Lỗi hệ thống' }, { status: 500 })
