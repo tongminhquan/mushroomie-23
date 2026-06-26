@@ -455,6 +455,19 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 <p className="text-[11px] text-neutral-400 ml-6 -mt-1 leading-normal">
                   Sẽ xuất hiện ở mục &quot;Sản phẩm nổi bật&quot; tại trang chủ.
                 </p>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="is_customizable"
+                    checked={form.is_customizable}
+                    onChange={handleChange}
+                    className="w-4 h-4 rounded border-neutral-300 text-primary focus:ring-primary"
+                  />
+                  <span className="text-sm font-semibold text-neutral-700">Cho phép custom</span>
+                </label>
+                <p className="text-[11px] text-neutral-400 ml-6 -mt-1 leading-normal">
+                  Hiển thị badge &quot;Custom&quot; và cho phép khách nhập yêu cầu riêng khi đặt hàng.
+                </p>
               </div>
             </div>
 

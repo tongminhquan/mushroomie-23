@@ -86,25 +86,29 @@ export default function AdminSidebar() {
           isCollapsed ? 'w-20' : 'w-64',
         )}
       >
-        <div className={cn('flex h-[77px] items-center border-b-[1.5px] border-[#f0e0d6] transition-all duration-300', isCollapsed ? 'justify-center' : 'justify-between px-5')}>
-          <Link href="/admin" className={cn('flex items-center gap-3 overflow-hidden', isCollapsed ? 'hidden' : 'flex')}>
+        <div className={cn('flex h-[77px] flex-shrink-0 items-center border-b-[1.5px] border-[#f0e0d6]', isCollapsed ? 'justify-center' : 'justify-between px-5')}>
+          <Link href="/admin" className="flex min-w-0 items-center gap-3">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-secondary">
               <Image src="/logo.webp" alt="Mushroomie" width={40} height={40} className="h-9 w-9 object-contain" />
             </div>
-            <div className="flex flex-col leading-tight">
-              <span className="whitespace-nowrap font-heading text-[15px] text-primary">Mushroomie</span>
-              <span className="whitespace-nowrap text-[10px] font-extrabold uppercase tracking-[0.12em] text-neutral-400">Quản trị</span>
-            </div>
+            {!isCollapsed && (
+              <div className="flex min-w-0 flex-col leading-tight">
+                <span className="truncate font-heading text-[15px] text-primary">Mushroomie</span>
+                <span className="truncate text-[10px] font-extrabold uppercase tracking-[0.12em] text-neutral-400">Quản trị</span>
+              </div>
+            )}
           </Link>
-          <button
-            className="hidden rounded-lg p-2 text-neutral-400 transition-colors hover:bg-secondary hover:text-primary md:flex"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            aria-label="Thu gọn menu"
-          >
-            <svg className={cn('h-5 w-5 transition-transform duration-300', isCollapsed ? 'rotate-180' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
+          {!isCollapsed && (
+            <button
+              className="hidden rounded-lg p-2 text-neutral-400 transition-colors hover:bg-secondary hover:text-primary md:flex"
+              onClick={() => setIsCollapsed(true)}
+              aria-label="Thu gọn menu"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
           <button className="mr-4 rounded-lg p-1 text-neutral-400 transition-colors hover:text-primary md:hidden" onClick={() => setIsOpen(false)} aria-label="Đóng menu admin">
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -113,6 +117,16 @@ export default function AdminSidebar() {
         </div>
 
         <nav className="no-scrollbar flex-1 space-y-1 overflow-y-auto overflow-x-hidden p-3">
+          {isCollapsed && (
+            <button
+              onClick={() => setIsCollapsed(false)}
+              title="Mở rộng menu"
+              aria-label="Mở rộng menu"
+              className="hidden w-full items-center justify-center rounded-xl px-3 py-3 text-neutral-400 transition-all hover:bg-secondary hover:text-primary md:flex"
+            >
+              <ChevronRight size={20} className="flex-shrink-0" />
+            </button>
+          )}
           {filteredNavItems.map((item) => (
             <Link
               key={item.href}

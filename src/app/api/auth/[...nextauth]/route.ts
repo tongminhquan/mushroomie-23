@@ -1,7 +1,6 @@
 import { handlers } from '@/lib/auth'
 import { checkRateLimit } from '@/lib/security'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 export const GET = handlers.GET
 

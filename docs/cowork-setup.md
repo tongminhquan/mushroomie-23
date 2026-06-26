@@ -1,64 +1,133 @@
-# Cowork Setup — Mushroomie
+# Mushroomie - Cowork / Claude Code Setup Guide
 
-Tài liệu onboarding cho thành viên cộng tác trên dự án (kèm hỗ trợ Claude Code).
+Tai lieu onboarding cho thanh vien cong tac tren du an Mushroomie, kem quy trinh lam viec voi Claude Code/Cowork va cac lenh kiem tra production.
 
-## 1. Yêu cầu môi trường
+## 1. Mo project bang Claude Cowork
 
-- **Node.js** 20+ (khớp `@types/node: ^20`).
-- **MySQL** đang chạy và truy cập được (Prisma dùng provider `mysql`).
-- File **`.env`** ở thư mục gốc (bị `.gitignore` bỏ qua — **không commit**). Tối thiểu cần:
-  - `DATABASE_URL` — chuỗi kết nối MySQL.
-  - `AUTH_SECRET` / `NEXTAUTH_SECRET` — cho NextAuth v5 (beta).
-  - Biến PayOS (thanh toán) và SMTP/nodemailer (email OTP) nếu chạy các tính năng tương ứng.
+1. Mo Claude Desktop va chon che do **Cowork**.
+2. Ket noi dung thu muc project: `C:\Users\Admin\OneDrive\Tai lieu\mushroomie`.
+3. Chi cap quyen cho thu muc project, khong cap quyen toan o `C:\`.
 
-> Build vẫn chạy được khi thiếu `DATABASE_URL`; các route dữ liệu là dynamic nên được bỏ qua lúc build (xem mục Build bên dưới).
+## 2. Yeu cau moi truong
 
-## 2. Cài đặt & chạy local
+- **Node.js** 20+.
+- **MySQL** dang chay va truy cap duoc. Prisma dung provider `mysql`.
+- File **`.env`** o thu muc goc. File nay bi `.gitignore` bo qua va khong duoc commit.
+- Bien moi truong toi thieu:
+  - `DATABASE_URL`: chuoi ket noi MySQL.
+  - `AUTH_SECRET` hoac `NEXTAUTH_SECRET`: dung cho NextAuth v5 beta.
+  - PayOS/VietQR va SMTP variables neu chay thanh toan hoac email OTP.
+
+> Build local co the in `prisma:error ... DATABASE_URL` khi khong co `.env`. Neu build van exit code 0 va TypeScript khong loi, day la canh bao da biet vi cac route du lieu duoc render dynamic.
+
+## 3. Cai dat va chay local
 
 ```bash
 npm install
-npm run db:push      # đồng bộ schema Prisma vào DB (xem cảnh báo ở /db-push)
-npm run seed         # (tuỳ chọn) nạp dữ liệu mẫu
-npm run dev          # chạy dev server
+npm run db:push
+npm run seed
+npm run dev
 ```
 
-Các script khác trong `package.json`:
+## 4. Scripts trong package.json
 
-| Lệnh | Tác dụng |
-|------|----------|
-| `npm run build` | Build production (`next build --webpack`, giới hạn heap 2 GB) |
-| `npm run start` | Chạy bản production đã build |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run lint` | ESLint |
-| `npm run db:migrate` | Tạo & áp migration (giữ lịch sử) |
-| `npm run db:studio` | Mở Prisma Studio |
-| `npm run images:optimize` | Tối ưu ảnh upload sang WebP |
+| Lenh | Tac dung |
+|---|---|
+| `npm run dev` | Chay local dev server |
+| `npm run build` | Build production bang `next build --webpack` |
+| `npm run start` | Start ban production da build |
+| `npm run typecheck` | Chay `tsc --noEmit` |
+| `npm run lint` | Chay ESLint |
+| `npm run db:migrate` | Tao va ap Prisma migration trong dev |
+| `npm run db:push` | Dong bo schema Prisma vao DB |
+| `npm run db:studio` | Mo Prisma Studio |
+| `npm run images:optimize` | Convert uploads sang WebP |
+| `npm run images:optimize:dry-run` | Dry-run convert uploads sang WebP |
 
-## 3. Lưu ý kỹ thuật riêng của dự án
+## 5. Luu y ky thuat rieng
 
-- **Next.js 16.2.6 — bản tùy biến.** API/quy ước có thể khác với kiến thức mặc định. **Đọc guide trong `node_modules/next/dist/docs/` trước khi viết code** (xem `AGENTS.md`). Tôn trọng các thông báo deprecation.
-- **Build không có `.env`:** các dòng `prisma:error ... Environment variable not found: DATABASE_URL` là **vô hại** — mọi route dữ liệu là dynamic (`ƒ`) nên bị bỏ qua khi build. Build chỉ thực sự lỗi khi exit code khác 0 hoặc có lỗi TypeScript.
-- **`.gitignore`:** bỏ qua mọi `*.js` (trừ vài file config) và `*.sql`. Nếu thêm script JS mới cần commit, hãy thêm ngoại lệ tương ứng.
+- **Next.js 16.2.6 la ban co thay doi so voi Next.js pho bien.** Doc `node_modules/next/dist/docs/` va `AGENTS.md` truoc khi sua API/convention cua Next.
+- **Khong commit secret hoac du lieu production:** `.env`, `node_modules`, `.next`, `backups/`, `*.sql`, `*.dump`, log nhay cam.
+- **Khong xoa du lieu quan trong:** `public/uploads/`, `backups/`, `ecosystem.config.js`, `package-lock.json`, database, migration, user/order/voucher/payment data.
+- **Production khong dung Docker mac dinh.** Runtime hien tai la PM2 standalone.
 
-## 4. Quy ước branch & commit
+## 6. Slash commands co san
 
-- Branch mặc định để mở PR: **`main`**.
-- Branch tính năng đặt tiền tố theo công cụ/người, ví dụ: `codex/<mô-tả-ngắn>`.
-- Commit theo **Conventional Commits**: `feat:`, `fix:`, `chore:`, `refactor:`, …
-  - Ví dụ thực tế trong lịch sử: `fix: add react-is for recharts build`, `feat: refresh homepage ...`.
-- **Không** commit `.env`, file build, hay dữ liệu nhạy cảm.
+Go `/` trong Claude Code/Cowork de xem danh sach command. Moi command la mot file Markdown trong `.claude/commands/`.
 
-## 5. Slash command cho Claude Code
+| Command | Muc dich |
+|---|---|
+| `/build` | Build production va tom tat loi/route |
+| `/typecheck` | Chay TypeScript check |
+| `/lint` | Chay ESLint |
+| `/db-push` | Dong bo schema vao DB, co canh bao data-loss/production |
+| `/seed` | Nap du lieu mau, chi dung dev/staging |
+| `/cowork` | Tom tat nhanh quy trinh va lenh cowork |
+| `/setup-coworks` | Thiet lap lai moi truong lam viec Claude cho project |
+| `/audit-ux-ui` | Audit va sua loi UX/UI user site va admin |
+| `/audit-production` | Audit health production: PM2, Nginx, MySQL, logs, bao mat |
+| `/fix-media-upload` | Kiem tra va sua upload anh, WebP, broken images |
+| `/deploy-production` | Deploy an toan len production voi PM2 standalone |
+| `/verify-production` | Verify routes, MIME, anh, PM2 logs sau deploy |
 
-Các command nằm trong `.claude/commands/` (commit kèm repo để cả nhóm dùng chung):
+## 7. Quy uoc branch va commit
 
-| Command | Tác dụng |
-|---------|----------|
-| `/build` | Build production và tóm tắt lỗi/route (đã biết bỏ qua `prisma:error` vô hại) |
-| `/typecheck` | Chạy `tsc --noEmit` và báo lỗi kiểu |
-| `/lint` | Chạy ESLint, gợi ý `--fix` (hỏi trước khi áp dụng) |
-| `/db-push` | Đồng bộ schema vào DB — có cảnh báo data-loss/production |
-| `/seed` | Nạp dữ liệu mẫu (chỉ dev/staging) |
-| `/cowork` | Tóm tắt nhanh quy trình & lệnh (đọc chính tài liệu này) |
+- Branch chinh: `main`.
+- Branch tinh nang nen dung tien to theo cong cu/nguoi, vi du `codex/<mo-ta-ngan>`.
+- Commit theo Conventional Commits: `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`.
+- Khong tao commit test vo nghia.
 
-Gõ `/` trong Claude Code để xem danh sách. Mỗi command là một file `.md` trong `.claude/commands/` — sửa file đó để chỉnh hành vi cho cả nhóm.
+## 8. Quy trinh deploy PM2
+
+Production server:
+
+- URL: `https://mushroomie.io.vn`
+- Server: `103.173.226.86`
+- Path: `/var/www/mushroomie`
+- PM2 process: `mushroomie_pm2`
+- App port: `3001`
+- Branch: `main`
+
+Lenh deploy co ban:
+
+```bash
+cd /var/www/mushroomie
+git status
+git pull origin main
+npm ci
+npx prisma generate
+npm run build
+pm2 restart mushroomie_pm2
+pm2 save
+pm2 logs mushroomie_pm2 --lines 150 --nostream
+```
+
+Neu dung script deploy cua du an, uu tien:
+
+```bash
+cd /var/www/mushroomie
+git pull origin main
+bash deploy.sh
+```
+
+## 9. Checklist truoc khi bao hoan tat
+
+- `npm run typecheck` pass.
+- `npm run build` pass.
+- Lint khong co error neu nam trong pham vi task.
+- PM2 online sau restart.
+- Routes chinh tra 200 hoac redirect auth hop ly.
+- CSS tra `text/css`.
+- JS tra `application/javascript` hoac `text/javascript`.
+- Logo, favicon, banner, product image, blog image, uploads va QR khong broken.
+- Khong co secret trong git diff.
+
+## 10. Stack nhanh
+
+- Framework: Next.js 16.2.6, App Router, TypeScript
+- Database: Prisma 5 + MySQL
+- Auth: next-auth v5 beta
+- Payment: PayOS + VietQR
+- Images: sharp, WebP, next/image
+- Styling: Tailwind CSS v4
+- Rich text: TipTap v3

@@ -214,6 +214,11 @@ export default function AddProductPage() {
                 className="w-5 h-5 rounded border-[1.5px] border-[#e2d3c8] text-primary focus:ring-primary" />
               <span className="text-sm font-medium text-neutral-700">Sản phẩm nổi bật</span>
             </label>
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <input type="checkbox" name="is_customizable" checked={form.is_customizable} onChange={handleChange}
+                className="w-5 h-5 rounded border-[1.5px] border-[#e2d3c8] text-primary focus:ring-primary" />
+              <span className="text-sm font-medium text-neutral-700">Cho phép custom</span>
+            </label>
           </div>
         </div>
 

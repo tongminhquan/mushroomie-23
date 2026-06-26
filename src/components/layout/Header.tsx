@@ -80,7 +80,7 @@ export default function Header() {
     <header className="relative z-50 border-b border-[#f0e0d6] bg-secondary">
       <div className="hidden bg-text text-white md:block">
         <div className="brand-container flex h-9 items-center justify-between text-[11px] font-semibold">
-          <p>Từ từng hạt nhỏ, tạo phong cách riêng.</p>
+          <p>Làm bằng tay, Trao bằng tim</p>
           <div className="flex items-center gap-5 text-white/70">
             <a href="tel:+84848744060" className="hover:text-white">0848 744 060</a>
             <Link href="/chinh-sach-doi-tra" className="hover:text-white">Đổi trả & bảo hành</Link>
