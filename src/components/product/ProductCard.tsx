@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { ShoppingBag, Check } from 'lucide-react'
+import { ShoppingBag, Check, Eye } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { getPublicImageUrl, formatPrice } from '@/lib/utils'
 import { useState, useEffect } from 'react'
@@ -95,6 +95,12 @@ export default function ProductCard({ product }: ProductCardProps) {
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="object-contain p-3 transition-transform duration-500 ease-out group-hover:scale-[1.035]"
         />
+        {/* Quick-view overlay on hover */}
+        <div className="absolute inset-0 flex items-end justify-center pb-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-1.5 text-xs font-extrabold text-text shadow-card backdrop-blur-sm">
+            <Eye size={13} /> Xem nhanh
+          </span>
+        </div>
         {/* Badges */}
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
           {product.is_customizable && (
