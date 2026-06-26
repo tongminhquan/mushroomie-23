@@ -114,7 +114,11 @@ export default function AddToCartButton({ product }: Props) {
           <button aria-label="Giảm số lượng" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="grid h-10 w-10 place-items-center rounded-xl border border-neutral-200 bg-white hover:border-primary hover:text-primary"><Minus size={16} /></button>
           <span className="w-10 text-center font-bold text-lg">{quantity}</span>
           <button aria-label="Tăng số lượng" onClick={() => setQuantity(Math.min(product.stock, quantity + 1))} className="grid h-10 w-10 place-items-center rounded-xl border border-neutral-200 bg-white hover:border-primary hover:text-primary"><Plus size={16} /></button>
-          <span className="text-sm text-neutral-500">Còn {product.stock} sản phẩm</span>
+          {product.stock > 0 && product.stock <= 5 ? (
+            <span className="text-sm font-semibold text-primary">🔥 Chỉ còn {product.stock}!</span>
+          ) : product.stock > 0 ? (
+            <span className="text-sm text-neutral-500">Còn {product.stock} sản phẩm</span>
+          ) : null}
         </div>
       </div>
 

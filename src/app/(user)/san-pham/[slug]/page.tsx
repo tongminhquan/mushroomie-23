@@ -4,6 +4,7 @@ import Breadcrumb from '@/components/layout/Breadcrumb'
 import ProductCard from '@/components/product/ProductCard'
 import AddToCartButton from '@/components/product/AddToCartButton'
 import ProductGallery from '@/components/product/ProductGallery'
+import ReviewForm from '@/components/product/ReviewForm'
 import { toAbsoluteUrl } from '@/lib/url'
 import { getPublicImageUrl } from '@/lib/utils'
 import type { Metadata } from 'next'
@@ -13,6 +14,19 @@ import PriceText from '@/components/ui/PriceText'
 import SectionHeader from '@/components/ui/SectionHeader'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { safeJsonLd } from '@/lib/security'
+
+export async function generateStaticParams() {
+  try {
+    const products = await prisma.product.findMany({
+      where: { status: 'active' },
+      select: { slug: true },
+      take: 200,
+    })
+    return products.map((p) => ({ slug: p.slug }))
+  } catch {
+    return []
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -59,7 +73,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const decodedSlug = decodeURIComponent(slug)
   
   const productRaw = await prisma.product.findFirst({
-    where: { 
+    where: {
       OR: [
         { slug: decodedSlug },
         { slug: slug }
@@ -69,7 +83,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       category: true,
       images: { orderBy: { sort_order: 'asc' } },
       options: true,
-      reviews: { where: { status: 'approved' }, take: 5 },
+      reviews: { where: { status: 'approved' }, take: 20, orderBy: { created_at: 'desc' } },
     },
   })
   if (!productRaw) notFound()
@@ -191,47 +205,70 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         </div>
 
         {/* Description and Reviews */}
-        {(product.description || product.reviews.length > 0) && (
-          <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.95fr)] lg:gap-10">
-            {/* Empty left column on desktop to align with right info column, or let it span full? The user suggested it can span full if it's a block below. Let's make it span full for better reading. */}
-            <div className="lg:col-span-2">
-              <div className="space-y-8">
-                {product.description && (
-                  <section className="rounded-[24px] border-[1.5px] border-[#f0e0d6] bg-white p-6 shadow-card sm:p-8">
-                    <h2 className="mb-6 font-heading text-2xl text-text">Mô tả chi tiết</h2>
-                    <div className="prose prose-sm max-w-none text-neutral-600 prose-headings:font-heading prose-headings:text-text prose-a:text-primary" dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description) }} />
-                  </section>
-                )}
+        <div className="mt-8 space-y-6">
+          {product.description && (
+            <section className="rounded-[24px] border-[1.5px] border-[#f0e0d6] bg-white p-6 shadow-card sm:p-8">
+              <h2 className="mb-6 font-heading text-2xl text-text">Mô tả chi tiết</h2>
+              <div className="prose prose-sm max-w-none text-neutral-600 prose-headings:font-heading prose-headings:text-text prose-a:text-primary" dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description) }} />
+            </section>
+          )}
 
-                {product.reviews.length > 0 && (
-                  <section className="rounded-[24px] border-[1.5px] border-[#f0e0d6] bg-white p-6 shadow-card sm:p-8">
-                    <h2 className="mb-6 font-heading text-2xl text-text">Đánh giá ({product.reviews.length})</h2>
-                    <div className="space-y-5">
-                      {product.reviews.map((review: any) => (
-                        <div key={review.id} className="border-b border-neutral-100 pb-5 last:border-0">
-                          <div className="mb-1 flex items-center gap-2">
-                            <span className="text-sm font-semibold text-text">{review.name}</span>
-                            <div className="flex text-xs text-yellow">{'★'.repeat(review.rating)}</div>
-                          </div>
-                          <p className="text-sm leading-6 text-neutral-600">{review.content}</p>
-                        </div>
-                      ))}
+          <section className="rounded-[24px] border-[1.5px] border-[#f0e0d6] bg-white p-6 shadow-card sm:p-8">
+            {product.reviews.length > 0 ? (
+              <>
+                <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <h2 className="font-heading text-2xl text-text">Đánh giá</h2>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="text-3xl font-black text-text">
+                        {(product.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / product.reviews.length).toFixed(1)}
+                      </span>
+                      <div>
+                        <div className="flex text-yellow">{'★'.repeat(Math.round(product.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / product.reviews.length))}</div>
+                        <p className="text-xs text-neutral-500">{product.reviews.length} đánh giá</p>
+                      </div>
                     </div>
-                  </section>
-                )}
+                  </div>
+                </div>
+                <div className="space-y-5">
+                  {product.reviews.map((review: any) => (
+                    <div key={review.id} className="border-b border-neutral-100 pb-5 last:border-0">
+                      <div className="mb-1.5 flex items-center gap-2">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                          {review.name.charAt(0).toUpperCase()}
+                        </span>
+                        <div>
+                          <span className="text-sm font-semibold text-text">{review.name}</span>
+                          <div className="flex text-xs text-yellow">{'★'.repeat(review.rating)}</div>
+                        </div>
+                      </div>
+                      <p className="pl-10 text-sm leading-6 text-neutral-600">{review.content}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-8 border-t border-neutral-100 pt-6">
+                  <h3 className="mb-4 font-semibold text-text">Viết đánh giá của bạn</h3>
+                  <ReviewForm productId={product.id} productName={product.name} />
+                </div>
+              </>
+            ) : (
+              <div>
+                <h2 className="mb-4 font-heading text-2xl text-text">Đánh giá</h2>
+                <p className="mb-5 text-sm text-neutral-500">Chưa có đánh giá nào. Hãy là người đầu tiên!</p>
+                <ReviewForm productId={product.id} productName={product.name} />
               </div>
-            </div>
-          </div>
-        )}
+            )}
+          </section>
+        </div>
 
         {/* Related */}
         {relatedProducts.length > 0 && (
-            <section className="mt-16 border-t border-[#f0e0d6] pt-12">
-              <SectionHeader eyebrow="Có thể bạn sẽ thích" title="Sản phẩm liên quan" />
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {relatedProducts.map((p: any) => <ProductCard key={p.id} product={p} />)}
-              </div>
-            </section>
+          <section className="mt-16 border-t border-[#f0e0d6] pt-12">
+            <SectionHeader eyebrow="Có thể bạn sẽ thích" title="Sản phẩm liên quan" />
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              {relatedProducts.map((p: any) => <ProductCard key={p.id} product={p} />)}
+            </div>
+          </section>
         )}
       </BrandContainer>
     </div>
