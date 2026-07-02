@@ -1,22 +1,21 @@
+import { format } from 'date-fns'
+import { vi } from 'date-fns/locale'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { normalizeImageUrl, type PublicImageKind } from '@/lib/image-url'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-import { format } from 'date-fns'
-import { vi } from 'date-fns/locale'
-import { normalizeImageUrl, type PublicImageKind } from '@/lib/image-url'
-
 export function formatPrice(price: number | string): string {
   const num = typeof price === 'string' ? parseFloat(price) : price
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " ₫"
+  return `${num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} ₫`
 }
 
 export function formatDate(date: Date | string): string {
-  const d = typeof date === 'string' ? new Date(date) : date
-  return format(d, 'dd/MM/yyyy HH:mm', { locale: vi })
+  const value = typeof date === 'string' ? new Date(date) : date
+  return format(value, 'dd/MM/yyyy HH:mm', { locale: vi })
 }
 
 export function generateSlug(text: string): string {
@@ -24,7 +23,7 @@ export function generateSlug(text: string): string {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/đ/g, 'd')
+    .replace(/[đĐ]/g, 'd')
     .replace(/[^a-z0-9\s-]/g, '')
     .trim()
     .replace(/\s+/g, '-')
@@ -40,7 +39,7 @@ export function generateOrderCode(): string {
 
 export function truncate(str: string, length: number): string {
   if (str.length <= length) return str
-  return str.substring(0, length) + '...'
+  return `${str.substring(0, length)}...`
 }
 
 export function getPublicImageUrl(

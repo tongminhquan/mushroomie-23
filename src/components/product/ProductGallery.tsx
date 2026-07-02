@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { X } from 'lucide-react'
 import BrandBadge from '@/components/ui/BrandBadge'
 import SafeImage from '@/components/ui/SafeImage'
@@ -15,52 +15,87 @@ interface ProductGalleryProps {
 
 const FALLBACK_IMAGE = '/logo.webp'
 
-export default function ProductGallery({ images, productName, isCustomizable, isOnSale }: ProductGalleryProps) {
-  const gallery = images.length > 0
-    ? images.map((image) => getPublicImageUrl(image, 'product'))
-    : [FALLBACK_IMAGE]
+export default function ProductGallery({
+  images,
+  productName,
+  isCustomizable,
+  isOnSale,
+}: ProductGalleryProps) {
+  const gallery = useMemo(() => {
+    const normalized = images
+      .map((image) => getPublicImageUrl(image, 'product'))
+      .filter(Boolean)
+
+    const uniqueImages = Array.from(new Set(normalized))
+    return uniqueImages.length > 0 ? uniqueImages : [FALLBACK_IMAGE]
+  }, [images])
+
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [failed, setFailed] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
-  const mainImage = failed ? FALLBACK_IMAGE : gallery[selectedIndex] || FALLBACK_IMAGE
+  const mainImage = gallery[selectedIndex] || FALLBACK_IMAGE
 
   useEffect(() => {
-    if (!lightboxOpen) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setLightboxOpen(false)
-      if (e.key === 'ArrowRight') setSelectedIndex((i) => (i + 1) % gallery.length)
-      if (e.key === 'ArrowLeft') setSelectedIndex((i) => (i - 1 + gallery.length) % gallery.length)
+    if (selectedIndex < gallery.length) return
+    setSelectedIndex(0)
+  }, [gallery.length, selectedIndex])
+
+  useEffect(() => {
+    if (!lightboxOpen) return undefined
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setLightboxOpen(false)
+      if (event.key === 'ArrowRight') {
+        setSelectedIndex((index) => (index + 1) % gallery.length)
+      }
+      if (event.key === 'ArrowLeft') {
+        setSelectedIndex((index) => (index - 1 + gallery.length) % gallery.length)
+      }
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [lightboxOpen, gallery.length])
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [gallery.length, lightboxOpen])
 
   return (
     <>
-      <div className="flex h-full flex-col space-y-3">
+      <div className="flex h-full flex-col gap-3">
         <button
           type="button"
           onClick={() => setLightboxOpen(true)}
-          aria-label="Xem ảnh lớn hơn"
-          className="relative flex aspect-[3/4] flex-1 cursor-zoom-in items-center justify-center overflow-hidden rounded-[24px] border border-[#ece0d6] bg-white shadow-card lg:aspect-auto lg:min-h-[520px]"
+          aria-label="Xem ảnh sản phẩm lớn hơn"
+          className="relative flex aspect-[3/4] flex-1 cursor-zoom-in items-center justify-center overflow-hidden rounded-[28px] border border-warm-border bg-white shadow-card lg:min-h-[640px]"
         >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,214,214,0.35),_transparent_55%)]" />
           <SafeImage
             src={mainImage}
-            alt={failed ? 'Ảnh sản phẩm đang được cập nhật' : productName}
+            fallbackSrc={FALLBACK_IMAGE}
+            imageKind="product"
+            alt={productName || 'Ảnh sản phẩm Mushroomie'}
             fill
             priority
             fetchPriority="high"
             sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-contain p-4 transition-transform duration-300 hover:scale-[1.03]"
-            onError={() => setFailed(true)}
+            className="object-contain p-5 transition-transform duration-300 group-hover:scale-[1.02]"
           />
-          <div className="absolute left-4 top-4 flex flex-col items-start gap-2">
-            {isCustomizable && <BrandBadge tone="yellow">Cá nhân hóa</BrandBadge>}
-            {isOnSale && <BrandBadge tone="red">Đang giảm giá</BrandBadge>}
-            <BrandBadge tone="pink">Handmade</BrandBadge>
+
+          <div className="absolute left-4 top-4 flex flex-wrap items-start gap-2">
+            <BrandBadge tone="pink" className="rounded-full px-3 py-1">
+              Handmade
+            </BrandBadge>
+            {isCustomizable && (
+              <BrandBadge tone="yellow" className="rounded-full px-3 py-1">
+                Cá nhân hóa
+              </BrandBadge>
+            )}
+            {isOnSale && (
+              <BrandBadge tone="red" className="rounded-full px-3 py-1">
+                Đang giảm giá
+              </BrandBadge>
+            )}
           </div>
-          <span className="absolute bottom-3 right-3 rounded-xl bg-white/80 px-2.5 py-1 text-[11px] font-bold text-neutral-500 backdrop-blur-sm">
-            🔍 Nhấn để xem lớn
+
+          <span className="absolute bottom-3 right-3 rounded-xl bg-white/85 px-3 py-1.5 text-[11px] font-bold text-neutral-500 shadow-card backdrop-blur-sm">
+            Nhấn để xem lớn
           </span>
         </button>
 
@@ -70,17 +105,19 @@ export default function ProductGallery({ images, productName, isCustomizable, is
               <button
                 key={`${image}-${index}`}
                 type="button"
-                onClick={() => { setSelectedIndex(index); setFailed(false) }}
+                onClick={() => setSelectedIndex(index)}
                 aria-label={`Xem ảnh sản phẩm ${index + 1}`}
                 aria-pressed={selectedIndex === index}
-                className={`relative aspect-[3/4] overflow-hidden rounded-xl border bg-white transition-all ${
+                className={`relative aspect-[3/4] overflow-hidden rounded-[20px] border bg-white transition ${
                   selectedIndex === index
                     ? 'border-primary ring-2 ring-primary/15'
-                    : 'border-[#ece0d6] hover:border-primary/60'
+                    : 'border-warm-border hover:border-primary/60'
                 }`}
               >
                 <SafeImage
                   src={image}
+                  fallbackSrc={FALLBACK_IMAGE}
+                  imageKind="product"
                   alt={`${productName}, ảnh ${index + 1}`}
                   fill
                   sizes="120px"
@@ -92,7 +129,6 @@ export default function ProductGallery({ images, productName, isCustomizable, is
         )}
       </div>
 
-      {/* Lightbox */}
       {lightboxOpen && (
         <div
           className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
@@ -100,17 +136,20 @@ export default function ProductGallery({ images, productName, isCustomizable, is
         >
           <button
             onClick={() => setLightboxOpen(false)}
-            aria-label="Đóng"
-            className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20"
+            aria-label="Đóng ảnh lớn"
+            className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+            type="button"
           >
             <X size={20} />
           </button>
           <div
             className="relative h-[85vmin] w-[85vmin] max-h-[85vh] max-w-4xl"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
           >
             <SafeImage
               src={mainImage}
+              fallbackSrc={FALLBACK_IMAGE}
+              imageKind="product"
               alt={productName}
               fill
               sizes="85vmin"
@@ -120,12 +159,18 @@ export default function ProductGallery({ images, productName, isCustomizable, is
           </div>
           {gallery.length > 1 && (
             <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
-              {gallery.map((_, i) => (
+              {gallery.map((image, index) => (
                 <button
-                  key={i}
-                  onClick={(e) => { e.stopPropagation(); setSelectedIndex(i); setFailed(false) }}
-                  className={`h-2 rounded-full transition-all ${i === selectedIndex ? 'w-6 bg-white' : 'w-2 bg-white/40'}`}
-                  aria-label={`Ảnh ${i + 1}`}
+                  key={image}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setSelectedIndex(index)
+                  }}
+                  className={`h-2 rounded-full transition-all ${
+                    index === selectedIndex ? 'w-6 bg-white' : 'w-2 bg-white/40'
+                  }`}
+                  aria-label={`Ảnh ${index + 1}`}
+                  type="button"
                 />
               ))}
             </div>

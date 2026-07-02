@@ -10,7 +10,7 @@ export function AdminPageHeader({
   action?: React.ReactNode
 }) {
   return (
-    <header className="flex flex-col gap-4 border-b border-neutral-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+    <header className="flex flex-col gap-4 border-b border-warm-border pb-5 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <p className="mb-1 text-xs font-extrabold uppercase tracking-[0.12em] text-primary">Mushroomie admin</p>
         <h1 className="font-heading text-2xl text-neutral-900 md:text-3xl">{title}</h1>
@@ -28,7 +28,7 @@ export function AdminCard({
   children: React.ReactNode
   className?: string
 }) {
-  return <section className={cn('rounded-xl border border-neutral-200 bg-white shadow-card', className)}>{children}</section>
+  return <section className={cn('rounded-[16px] border border-warm-border bg-white shadow-card', className)}>{children}</section>
 }
 
 export function AdminStatusBadge({

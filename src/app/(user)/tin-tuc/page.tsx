@@ -1,78 +1,147 @@
+import Link from 'next/link'
+import type { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
 import PostCard from '@/components/blog/PostCard'
 import Breadcrumb from '@/components/layout/Breadcrumb'
-import Link from 'next/link'
-import type { Metadata } from 'next'
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
+import BrandContainer from '@/components/ui/BrandContainer'
+import EmptyState from '@/components/ui/EmptyState'
 
 export const metadata: Metadata = {
-  title: 'Tin tức Handmade | Mushroomie',
+  title: 'Tin tức handmade | Mushroomie',
   description: 'Chia sẻ tips, hướng dẫn và câu chuyện handmade từ Mushroomie.',
 }
 
-interface SearchParams { category?: string; page?: string }
+type ParamValue = string | string[] | undefined
 
-const LINE = '#f0e0d6'
+interface SearchParams {
+  category?: ParamValue
+  page?: ParamValue
+}
 
-export default async function BlogPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+function readParam(value: ParamValue) {
+  return Array.isArray(value) ? value[0] : value
+}
+
+export default async function BlogPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>
+}) {
   const sp = await searchParams
-  const page = Number(sp.page || 1)
+  const categorySlug = readParam(sp.category)
+  const pageValue = readParam(sp.page) || '1'
+  const page = Math.max(1, parseInt(pageValue, 10) || 1)
   const limit = 9
-
   const where: any = { status: 'published' }
-  if (sp.category) where.category = { slug: sp.category }
+
+  if (categorySlug) where.category = { slug: categorySlug }
 
   const [posts, total, categories] = await Promise.all([
-    prisma.post.findMany({
-      where,
-      include: { category: true },
-      orderBy: { published_at: 'desc' },
-      skip: (page - 1) * limit,
-      take: limit,
-    }).catch(() => []),
+    prisma.post
+      .findMany({
+        where,
+        include: { category: true },
+        orderBy: { published_at: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      })
+      .catch(() => []),
     prisma.post.count({ where }).catch(() => 0),
     prisma.category.findMany({ where: { type: 'post' } }).catch(() => []),
   ])
 
   const totalPages = Math.ceil(total / limit)
+  const activeCategory = categories.find((category: any) => category.slug === categorySlug)
+  const title = activeCategory?.name || 'Góc cảm hứng Mushroomie'
+  const description = activeCategory
+    ? `Những bài viết mới nhất trong chủ đề ${activeCategory.name.toLowerCase()} dành cho quà tặng và cảm hứng handmade.`
+    : 'Mẹo phối charm, hậu trường handmade và những câu chuyện quà tặng mang dấu ấn riêng từ Mushroomie.'
 
-  const chipCls = (active: boolean) =>
-    `px-4 py-2 rounded-full text-sm font-semibold transition-colors border-[1.5px] ${
+  const chipClass = (active: boolean) =>
+    `rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
       active
-        ? 'bg-primary text-white border-primary'
-        : 'bg-white text-neutral-600 border-[#e2d3c8] hover:text-primary hover:border-primary'
+        ? 'border-primary bg-primary text-white'
+        : 'border-warm-border bg-white text-neutral-600 hover:border-primary hover:text-primary'
     }`
+
+  const buildUrl = (params: Partial<Record<'category' | 'page', string | undefined>>) => {
+    const query = new URLSearchParams()
+    const nextParams = {
+      category: categorySlug,
+      page: page > 1 ? String(page) : undefined,
+      ...params,
+    }
+
+    Object.entries(nextParams).forEach(([key, value]) => {
+      if (value) query.set(key, value)
+    })
+
+    const search = query.toString()
+    return search ? `/tin-tuc?${search}` : '/tin-tuc'
+  }
 
   return (
     <div className="min-h-screen bg-secondary pb-16">
-      {/* Breadcrumb (JSON-LD cho SEO) */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <Breadcrumb items={[{ label: 'Tin tức' }]} />
-      </div>
-
-      {/* Hero */}
       <section
-        className="relative overflow-hidden text-center"
-        style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
+        className="relative overflow-hidden border-b border-warm-border"
+        style={{
+          background:
+            'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))',
+        }}
       >
-        <span aria-hidden className="pointer-events-none select-none absolute left-[13%] top-[36%] text-xl text-coral animate-float-soft">❤</span>
-        <span aria-hidden className="pointer-events-none select-none absolute right-[14%] top-[30%] text-lg text-accent-mint animate-float-soft" style={{ animationDelay: '1.1s' }}>★</span>
-        <div className="relative max-w-2xl mx-auto px-6 pt-8 pb-9">
-          <span className="inline-block text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-2.5">Blog &amp; tin tức</span>
-          <h1 className="font-heading text-3xl md:text-4xl text-neutral-900 mb-2 leading-tight">Góc cảm hứng Mushroomie</h1>
-          <p className="m-0 text-sm text-neutral-500">Mẹo phối charm, hậu trường handmade &amp; câu chuyện quà tặng ♡</p>
-        </div>
+        <BrandContainer className="py-5 md:py-7">
+          <Breadcrumb items={[{ label: 'Tin tức' }]} />
+
+          <div className="relative mx-auto max-w-3xl text-center">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute left-[8%] top-[24%] h-3 w-3 rounded-full bg-primary/25"
+            />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute right-[10%] top-[18%] h-4 w-4 rounded-full bg-[#ffd6d6]"
+            />
+            <span className="mb-3 inline-flex rounded-full border border-white/70 bg-white/80 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-primary shadow-sm">
+              Blog &amp; câu chuyện thương hiệu
+            </span>
+            <h1 className="font-heading text-3xl leading-tight text-neutral-900 md:text-5xl">
+              {title}
+            </h1>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-neutral-600 md:text-base">
+              {description}
+            </p>
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
+              <span className="rounded-full border border-warm-border bg-white px-4 py-2 text-sm font-semibold text-neutral-700">
+                {total} bài viết đã xuất bản
+              </span>
+              {activeCategory && (
+                <Link
+                  href={buildUrl({ category: undefined, page: undefined })}
+                  className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-dark"
+                >
+                  Xem toàn bộ bài viết
+                </Link>
+              )}
+            </div>
+          </div>
+        </BrandContainer>
       </section>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 mt-8">
-        {/* Category filter */}
+      <BrandContainer className="mt-8">
         {categories.length > 0 && (
           <AnimateOnScroll animation="fade-up">
-            <div className="flex flex-wrap gap-2 justify-center mb-8">
-              <Link href="/tin-tuc" className={chipCls(!sp.category)}>Tất cả</Link>
-              {categories.map((cat: any) => (
-                <Link key={cat.id} href={`/tin-tuc?category=${cat.slug}`} className={chipCls(sp.category === cat.slug)}>
-                  {cat.name}
+            <div className="mb-8 flex flex-wrap justify-center gap-2">
+              <Link href="/tin-tuc" className={chipClass(!categorySlug)}>
+                Tất cả
+              </Link>
+              {categories.map((category: any) => (
+                <Link
+                  key={category.id}
+                  href={buildUrl({ category: category.slug, page: undefined })}
+                  className={chipClass(categorySlug === category.slug)}
+                >
+                  {category.name}
                 </Link>
               ))}
             </div>
@@ -80,29 +149,45 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
         )}
 
         {posts.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-5xl mb-4" aria-hidden>📝</div>
-            <p className="text-neutral-500">Chưa có bài viết nào.</p>
-          </div>
+          <EmptyState
+            title="Chưa có bài viết phù hợp"
+            description="Danh mục này hiện chưa có nội dung công khai. Bạn có thể quay lại trang tin tức để xem các bài viết khác."
+            action={
+              <Link
+                href="/tin-tuc"
+                className="rounded-full bg-primary px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-dark"
+              >
+                Quay lại trang tin tức
+              </Link>
+            }
+          />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map((post: any) => <PostCard key={post.id} post={post as any} />)}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {posts.map((post: any) => (
+              <PostCard key={post.id} post={post as any} />
+            ))}
           </div>
         )}
 
         {totalPages > 1 && (
-          <div className="flex justify-center gap-2 mt-12">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <Link key={p} href={`/tin-tuc?${new URLSearchParams({ ...sp, page: String(p) })}`}
-                aria-current={p === page ? 'page' : undefined}
-                className={`grid h-10 w-10 place-items-center rounded-full text-sm font-bold transition-colors border-[1.5px] ${
-                  p === page ? 'bg-primary text-white border-primary' : 'bg-white text-neutral-600 border-[#f0e0d6] hover:text-primary hover:border-primary'
-                }`}>{p}
+          <div className="mt-12 flex justify-center gap-2">
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
+              <Link
+                key={pageNumber}
+                href={buildUrl({ page: String(pageNumber) })}
+                aria-current={pageNumber === page ? 'page' : undefined}
+                className={`grid h-10 w-10 place-items-center rounded-full border text-sm font-bold transition-colors ${
+                  pageNumber === page
+                    ? 'border-primary bg-primary text-white'
+                    : 'border-warm-border bg-white text-neutral-600 hover:border-primary hover:text-primary'
+                }`}
+              >
+                {pageNumber}
               </Link>
             ))}
           </div>
         )}
-      </div>
+      </BrandContainer>
     </div>
   )
 }

@@ -5,10 +5,10 @@ import { safeJsonLd } from '@/lib/security'
 
 export const metadata: Metadata = {
   title: 'Mushroomie - Phụ kiện handmade cá nhân hóa',
-  description: 'Mushroomie mang đến vòng tay, charm, móc khóa và phụ kiện handmade cá nhân hóa. Làm bằng tay, Trao bằng tim.',
+  description: 'Mushroomie mang đến vòng tay, charm, móc khóa và phụ kiện handmade cá nhân hóa. Làm bằng tay, trao bằng tim.',
 }
 
-export const revalidate = 3600 // Revalidate every hour
+export const revalidate = 3600
 
 export default async function HomePage() {
   const [featuredProducts, posts, reviews, categories, banners] = await Promise.all([
@@ -26,7 +26,7 @@ export default async function HomePage() {
       is_customizable: product.is_customizable,
       stock: product.stock,
       category: product.category ? { name: product.category.name, slug: product.category.slug } : null,
-      images: product.images.map((image) => ({ image_url: image.image_url }))
+      images: product.images.map((image) => ({ image_url: image.image_url })),
     }))).catch(() => []),
     prisma.post.findMany({
       where: { status: 'published' },
@@ -39,13 +39,13 @@ export default async function HomePage() {
       select: { id: true, rating: true, content: true, name: true },
       take: 6,
     }).catch(() => []),
-    prisma.category.findMany({ 
+    prisma.category.findMany({
       where: { type: 'product' },
-      select: { id: true, name: true, slug: true, image_url: true, icon: true }
+      select: { id: true, name: true, slug: true, image_url: true, icon: true },
     }).catch(() => []),
     prisma.banner.findMany({
       where: { status: 'active' },
-      orderBy: { sort_order: 'asc' }
+      orderBy: { sort_order: 'asc' },
     }).catch(() => []),
   ])
 
@@ -64,8 +64,8 @@ export default async function HomePage() {
       streetAddress: 'Hẻm 2 tổ 11, Phường Trảng Dài',
       addressLocality: 'Biên Hòa',
       addressRegion: 'Đồng Nai',
-      addressCountry: 'VN'
-    }
+      addressCountry: 'VN',
+    },
   }
 
   const webSiteSchema = {
@@ -73,12 +73,12 @@ export default async function HomePage() {
     '@type': 'WebSite',
     name: 'Mushroomie',
     alternateName: ['Mushroomie Handmade'],
-    url: `${siteUrl}/`
+    url: `${siteUrl}/`,
   }
 
   return (
     <div>
-      <h1 className="sr-only">Mushroomie - Phu kien handmade ca nhan hoa: vong tay, charm, moc khoa, qua tang</h1>
+      <h1 className="sr-only">Mushroomie - phụ kiện handmade cá nhân hóa: vòng tay, charm, móc khóa, quà tặng</h1>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(localBusinessSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(webSiteSchema) }} />
       <HomeLanding

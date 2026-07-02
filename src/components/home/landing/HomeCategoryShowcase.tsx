@@ -11,18 +11,8 @@ export default function HomeCategoryShowcase({ categories }: { categories: HomeC
       className="relative overflow-hidden bg-secondary py-16 md:py-24"
       style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
     >
-      <span
-        aria-hidden
-        className="animate-float-soft pointer-events-none absolute -left-6 top-16 hidden text-4xl opacity-70 md:block"
-      >
-        🍓
-      </span>
-      <span
-        aria-hidden
-        className="animate-float-soft pointer-events-none absolute right-4 top-28 hidden text-3xl opacity-60 md:block"
-      >
-        🎀
-      </span>
+      <span aria-hidden className="pointer-events-none absolute -left-6 top-16 hidden h-14 w-14 rounded-full bg-pink/60 blur-xl md:block" />
+      <span aria-hidden className="pointer-events-none absolute right-4 top-28 hidden h-12 w-12 rounded-full bg-yellow/70 blur-xl md:block" />
 
       <BrandContainer>
         <LandingSectionHeader
@@ -37,7 +27,7 @@ export default function HomeCategoryShowcase({ categories }: { categories: HomeC
               <Link
                 key={category.id}
                 href={`/san-pham?category=${category.slug}`}
-                className="group flex min-h-[250px] flex-col rounded-[22px] border-[1.5px] border-[#f0e0d6] bg-white p-5 shadow-card transition duration-200 hover:-translate-y-1 hover:shadow-hover sm:p-6"
+                className="group flex min-h-[250px] flex-col rounded-[22px] border-[1.5px] border-warm-border bg-white p-5 shadow-card transition duration-200 hover:-translate-y-1 hover:shadow-hover sm:p-6"
               >
                 <div
                   className={`mb-6 grid aspect-square w-full place-items-center overflow-hidden rounded-[16px] ${
@@ -60,7 +50,7 @@ export default function HomeCategoryShowcase({ categories }: { categories: HomeC
             ))}
           </div>
         ) : (
-          <div className="rounded-[22px] border-[1.5px] border-[#f0e0d6] bg-white p-8 text-center shadow-card">
+          <div className="rounded-[22px] border-[1.5px] border-warm-border bg-white p-8 text-center shadow-card">
             <p className="text-sm text-neutral-500">Các danh mục đang được cập nhật.</p>
           </div>
         )}
