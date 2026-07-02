@@ -1,4 +1,5 @@
 'use client'
+
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, Search, ShoppingBag, User } from 'lucide-react'
@@ -19,19 +20,26 @@ export default function MobileBottomNav() {
   ]
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-secondary/85 backdrop-blur-md border-t border-[#f0e0d6] z-50 px-6 py-3 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-      <div className="flex justify-between items-center">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-warm-border bg-secondary/88 px-6 py-3 shadow-[0_-4px_20px_rgba(91,48,35,0.07)] backdrop-blur-md md:hidden">
+      <div className="flex items-center justify-between">
         {navItems.map((item, index) => {
           const isActive = pathname === item.href
           const Icon = item.icon
-          
+
           if (item.onClick) {
             return (
-              <button key={index} onClick={(e) => { e.preventDefault(); item.onClick(); }} className="flex flex-col items-center gap-1 relative group">
-                <div className={`p-2 rounded-xl transition-all duration-300 ${isActive ? 'bg-primary-light text-primary scale-110' : 'text-neutral-500 group-hover:bg-neutral-50 group-hover:text-primary'}`}>
+              <button
+                key={index}
+                onClick={(event) => {
+                  event.preventDefault()
+                  item.onClick()
+                }}
+                className="group relative flex flex-col items-center gap-1"
+              >
+                <div className={`rounded-xl p-2 transition-all duration-300 ${isActive ? 'scale-110 bg-primary-light text-primary' : 'text-neutral-500 group-hover:bg-white group-hover:text-primary'}`}>
                   <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
                   {item.badge !== undefined && item.badge > 0 && (
-                    <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-white text-[10px] font-bold flex items-center justify-center rounded-full shadow-sm animate-pulse-glow">
+                    <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white shadow-sm">
                       {item.badge}
                     </span>
                   )}
@@ -42,8 +50,8 @@ export default function MobileBottomNav() {
           }
 
           return (
-            <Link key={index} href={item.href} className="flex flex-col items-center gap-1 group">
-              <div className={`p-2 rounded-xl transition-all duration-300 ${isActive ? 'bg-primary-light text-primary scale-110' : 'text-neutral-500 group-hover:bg-neutral-50 group-hover:text-primary'}`}>
+            <Link key={index} href={item.href} className="group flex flex-col items-center gap-1">
+              <div className={`rounded-xl p-2 transition-all duration-300 ${isActive ? 'scale-110 bg-primary-light text-primary' : 'text-neutral-500 group-hover:bg-white group-hover:text-primary'}`}>
                 <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
               </div>
               <span className={`text-[10px] font-bold transition-colors ${isActive ? 'text-primary' : 'text-neutral-500 group-hover:text-primary'}`}>{item.name}</span>

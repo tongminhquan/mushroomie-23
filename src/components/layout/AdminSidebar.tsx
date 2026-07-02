@@ -1,9 +1,11 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useState } from 'react'
+import type { LucideIcon } from 'lucide-react'
 import {
   Activity,
   ChevronRight,
@@ -24,11 +26,23 @@ import {
   Users,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import Image from 'next/image'
 
-const navGroups = [
+interface AdminNavItem {
+  href: string
+  icon: LucideIcon
+  label: string
+  exact?: boolean
+  superAdminOnly?: boolean
+}
+
+interface AdminNavGroup {
+  label: string
+  items: AdminNavItem[]
+}
+
+const navGroups: AdminNavGroup[] = [
   {
-    label: 'TỔNG QUAN',
+    label: 'Tổng quan',
     items: [
       { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
       { href: '/admin/don-hang', icon: ShoppingCart, label: 'Đơn hàng' },
@@ -36,24 +50,24 @@ const navGroups = [
     ],
   },
   {
-    label: 'CỬA HÀNG',
+    label: 'Cửa hàng',
     items: [
       { href: '/admin/san-pham', icon: Package, label: 'Sản phẩm' },
       { href: '/admin/banner', icon: ImageIcon, label: 'Banner' },
       { href: '/admin/voucher', icon: TicketPercent, label: 'Voucher' },
       { href: '/admin/voucher-history', icon: Activity, label: 'Lịch sử voucher' },
-      { href: '/admin/thanh-toan/webhook-logs', icon: Activity, label: 'Webhook Logs' },
+      { href: '/admin/thanh-toan/webhook-logs', icon: Activity, label: 'Webhook logs' },
     ],
   },
   {
-    label: 'NỘI DUNG & HỆ THỐNG',
+    label: 'Nội dung & hệ thống',
     items: [
       { href: '/admin/bai-viet', icon: FileText, label: 'Bài viết' },
-      { href: '/admin/thu-vien', icon: FolderOpen, label: 'Media' },
+      { href: '/admin/thu-vien', icon: FolderOpen, label: 'Thư viện' },
       { href: '/admin/danh-gia', icon: Star, label: 'Đánh giá' },
       { href: '/admin/lien-he', icon: MessageSquare, label: 'Liên hệ' },
       { href: '/admin/tai-khoan', icon: Users, label: 'Người dùng', superAdminOnly: true },
-      { href: '/admin/nhat-ky', icon: ClipboardList, label: 'Nhật ký HĐ', superAdminOnly: true },
+      { href: '/admin/nhat-ky', icon: ClipboardList, label: 'Nhật ký hoạt động', superAdminOnly: true },
       { href: '/admin/cai-dat', icon: Settings, label: 'Cài đặt' },
     ],
   },
@@ -66,22 +80,23 @@ export default function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
 
-  const isActive = (href: string, exact?: boolean) => exact ? pathname === href : pathname.startsWith(href)
+  const isActive = (href: string, exact?: boolean) =>
+    exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`)
 
-  const filteredGroups = navGroups.map((group) => ({
-    ...group,
-    items: group.items.filter((item) => {
-      if ((item as any).superAdminOnly && role !== 'super_admin') return false
-      return true
-    }),
-  })).filter((group) => group.items.length > 0)
+  const filteredGroups = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => !item.superAdminOnly || role === 'super_admin'),
+    }))
+    .filter((group) => group.items.length > 0)
 
   return (
     <>
       <button
-        className="fixed left-4 top-3 z-40 rounded-xl border-[1.5px] border-[#f0e0d6] bg-white p-2 text-neutral-900 shadow-card md:hidden"
+        className="fixed left-4 top-3 z-40 rounded-xl border border-warm-border bg-white p-2 text-neutral-900 shadow-card md:hidden"
         onClick={() => setIsOpen(true)}
         aria-label="Mở menu admin"
+        type="button"
       >
         <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -97,58 +112,77 @@ export default function AdminSidebar() {
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex h-screen flex-shrink-0 transform flex-col overflow-hidden border-r-[1.5px] border-[#f0e0d6] bg-white shadow-card transition-all duration-300 ease-in-out md:relative md:translate-x-0 md:shadow-none',
+          'fixed inset-y-0 left-0 z-50 flex h-screen flex-shrink-0 transform flex-col overflow-hidden border-r border-warm-border bg-white shadow-card transition-all duration-300 ease-in-out md:relative md:translate-x-0 md:shadow-none',
           isOpen ? 'translate-x-0' : '-translate-x-full',
           isCollapsed ? 'w-20' : 'w-64',
         )}
       >
-        <div className={cn('flex h-[77px] flex-shrink-0 items-center border-b-[1.5px] border-[#f0e0d6]', isCollapsed ? 'justify-center' : 'justify-between px-5')}>
+        <div
+          className={cn(
+            'flex h-[77px] flex-shrink-0 items-center border-b border-warm-border',
+            isCollapsed ? 'justify-center' : 'justify-between px-5',
+          )}
+        >
           <Link href="/admin" className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-secondary">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-[16px] bg-secondary ring-1 ring-warm-border">
               <Image src="/logo.webp" alt="Mushroomie" width={40} height={40} className="h-9 w-9 object-contain" />
             </div>
             {!isCollapsed && (
               <div className="flex min-w-0 flex-col leading-tight">
                 <span className="truncate font-heading text-[15px] text-primary">Mushroomie</span>
-                <span className="truncate text-[10px] font-extrabold uppercase tracking-[0.12em] text-neutral-400">Quản trị</span>
+                <span className="truncate text-[10px] font-extrabold uppercase tracking-[0.12em] text-neutral-400">
+                  Quản trị
+                </span>
               </div>
             )}
           </Link>
+
           {!isCollapsed && (
             <button
-              className="hidden rounded-lg p-2 text-neutral-400 transition-colors hover:bg-secondary hover:text-primary md:flex"
+              className="hidden rounded-lg p-2 text-neutral-400 transition-colors hover:bg-admin-bg hover:text-primary md:flex"
               onClick={() => setIsCollapsed(true)}
               aria-label="Thu gọn menu"
+              type="button"
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
           )}
-          <button className="mr-4 rounded-lg p-1 text-neutral-400 transition-colors hover:text-primary md:hidden" onClick={() => setIsOpen(false)} aria-label="Đóng menu admin">
+
+          <button
+            className="mr-4 rounded-lg p-1 text-neutral-400 transition-colors hover:text-primary md:hidden"
+            onClick={() => setIsOpen(false)}
+            aria-label="Đóng menu admin"
+            type="button"
+          >
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <nav className="no-scrollbar flex-1 overflow-y-auto overflow-x-hidden p-3">
+        <nav className="no-scrollbar flex-1 overflow-y-auto overflow-x-hidden bg-admin-bg p-3">
           {isCollapsed && (
             <button
               onClick={() => setIsCollapsed(false)}
               title="Mở rộng menu"
               aria-label="Mở rộng menu"
-              className="hidden w-full items-center justify-center rounded-xl px-3 py-3 text-neutral-400 transition-all hover:bg-secondary hover:text-primary md:flex"
+              className="hidden w-full items-center justify-center rounded-[16px] px-3 py-3 text-neutral-400 transition-all hover:bg-white hover:text-primary md:flex"
+              type="button"
             >
               <ChevronRight size={20} className="flex-shrink-0" />
             </button>
           )}
+
           {filteredGroups.map((group) => (
             <div key={group.label} className="mb-4">
               {!isCollapsed && (
-                <p className="mb-1 px-4 text-[10px] font-extrabold uppercase tracking-[0.1em] text-neutral-400">{group.label}</p>
+                <p className="mb-1 px-4 text-[10px] font-extrabold uppercase tracking-[0.1em] text-neutral-400">
+                  {group.label}
+                </p>
               )}
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {group.items.map((item) => (
                   <Link
                     key={item.href}
@@ -156,17 +190,29 @@ export default function AdminSidebar() {
                     onClick={() => setIsOpen(false)}
                     title={item.label}
                     className={cn(
-                      'group flex items-center gap-3 rounded-xl py-2.5 transition-all',
+                      'group flex items-center gap-3 rounded-[16px] py-3 transition-all',
                       isCollapsed ? 'justify-center px-3' : 'px-4',
-                      isActive(item.href, (item as { exact?: boolean }).exact)
-                        ? 'bg-primary text-white shadow-card'
-                        : 'text-neutral-600 hover:bg-secondary hover:text-primary',
+                      isActive(item.href, item.exact)
+                        ? 'bg-primary text-white shadow-[0_10px_24px_rgba(228,29,29,0.18)]'
+                        : 'text-neutral-600 hover:bg-white hover:text-primary',
                     )}
                   >
-                    <item.icon size={isCollapsed ? 20 : 17} className="flex-shrink-0 transition-all duration-300" />
-                    <span className={cn('whitespace-nowrap text-sm font-medium transition-all duration-300', isCollapsed ? 'w-0 overflow-hidden opacity-0' : 'flex-1 opacity-100')}>
+                    <item.icon size={isCollapsed ? 22 : 18} className="flex-shrink-0 transition-all duration-300" />
+                    <span
+                      className={cn(
+                        'whitespace-nowrap text-sm font-medium transition-all duration-300',
+                        isCollapsed ? 'w-0 overflow-hidden opacity-0' : 'flex-1 opacity-100',
+                      )}
+                    >
                       {item.label}
                     </span>
+                    <ChevronRight
+                      size={14}
+                      className={cn(
+                        'flex-shrink-0 transition-all duration-300',
+                        isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-0 group-hover:opacity-100',
+                      )}
+                    />
                   </Link>
                 ))}
               </div>
@@ -174,15 +220,27 @@ export default function AdminSidebar() {
           ))}
         </nav>
 
-        <div className="space-y-1 border-t-[1.5px] border-[#f0e0d6] p-3">
-          <Link href="/" target="_blank" title="Xem website" className={cn('flex items-center gap-3 rounded-xl py-3 text-sm text-neutral-500 transition-all hover:bg-secondary hover:text-primary', isCollapsed ? 'justify-center px-3' : 'px-4')}>
+        <div className="space-y-1 border-t border-warm-border bg-white p-3">
+          <Link
+            href="/"
+            target="_blank"
+            title="Xem website"
+            className={cn(
+              'flex items-center gap-3 rounded-[16px] py-3 text-sm text-neutral-500 transition-all hover:bg-admin-bg hover:text-primary',
+              isCollapsed ? 'justify-center px-3' : 'px-4',
+            )}
+          >
             <ExternalLink size={isCollapsed ? 22 : 18} className="flex-shrink-0" />
             {!isCollapsed && <span className="whitespace-nowrap">Xem website</span>}
           </Link>
           <button
             onClick={() => signOut({ callbackUrl: '/' })}
             title="Đăng xuất"
-            className={cn('flex w-full items-center gap-3 rounded-xl py-3 text-sm text-neutral-500 transition-all hover:bg-[#ffece6] hover:text-primary', isCollapsed ? 'justify-center px-3' : 'px-4')}
+            className={cn(
+              'flex w-full items-center gap-3 rounded-[16px] py-3 text-sm text-neutral-500 transition-all hover:bg-[#ffece6] hover:text-primary',
+              isCollapsed ? 'justify-center px-3' : 'px-4',
+            )}
+            type="button"
           >
             <LogOut size={isCollapsed ? 22 : 18} className="flex-shrink-0" />
             {!isCollapsed && <span className="whitespace-nowrap">Đăng xuất</span>}

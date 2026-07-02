@@ -14,7 +14,7 @@ const milestones = [
   { icon: PackageCheck, label: 'Gửi từng dấu ấn riêng đến khách hàng' },
 ]
 
-const storyChips = ['✋ Thủ công', '✨ Cá nhân hóa', '❤ Cảm xúc']
+const storyChips = ['Thủ công', 'Cá nhân hóa', 'Cảm xúc']
 
 export default function HomeBrandStory({ products }: { products: HomeProduct[] }) {
   const storyImage = getPublicImageUrl(
@@ -26,12 +26,11 @@ export default function HomeBrandStory({ products }: { products: HomeProduct[] }
     <section className="bg-secondary py-16 md:py-24">
       <BrandContainer>
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
-          <div className="relative order-2 lg:order-1">
+          <div className="order-2 relative lg:order-1">
             <div
-              className="relative aspect-[5/4] overflow-hidden rounded-[24px] border-[1.5px] border-[#f0e0d6] shadow-card"
+              className="relative aspect-[5/4] overflow-hidden rounded-[24px] border-[1.5px] border-warm-border shadow-card"
               style={{
-                background:
-                  'repeating-linear-gradient(45deg, #fbf0e9, #fbf0e9 13px, #fff 13px, #fff 26px)',
+                background: 'repeating-linear-gradient(45deg, #fbf0e9, #fbf0e9 13px, #fff 13px, #fff 26px)',
               }}
             >
               <SafeImage
@@ -53,7 +52,7 @@ export default function HomeBrandStory({ products }: { products: HomeProduct[] }
               {milestones.map(({ icon: Icon, label }, index) => (
                 <li
                   key={label}
-                  className="flex min-h-24 items-start gap-3 rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-4 shadow-card hover-lift"
+                  className="flex min-h-24 items-start gap-3 rounded-[18px] border-[1.5px] border-warm-border bg-white p-4 shadow-card hover-lift"
                 >
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-pink text-primary">
                     <Icon size={18} />
@@ -88,7 +87,7 @@ export default function HomeBrandStory({ products }: { products: HomeProduct[] }
               {storyChips.map((chip) => (
                 <li
                   key={chip}
-                  className="rounded-full border-[1.5px] border-[#f0e0d6] bg-white px-4 py-2 text-[13px] font-bold text-accent-kraft"
+                  className="rounded-full border-[1.5px] border-warm-border bg-white px-4 py-2 text-[13px] font-bold text-accent-kraft"
                 >
                   {chip}
                 </li>

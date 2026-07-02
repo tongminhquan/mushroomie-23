@@ -15,7 +15,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <SessionProvider session={session}>
       <ProfileCompletionGuard>
-        <div className="flex h-screen overflow-hidden bg-[#f7f7f6]">
+        <div className="flex h-screen overflow-hidden bg-admin-bg">
           <AdminSidebar />
           <main id="main-content" className="flex-1 overflow-auto pt-16 md:pt-0">
             {children}

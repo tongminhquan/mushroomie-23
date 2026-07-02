@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Gift, Sparkles } from 'lucide-react'
 import BrandContainer from '@/components/ui/BrandContainer'
 import ProductCard from '@/components/product/ProductCard'
 import LandingSectionHeader from './LandingSectionHeader'
@@ -13,20 +13,8 @@ export default function HomeFeaturedProducts({ products }: { products: HomeProdu
       className="relative overflow-hidden bg-secondary py-16 md:py-24"
       style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
     >
-      {/* Decorative floats */}
-      <span
-        aria-hidden
-        className="animate-float-soft pointer-events-none absolute left-[6%] top-24 hidden text-3xl opacity-80 md:block"
-      >
-        🍓
-      </span>
-      <span
-        aria-hidden
-        className="animate-float-soft pointer-events-none absolute right-[7%] top-32 hidden text-3xl opacity-80 md:block"
-        style={{ animationDelay: '1.2s' }}
-      >
-        🔑
-      </span>
+      <Sparkles aria-hidden className="pointer-events-none absolute left-[6%] top-24 hidden h-7 w-7 text-primary/70 md:block" />
+      <Gift aria-hidden className="pointer-events-none absolute right-[7%] top-32 hidden h-7 w-7 text-kraft/70 md:block" />
 
       <BrandContainer className="relative">
         <LandingSectionHeader

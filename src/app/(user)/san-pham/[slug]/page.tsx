@@ -1,83 +1,30 @@
-import { prisma } from '@/lib/prisma'
-import { notFound } from 'next/navigation'
-import Breadcrumb from '@/components/layout/Breadcrumb'
-import ProductCard from '@/components/product/ProductCard'
-import AddToCartButton from '@/components/product/AddToCartButton'
-import ProductGallery from '@/components/product/ProductGallery'
-import ReviewForm from '@/components/product/ReviewForm'
-import { toAbsoluteUrl } from '@/lib/url'
-import { getPublicImageUrl } from '@/lib/utils'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { cache } from 'react'
+import { CheckCircle2, MessageCircleHeart, PackageCheck, Star, Truck } from 'lucide-react'
+import AddToCartButton from '@/components/product/AddToCartButton'
+import Breadcrumb from '@/components/layout/Breadcrumb'
 import BrandContainer from '@/components/ui/BrandContainer'
 import PriceText from '@/components/ui/PriceText'
+import ProductCard from '@/components/product/ProductCard'
+import ProductGallery from '@/components/product/ProductGallery'
+import ReviewForm from '@/components/product/ReviewForm'
 import SectionHeader from '@/components/ui/SectionHeader'
-import { sanitizeHtml } from '@/lib/sanitize'
+import { getPublicImageUrl } from '@/lib/utils'
+import { prisma } from '@/lib/prisma'
 import { safeJsonLd } from '@/lib/security'
+import { sanitizeHtml } from '@/lib/sanitize'
+import { toAbsoluteUrl } from '@/lib/url'
 
-export async function generateStaticParams() {
-  try {
-    const products = await prisma.product.findMany({
-      where: { status: 'active' },
-      select: { slug: true },
-      take: 200,
-    })
-    return products.map((p) => ({ slug: p.slug }))
-  } catch {
-    return []
-  }
-}
+const SITE_NAME = 'Mushroomie Handmade'
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params
+const getProductBySlug = cache(async (slug: string) => {
   const decodedSlug = decodeURIComponent(slug)
-  const product = await prisma.product.findFirst({ 
-    where: { 
-      OR: [
-        { slug: decodedSlug },
-        { slug: slug }
-      ]
-    } 
-  })
-  if (!product) return { title: 'Sản phẩm không tồn tại' }
-  return {
-    title: `${product.name} | Mushroomie Handmade`,
-    description: product.short_description || `Mua ${product.name} handmade cá nhân hóa tại Mushroomie.`,
-    openGraph: {
-      title: `${product.name} | Mushroomie Handmade`,
-      description: product.short_description || `Mua ${product.name} handmade cá nhân hóa tại Mushroomie.`,
-      url: toAbsoluteUrl(`/san-pham/${product.slug}`),
-      siteName: 'Mushroomie Handmade',
-      images: product.featured_image ? [
-        {
-          url: getPublicImageUrl(product.featured_image),
-          width: 800,
-          height: 600,
-          alt: product.name,
-        }
-      ] : [{ url: getPublicImageUrl(null), width: 800, height: 600, alt: 'Mushroomie Default OG' }],
-      locale: 'vi_VN',
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `${product.name} | Mushroomie Handmade`,
-      description: product.short_description || `Mua ${product.name} handmade cá nhân hóa tại Mushroomie.`,
-      images: product.featured_image ? [getPublicImageUrl(product.featured_image)] : [getPublicImageUrl(null)],
-    }
-  }
-}
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const decodedSlug = decodeURIComponent(slug)
-  
-  const productRaw = await prisma.product.findFirst({
+  return prisma.product.findFirst({
     where: {
-      OR: [
-        { slug: decodedSlug },
-        { slug: slug }
-      ]
+      OR: [{ slug: decodedSlug }, { slug }],
     },
     include: {
       category: true,
@@ -86,41 +33,128 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       reviews: { where: { status: 'approved' }, take: 20, orderBy: { created_at: 'desc' } },
     },
   })
-  if (!productRaw) notFound()
+})
+
+export async function generateStaticParams() {
+  try {
+    const products = await prisma.product.findMany({
+      where: { status: 'active' },
+      select: { slug: true },
+      take: 200,
+    })
+
+    return products.map((product) => ({ slug: product.slug }))
+  } catch {
+    return []
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const product = await getProductBySlug(slug)
+
+  if (!product) {
+    return { title: 'Sản phẩm không tồn tại | Mushroomie' }
+  }
+
+  const description =
+    product.short_description || `Mua ${product.name} handmade cá nhân hóa tại Mushroomie.`
+  const imageUrl = getPublicImageUrl(product.featured_image, 'product')
+  const absoluteImageUrl = toAbsoluteUrl(imageUrl || getPublicImageUrl(null, 'product'))
+
+  return {
+    title: `${product.name} | ${SITE_NAME}`,
+    description,
+    openGraph: {
+      title: `${product.name} | ${SITE_NAME}`,
+      description,
+      url: toAbsoluteUrl(`/san-pham/${product.slug}`),
+      siteName: SITE_NAME,
+      images: [
+        {
+          url: absoluteImageUrl,
+          width: 800,
+          height: 1067,
+          alt: product.name,
+        },
+      ],
+      locale: 'vi_VN',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${product.name} | ${SITE_NAME}`,
+      description,
+      images: [absoluteImageUrl],
+    },
+  }
+}
+
+export default async function ProductDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
+  const productRaw = await getProductBySlug(slug)
+
+  if (!productRaw) {
+    notFound()
+  }
+
   const product = {
     ...productRaw,
     price: Number(productRaw.price),
-    sale_price: productRaw.sale_price ? Number(productRaw.sale_price) : null
+    sale_price: productRaw.sale_price ? Number(productRaw.sale_price) : null,
   }
 
-  const relatedProducts = await prisma.product.findMany({
-    where: { category_id: product.category_id, status: 'active', id: { not: product.id } },
-    include: { category: true, images: { orderBy: { sort_order: 'asc' }, take: 1 } },
-    take: 4,
-  }).then((products: any[]) => products.map((p: any) => ({
-    ...p,
-    price: Number(p.price),
-    sale_price: p.sale_price ? Number(p.sale_price) : null
-  }))).catch(() => [])
+  const relatedProducts = await prisma.product
+    .findMany({
+      where: { category_id: product.category_id, status: 'active', id: { not: product.id } },
+      include: { category: true, images: { orderBy: { sort_order: 'asc' }, take: 1 } },
+      take: 4,
+    })
+    .then((products: any[]) =>
+      products.map((item: any) => ({
+        ...item,
+        price: Number(item.price),
+        sale_price: item.sale_price ? Number(item.sale_price) : null,
+      })),
+    )
+    .catch(() => [])
 
-  const allImages = [
-    ...(product.featured_image ? [getPublicImageUrl(product.featured_image)] : []),
-    ...product.images.map((i: any) => getPublicImageUrl(i.image_url)),
-  ].filter(Boolean)
+  const allImages = Array.from(
+    new Set(
+      [product.featured_image, ...product.images.map((image: any) => image.image_url)]
+        .filter(Boolean)
+        .map((image) => getPublicImageUrl(image, 'product')),
+    ),
+  )
+  const galleryImages = allImages.length > 0 ? allImages : [getPublicImageUrl(null, 'product')]
 
   const price = Number(product.price)
   const salePrice = product.sale_price ? Number(product.sale_price) : null
   const displayPrice = salePrice || price
-  const isOnSale = !!salePrice && salePrice < price
+  const isOnSale = Boolean(salePrice && salePrice < price)
+  const reviewCount = product.reviews.length
+  const reviewAverage = reviewCount
+    ? Number(
+        (
+          product.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) /
+          reviewCount
+        ).toFixed(1),
+      )
+    : null
 
-  const defaultImage = `/logo.webp`
-
-  // Product Schema JSON-LD
   const productSchema = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
-    image: allImages,
+    image: galleryImages.map((image) => toAbsoluteUrl(image)),
     description: product.short_description || product.name,
     sku: product.slug,
     offers: {
@@ -128,145 +162,213 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       url: toAbsoluteUrl(`/san-pham/${product.slug}`),
       priceCurrency: 'VND',
       price: displayPrice,
-      availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      availability:
+        product.stock > 0
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
     },
-    ...(product.reviews.length > 0 && {
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: (product.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / product.reviews.length).toFixed(1),
-        reviewCount: product.reviews.length,
-      }
-    })
+    ...(reviewAverage
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: reviewAverage,
+            reviewCount,
+          },
+        }
+      : {}),
   }
 
   return (
     <div className="min-h-screen bg-secondary py-5 md:py-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(productSchema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(productSchema) }}
+      />
+
       <BrandContainer>
-        <Breadcrumb items={[
-          { label: 'Sản phẩm', href: '/san-pham' },
-          ...(product.category ? [{ label: product.category.name, href: `/san-pham?category=${product.category.slug}` }] : []),
-          { label: product.name },
-        ]} />
+        <Breadcrumb
+          items={[
+            { label: 'Sản phẩm', href: '/san-pham' },
+            ...(product.category
+              ? [{ label: product.category.name, href: `/san-pham?category=${product.category.slug}` }]
+              : []),
+            { label: product.name },
+          ]}
+        />
 
-        <div className="mt-5 grid items-stretch gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.95fr)] lg:gap-10">
-          {/* Gallery */}
-          <div className="h-full">
-            <ProductGallery
-              images={allImages.length > 0 ? allImages : [defaultImage]}
-              productName={product.name}
-              isCustomizable={product.is_customizable}
-              isOnSale={isOnSale}
-            />
-          </div>
+        <div className="mt-5 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.95fr)] lg:gap-10">
+          <ProductGallery
+            images={galleryImages}
+            productName={product.name}
+            isCustomizable={product.is_customizable}
+            isOnSale={isOnSale}
+          />
 
-          {/* Product info */}
-          <div className="flex h-full flex-col rounded-[24px] border-[1.5px] border-[#f0e0d6] bg-white p-6 shadow-card sm:p-8">
-            <div className="space-y-5">
+          <div className="flex h-full flex-col rounded-[28px] border border-warm-border bg-white p-6 shadow-card sm:p-8">
+            <div className="flex flex-wrap items-center gap-2">
               {product.category && (
-                <Link href={`/san-pham?category=${product.category.slug}`} className="brand-kicker">{product.category.name}</Link>
+                <Link
+                  href={`/san-pham?category=${product.category.slug}`}
+                  className="rounded-full bg-primary-light px-4 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-primary transition-colors hover:bg-primary hover:text-white"
+                >
+                  {product.category.name}
+                </Link>
               )}
-              <h1 className="text-balance font-heading text-3xl leading-[1.08] text-text md:text-5xl">{product.name}</h1>
-
-              <PriceText price={displayPrice} originalPrice={isOnSale ? price : null} className="[&_strong]:text-3xl" />
-
-              {product.short_description && (
-                <p className="max-w-xl text-sm leading-7 text-neutral-600 md:text-base">{product.short_description}</p>
+              <span
+                className={`rounded-full px-4 py-2 text-xs font-extrabold uppercase tracking-[0.08em] ${
+                  product.stock > 0
+                    ? 'bg-[#eef9f0] text-[#1f7a34]'
+                    : 'bg-[#fff0f0] text-primary'
+                }`}
+              >
+                {product.stock > 0 ? 'Sẵn sàng làm cho bạn' : 'Tạm hết hàng'}
+              </span>
+              {product.is_customizable && (
+                <span className="rounded-full bg-[#fff3dc] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#9a6400]">
+                  Có thể cá nhân hóa
+                </span>
               )}
             </div>
 
-            <div className="mt-8 space-y-3 rounded-2xl border-[1.5px] border-[#f0e0d6] bg-[#fffaf6] p-4 text-sm text-text">
-              <div className="flex items-center gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">✓</span>
-                <p><strong>Handmade 100%:</strong> Tỉ mỉ từng chi tiết</p>
+            <h1 className="mt-4 text-balance font-heading text-3xl leading-[1.08] text-text md:text-5xl">
+              {product.name}
+            </h1>
+
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <PriceText
+                price={displayPrice}
+                originalPrice={isOnSale ? price : null}
+                className="[&_strong]:text-3xl md:[&_strong]:text-4xl [&_span]:text-sm"
+              />
+
+              {reviewAverage && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-warm-border bg-white px-3 py-2 text-sm font-semibold text-neutral-600">
+                  <Star size={15} className="fill-[#ffe7a3] text-[#d4a100]" />
+                  {reviewAverage}/5
+                  <span className="text-neutral-400">({reviewCount} đánh giá)</span>
+                </span>
+              )}
+            </div>
+
+            {product.short_description && (
+              <p className="mt-4 max-w-xl text-sm leading-7 text-neutral-600 md:text-base">
+                {product.short_description}
+              </p>
+            )}
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-[22px] border border-warm-border bg-secondary px-4 py-4">
+                <CheckCircle2 size={18} className="text-primary" />
+                <p className="mt-3 text-sm font-semibold text-neutral-800">Làm thủ công tỉ mỉ</p>
+                <p className="mt-1 text-xs leading-5 text-neutral-500">
+                  Mỗi chi tiết được hoàn thiện thủ công theo đúng tinh thần Mushroomie.
+                </p>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">✓</span>
-                <p><strong>Custom theo yêu cầu:</strong> Nhắn tin để thiết kế riêng</p>
+              <div className="rounded-[22px] border border-warm-border bg-secondary px-4 py-4">
+                <MessageCircleHeart size={18} className="text-primary" />
+                <p className="mt-3 text-sm font-semibold text-neutral-800">Tùy chỉnh theo ý bạn</p>
+                <p className="mt-1 text-xs leading-5 text-neutral-500">
+                  Dễ thêm tên, charm hoặc lời nhắn riêng khi sản phẩm hỗ trợ cá nhân hóa.
+                </p>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">✓</span>
-                <p><strong>Giao hàng toàn quốc:</strong> Đóng gói cẩn thận làm quà tặng</p>
+              <div className="rounded-[22px] border border-warm-border bg-secondary px-4 py-4">
+                <Truck size={18} className="text-primary" />
+                <p className="mt-3 text-sm font-semibold text-neutral-800">Đóng gói sẵn để tặng</p>
+                <p className="mt-1 text-xs leading-5 text-neutral-500">
+                  Phù hợp cho quà sinh nhật, dịp đặc biệt hoặc một món quà nhỏ cho chính mình.
+                </p>
               </div>
             </div>
 
-            <div className="mt-6 pt-6 border-t border-[#f0e0d6]">
+            <div className="mt-8 rounded-[24px] border border-warm-border bg-[#fffaf6] p-5">
               <AddToCartButton product={product} />
             </div>
 
-            <div className="mt-4 flex items-start gap-3 rounded-[16px] border-[1.5px] border-dashed border-[#d9b89e] bg-secondary p-4">
-              <span aria-hidden className="text-xl">🤍</span>
+            <div className="mt-4 flex items-start gap-3 rounded-[20px] border border-dashed border-[#d9b89e] bg-secondary p-4">
+              <PackageCheck size={20} className="mt-0.5 shrink-0 text-primary" />
               <p className="m-0 text-[13px] leading-relaxed text-neutral-600">
-                Sản phẩm được làm thủ công nên mỗi mẫu có thể hơi khác nhau — đó là <strong className="text-accent-kraft">dấu ấn riêng</strong> của bạn.
+                Sản phẩm handmade có thể khác nhau một chút giữa từng lần hoàn thiện. Điều đó
+                giúp mỗi món quà giữ được cảm giác riêng và tự nhiên hơn.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Description and Reviews */}
-        <div className="mt-8 space-y-6">
+        <div className={`mt-8 grid gap-8 ${product.description ? 'lg:grid-cols-[minmax(0,1fr)_360px]' : ''}`}>
           {product.description && (
-            <section className="rounded-[24px] border-[1.5px] border-[#f0e0d6] bg-white p-6 shadow-card sm:p-8">
-              <h2 className="mb-6 font-heading text-2xl text-text">Mô tả chi tiết</h2>
-              <div className="prose prose-sm max-w-none text-neutral-600 prose-headings:font-heading prose-headings:text-text prose-a:text-primary" dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description) }} />
+            <section className="rounded-[28px] border border-warm-border bg-white p-6 shadow-card sm:p-8">
+              <SectionHeader
+                eyebrow="Chi tiết sản phẩm"
+                title="Mô tả đầy đủ"
+                description="Thông tin chất liệu, cảm hứng thiết kế và gợi ý sử dụng cho sản phẩm bạn đang xem."
+                className="mb-6"
+              />
+              <div
+                className="prose prose-sm max-w-none text-neutral-700 prose-headings:font-heading prose-headings:text-text prose-a:text-primary prose-img:rounded-[22px]"
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description) }}
+              />
             </section>
           )}
 
-          <section className="rounded-[24px] border-[1.5px] border-[#f0e0d6] bg-white p-6 shadow-card sm:p-8">
-            {product.reviews.length > 0 ? (
+          <section className="rounded-[28px] border border-warm-border bg-white p-6 shadow-card sm:p-8">
+            <h2 className="font-heading text-2xl text-text">Đánh giá</h2>
+
+            {reviewCount > 0 ? (
               <>
-                <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <h2 className="font-heading text-2xl text-text">Đánh giá</h2>
-                    <div className="mt-1 flex items-center gap-2">
-                      <span className="text-3xl font-black text-text">
-                        {(product.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / product.reviews.length).toFixed(1)}
-                      </span>
-                      <div>
-                        <div className="flex text-yellow">{'★'.repeat(Math.round(product.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / product.reviews.length))}</div>
-                        <p className="text-xs text-neutral-500">{product.reviews.length} đánh giá</p>
-                      </div>
-                    </div>
-                  </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <Star size={18} className="fill-[#ffe7a3] text-[#d4a100]" />
+                  <span className="text-lg font-bold text-neutral-900">{reviewAverage}</span>
+                  <span className="text-sm text-neutral-500">trên 5 điểm từ {reviewCount} đánh giá</span>
                 </div>
-                <div className="space-y-5">
+
+                <div className="mt-6 space-y-5">
                   {product.reviews.map((review: any) => (
-                    <div key={review.id} className="border-b border-neutral-100 pb-5 last:border-0">
-                      <div className="mb-1.5 flex items-center gap-2">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                          {review.name.charAt(0).toUpperCase()}
-                        </span>
-                        <div>
-                          <span className="text-sm font-semibold text-text">{review.name}</span>
-                          <div className="flex text-xs text-yellow">{'★'.repeat(review.rating)}</div>
+                    <div
+                      key={review.id}
+                      className="border-b border-warm-border pb-5 last:border-0 last:pb-0"
+                    >
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        <span className="text-sm font-semibold text-text">{review.name}</span>
+                        <div className="flex items-center gap-1 text-[#d4a100]">
+                          {Array.from({ length: 5 }, (_, index) => (
+                            <Star
+                              key={index}
+                              size={14}
+                              className={index < review.rating ? 'fill-[#ffe7a3]' : 'text-neutral-300'}
+                            />
+                          ))}
                         </div>
                       </div>
-                      <p className="pl-10 text-sm leading-6 text-neutral-600">{review.content}</p>
+                      <p className="text-sm leading-6 text-neutral-600">{review.content}</p>
                     </div>
                   ))}
                 </div>
-                <div className="mt-8 border-t border-neutral-100 pt-6">
-                  <h3 className="mb-4 font-semibold text-text">Viết đánh giá của bạn</h3>
-                  <ReviewForm productId={product.id} productName={product.name} />
-                </div>
               </>
             ) : (
-              <div>
-                <h2 className="mb-4 font-heading text-2xl text-text">Đánh giá</h2>
-                <p className="mb-5 text-sm text-neutral-500">Chưa có đánh giá nào. Hãy là người đầu tiên!</p>
-                <ReviewForm productId={product.id} productName={product.name} />
-              </div>
+              <p className="mt-3 text-sm leading-6 text-neutral-500">
+                Chưa có đánh giá nào. Hãy là người đầu tiên chia sẻ cảm nhận về sản phẩm này.
+              </p>
             )}
+
+            <div className="mt-8 border-t border-warm-border pt-6">
+              <h3 className="mb-4 text-sm font-semibold text-text">Viết đánh giá của bạn</h3>
+              <ReviewForm productId={product.id} productName={product.name} />
+            </div>
           </section>
         </div>
 
-        {/* Related */}
         {relatedProducts.length > 0 && (
-          <section className="mt-16 border-t border-[#f0e0d6] pt-12">
-            <SectionHeader eyebrow="Có thể bạn sẽ thích" title="Sản phẩm liên quan" />
+          <section className="mt-16 border-t border-warm-border pt-12">
+            <SectionHeader
+              eyebrow="Bạn có thể thích"
+              title="Sản phẩm liên quan"
+              description="Những thiết kế cùng tinh thần hoặc cùng danh mục để bạn chọn thêm."
+            />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              {relatedProducts.map((p: any) => <ProductCard key={p.id} product={p} />)}
+              {relatedProducts.map((item: any) => (
+                <ProductCard key={item.id} product={item} />
+              ))}
             </div>
           </section>
         )}
