@@ -41,7 +41,7 @@ export const GAME_DEFINITIONS: Record<GameKey, GameDefinition> = {
       'Space: Rơi liền',
       'P: Tạm dừng',
       'M: Bật/tắt âm thanh',
-      'R: Chơi lại',
+      'R: Kết thúc lượt và lưu điểm',
     ],
     voucherTiers: [
       { score: 500, percent: 5 },

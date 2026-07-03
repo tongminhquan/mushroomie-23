@@ -471,6 +471,7 @@ export default function TetrisGame({ onGameOver, soundEnabled = true, onSoundTog
       // Update grid after animation finishes
       setTimeout(() => {
         const gNow = gameRef.current
+        if (gNow.over) return
         // Remove cleared rows (sorted descending so splice doesn't offset)
         const sortedRows = [...clearedRows].sort((a, b) => b - a)
         sortedRows.forEach(y => {
@@ -546,8 +547,11 @@ export default function TetrisGame({ onGameOver, soundEnabled = true, onSoundTog
 
   const gameOver = useCallback(() => {
     const g = gameRef.current
+    if (g.over) return
     g.over = true
+    g.paused = false
     setIsOver(true)
+    setIsPaused(false)
     const audio = getAudio()
     if (audio) sfxGameOver(audio)
     const canvas = canvasRef.current
@@ -566,7 +570,7 @@ export default function TetrisGame({ onGameOver, soundEnabled = true, onSoundTog
         ctx.fillStyle = '#00e5ff'; ctx.fillText(`Điểm: ${g.score}`, cx, cy + 15)
         ctx.shadowBlur = 0; ctx.font = "500 14px 'Montserrat', system-ui, sans-serif"
         ctx.fillStyle = 'rgba(255,255,255,0.4)'
-        ctx.fillText('Nhấn R hoặc nút bên dưới để chơi lại', cx, cy + 50)
+        ctx.fillText('Lượt chơi đã kết thúc', cx, cy + 50)
         ctx.restore()
       }
     }
@@ -634,7 +638,7 @@ export default function TetrisGame({ onGameOver, soundEnabled = true, onSoundTog
     const handleKey = (e: KeyboardEvent) => {
       if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault()
       const g = gameRef.current
-      if (g.over && e.code === 'KeyR') { start(); return }
+      if (e.code === 'KeyR') { gameOver(); return }
       if (e.code === 'KeyP') { togglePause(); return }
       if (e.code === 'KeyM') { toggleMute(); return }
       if (g.over || g.paused) return
@@ -644,13 +648,12 @@ export default function TetrisGame({ onGameOver, soundEnabled = true, onSoundTog
         case 'ArrowUp':    rotate();    break
         case 'ArrowDown':  softDrop();  break
         case 'Space':      hardDrop();  break
-        case 'KeyR':       start();     break
       }
     }
     window.addEventListener('keydown', handleKey)
     containerRef.current?.focus()
     return () => window.removeEventListener('keydown', handleKey)
-  }, [move, rotate, softDrop, hardDrop, start, togglePause])
+  }, [move, rotate, softDrop, hardDrop, gameOver, togglePause])
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -737,7 +740,7 @@ export default function TetrisGame({ onGameOver, soundEnabled = true, onSoundTog
           <div className="tetris-stat-card desktop-only">
             <div className="tetris-stat-label">ĐIỀU KHIỂN</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {[['← →','Di chuyển'],['↑','Xoay thủ công'],['↓','Rơi nhanh'],['Space','Rơi liền'],['P','Tạm dừng'],['M','Tắt âm'],['R','Chơi lại']].map(([key, desc]) => (
+              {[['← →','Di chuyển'],['↑','Xoay thủ công'],['↓','Rơi nhanh'],['Space','Rơi liền'],['P','Tạm dừng'],['M','Tắt âm'],['R','Kết thúc lượt']].map(([key, desc]) => (
                 <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span className="tetris-key">{key}</span>
                   <span className="tetris-key-desc">{desc}</span>
@@ -748,7 +751,16 @@ export default function TetrisGame({ onGameOver, soundEnabled = true, onSoundTog
 
           {/* Quick actions - mobile */}
           <div className="tetris-quick-actions mobile-only">
-            <button onClick={start} className="tetris-action-btn tetris-action-restart">🔄</button>
+            <button
+              type="button"
+              onClick={gameOver}
+              disabled={isOver}
+              className="tetris-action-btn tetris-action-end"
+              aria-label="Kết thúc lượt chơi"
+              title="Kết thúc lượt"
+            >
+              Kết thúc
+            </button>
             <button onClick={togglePause} className="tetris-action-btn tetris-action-pause">{isPaused ? '▶' : '⏸'}</button>
             <button onClick={toggleMute} className="tetris-action-btn tetris-action-mute" style={{ background: isMuted ? 'rgba(255,77,106,0.15)' : 'rgba(57,231,95,0.1)', border: `1px solid ${isMuted ? 'rgba(255,77,106,0.25)' : 'rgba(57,231,95,0.2)'}`, color: isMuted ? '#ff4d6a' : '#39e75f' }}>{isMuted ? '🔇' : '🔊'}</button>
           </div>
@@ -839,7 +851,8 @@ export default function TetrisGame({ onGameOver, soundEnabled = true, onSoundTog
           flex: 1; padding: 6px; border-radius: 8px; font-size: 14px;
           font-weight: 700; cursor: pointer; font-family: var(--font-body), Montserrat, sans-serif;
         }
-        .tetris-action-restart { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2); color: #00e5ff; }
+        .tetris-action-btn:disabled { cursor: not-allowed; opacity: 0.48; }
+        .tetris-action-end { background: rgba(255,77,106,0.12); border: 1px solid rgba(255,77,106,0.24); color: #ff8a9d; }
         .tetris-action-pause   { background: rgba(255,225,77,0.1); border: 1px solid rgba(255,225,77,0.2); color: #ffe14d; }
         .tetris-touch-controls { display: flex; flex-direction: column; gap: 6px; align-items: center; }
         .tetris-touch-row { display: flex; gap: 8px; }
