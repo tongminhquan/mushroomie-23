@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { Post } from '@prisma/client'
+import type { Post, Prisma } from '@prisma/client'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
@@ -131,7 +131,7 @@ export default async function PostDetailPage({
     notFound()
   }
 
-  const relatedWhere = post.category_id
+  const relatedWhere: Prisma.PostWhereInput = post.category_id
     ? { category_id: post.category_id, status: 'published', id: { not: post.id } }
     : { status: 'published', id: { not: post.id } }
 
@@ -274,7 +274,7 @@ export default async function PostDetailPage({
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {relatedPosts.map((relatedPost: any) => (
+            {relatedPosts.map((relatedPost) => (
               <PostCard key={relatedPost.id} post={relatedPost} />
             ))}
           </div>

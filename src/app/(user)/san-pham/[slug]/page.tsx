@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import type { Prisma } from '@prisma/client'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
@@ -18,6 +19,15 @@ import { sanitizeHtml } from '@/lib/sanitize'
 import { toAbsoluteUrl } from '@/lib/url'
 
 const SITE_NAME = 'Mushroomie Handmade'
+
+type RelatedProductRecord = Prisma.ProductGetPayload<{
+  include: { category: true; images: true }
+}>
+
+type RelatedProductItem = Omit<RelatedProductRecord, 'price' | 'sale_price'> & {
+  price: number
+  sale_price: number | null
+}
 
 const getProductBySlug = cache(async (slug: string) => {
   const decodedSlug = decodeURIComponent(slug)
@@ -118,8 +128,8 @@ export default async function ProductDetailPage({
       include: { category: true, images: { orderBy: { sort_order: 'asc' }, take: 1 } },
       take: 4,
     })
-    .then((products: any[]) =>
-      products.map((item: any) => ({
+    .then((products): RelatedProductItem[] =>
+      products.map((item) => ({
         ...item,
         price: Number(item.price),
         sale_price: item.sale_price ? Number(item.sale_price) : null,
@@ -129,7 +139,7 @@ export default async function ProductDetailPage({
 
   const allImages = Array.from(
     new Set(
-      [product.featured_image, ...product.images.map((image: any) => image.image_url)]
+      [product.featured_image, ...product.images.map((image) => image.image_url)]
         .filter(Boolean)
         .map((image) => getPublicImageUrl(image, 'product')),
     ),
@@ -144,7 +154,7 @@ export default async function ProductDetailPage({
   const reviewAverage = reviewCount
     ? Number(
         (
-          product.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) /
+          product.reviews.reduce((sum, review) => sum + review.rating, 0) /
           reviewCount
         ).toFixed(1),
       )
@@ -323,7 +333,7 @@ export default async function ProductDetailPage({
                 </div>
 
                 <div className="mt-6 space-y-5">
-                  {product.reviews.map((review: any) => (
+                  {product.reviews.map((review) => (
                     <div
                       key={review.id}
                       className="border-b border-warm-border pb-5 last:border-0 last:pb-0"
@@ -366,7 +376,7 @@ export default async function ProductDetailPage({
               description="Những thiết kế cùng tinh thần hoặc cùng danh mục để bạn chọn thêm."
             />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              {relatedProducts.map((item: any) => (
+              {relatedProducts.map((item) => (
                 <ProductCard key={item.id} product={item} />
               ))}
             </div>
