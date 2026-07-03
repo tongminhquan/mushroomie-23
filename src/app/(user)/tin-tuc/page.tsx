@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import PostCard from '@/components/blog/PostCard'
 import Breadcrumb from '@/components/layout/Breadcrumb'
@@ -33,7 +34,7 @@ export default async function BlogPage({
   const pageValue = readParam(sp.page) || '1'
   const page = Math.max(1, parseInt(pageValue, 10) || 1)
   const limit = 9
-  const where: any = { status: 'published' }
+  const where: Prisma.PostWhereInput = { status: 'published' }
 
   if (categorySlug) where.category = { slug: categorySlug }
 
@@ -52,7 +53,7 @@ export default async function BlogPage({
   ])
 
   const totalPages = Math.ceil(total / limit)
-  const activeCategory = categories.find((category: any) => category.slug === categorySlug)
+  const activeCategory = categories.find((category) => category.slug === categorySlug)
   const title = activeCategory?.name || 'Góc cảm hứng Mushroomie'
   const description = activeCategory
     ? `Những bài viết mới nhất trong chủ đề ${activeCategory.name.toLowerCase()} dành cho quà tặng và cảm hứng handmade.`
@@ -135,7 +136,7 @@ export default async function BlogPage({
               <Link href="/tin-tuc" className={chipClass(!categorySlug)}>
                 Tất cả
               </Link>
-              {categories.map((category: any) => (
+              {categories.map((category) => (
                 <Link
                   key={category.id}
                   href={buildUrl({ category: category.slug, page: undefined })}
@@ -163,8 +164,8 @@ export default async function BlogPage({
           />
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post: any) => (
-              <PostCard key={post.id} post={post as any} />
+            {posts.map((post) => (
+              <PostCard key={post.id} post={post} />
             ))}
           </div>
         )}

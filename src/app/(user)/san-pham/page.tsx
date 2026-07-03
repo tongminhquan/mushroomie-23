@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import type { Prisma } from '@prisma/client'
 import { SlidersHorizontal, X } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import ProductCard from '@/components/product/ProductCard'
@@ -28,6 +29,15 @@ const SORT_OPTIONS = [
   { value: 'price_desc', label: 'Giá cao' },
 ]
 
+type ProductListRecord = Prisma.ProductGetPayload<{
+  include: { category: true; images: true }
+}>
+
+type ProductListItem = Omit<ProductListRecord, 'price' | 'sale_price'> & {
+  price: number
+  sale_price: number | null
+}
+
 function readParam(value: ParamValue) {
   return Array.isArray(value) ? value[0] : value
 }
@@ -44,12 +54,12 @@ export default async function ProductsPage({
   const pageValue = readParam(sp.page) || '1'
   const page = Math.max(1, parseInt(pageValue, 10) || 1)
   const limit = 12
-  const where: any = { status: 'active' }
+  const where: Prisma.ProductWhereInput = { status: 'active' }
 
   if (categorySlug) where.category = { slug: categorySlug }
   if (searchKeyword) where.name = { contains: searchKeyword }
 
-  const orderBy: any =
+  const orderBy: Prisma.ProductOrderByWithRelationInput =
     sortValue === 'price_asc'
       ? { price: 'asc' }
       : sortValue === 'price_desc'
@@ -65,8 +75,8 @@ export default async function ProductsPage({
         skip: (page - 1) * limit,
         take: limit,
       })
-      .then((items: any[]) =>
-        items.map((product: any) => ({
+      .then((items): ProductListItem[] =>
+        items.map((product) => ({
           ...product,
           price: Number(product.price),
           sale_price: product.sale_price ? Number(product.sale_price) : null,
@@ -80,7 +90,7 @@ export default async function ProductsPage({
   ])
 
   const totalPages = Math.ceil(total / limit)
-  const activeCategory = categories.find((category: any) => category.slug === categorySlug)
+  const activeCategory = categories.find((category) => category.slug === categorySlug)
   const title = searchKeyword
     ? `Kết quả cho “${searchKeyword}”`
     : activeCategory?.name || 'Tất cả sản phẩm'
@@ -209,7 +219,7 @@ export default async function ProductsPage({
                 >
                   Tất cả
                 </Link>
-                {categories.map((category: any) => (
+                {categories.map((category) => (
                   <Link
                     key={category.id}
                     href={buildUrl({ category: category.slug, page: undefined })}
@@ -262,7 +272,7 @@ export default async function ProductsPage({
               />
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
-                {products.map((product: any) => (
+                {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
