@@ -29,7 +29,7 @@ export interface OptimizedUploadResult {
   created_at: string
 }
 
-const WEBP_QUALITY = 85
+const WEBP_QUALITY = 90
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024
 const MAX_INPUT_PIXELS = 40_000_000
 const sharpInputOptions = { failOn: 'warning' as const, animated: false, limitInputPixels: MAX_INPUT_PIXELS }
