@@ -13,6 +13,9 @@ const uploadDir = join(process.cwd(), 'public', 'uploads')
 
 export async function GET() {
   try {
+    // Chỉ admin mới được liệt kê thư viện media (dùng bởi MediaPicker)
+    await requireAdmin()
+
     // Check if directory exists
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true })

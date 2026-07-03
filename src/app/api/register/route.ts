@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { checkRateLimit } from '@/lib/security'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
@@ -13,6 +14,14 @@ const registerSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const rl = checkRateLimit(request, 'register-ip', { limit: 10, windowMs: 60 * 60 * 1000 })
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Quá nhiều yêu cầu đăng ký. Vui lòng thử lại sau.' },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } },
+      )
+    }
+
     const body = await request.json()
     const parsed = registerSchema.safeParse(body)
     if (!parsed.success) {

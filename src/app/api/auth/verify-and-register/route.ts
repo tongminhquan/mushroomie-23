@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { checkRateLimit, timingSafeStringEqual } from '@/lib/security'
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,13 +10,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Vui lòng điền đầy đủ thông tin bắt buộc' }, { status: 400 })
     }
 
+    // Chống brute-force mã OTP 6 số: giới hạn số lần thử theo email và IP
+    const byEmail = checkRateLimit(request, 'verify-otp-email', { limit: 5, windowMs: 10 * 60 * 1000, identity: String(email).toLowerCase() })
+    const byIp = checkRateLimit(request, 'verify-otp-ip', { limit: 20, windowMs: 10 * 60 * 1000 })
+    if (!byEmail.allowed || !byIp.allowed) {
+      const retryAfter = Math.max(byEmail.retryAfter, byIp.retryAfter)
+      return NextResponse.json(
+        { error: 'Bạn đã nhập sai quá nhiều lần. Vui lòng thử lại sau.' },
+        { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+      )
+    }
+
     // Check OTP
     const otpRecord = await prisma.otp.findUnique({ where: { email } })
     if (!otpRecord) {
       return NextResponse.json({ error: 'Chưa có yêu cầu gửi OTP nào hoặc OTP đã bị xóa' }, { status: 400 })
     }
 
-    if (otpRecord.code !== otp) {
+    // So sánh constant-time để tránh side-channel
+    if (!timingSafeStringEqual(otpRecord.code, String(otp))) {
       return NextResponse.json({ error: 'Mã OTP không chính xác' }, { status: 400 })
     }
 

@@ -31,8 +31,22 @@ declare module 'next-auth' {
 
 const authSecret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
 
+// Ở production runtime, KHÔNG được phép chạy với secret fallback công khai — nếu
+// thiếu AUTH_SECRET/NEXTAUTH_SECRET thì JWT sẽ bị ký bằng hằng số ai cũng biết,
+// dẫn tới giả mạo phiên/leo quyền. Fail-fast để lộ lỗi cấu hình ngay.
+// Bỏ qua trong lúc `next build` (page-data collection chạy với NODE_ENV=production
+// nhưng chưa có secret runtime) — chỉ kiểm tra khi server thực sự khởi động/xử lý request.
+const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build'
+if (
+  process.env.NODE_ENV === 'production' &&
+  !isBuildPhase &&
+  (!authSecret || authSecret.length < 32)
+) {
+  throw new Error('AUTH_SECRET (hoặc NEXTAUTH_SECRET) phải được cấu hình tối thiểu 32 ký tự ở môi trường production')
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  // Local fallback so `next build` can complete in environments without secrets.
+  // Fallback chỉ dùng cho `next build`/dev khi không có secret (đã chặn ở production phía trên).
   secret: authSecret || 'mushroomie-dev-only-secret-not-for-production',
   theme: { logo: '/logo.webp' },
   providers: [

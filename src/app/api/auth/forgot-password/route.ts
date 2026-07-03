@@ -1,14 +1,23 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendPasswordResetEmail } from '@/lib/email'
+import { checkRateLimit } from '@/lib/security'
 import crypto from 'crypto'
 
 export async function POST(req: Request) {
   try {
     const { email } = await req.json()
 
-    if (!email) {
+    if (!email || typeof email !== 'string') {
       return NextResponse.json({ message: 'Vui lòng nhập email.' }, { status: 400 })
+    }
+
+    // Chống lạm dụng gửi email reset (email bombing) theo IP và theo email
+    const byIp = checkRateLimit(req, 'forgot-pw-ip', { limit: 10, windowMs: 60 * 60 * 1000 })
+    const byEmail = checkRateLimit(req, 'forgot-pw-email', { limit: 5, windowMs: 60 * 60 * 1000, identity: email.toLowerCase() })
+    if (!byIp.allowed || !byEmail.allowed) {
+      // Vẫn trả OK để không lộ thông tin, nhưng không thực hiện gửi mail
+      return NextResponse.json({ message: 'OK' }, { status: 200 })
     }
 
     const user = await prisma.user.findUnique({

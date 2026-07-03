@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+import { checkRateLimit } from '@/lib/security'
 import { z } from 'zod'
 
 const reviewSchema = z.object({
@@ -36,6 +37,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Chống spam đánh giá vào hàng chờ duyệt
+    const rl = checkRateLimit(request, 'reviews-post-ip', { limit: 5, windowMs: 10 * 60 * 1000 })
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Bạn gửi đánh giá quá nhanh. Vui lòng thử lại sau.' },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } },
+      )
+    }
+
     const body = await request.json()
     const parsed = reviewSchema.safeParse(body)
     if (!parsed.success) {

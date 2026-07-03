@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import { IPaymentProvider, CreatePaymentInput, PaymentResult, WebhookVerifyResult, PaymentStatus } from '../types'
 import { buildVietQRUrl, buildVietQRPayload } from '../qr-generator'
+import { timingSafeStringEqual } from '@/lib/security'
 
 /**
  * VietQR + Casso Webhook Provider
@@ -88,9 +89,11 @@ export class VietQRCassoProvider implements IPaymentProvider {
       return { isValid: false, eventId: '', transactionCode: '', amount: 0, transferContent: '', rawPayload: null }
     }
 
-    // Casso dùng Secure-Token header
-    const secureToken = request.headers.get('Secure-Token') || request.headers.get('secure-token')
-    const isValid = secureToken === this.webhookSecret
+    // Casso dùng Secure-Token header.
+    // Fail-closed: nếu webhook secret chưa được cấu hình thì luôn coi là KHÔNG hợp lệ
+    // (tránh trường hợp so sánh "" === "" cho phép giả mạo webhook đã thanh toán).
+    const secureToken = request.headers.get('Secure-Token') || request.headers.get('secure-token') || ''
+    const isValid = this.webhookSecret.length > 0 && timingSafeStringEqual(secureToken, this.webhookSecret)
 
     // Casso payload structure:
     // { id, tid, bankSubAccId, amount, description, when, bookingDate, ... }

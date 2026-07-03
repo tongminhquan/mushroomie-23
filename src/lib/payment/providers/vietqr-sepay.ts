@@ -1,5 +1,6 @@
 import { IPaymentProvider, CreatePaymentInput, PaymentResult, WebhookVerifyResult, PaymentStatus } from '../types'
 import { buildVietQRUrl, buildVietQRPayload } from '../qr-generator'
+import { timingSafeStringEqual } from '@/lib/security'
 import crypto from 'crypto'
 
 /**
@@ -53,11 +54,12 @@ export class VietQRSePayProvider implements IPaymentProvider {
     const signature = request.headers.get('X-Sepay-Signature') || ''
     let isValid = false
 
+    // Fail-closed: chỉ verify khi có webhook secret; so sánh HMAC bằng constant-time
     if (this.webhookSecret) {
       const hmac = crypto.createHmac('sha256', this.webhookSecret)
       hmac.update(body)
       const expected = hmac.digest('hex')
-      isValid = expected === signature
+      isValid = timingSafeStringEqual(expected, signature)
     }
 
     // SePay payload: { id, gateway, transactionDate, accountNumber, code, content, transferAmount, ... }

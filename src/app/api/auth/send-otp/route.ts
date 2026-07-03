@@ -1,16 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
+import crypto from 'node:crypto'
 import { prisma } from '@/lib/prisma'
 import { createTransporter } from '@/lib/email'
+import { checkRateLimit } from '@/lib/security'
 
 function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000).toString()
+  // CSPRNG thay cho Math.random() để mã OTP không đoán trước được
+  return crypto.randomInt(100000, 1000000).toString()
 }
 
 export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json()
-    if (!email) {
+    if (!email || typeof email !== 'string') {
       return NextResponse.json({ error: 'Thiếu email' }, { status: 400 })
+    }
+
+    // Chống email bombing / lạm dụng: giới hạn theo IP và theo địa chỉ email
+    const byIp = checkRateLimit(request, 'send-otp-ip', { limit: 10, windowMs: 60 * 60 * 1000 })
+    const byEmail = checkRateLimit(request, 'send-otp-email', { limit: 5, windowMs: 60 * 60 * 1000, identity: email.toLowerCase() })
+    if (!byIp.allowed || !byEmail.allowed) {
+      const retryAfter = Math.max(byIp.retryAfter, byEmail.retryAfter)
+      return NextResponse.json(
+        { error: 'Bạn đã yêu cầu mã quá nhiều lần. Vui lòng thử lại sau.' },
+        { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+      )
     }
 
     // Check if email already exists in User

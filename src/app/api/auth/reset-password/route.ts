@@ -1,17 +1,27 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { checkRateLimit } from '@/lib/security'
 import bcrypt from 'bcryptjs'
 
 export async function POST(req: Request) {
   try {
+    // Chống dò/brute-force reset token
+    const rl = checkRateLimit(req, 'reset-pw-ip', { limit: 20, windowMs: 15 * 60 * 1000 })
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { message: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.' },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } },
+      )
+    }
+
     const { token, password } = await req.json()
 
     if (!token || !password) {
       return NextResponse.json({ message: 'Thiếu thông tin bắt buộc.' }, { status: 400 })
     }
 
-    if (password.length < 6) {
-      return NextResponse.json({ message: 'Mật khẩu phải có ít nhất 6 ký tự.' }, { status: 400 })
+    if (typeof password !== 'string' || password.length < 8) {
+      return NextResponse.json({ message: 'Mật khẩu phải có ít nhất 8 ký tự.' }, { status: 400 })
     }
 
     const user = await prisma.user.findFirst({
