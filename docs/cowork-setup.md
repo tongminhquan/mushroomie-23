@@ -1,32 +1,94 @@
-# Mushroomie — Cowork / Claude Code Setup Guide
+# Mushroomie - Cowork / Claude Code Setup Guide
 
-## Mở project bằng Claude Cowork
+Tai lieu onboarding cho thanh vien cong tac tren du an Mushroomie, kem quy trinh lam viec voi Claude Code/Cowork va cac lenh kiem tra production.
 
-1. Mở Claude Desktop → chọn chế độ **Cowork**
-2. Kết nối thư mục project: `C:\Users\Admin\OneDrive\Tài liệu\mushroomie`
-3. KHÔNG cấp quyền toàn ổ C:\ — chỉ cấp thư mục project
+## 1. Mo project bang Claude Cowork
 
-## Slash commands có sẵn
+1. Mo Claude Desktop va chon che do **Cowork**.
+2. Ket noi dung thu muc project: `C:\Users\Admin\OneDrive\Tai lieu\mushroomie`.
+3. Chi cap quyen cho thu muc project, khong cap quyen toan o `C:\`.
 
-Gõ `/` trong Cowork để xem danh sách, hoặc dùng trực tiếp:
+## 2. Yeu cau moi truong
 
-| Command | Mục đích |
+- **Node.js** 20+.
+- **MySQL** dang chay va truy cap duoc. Prisma dung provider `mysql`.
+- File **`.env`** o thu muc goc. File nay bi `.gitignore` bo qua va khong duoc commit.
+- Bien moi truong toi thieu:
+  - `DATABASE_URL`: chuoi ket noi MySQL.
+  - `AUTH_SECRET` hoac `NEXTAUTH_SECRET`: dung cho NextAuth v5 beta.
+  - PayOS/VietQR va SMTP variables neu chay thanh toan hoac email OTP.
+
+> Build local co the in `prisma:error ... DATABASE_URL` khi khong co `.env`. Neu build van exit code 0 va TypeScript khong loi, day la canh bao da biet vi cac route du lieu duoc render dynamic.
+
+## 3. Cai dat va chay local
+
+```bash
+npm install
+npm run db:push
+npm run seed
+npm run dev
+```
+
+## 4. Scripts trong package.json
+
+| Lenh | Tac dung |
 |---|---|
-| `/setup-coworks` | Thiết lập lại môi trường làm việc Claude cho project |
-| `/audit-ux-ui` | Audit và sửa lỗi UX/UI toàn site (user + admin) |
-| `/audit-production` | Audit health production: PM2, Nginx, MySQL, logs, bảo mật |
-| `/fix-media-upload` | Kiểm tra và sửa lỗi upload ảnh / WebP / broken images |
-| `/deploy-production` | Deploy an toàn lên production với PM2 standalone |
-| `/verify-production` | Verify routes, MIME, ảnh, PM2 logs sau deploy |
+| `npm run dev` | Chay local dev server |
+| `npm run build` | Build production bang `next build --webpack` |
+| `npm run start` | Start ban production da build |
+| `npm run typecheck` | Chay `tsc --noEmit` |
+| `npm run lint` | Chay ESLint |
+| `npm run db:migrate` | Tao va ap Prisma migration trong dev |
+| `npm run db:push` | Dong bo schema Prisma vao DB |
+| `npm run db:studio` | Mo Prisma Studio |
+| `npm run images:optimize` | Convert uploads sang WebP |
+| `npm run images:optimize:dry-run` | Dry-run convert uploads sang WebP |
 
-## Quy tắc bất biến (không được phá vỡ)
+## 5. Luu y ky thuat rieng
 
-- ❌ KHÔNG commit: `.env`, `node_modules`, `.next`, `backups/`, `*.sql`, `*.dump`, secret
-- ❌ KHÔNG xóa: `public/uploads/`, `backups/`, `ecosystem.config.js`, `package-lock.json`
-- ❌ KHÔNG reset production database
-- ❌ KHÔNG dùng Docker cho production
+- **Next.js 16.2.6 la ban co thay doi so voi Next.js pho bien.** Doc `node_modules/next/dist/docs/` va `AGENTS.md` truoc khi sua API/convention cua Next.
+- **Khong commit secret hoac du lieu production:** `.env`, `node_modules`, `.next`, `backups/`, `*.sql`, `*.dump`, log nhay cam.
+- **Khong xoa du lieu quan trong:** `public/uploads/`, `backups/`, `ecosystem.config.js`, `package-lock.json`, database, migration, user/order/voucher/payment data.
+- **Production khong dung Docker mac dinh.** Runtime hien tai la PM2 standalone.
 
-## Quy trình deploy PM2 (standalone mode)
+## 6. Slash commands co san
+
+Go `/` trong Claude Code/Cowork de xem danh sach command. Moi command la mot file Markdown trong `.claude/commands/`.
+
+| Command | Muc dich |
+|---|---|
+| `/build` | Build production va tom tat loi/route |
+| `/typecheck` | Chay TypeScript check |
+| `/lint` | Chay ESLint |
+| `/db-push` | Dong bo schema vao DB, co canh bao data-loss/production |
+| `/seed` | Nap du lieu mau, chi dung dev/staging |
+| `/cowork` | Tom tat nhanh quy trinh va lenh cowork |
+| `/setup-coworks` | Thiet lap lai moi truong lam viec Claude cho project |
+| `/audit-ux-ui` | Audit va sua loi UX/UI user site va admin |
+| `/audit-production` | Audit health production: PM2, Nginx, MySQL, logs, bao mat |
+| `/fix-media-upload` | Kiem tra va sua upload anh, WebP, broken images |
+| `/deploy-production` | Deploy an toan len production voi PM2 standalone |
+| `/verify-production` | Verify routes, MIME, anh, PM2 logs sau deploy |
+
+## 7. Quy uoc branch va commit
+
+- Branch chinh: `main`.
+- Branch tinh nang nen dung tien to theo cong cu/nguoi, vi du `codex/<mo-ta-ngan>`.
+- Commit theo Conventional Commits: `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`.
+- Khong tao commit test vo nghia.
+
+## 8. Quy trinh deploy PM2
+
+Production server:
+
+- URL: `https://mushroomie.io.vn`
+- Server: `103.173.226.86`
+- Path: `/var/www/mushroomie`
+- PM2 process: `mushroomie_pm2`
+- App port: `3001`
+- Branch: `main`
+
+Lenh deploy co ban:
 
 ```bash
 cd /var/www/mushroomie
@@ -35,52 +97,37 @@ git pull origin main
 npm ci
 npx prisma generate
 npm run build
-cp -r .next/static .next/standalone/.next/static
-cp -r public .next/standalone/public
 pm2 restart mushroomie_pm2
 pm2 save
 pm2 logs mushroomie_pm2 --lines 150 --nostream
 ```
 
-## Checklist trước khi báo hoàn tất
+Neu dung script deploy cua du an, uu tien:
 
-- [ ] `npm run typecheck` pass (không có TypeScript error)
-- [ ] `npm run build` thành công (không build fail)
-- [ ] PM2 không có error logs sau restart
-- [ ] Routes chính trả HTTP 200 (không 500)
-- [ ] CSS/JS có đúng MIME type
-- [ ] Ảnh không broken (logo, banner, product, uploads)
-- [ ] KHÔNG có secret trong git diff
-
-## Scripts có sẵn trong package.json
-
-```
-npm run dev                   # Local dev
-npm run build                 # Production build (webpack)
-npm run start                 # Start production server
-npm run lint                  # ESLint
-npm run typecheck             # TypeScript check (tsc --noEmit)
-npm run db:migrate            # Prisma migrate dev
-npm run db:studio             # Prisma Studio GUI
-npm run images:optimize       # Convert uploads sang WebP (apply)
-npm run images:optimize:dry-run  # Dry-run WebP convert
+```bash
+cd /var/www/mushroomie
+git pull origin main
+bash deploy.sh
 ```
 
-## Stack nhanh
+## 9. Checklist truoc khi bao hoan tat
 
-- **Framework:** Next.js 16.2.6, App Router, TypeScript
-- **DB:** Prisma 5 + MySQL
-- **Auth:** next-auth v5 beta
-- **Payment:** PayOS + VietQR
-- **Images:** sharp (WebP), next/image
-- **Styling:** Tailwind CSS v4
-- **Rich text:** TipTap v3
+- `npm run typecheck` pass.
+- `npm run build` pass.
+- Lint khong co error neu nam trong pham vi task.
+- PM2 online sau restart.
+- Routes chinh tra 200 hoac redirect auth hop ly.
+- CSS tra `text/css`.
+- JS tra `application/javascript` hoac `text/javascript`.
+- Logo, favicon, banner, product image, blog image, uploads va QR khong broken.
+- Khong co secret trong git diff.
 
-## Production info
+## 10. Stack nhanh
 
-- URL: https://mushroomie.io.vn
-- Server: 103.173.226.86
-- Path: /var/www/mushroomie
-- PM2 process: `mushroomie_pm2` (port 3001)
-- Branch: main
-- Remote: https://github.com/tongminhquan/mushroomie-23.git
+- Framework: Next.js 16.2.6, App Router, TypeScript
+- Database: Prisma 5 + MySQL
+- Auth: next-auth v5 beta
+- Payment: PayOS + VietQR
+- Images: sharp, WebP, next/image
+- Styling: Tailwind CSS v4
+- Rich text: TipTap v3
