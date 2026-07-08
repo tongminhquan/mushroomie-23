@@ -48,7 +48,7 @@ function normalizeHeader(raw: string): string {
   return raw
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/[đ]/g, 'd')
     .trim()
     .replace(/\s+/g, '_')

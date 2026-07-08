@@ -1,6 +1,6 @@
 import { prisma } from './prisma'
 
-type AdminAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | 'OTHER'
+type AdminAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | 'BULK_IMPORT' | 'OTHER'
 type AdminEntity = 'PRODUCT' | 'ORDER' | 'POST' | 'USER' | 'BANNER' | 'CATEGORY' | 'VOUCHER' | 'SETTINGS' | 'SYSTEM'
 
 interface AdminLogPayload {
