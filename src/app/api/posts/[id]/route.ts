@@ -47,8 +47,20 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       og_title, og_description, og_image,
       twitter_title, twitter_description, twitter_image,
       canonical_url, robots_index, robots_follow, schema_type,
-      secondary_keywords,
+      secondary_keywords, publish_date,
     } = body
+
+    // Lên lịch đăng (Đăng bài tự động): cần thời điểm hợp lệ trong tương lai
+    let scheduledAt: Date | null = null
+    if (status === 'scheduled') {
+      scheduledAt = publish_date ? new Date(publish_date) : null
+      if (!scheduledAt || isNaN(scheduledAt.getTime())) {
+        return NextResponse.json({ error: 'Lịch đăng cần thời gian hợp lệ' }, { status: 400 })
+      }
+      if (scheduledAt.getTime() <= Date.now()) {
+        return NextResponse.json({ error: 'Thời gian hẹn đăng phải ở tương lai' }, { status: 400 })
+      }
+    }
 
     const data: any = {
       title, excerpt, featured_image: normalizeOptionalPostImage(featured_image),
