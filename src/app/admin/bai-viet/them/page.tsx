@@ -204,7 +204,14 @@ export default function AddPostPage() {
   const handleSubmit = async (submitStatus: string) => {
     if (!form.title.trim()) { setError('Vui lòng nhập tiêu đề bài viết'); return }
 
-    if (submitStatus === 'published') {
+    if (submitStatus === 'scheduled') {
+      if (!form.publish_date || new Date(form.publish_date).getTime() <= Date.now()) {
+        setError('Vui lòng chọn thời gian hẹn đăng ở tương lai')
+        return
+      }
+    }
+
+    if (submitStatus === 'published' || submitStatus === 'scheduled') {
       const errors = validateForPublish()
       if (errors.length > 0) {
         setValidationErrors(errors)
