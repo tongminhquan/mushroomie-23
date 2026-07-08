@@ -28,8 +28,15 @@ export default async function AdminPostsPage({ searchParams }: { searchParams: P
 
   const statusColors: Record<string, string> = {
     published: 'bg-green-100 text-green-700',
+    scheduled: 'bg-blue-100 text-blue-700',
     draft: 'bg-yellow-100 text-yellow-700',
     hidden: 'bg-neutral-100 text-neutral-700',
+  }
+  const statusLabels: Record<string, string> = {
+    published: 'Đã xuất bản',
+    scheduled: 'Chờ đăng',
+    draft: 'Nháp',
+    hidden: 'Ẩn',
   }
 
   return (
