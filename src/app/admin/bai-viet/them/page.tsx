@@ -526,8 +526,8 @@ export default function AddPostPage() {
                   <button onClick={() => handleSubmit('draft')} className="flex-1 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors">
                     Lưu nháp
                   </button>
-                  <button onClick={() => handleSubmit('published')} disabled={isLoading} className="flex-1 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60">
-                    Xuất bản
+                  <button onClick={() => handleSubmit(form.status === 'scheduled' ? 'scheduled' : 'published')} disabled={isLoading} className="flex-1 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60">
+                    {form.status === 'scheduled' ? '⏰ Lên lịch' : 'Xuất bản'}
                   </button>
                 </div>
               </div>
