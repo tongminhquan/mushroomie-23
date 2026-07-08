@@ -544,12 +544,12 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
               <Save size={14} /> Lưu nháp
             </button>
             <button
-              onClick={() => handleSubmit('published')}
+              onClick={() => handleSubmit(form.status === 'scheduled' ? 'scheduled' : 'published')}
               disabled={isLoading}
               className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60"
             >
               <Eye size={14} />
-              {isLoading ? 'Đang lưu...' : 'Cập nhật'}
+              {isLoading ? 'Đang lưu...' : form.status === 'scheduled' ? '⏰ Lên lịch' : 'Cập nhật'}
             </button>
           </div>
         </div>
