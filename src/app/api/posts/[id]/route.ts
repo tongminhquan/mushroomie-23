@@ -91,6 +91,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
     data.slug = slug || (title ? generateSlug(title) : undefined)
     if (status === 'published') data.published_at = new Date()
+    if (status === 'scheduled') data.published_at = scheduledAt
     // Remove undefined keys
     Object.keys(data).forEach(k => data[k] === undefined && delete data[k])
     const post = await prisma.post.update({ where: { id: Number(id) }, data })
