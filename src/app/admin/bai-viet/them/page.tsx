@@ -316,12 +316,12 @@ export default function AddPostPage() {
               <Save size={14} /> Lưu nháp
             </button>
             <button
-              onClick={() => handleSubmit('published')}
+              onClick={() => handleSubmit(form.status === 'scheduled' ? 'scheduled' : 'published')}
               disabled={isLoading}
               className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60"
             >
               <Eye size={14} />
-              {isLoading ? 'Đang lưu...' : 'Xuất bản'}
+              {isLoading ? 'Đang lưu...' : form.status === 'scheduled' ? '⏰ Lên lịch' : 'Xuất bản'}
             </button>
           </div>
         </div>
