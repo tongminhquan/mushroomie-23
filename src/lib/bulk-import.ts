@@ -255,7 +255,7 @@ export async function parseBulkImportFile(
       warnings.push('ma_bai chứa khoảng trắng hoặc tiếng Việt có dấu — không khớp được ảnh.')
     }
 
-    let slug = col(raw, 'slug') || (maBai ? generateSlug(maBai) : '') || generateSlug(title)
+    const slug = col(raw, 'slug') || (maBai ? generateSlug(maBai) : '') || generateSlug(title)
     if (slug && seenSlugs.has(slug)) {
       warnings.push(`Slug "${slug}" trùng với dòng phía trên trong file — dòng này sẽ ghi đè dòng trước.`)
     }
