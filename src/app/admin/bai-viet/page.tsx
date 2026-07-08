@@ -40,13 +40,18 @@ export default async function AdminPostsPage({ searchParams }: { searchParams: P
           <h1 className="font-heading text-2xl font-bold text-neutral-800">Quản lý bài viết</h1>
           <p className="text-neutral-500 text-sm mt-0.5">{total} bài viết</p>
         </div>
-        <Link href="/admin/bai-viet/them" className="bg-primary text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-primary-dark transition-colors whitespace-nowrap flex-1 text-center md:flex-none">
-          + Thêm bài viết
-        </Link>
+        <div className="flex gap-2 flex-1 md:flex-none">
+          <Link href="/admin/bai-viet/dang-hang-loat" className="border-[1.5px] border-primary text-primary px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-primary hover:text-white transition-colors whitespace-nowrap flex-1 text-center md:flex-none">
+            ⚡ Đăng tự động
+          </Link>
+          <Link href="/admin/bai-viet/them" className="bg-primary text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-primary-dark transition-colors whitespace-nowrap flex-1 text-center md:flex-none">
+            + Thêm bài viết
+          </Link>
+        </div>
       </div>
 
       <div className="flex gap-2 mb-6 overflow-x-auto whitespace-nowrap pb-1">
-        {[{ value: '', label: 'Tất cả' }, { value: 'published', label: '🟢 Đã xuất bản' }, { value: 'draft', label: '🟡 Nháp' }].map((tab) => (
+        {[{ value: '', label: 'Tất cả' }, { value: 'published', label: '🟢 Đã xuất bản' }, { value: 'scheduled', label: '⏰ Chờ đăng' }, { value: 'draft', label: '🟡 Nháp' }].map((tab) => (
           <Link key={tab.value} href={`/admin/bai-viet${tab.value ? `?status=${tab.value}` : ''}`}
             className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
               (sp.status || '') === tab.value
