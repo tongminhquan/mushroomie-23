@@ -84,7 +84,8 @@ Production:
 
 - `/api/health` — Health check
 - `/api/products` — CRUD sản phẩm
-- `/api/posts` — CRUD bài viết
+- `/api/posts` — CRUD bài viết (status: draft | published | scheduled | hidden; scheduled + published_at tương lai = hẹn giờ)
+- `/api/posts/bulk-import` — Đăng bài hàng loạt từ Excel/CSV (mode=preview|commit)
 - `/api/orders` — CRUD đơn hàng
 - `/api/payments` — Thanh toán
 - `/api/upload` — Upload ảnh (WebP, sharp)
