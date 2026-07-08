@@ -489,9 +489,23 @@ export default function AddPostPage() {
                   >
                     <option value="draft">Bản nháp</option>
                     <option value="published">Công khai</option>
+                    <option value="scheduled">⏰ Lên lịch</option>
                     <option value="hidden">Ẩn</option>
                   </select>
                 </div>
+                {form.status === 'scheduled' && (
+                  <div className="flex items-center justify-between text-sm gap-2">
+                    <span className="text-neutral-500 whitespace-nowrap">🕑 Hẹn đăng lúc</span>
+                    <input
+                      type="datetime-local"
+                      name="publish_date"
+                      value={form.publish_date}
+                      onChange={handleChange}
+                      min={new Date(Date.now() + 5 * 60 * 1000).toISOString().slice(0, 16)}
+                      className="border-[1.5px] border-[#e2d3c8] rounded-lg px-2 py-1.5 text-sm focus:border-primary outline-none bg-white"
+                    />
+                  </div>
+                )}
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-neutral-500">📊 Schema</span>
                   <select
