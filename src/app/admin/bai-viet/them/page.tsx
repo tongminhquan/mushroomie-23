@@ -62,6 +62,7 @@ export default function AddPostPage() {
     featured_image_caption: '',
     featured_image_description: '',
     status: 'draft',
+    publish_date: '',
     seo_title: '',
     meta_description: '',
     focus_keyword: '',
