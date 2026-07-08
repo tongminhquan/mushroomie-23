@@ -67,6 +67,7 @@ Production:
 - `/admin/bai-viet` — Quản lý bài viết
 - `/admin/bai-viet/them` — Thêm bài viết
 - `/admin/bai-viet/[id]` — Sửa bài viết
+- `/admin/bai-viet/dang-hang-loat` — Đăng bài tự động (bulk import Excel/CSV + ảnh theo ma_bai, hẹn giờ đăng)
 - `/admin/don-hang` — Quản lý đơn hàng
 - `/admin/don-hang/[id]` — Chi tiết đơn hàng
 - `/admin/thanh-toan` — Quản lý thanh toán
