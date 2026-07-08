@@ -161,6 +161,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         const parsedTags = parseStringArray(post.tags)
         const parsedSecondaryKeywords = parseStringArray(post.secondary_keywords)
         setForm({
+          publish_date: post.status === 'scheduled' ? toLocalInputValue(post.published_at) : '',
           title: post.title || '',
           slug: post.slug || '',
           excerpt: post.excerpt || '',
