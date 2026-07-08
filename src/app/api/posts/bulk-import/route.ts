@@ -6,7 +6,7 @@ import { generateSlug } from '@/lib/utils'
 import { logAdminAction } from '@/lib/admin-logger'
 import { optimizeUploadImage } from '@/lib/image-processing'
 import { buildPostContentMetrics, normalizeOptionalPostImage } from '@/lib/post-normalization'
-import { parseBulkImportFile, rewriteContentImages, type BulkImportRow } from '@/lib/bulk-import'
+import { parseBulkImportFile, rewriteContentImages } from '@/lib/bulk-import'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
