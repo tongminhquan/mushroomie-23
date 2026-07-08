@@ -115,15 +115,21 @@ export default function AdminSidebar() {
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex h-screen flex-shrink-0 transform flex-col overflow-visible border-r border-[#ead8cd] shadow-[16px_0_40px_rgba(91,48,35,0.10)] transition-all duration-300 ease-in-out md:relative md:translate-x-0 md:shadow-none',
+          'fixed inset-y-0 left-0 z-50 isolate flex h-screen flex-shrink-0 transform flex-col overflow-visible border-r border-[#ead8cd] shadow-[16px_0_40px_rgba(91,48,35,0.10)] transition-all duration-300 ease-in-out motion-reduce:transition-none md:relative md:translate-x-0 md:shadow-none',
           sidebarSurface,
           isOpen ? 'translate-x-0' : '-translate-x-full',
           isCollapsed ? 'w-[78px]' : 'w-[274px]',
         )}
       >
+        {isCollapsed && (
+          <span
+            className="pointer-events-none absolute left-1/2 top-[112px] bottom-[122px] z-0 hidden w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-[#eccfc0] to-transparent md:block"
+            aria-hidden
+          />
+        )}
         <div
           className={cn(
-            'relative flex h-[86px] flex-shrink-0 items-center border-b border-[#f0dfd4]',
+            'relative z-10 flex h-[86px] flex-shrink-0 items-center border-b border-[#f0dfd4]',
             isCollapsed ? 'justify-center' : 'justify-between px-4',
           )}
         >
@@ -134,7 +140,12 @@ export default function AdminSidebar() {
               isCollapsed ? 'justify-center' : 'gap-3 px-2 py-2',
             )}
           >
-            <div className="relative grid h-12 w-12 flex-shrink-0 place-items-center rounded-[18px] border border-white bg-white shadow-[0_12px_26px_rgba(185,121,75,0.16)] transition group-hover:-translate-y-0.5">
+            <div
+              className={cn(
+                'relative grid flex-shrink-0 place-items-center border border-white bg-white shadow-[0_12px_26px_rgba(185,121,75,0.16)] transition group-hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0',
+                isCollapsed ? 'h-14 w-14 rounded-[24px]' : 'h-12 w-12 rounded-[18px]',
+              )}
+            >
               <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-primary" aria-hidden />
               <Image src="/logo.webp" alt="Mushroomie" width={44} height={44} className="h-10 w-10 object-contain" priority />
             </div>
@@ -173,21 +184,26 @@ export default function AdminSidebar() {
           </button>
         </div>
 
-        <nav className="no-scrollbar flex-1 overflow-y-auto overflow-x-visible px-3 py-4">
+        <nav className="no-scrollbar relative z-10 flex-1 overflow-y-auto overflow-x-visible px-3 py-4">
           {isCollapsed && (
             <button
               onClick={() => setIsCollapsed(false)}
               title="Mở rộng menu"
               aria-label="Mở rộng menu"
-              className="mb-3 hidden h-11 w-full items-center justify-center rounded-2xl border border-[#ead8cd] bg-white/88 text-accent-kraft shadow-sm transition hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 md:flex"
+              className="mb-4 hidden h-12 w-full items-center justify-center rounded-[20px] border border-[#ead8cd] bg-white/92 text-accent-kraft shadow-[0_10px_22px_rgba(91,48,35,0.08)] transition hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 motion-reduce:transition-none motion-reduce:hover:translate-y-0 md:flex"
               type="button"
             >
               <ChevronRight size={20} className="flex-shrink-0" />
             </button>
           )}
 
-          {filteredGroups.map((group) => (
+          {filteredGroups.map((group, groupIndex) => (
             <div key={group.label} className={cn('relative', isCollapsed ? 'mb-3' : 'mb-5')}>
+              {isCollapsed && groupIndex > 0 && (
+                <div className="mb-3 mt-1 flex w-full justify-center" aria-hidden>
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#e9bca7] shadow-[0_0_0_4px_rgba(255,247,242,0.95)]" />
+                </div>
+              )}
               {!isCollapsed && (
                 <div className="mb-2 flex items-center gap-2 px-3">
                   <span className="h-px flex-1 bg-[#ead8cd]" />
@@ -210,22 +226,35 @@ export default function AdminSidebar() {
                       aria-label={item.label}
                       aria-current={active ? 'page' : undefined}
                       className={cn(
-                        'group relative flex items-center gap-3 overflow-visible rounded-[18px] py-2.5 text-sm font-semibold transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15',
-                        isCollapsed ? 'h-11 w-11 justify-center px-0' : 'px-3.5',
+                        'group relative flex items-center gap-3 overflow-visible py-2.5 text-sm font-semibold transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 motion-reduce:transition-none',
+                        isCollapsed ? 'h-[52px] w-[52px] justify-center rounded-[22px] px-0' : 'rounded-[18px] px-3.5',
                         active
-                          ? 'bg-primary text-white shadow-[0_14px_30px_rgba(228,29,29,0.24)]'
-                          : 'text-neutral-600 hover:-translate-y-0.5 hover:bg-white/90 hover:text-primary hover:shadow-[0_10px_24px_rgba(91,48,35,0.08)]',
+                          ? isCollapsed
+                            ? 'bg-primary text-white shadow-[0_16px_34px_rgba(228,29,29,0.28)] ring-4 ring-primary/10'
+                            : 'bg-primary text-white shadow-[0_14px_30px_rgba(228,29,29,0.24)]'
+                          : isCollapsed
+                            ? 'border border-[#ead8cd] bg-white/94 text-accent-kraft shadow-[0_10px_24px_rgba(91,48,35,0.08)] hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary hover:shadow-[0_14px_28px_rgba(91,48,35,0.12)] motion-reduce:hover:translate-y-0'
+                            : 'text-neutral-600 hover:-translate-y-0.5 hover:bg-white/90 hover:text-primary hover:shadow-[0_10px_24px_rgba(91,48,35,0.08)] motion-reduce:hover:translate-y-0',
                       )}
                     >
                       {active && !isCollapsed && (
                         <span className="absolute inset-y-2 left-1 w-1 rounded-full bg-white/85" aria-hidden />
                       )}
+                      {active && isCollapsed && (
+                        <span
+                          className="absolute -right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full border-[3px] border-[#fff7f2] bg-[#ffe7a3] shadow-[0_0_0_2px_rgba(228,29,29,0.18)]"
+                          aria-hidden
+                        />
+                      )}
                       <span
                         className={cn(
-                          'grid h-8 w-8 flex-shrink-0 place-items-center rounded-[14px] transition-all duration-200',
+                          'grid flex-shrink-0 place-items-center transition-all duration-200 motion-reduce:transition-none',
+                          isCollapsed ? 'h-10 w-10 rounded-[18px]' : 'h-8 w-8 rounded-[14px]',
                           active
                             ? 'bg-white/18 text-white'
-                            : 'bg-white text-accent-kraft shadow-[inset_0_0_0_1px_rgba(236,224,214,0.9)] group-hover:text-primary',
+                            : isCollapsed
+                              ? 'bg-[#fff7f2] text-accent-kraft shadow-[inset_0_0_0_1px_rgba(236,224,214,0.9)] group-hover:bg-white group-hover:text-primary'
+                              : 'bg-white text-accent-kraft shadow-[inset_0_0_0_1px_rgba(236,224,214,0.9)] group-hover:text-primary',
                         )}
                       >
                         <item.icon size={isCollapsed ? 21 : 17} strokeWidth={2.2} />
@@ -246,7 +275,7 @@ export default function AdminSidebar() {
                         )}
                       />
                       {isCollapsed && (
-                        <span className="pointer-events-none absolute left-[calc(100%+10px)] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-xl border border-warm-border bg-white px-3 py-2 text-xs font-bold text-neutral-700 opacity-0 shadow-[0_12px_28px_rgba(91,48,35,0.14)] transition group-hover:opacity-100 group-focus-visible:opacity-100">
+                        <span className="pointer-events-none absolute left-[calc(100%+12px)] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-2xl border border-warm-border bg-white px-3 py-2 text-xs font-bold text-neutral-700 opacity-0 shadow-[0_12px_28px_rgba(91,48,35,0.14)] transition motion-reduce:transition-none group-hover:opacity-100 group-focus-visible:opacity-100">
                           {item.label}
                         </span>
                       )}
@@ -258,24 +287,34 @@ export default function AdminSidebar() {
           ))}
         </nav>
 
-        <div className="border-t border-[#ead8cd] bg-white/80 p-3 backdrop-blur">
+        <div
+          className={cn(
+            'relative z-10 border-t border-[#ead8cd] bg-white/80 backdrop-blur',
+            isCollapsed ? 'p-3.5' : 'p-3',
+          )}
+        >
           {!isCollapsed && (
             <div className="mb-3 rounded-[20px] border border-[#f0dfd4] bg-[#fff7f2] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-primary">Studio Mushroomie</p>
               <p className="mt-1 text-xs font-medium leading-relaxed text-neutral-500">Quản lý cửa hàng thủ công, đơn hàng và nội dung.</p>
             </div>
           )}
-          <div className="space-y-1.5">
+          <div className={cn(isCollapsed ? 'space-y-2.5' : 'space-y-1.5')}>
             <Link
               href="/"
               target="_blank"
               title="Xem website"
               className={cn(
-                'group relative flex items-center gap-3 rounded-[18px] py-2.5 text-sm font-semibold text-neutral-500 transition-all hover:bg-white hover:text-primary hover:shadow-[0_10px_24px_rgba(91,48,35,0.08)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15',
-                isCollapsed ? 'h-11 justify-center px-0' : 'px-3.5',
+                'group relative flex items-center gap-3 py-2.5 text-sm font-semibold text-neutral-500 transition-all hover:bg-white hover:text-primary hover:shadow-[0_10px_24px_rgba(91,48,35,0.08)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 motion-reduce:transition-none',
+                isCollapsed ? 'h-12 justify-center rounded-[20px] border border-[#ead8cd] bg-white/92 px-0 shadow-[0_10px_22px_rgba(91,48,35,0.08)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0' : 'rounded-[18px] px-3.5',
               )}
             >
-              <span className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-[14px] bg-white text-accent-kraft shadow-[inset_0_0_0_1px_rgba(236,224,214,0.9)] group-hover:text-primary">
+              <span
+                className={cn(
+                  'grid flex-shrink-0 place-items-center bg-white text-accent-kraft shadow-[inset_0_0_0_1px_rgba(236,224,214,0.9)] group-hover:text-primary',
+                  isCollapsed ? 'h-9 w-9 rounded-[16px]' : 'h-8 w-8 rounded-[14px]',
+                )}
+              >
                 <ExternalLink size={isCollapsed ? 21 : 17} strokeWidth={2.2} />
               </span>
               {!isCollapsed && <span className="whitespace-nowrap">Xem website</span>}
@@ -284,12 +323,17 @@ export default function AdminSidebar() {
               onClick={() => signOut({ callbackUrl: '/' })}
               title="Đăng xuất"
               className={cn(
-                'group flex w-full items-center gap-3 rounded-[18px] py-2.5 text-sm font-semibold text-neutral-500 transition-all hover:bg-[#fff0ed] hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15',
-                isCollapsed ? 'h-11 justify-center px-0' : 'px-3.5',
+                'group flex w-full items-center gap-3 py-2.5 text-sm font-semibold text-neutral-500 transition-all hover:bg-[#fff0ed] hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 motion-reduce:transition-none',
+                isCollapsed ? 'h-12 justify-center rounded-[20px] border border-[#ead8cd] bg-white/92 px-0 shadow-[0_10px_22px_rgba(91,48,35,0.08)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0' : 'rounded-[18px] px-3.5',
               )}
               type="button"
             >
-              <span className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-[14px] bg-white text-accent-kraft shadow-[inset_0_0_0_1px_rgba(236,224,214,0.9)] group-hover:text-primary">
+              <span
+                className={cn(
+                  'grid flex-shrink-0 place-items-center bg-white text-accent-kraft shadow-[inset_0_0_0_1px_rgba(236,224,214,0.9)] group-hover:text-primary',
+                  isCollapsed ? 'h-9 w-9 rounded-[16px]' : 'h-8 w-8 rounded-[14px]',
+                )}
+              >
                 <LogOut size={isCollapsed ? 21 : 17} strokeWidth={2.2} />
               </span>
               {!isCollapsed && <span className="whitespace-nowrap">Đăng xuất</span>}
