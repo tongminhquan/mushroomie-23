@@ -143,6 +143,9 @@ export default function BulkImportPage() {
         <p>• Cột bắt buộc: <code className="bg-white px-1 rounded">title</code>, <code className="bg-white px-1 rounded">content</code> — Tùy chọn: <code className="bg-white px-1 rounded">ma_bai</code>, <code className="bg-white px-1 rounded">featured_image_url</code>, <code className="bg-white px-1 rounded">category</code>, <code className="bg-white px-1 rounded">tags</code>, <code className="bg-white px-1 rounded">status</code>, <code className="bg-white px-1 rounded">publish_date</code>, <code className="bg-white px-1 rounded">slug</code>, <code className="bg-white px-1 rounded">meta_description</code></p>
         <p>• Ảnh đại diện: <code className="bg-white px-1 rounded">{'{ma_bai}'}_bg.jpg</code> — Ảnh nội dung: <code className="bg-white px-1 rounded">{'{ma_bai}'}_1.jpg</code>, <code className="bg-white px-1 rounded">{'{ma_bai}'}_2.jpg</code>… (jpg/png/webp)</p>
         <p>• <code className="bg-white px-1 rounded">publish_date</code> ở tương lai (vd <code className="bg-white px-1 rounded">25/12/2026 08:00</code>) → bài sẽ <strong>tự động đăng đúng giờ</strong>. Slug trùng bài cũ → cập nhật, không tạo bài đôi.</p>
+        <p>
+          • <a href="/mau-dang-bai-tu-dong.csv" download className="text-primary font-semibold hover:underline">⬇ Tải file mẫu (.csv)</a> — mở bằng Excel, giữ nguyên dòng tiêu đề.
+        </p>
       </div>
 
       {/* ── Bước 1: Chọn file ── */}
