@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
         reading_time: readingTime,
         word_count: wordCount,
         author_id: Number((session.user as any).id),
-        published_at: status === 'published' ? new Date() : null,
+        published_at: status === 'published' ? new Date() : status === 'scheduled' ? scheduledAt : null,
       },
     })
 
