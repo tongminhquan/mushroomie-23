@@ -1,0 +1,4 @@
+title,content,ma_bai,featured_image_url,category,tags,status,publish_date,slug,meta_description
+"Ví dụ: 5 mẹo phối vòng tay charm cực xinh","<h2>Mở đầu</h2><p>Nội dung bài viết HTML đặt ở đây.</p><p><img src=""vi-du-bai-1_1.jpg"" alt=""Ảnh minh họa 1""></p><h2>Kết luận</h2><p>Cảm ơn bạn đã đọc!</p>",vi-du-bai-1,,Mẹo hay,"vòng tay, charm, handmade",publish,25/12/2026 08:00,,"Mô tả SEO ngắn gọn 120-160 ký tự cho bài viết ví dụ về cách phối vòng tay charm handmade đẹp và cá tính dành riêng cho Gen Z."
+"Ví dụ: Bài đăng ngay không hẹn giờ","<p>Bài này sẽ được đăng ngay khi nhấn Đăng theo file.</p>",vi-du-bai-2,,Tin tức,"tin tức",publish,,,"Mô tả SEO cho bài đăng ngay - bạn có thể để trống publish_date để đăng ngay lập tức khi chạy đăng bài tự động trong admin."
+"Ví dụ: Bài lưu nháp","<p>Bài này chỉ lưu nháp, chưa hiện ra ngoài trang.</p>",,,,,draft,,,
