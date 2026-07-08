@@ -353,6 +353,13 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   const handleSubmit = async (submitStatus: string) => {
     if (!form.title.trim()) { setError('Vui lòng nhập tiêu đề bài viết'); return }
 
+    if (submitStatus === 'scheduled') {
+      if (!form.publish_date || new Date(form.publish_date).getTime() <= Date.now()) {
+        setError('Vui lòng chọn thời gian hẹn đăng ở tương lai')
+        return
+      }
+    }
+
     // Guard against data loss: the post had content when loaded, but the editor
     // is now empty (e.g. it failed to bind on load). Don't silently overwrite.
     const stripText = (h: string) => h.replace(/<[^>]+>/g, '').replace(/&nbsp;/gi, ' ').trim()
