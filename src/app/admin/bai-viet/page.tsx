@@ -93,8 +93,11 @@ export default async function AdminPostsPage({ searchParams }: { searchParams: P
                   <td className="py-3 px-4 text-neutral-600">{post.author?.name || '—'}</td>
                   <td className="py-3 px-4">
                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusColors[post.status] || ''}`}>
-                      {post.status === 'published' ? 'Đã xuất bản' : post.status === 'draft' ? 'Nháp' : 'Ẩn'}
+                      {statusLabels[post.status] || 'Ẩn'}
                     </span>
+                    {post.status === 'scheduled' && post.published_at && (
+                      <div className="text-[11px] text-blue-600 mt-1">⏰ {formatDate(post.published_at)}</div>
+                    )}
                   </td>
                   <td className="py-3 px-4 text-neutral-500 text-xs">{formatDate(post.created_at)}</td>
                   <td className="py-3 px-4 text-right flex justify-end gap-3">
