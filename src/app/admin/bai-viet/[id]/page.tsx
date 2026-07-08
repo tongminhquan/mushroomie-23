@@ -371,7 +371,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
       if (!proceed) { setLoadAttempt(v => v + 1); return }
     }
 
-    if (submitStatus === 'published') {
+    if (submitStatus === 'published' || submitStatus === 'scheduled') {
       const errors = validateForPublish()
       if (errors.length > 0) {
         setValidationErrors(errors)
