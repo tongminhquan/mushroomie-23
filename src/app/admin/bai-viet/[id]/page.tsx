@@ -717,9 +717,22 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                   >
                     <option value="draft">Bản nháp</option>
                     <option value="published">Công khai</option>
+                    <option value="scheduled">⏰ Lên lịch</option>
                     <option value="hidden">Ẩn</option>
                   </select>
                 </div>
+                {form.status === 'scheduled' && (
+                  <div className="flex items-center justify-between text-sm gap-2">
+                    <span className="text-neutral-500 whitespace-nowrap">🕑 Hẹn đăng lúc</span>
+                    <input
+                      type="datetime-local"
+                      name="publish_date"
+                      value={form.publish_date}
+                      onChange={handleChange}
+                      className="border-[1.5px] border-[#f0e0d6] rounded-lg px-2 py-1.5 text-sm focus:border-primary outline-none bg-white"
+                    />
+                  </div>
+                )}
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-neutral-500">📊 Schema</span>
                   <select
