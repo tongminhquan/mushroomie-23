@@ -1,13 +1,18 @@
 'use client'
 
-import { useState, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 
+const OTP_RESEND_COOLDOWN_SECONDS = 60
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback
+}
+
 function RegistrationForm() {
   const searchParams = useSearchParams()
-  const router = useRouter()
 
   const email = searchParams.get('email') || ''
   const name = searchParams.get('name') || ''
@@ -18,15 +23,31 @@ function RegistrationForm() {
   const [address, setAddress] = useState('')
   const [otp, setOtp] = useState('')
   const [otpSent, setOtpSent] = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return
+
+    const timer = window.setInterval(() => {
+      setResendCooldown((value) => Math.max(0, value - 1))
+    }, 1000)
+
+    return () => window.clearInterval(timer)
+  }, [resendCooldown])
 
   const handleSendOtp = async () => {
     if (!phone || !address) {
       setError('Vui lòng nhập số điện thoại và địa chỉ trước khi gửi mã OTP')
       return
     }
+    if (otpSent && resendCooldown > 0) {
+      setError(`Vui lòng chờ ${resendCooldown} giây trước khi gửi lại mã OTP`)
+      return
+    }
+
     setError('')
     setLoading(true)
     try {
@@ -36,12 +57,18 @@ function RegistrationForm() {
         body: JSON.stringify({ email })
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Lỗi gửi OTP')
+      if (!res.ok) throw new Error(data.message || data.error || 'Lỗi gửi OTP')
 
       setOtpSent(true)
-      setSuccess('Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.')
-    } catch (err: any) {
-      setError(err.message)
+      setOtp('')
+      setResendCooldown(OTP_RESEND_COOLDOWN_SECONDS)
+      setSuccess(
+        otpSent
+          ? 'Mã OTP mới đã được gửi lại. Vui lòng kiểm tra hộp thư, Spam hoặc Quảng cáo.'
+          : 'Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.'
+      )
+    } catch (err) {
+      setError(getErrorMessage(err, 'Lỗi gửi OTP'))
     } finally {
       setLoading(false)
     }
@@ -78,8 +105,8 @@ function RegistrationForm() {
 
       // Auto login with Google to create session
       await signIn('google', { callbackUrl: '/tai-khoan' })
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      setError(getErrorMessage(err, 'Lỗi đăng ký'))
       setLoading(false)
     }
   }
@@ -180,7 +207,20 @@ function RegistrationForm() {
               required
             />
             <p className="text-xs mt-2 text-center text-neutral-500">Vui lòng kiểm tra email <strong className="text-accent-kraft">{email}</strong> để lấy mã xác nhận.</p>
+            <p className="text-xs mt-1 text-center text-neutral-500">Không nhận được mã? Kiểm tra Spam/Quảng cáo hoặc gửi lại khi hết thời gian chờ.</p>
           </div>
+          <button
+            type="button"
+            onClick={handleSendOtp}
+            disabled={loading || resendCooldown > 0}
+            className="w-full py-3 rounded-full border-[1.5px] border-[#e2d3c8] bg-white text-sm font-bold text-accent-kraft transition-all hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading
+              ? 'Đang gửi mã...'
+              : resendCooldown > 0
+                ? `Gửi lại mã sau ${resendCooldown}s`
+                : 'Gửi lại mã OTP'}
+          </button>
           <button
             type="submit"
             disabled={loading}
