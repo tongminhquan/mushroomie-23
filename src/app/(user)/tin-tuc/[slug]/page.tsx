@@ -183,6 +183,12 @@ export default async function PostDetailPage({
 
   return (
     <div className="min-h-screen bg-secondary pb-16">
+      {isPreview && (
+        <div className="bg-[#2b2b2b] text-white text-sm text-center py-2.5 px-4 sticky top-0 z-50">
+          👁 <strong>Bản xem trước</strong> — {PREVIEW_LABELS[post.status] || post.status}. Chỉ admin nhìn thấy trang này.
+          <Link href={`/admin/bai-viet/${post.id}`} className="underline ml-2 text-[#ffe7a3]">Sửa bài</Link>
+        </div>
+      )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
 
       <section
