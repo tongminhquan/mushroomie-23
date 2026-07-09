@@ -13,6 +13,7 @@ import {
   CreditCard,
   ExternalLink,
   FileText,
+  FileUp,
   FolderOpen,
   ImageIcon,
   LayoutDashboard,
@@ -66,6 +67,7 @@ const navGroups: AdminNavGroup[] = [
     label: 'Nội dung & hệ thống',
     items: [
       { href: '/admin/bai-viet', icon: FileText, label: 'Bài viết' },
+      { href: '/admin/wordpress', icon: FileUp, label: 'Đăng WordPress' },
       { href: '/admin/thu-vien', icon: FolderOpen, label: 'Thư viện' },
       { href: '/admin/danh-gia', icon: Star, label: 'Đánh giá' },
       { href: '/admin/lien-he', icon: MessageSquare, label: 'Liên hệ' },
