@@ -5,38 +5,77 @@ import { generateSlug } from '@/lib/utils'
 import { logAdminAction } from '@/lib/admin-logger'
 import { buildPostContentMetrics, normalizeOptionalPostImage, serializePostForEditor, serializeStringArray } from '@/lib/post-normalization'
 
+const SORTABLE_FIELDS = new Set(['created_at', 'updated_at', 'published_at', 'title'])
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const page = Number(searchParams.get('page') || 1)
-    const limit = Number(searchParams.get('limit') || 9)
+    const limit = Math.min(Number(searchParams.get('limit') || 9), 100)
     const category = searchParams.get('category')
     const search = searchParams.get('search')
     const status = searchParams.get('status') || 'published'
+    const month = searchParams.get('month') // dạng YYYY-MM
+    const sortBy = SORTABLE_FIELDS.has(searchParams.get('sortBy') || '') ? (searchParams.get('sortBy') as string) : null
+    const order = searchParams.get('order') === 'asc' ? 'asc' : 'desc'
+    const withCounts = searchParams.get('withCounts') === '1'
 
     const session = await auth()
     const isAdmin = (session?.user as any)?.role === 'admin' || (session?.user as any)?.role === 'super_admin'
 
     const where: any = {}
-    if (!isAdmin) where.status = 'published'
-    else if (status !== 'all') where.status = status
+    if (!isAdmin) {
+      // Public: chỉ bài đã xuất bản — không bao giờ lộ draft/scheduled/private/trash
+      where.status = 'published'
+    } else if (!status || status === 'all') {
+      // "Tất cả" kiểu WordPress: mọi trạng thái trừ thùng rác
+      where.status = { not: 'trash' }
+    } else {
+      where.status = status
+    }
     if (category) where.category = { slug: category }
-    if (search) where.title = { contains: search }
+    if (search) {
+      where.OR = [
+        { title: { contains: search } },
+        { slug: { contains: search } },
+        { focus_keyword: { contains: search } },
+      ]
+    }
+    if (isAdmin && month && /^\d{4}-\d{2}$/.test(month)) {
+      const [y, m] = month.split('-').map(Number)
+      where.created_at = { gte: new Date(y, m - 1, 1), lt: new Date(m === 12 ? y + 1 : y, m === 12 ? 0 : m, 1) }
+    }
+
+    const orderBy = sortBy
+      ? { [sortBy]: order }
+      : isAdmin ? { created_at: 'desc' as const } : { published_at: 'desc' as const }
 
     const [posts, total] = await Promise.all([
       prisma.post.findMany({
         where,
         include: { category: true, author: { select: { id: true, name: true } }, tags: { include: { tag: true } } },
-        orderBy: { published_at: 'desc' },
+        orderBy,
         skip: (page - 1) * limit,
         take: limit,
       }),
       prisma.post.count({ where }),
     ])
 
+    // Status counts cho tabs kiểu WordPress: Tất cả (n) / Đã xuất bản (n) / ...
+    let counts: Record<string, number> | undefined
+    if (isAdmin && withCounts) {
+      const grouped = await prisma.post.groupBy({ by: ['status'], _count: { _all: true } })
+      counts = { all: 0 }
+      for (const g of grouped) {
+        counts[g.status] = g._count._all
+        if (g.status !== 'trash') counts.all += g._count._all
+      }
+    }
+
     return NextResponse.json({
       posts: await Promise.all(posts.map((post) => serializePostForEditor(post))),
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      ...(counts ? { counts } : {}),
     })
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
