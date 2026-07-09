@@ -64,8 +64,8 @@ export default function InternalLinkSuggester() {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-      <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100 flex items-center gap-2">
+    <div className="bg-white rounded-2xl border border-[#f0e0d6] shadow-sm overflow-hidden">
+      <div className="px-4 py-3 bg-[#fdfaf7] border-b border-neutral-100 flex items-center gap-2">
         <LinkIcon size={14} className="text-neutral-500" />
         <span className="font-semibold text-sm text-neutral-800">Gợi ý Liên kết Nội bộ</span>
       </div>
@@ -77,7 +77,7 @@ export default function InternalLinkSuggester() {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Tìm kiếm bài viết hoặc sản phẩm..."
-            className="w-full pl-9 pr-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none bg-white"
+            className="w-full pl-9 pr-3 py-2 border border-[#f0e0d6] rounded-lg text-sm focus:border-primary outline-none bg-white"
           />
           {isLoading && <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-primary animate-spin" />}
         </div>
@@ -85,7 +85,7 @@ export default function InternalLinkSuggester() {
         {results.length > 0 ? (
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {results.map(item => (
-              <div key={item.id} className="flex items-center justify-between p-2 border border-neutral-100 rounded-lg hover:bg-neutral-50 transition-colors">
+              <div key={item.id} className="flex items-center justify-between p-2 border border-neutral-100 rounded-lg hover:bg-[#fdfaf7] transition-colors">
                 <div className="flex-1 min-w-0 pr-2">
                   <p className="text-xs font-semibold text-neutral-800 truncate" title={item.title}>{item.title}</p>
                   <p className="text-[10px] text-neutral-400 truncate flex gap-2">
@@ -94,12 +94,12 @@ export default function InternalLinkSuggester() {
                   </p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <a href={item.url} target="_blank" rel="noreferrer" className="p-1.5 text-neutral-400 hover:text-primary transition-colors bg-white border border-neutral-200 rounded-md">
+                  <a href={item.url} target="_blank" rel="noreferrer" className="p-1.5 text-neutral-400 hover:text-primary transition-colors bg-white border border-[#f0e0d6] rounded-md">
                     <ExternalLink size={12} />
                   </a>
                   <button
                     onClick={() => copyToClipboard(item.url, item.id)}
-                    className="p-1.5 text-neutral-600 hover:text-primary hover:bg-primary/5 transition-colors bg-white border border-neutral-200 rounded-md flex items-center justify-center w-7 h-7"
+                    className="p-1.5 text-neutral-600 hover:text-primary hover:bg-primary/5 transition-colors bg-white border border-[#f0e0d6] rounded-md flex items-center justify-center w-7 h-7"
                     title="Copy Link"
                   >
                     {copiedId === item.id ? <CheckCircle2 size={12} className="text-green-500" /> : <Copy size={12} />}

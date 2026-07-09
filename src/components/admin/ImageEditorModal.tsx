@@ -78,25 +78,25 @@ export default function ImageEditorModal({ src, purpose = 'media', onSave, onCan
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden">
         
         {/* Toolbar */}
-        <div className="p-3 border-b border-neutral-200 flex flex-wrap gap-2 items-center justify-between bg-neutral-50">
+        <div className="p-3 border-b border-[#f0e0d6] flex flex-wrap gap-2 items-center justify-between bg-[#fdfaf7]">
           <div className="flex flex-wrap gap-2 items-center">
-            <button onClick={handleSetDragModeCrop} className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 rounded hover:bg-neutral-100 text-sm font-medium text-neutral-700 bg-white">
+            <button onClick={handleSetDragModeCrop} className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 rounded hover:bg-[#fdf6f2] text-sm font-medium text-neutral-700 bg-white">
               <Crop size={16} className="text-primary" /> Cắt ảnh
             </button>
-            <button onClick={handleZoomIn} className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 rounded hover:bg-neutral-100 text-sm font-medium text-neutral-700 bg-white">
+            <button onClick={handleZoomIn} className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 rounded hover:bg-[#fdf6f2] text-sm font-medium text-neutral-700 bg-white">
               <ZoomIn size={16} className="text-primary" /> Phóng to
             </button>
-            <button onClick={handleZoomOut} className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 rounded hover:bg-neutral-100 text-sm font-medium text-neutral-700 bg-white">
+            <button onClick={handleZoomOut} className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 rounded hover:bg-[#fdf6f2] text-sm font-medium text-neutral-700 bg-white">
               <ZoomOut size={16} className="text-primary" /> Thu nhỏ
             </button>
-            <button onClick={handleRotateLeft} className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 rounded hover:bg-neutral-100 text-sm font-medium text-neutral-700 bg-white">
+            <button onClick={handleRotateLeft} className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 rounded hover:bg-[#fdf6f2] text-sm font-medium text-neutral-700 bg-white">
               <RotateCcw size={16} className="text-primary" /> Xoay trái
             </button>
-            <button onClick={handleRotateRight} className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 rounded hover:bg-neutral-100 text-sm font-medium text-neutral-700 bg-white">
+            <button onClick={handleRotateRight} className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 rounded hover:bg-[#fdf6f2] text-sm font-medium text-neutral-700 bg-white">
               <RotateCw size={16} className="text-primary" /> Xoay phải
             </button>
             <div className="w-px h-6 bg-neutral-300 mx-1" />
-            <button onClick={handleReset} className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 rounded hover:bg-neutral-100 text-sm font-medium text-neutral-700 bg-white">
+            <button onClick={handleReset} className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 rounded hover:bg-[#fdf6f2] text-sm font-medium text-neutral-700 bg-white">
               <Undo size={16} className="text-neutral-500" /> Đặt lại
             </button>
           </div>
@@ -108,7 +108,7 @@ export default function ImageEditorModal({ src, purpose = 'media', onSave, onCan
               <button onClick={() => handleRatioChange(1)} className={`px-2 py-1 text-xs font-semibold rounded ${aspectRatio === 1 ? 'bg-white shadow' : 'text-neutral-500 hover:text-neutral-700'}`}>1:1</button>
               <button onClick={() => handleRatioChange(16/9)} className={`px-2 py-1 text-xs font-semibold rounded ${aspectRatio === 16/9 ? 'bg-white shadow' : 'text-neutral-500 hover:text-neutral-700'}`}>16:9</button>
             </div>
-            <button onClick={onCancel} className="px-4 py-1.5 border border-neutral-300 rounded bg-white hover:bg-neutral-100 text-sm font-semibold text-neutral-600">
+            <button onClick={onCancel} className="px-4 py-1.5 border border-neutral-300 rounded bg-white hover:bg-[#fdf6f2] text-sm font-semibold text-neutral-600">
               Hủy chỉnh sửa
             </button>
             <button onClick={handleSave} disabled={isSaving} className="px-4 py-1.5 rounded bg-primary hover:bg-primary-dark text-white text-sm font-semibold disabled:opacity-50">

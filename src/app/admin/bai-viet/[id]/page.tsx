@@ -15,7 +15,7 @@ import SafeImage from '@/components/ui/SafeImage'
 const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor'), {
   ssr: false,
   loading: () => (
-    <div className="w-full min-h-[450px] border-[1.5px] border-[#f0e0d6] rounded-xl bg-neutral-50 flex items-center justify-center text-neutral-400 text-sm">
+    <div className="w-full min-h-[450px] border-[1.5px] border-[#f0e0d6] rounded-xl bg-[#fdfaf7] flex items-center justify-center text-neutral-400 text-sm">
       Đang tải trình soạn thảo...
     </div>
   ),
@@ -479,7 +479,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
   if (isFetching) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#fdfaf7] flex items-center justify-center">
         <div className="text-center space-y-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-neutral-500 text-sm">Đang tải bài viết...</p>
@@ -492,7 +492,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
     const needsLogin = loadError.status === 401 || loadError.status === 403
 
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[#fdfaf7] flex items-center justify-center px-4">
         <div className="w-full max-w-lg rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
           <p className="text-sm font-bold uppercase tracking-[0.12em] text-red-500">Lỗi tải bài viết</p>
           <h1 className="mt-2 text-2xl font-bold text-neutral-900">Không thể mở trang chỉnh sửa</h1>
@@ -506,7 +506,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
             </button>
             <Link
               href={needsLogin ? '/tai-khoan/dang-nhap' : '/admin/bai-viet'}
-              className="rounded-xl border-[1.5px] border-[#f0e0d6] px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+              className="rounded-xl border-[1.5px] border-[#f0e0d6] px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-[#fdfaf7]"
             >
               {needsLogin ? 'Đăng nhập lại' : 'Quay lại danh sách'}
             </Link>
@@ -517,12 +517,12 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-[#fdfaf7]">
       {/* ── Sticky Top Bar ── */}
-      <div className="sticky top-0 z-40 bg-white border-b border-neutral-200 shadow-sm">
+      <div className="sticky top-0 z-40 bg-white border-b border-[#f0e0d6] shadow-sm">
         <div className="max-w-[1400px] mx-auto px-5 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/admin/bai-viet" className="p-2 hover:bg-neutral-100 rounded-lg transition-colors text-neutral-500">
+            <Link href="/admin/bai-viet" className="p-2 hover:bg-[#fdf6f2] rounded-lg transition-colors text-neutral-500">
               <ArrowLeft size={18} />
             </Link>
             <div>
@@ -534,13 +534,13 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
             <AutosaveIndicator />
             {error && <span className="text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-lg border border-red-100">{error}</span>}
             {form.slug && (
-              <Link href={`/tin-tuc/${form.slug}`} target="_blank" className="flex items-center gap-1.5 px-3 py-2 border-[1.5px] border-[#f0e0d6] rounded-xl text-xs font-medium text-neutral-600 hover:bg-neutral-50 transition-colors">
+              <Link href={`/tin-tuc/${form.slug}`} target="_blank" className="flex items-center gap-1.5 px-3 py-2 border-[1.5px] border-[#f0e0d6] rounded-xl text-xs font-medium text-neutral-600 hover:bg-[#fdfaf7] transition-colors">
                 <ExternalLink size={13} /> Xem
               </Link>
             )}
             <button
               onClick={() => handleSubmit('draft')}
-              className="flex items-center gap-1.5 px-4 py-2 border-[1.5px] border-[#f0e0d6] bg-white rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 border-[1.5px] border-[#f0e0d6] bg-white rounded-xl text-sm font-semibold text-neutral-600 hover:bg-[#fdfaf7] transition-colors"
             >
               <Save size={14} /> Lưu nháp
             </button>
@@ -572,7 +572,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                   className="w-full text-2xl font-bold text-neutral-900 border-0 outline-none placeholder:text-neutral-300 leading-tight"
                 />
               </div>
-              <div className="px-6 py-3 flex items-center gap-2 bg-neutral-50/50 text-sm border-t border-neutral-100">
+              <div className="px-6 py-3 flex items-center gap-2 bg-[#fdfaf7]/50 text-sm border-t border-neutral-100">
                 <span className="text-neutral-400 text-xs font-medium whitespace-nowrap">Đường dẫn:</span>
                 <span className="text-neutral-300">/tin-tuc/</span>
                 <input
@@ -599,7 +599,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
             {/* Rich Text Editor */}
             <div className="bg-white rounded-2xl border-[1.5px] border-[#f0e0d6] shadow-sm overflow-hidden flex flex-col">
-              <div className="px-5 py-3 border-b border-neutral-100 bg-neutral-50 flex items-center justify-between">
+              <div className="px-5 py-3 border-b border-neutral-100 bg-[#fdfaf7] flex items-center justify-between">
                 <p className="text-sm font-semibold text-neutral-700">Nội dung bài viết</p>
                 <div className="flex bg-neutral-200/50 p-1 rounded-lg">
                   <button 
@@ -651,7 +651,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
             {/* Table of Contents Panel */}
             <div className="bg-white rounded-2xl border-[1.5px] border-[#f0e0d6] shadow-sm overflow-hidden">
-              <div className="px-5 py-3 bg-neutral-50 border-b border-neutral-100 flex items-center justify-between">
+              <div className="px-5 py-3 bg-[#fdfaf7] border-b border-neutral-100 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <BookOpen size={15} className="text-neutral-500" />
                   <span className="text-sm font-semibold text-neutral-700">Mục lục (Table of Contents)</span>
@@ -690,7 +690,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
             {/* ── SEO Cơ bản (below editor on mobile, visible on desktop too) ── */}
             <div className="bg-white rounded-2xl border-[1.5px] border-[#f0e0d6] shadow-sm overflow-hidden xl:hidden">
-              <div className="px-5 py-3 bg-neutral-50 border-b border-neutral-100 flex items-center gap-2">
+              <div className="px-5 py-3 bg-[#fdfaf7] border-b border-neutral-100 flex items-center gap-2">
                 <Settings2 size={15} className="text-neutral-500" />
                 <span className="text-sm font-semibold text-neutral-700">SEO & Mạng xã hội</span>
               </div>
@@ -704,7 +704,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           <div className="space-y-4">
             {/* Publish Panel */}
             <div className="bg-white rounded-2xl border-[1.5px] border-[#f0e0d6] shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
+              <div className="px-4 py-3 bg-[#fdfaf7] border-b border-neutral-100">
                 <span className="font-semibold text-sm text-neutral-800">Xuất bản</span>
               </div>
               <div className="p-4 space-y-3">
@@ -752,7 +752,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                 </div>
                 <AutosaveIndicator />
                 <div className="pt-2 border-t border-neutral-100 flex gap-2">
-                  <button onClick={() => handleSubmit('draft')} className="flex-1 py-2 border-[1.5px] border-[#f0e0d6] rounded-xl text-sm font-medium text-neutral-600 hover:bg-neutral-50 transition-colors">
+                  <button onClick={() => handleSubmit('draft')} className="flex-1 py-2 border-[1.5px] border-[#f0e0d6] rounded-xl text-sm font-medium text-neutral-600 hover:bg-[#fdfaf7] transition-colors">
                     Lưu nháp
                   </button>
                   <button onClick={() => handleSubmit(['scheduled', 'private', 'hidden'].includes(form.status) ? form.status : 'published')} disabled={isLoading} className="flex-1 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60">
@@ -782,7 +782,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
             {/* Featured Image Panel */}
             <div className="bg-white rounded-2xl border-[1.5px] border-[#f0e0d6] shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
+              <div className="px-4 py-3 bg-[#fdfaf7] border-b border-neutral-100">
                 <span className="font-semibold text-sm text-neutral-800">Ảnh đại diện</span>
               </div>
               <div className="p-4">
@@ -832,7 +832,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                     </div>
                   </div>
                 ) : (
-                  <button onClick={() => openMediaPicker('featured')} className="w-full border-2 border-dashed border-neutral-200 rounded-xl py-8 flex flex-col items-center gap-2 text-neutral-400 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all">
+                  <button onClick={() => openMediaPicker('featured')} className="w-full border-2 border-dashed border-[#f0e0d6] rounded-xl py-8 flex flex-col items-center gap-2 text-neutral-400 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all">
                     <ImageIcon size={28} />
                     <span className="text-sm font-medium">Chọn ảnh đại diện</span>
                     <span className="text-xs">Khuyến nghị: 1200×675px</span>
@@ -846,7 +846,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
             {/* Tags */}
             <div className="bg-white rounded-2xl border-[1.5px] border-[#f0e0d6] shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
+              <div className="px-4 py-3 bg-[#fdfaf7] border-b border-neutral-100">
                 <span className="font-semibold text-sm text-neutral-800">Tags</span>
               </div>
               <div className="p-4">
@@ -881,7 +881,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
             {/* ── Social / OG / Twitter Panel ── */}
             <div className="bg-white rounded-2xl border-[1.5px] border-[#f0e0d6] shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100 flex items-center gap-2">
+              <div className="px-4 py-3 bg-[#fdfaf7] border-b border-neutral-100 flex items-center gap-2">
                 <Share2 size={14} className="text-neutral-500" />
                 <span className="font-semibold text-sm text-neutral-800">Mạng xã hội</span>
               </div>
@@ -904,7 +904,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                       </div>
                     )}
                   </div>
-                  <div className="p-3 bg-neutral-50">
+                  <div className="p-3 bg-[#fdfaf7]">
                     <p className="text-[10px] text-neutral-400 uppercase">mushroomie.io.vn</p>
                     <p className="text-sm font-semibold text-neutral-800 line-clamp-1 mt-0.5">
                       {form.og_title || form.seo_title || form.title || 'Tiêu đề bài viết'}
@@ -956,7 +956,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
             {/* ── Technical SEO Panel ── */}
             <div className="bg-white rounded-2xl border-[1.5px] border-[#f0e0d6] shadow-sm overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100 flex items-center gap-2">
+              <div className="px-4 py-3 bg-[#fdfaf7] border-b border-neutral-100 flex items-center gap-2">
                 <Globe size={14} className="text-neutral-500" />
                 <span className="font-semibold text-sm text-neutral-800">SEO Kỹ thuật</span>
               </div>
@@ -1033,8 +1033,8 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                 </div>
               ))}
             </div>
-            <div className="px-5 py-4 bg-neutral-50 border-t border-neutral-100 flex justify-end gap-2">
-              <button onClick={() => setShowValidationDialog(false)} className="px-4 py-2 border-[1.5px] border-[#f0e0d6] rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-100">
+            <div className="px-5 py-4 bg-[#fdfaf7] border-t border-neutral-100 flex justify-end gap-2">
+              <button onClick={() => setShowValidationDialog(false)} className="px-4 py-2 border-[1.5px] border-[#f0e0d6] rounded-xl text-sm font-semibold text-neutral-600 hover:bg-[#fdf6f2]">
                 Quay lại sửa
               </button>
               <button onClick={() => doSubmit('published')} className="px-4 py-2 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600">

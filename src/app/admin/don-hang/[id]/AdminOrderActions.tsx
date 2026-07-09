@@ -50,7 +50,7 @@ export default function AdminOrderActions({ orderId, currentStatus }: { orderId:
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="w-full px-3 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full px-3 py-2 border border-[#f0e0d6] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
             {ORDER_STATUSES.map((s) => (
               <option key={s.value} value={s.value}>{s.label}</option>
@@ -64,7 +64,7 @@ export default function AdminOrderActions({ orderId, currentStatus }: { orderId:
             onChange={(e) => setNote(e.target.value)}
             rows={2}
             placeholder="Ghi chú cập nhật..."
-            className="w-full px-3 py-2 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+            className="w-full px-3 py-2 border border-[#f0e0d6] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
           />
         </div>
         {success && (

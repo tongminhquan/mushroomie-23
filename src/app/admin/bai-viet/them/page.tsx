@@ -311,7 +311,7 @@ export default function AddPostPage() {
             {error && <span className="text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-lg border border-red-100">{error}</span>}
             <button
               onClick={() => handleSubmit('draft')}
-              className="flex items-center gap-1.5 px-4 py-2 border-[1.5px] border-[#e2d3c8] bg-white rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 border-[1.5px] border-[#e2d3c8] bg-white rounded-lg text-sm font-semibold text-neutral-700 hover:bg-[#fdf6f2] transition-colors"
             >
               <Save size={14} /> Lưu nháp
             </button>
@@ -524,7 +524,7 @@ export default function AddPostPage() {
                 </div>
                 <AutosaveIndicator />
                 <div className="pt-2 border-t border-[#f0e0d6] flex gap-2">
-                  <button onClick={() => handleSubmit('draft')} className="flex-1 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors">
+                  <button onClick={() => handleSubmit('draft')} className="flex-1 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm font-semibold text-neutral-700 hover:bg-[#fdf6f2] transition-colors">
                     Lưu nháp
                   </button>
                   <button onClick={() => handleSubmit(['scheduled', 'private', 'hidden'].includes(form.status) ? form.status : 'published')} disabled={isLoading} className="flex-1 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60">
@@ -757,7 +757,7 @@ export default function AddPostPage() {
               ))}
             </div>
             <div className="px-5 py-4 bg-[#fdfaf7] border-t-[1.5px] border-[#f0e0d6] flex justify-end gap-2">
-              <button onClick={() => setShowValidationDialog(false)} className="px-4 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100">
+              <button onClick={() => setShowValidationDialog(false)} className="px-4 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm font-semibold text-neutral-700 hover:bg-[#fdf6f2]">
                 Quay lại sửa
               </button>
               <button onClick={() => doSubmit('published')} className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-semibold hover:bg-orange-600">

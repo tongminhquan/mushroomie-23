@@ -29,7 +29,7 @@ export default function AdminPaymentsPage() {
       case 'PENDING': return 'bg-[#fdf3df] text-[#b9791b] border-[#f3e4bd]'
       case 'FAILED': return 'bg-[#fdeceb] text-[#d83a2f] border-[#f6d2cf]'
       case 'EXPIRED': return 'bg-[#f1efed] text-neutral-600 border-[#e2d3c8]'
-      default: return 'bg-neutral-100 text-neutral-700 border-neutral-200'
+      default: return 'bg-neutral-100 text-neutral-700 border-[#f0e0d6]'
     }
   }
 

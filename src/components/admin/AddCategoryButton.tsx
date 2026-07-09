@@ -36,7 +36,7 @@ export default function AddCategoryButton() {
 
   return (
     <>
-      <button onClick={() => setShow(true)} className="bg-white border border-neutral-200 text-neutral-700 px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-neutral-50 transition-colors shadow-sm">
+      <button onClick={() => setShow(true)} className="bg-white border border-[#f0e0d6] text-neutral-700 px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#fdfaf7] transition-colors shadow-sm">
         + Thêm danh mục
       </button>
       {show && (
@@ -48,11 +48,11 @@ export default function AddCategoryButton() {
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Tên danh mục (ví dụ: Vòng tay)..."
-              className="w-full px-4 py-2 border border-neutral-200 rounded-xl mb-6 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+              className="w-full px-4 py-2 border border-[#f0e0d6] rounded-xl mb-6 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
               onKeyDown={e => e.key === 'Enter' && handleAdd()}
             />
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setShow(false)} className="px-4 py-2 text-sm text-neutral-500 font-semibold hover:bg-neutral-100 rounded-xl transition-colors">Hủy</button>
+              <button onClick={() => setShow(false)} className="px-4 py-2 text-sm text-neutral-500 font-semibold hover:bg-[#fdf6f2] rounded-xl transition-colors">Hủy</button>
               <button onClick={handleAdd} disabled={loading || !name.trim()} className="px-5 py-2 text-sm bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50">
                 {loading ? 'Đang thêm...' : 'Thêm danh mục'}
               </button>

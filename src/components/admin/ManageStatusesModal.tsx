@@ -74,7 +74,7 @@ export default function ManageStatusesModal() {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Tên trạng thái (VD: Hết hàng)..."
-                className="flex-1 px-4 py-2 border border-neutral-200 rounded-xl outline-none focus:border-primary text-sm"
+                className="flex-1 px-4 py-2 border border-[#f0e0d6] rounded-xl outline-none focus:border-primary text-sm"
                 onKeyDown={e => e.key === 'Enter' && handleAdd()}
               />
               <button onClick={handleAdd} disabled={loading || !name.trim()} className="px-4 py-2 bg-primary text-white font-semibold rounded-xl disabled:opacity-50 text-sm">
@@ -83,20 +83,20 @@ export default function ManageStatusesModal() {
             </div>
 
             <div className="flex-1 overflow-y-auto mb-4 border border-neutral-100 rounded-lg">
-              <div className="flex items-center justify-between p-3 border-b border-neutral-100 bg-neutral-50/50">
+              <div className="flex items-center justify-between p-3 border-b border-neutral-100 bg-[#fdfaf7]/50">
                 <span className="font-medium text-sm text-neutral-600">Đang bán (Active)</span>
                 <span className="text-xs text-neutral-400 bg-neutral-200 px-2 py-1 rounded">Mặc định</span>
               </div>
-              <div className="flex items-center justify-between p-3 border-b border-neutral-100 bg-neutral-50/50">
+              <div className="flex items-center justify-between p-3 border-b border-neutral-100 bg-[#fdfaf7]/50">
                 <span className="font-medium text-sm text-neutral-600">Ngừng bán (Inactive)</span>
                 <span className="text-xs text-neutral-400 bg-neutral-200 px-2 py-1 rounded">Mặc định</span>
               </div>
-              <div className="flex items-center justify-between p-3 border-b border-neutral-100 bg-neutral-50/50">
+              <div className="flex items-center justify-between p-3 border-b border-neutral-100 bg-[#fdfaf7]/50">
                 <span className="font-medium text-sm text-neutral-600">Bản nháp (Draft)</span>
                 <span className="text-xs text-neutral-400 bg-neutral-200 px-2 py-1 rounded">Mặc định</span>
               </div>
               {statuses.map(s => (
-                <div key={s.id} className="flex items-center justify-between p-3 border-b border-neutral-100 last:border-0 hover:bg-neutral-50">
+                <div key={s.id} className="flex items-center justify-between p-3 border-b border-neutral-100 last:border-0 hover:bg-[#fdfaf7]">
                   <span className="font-medium text-sm">{s.name}</span>
                   <button onClick={() => handleDelete(s.id)} className="text-red-500 p-1 hover:bg-red-100 rounded">
                     <Trash2 size={16} />

@@ -85,8 +85,8 @@ export default function CategoryPanel({ selectedIds, onChange }: CategoryPanelPr
     : categories
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
-      <div className="px-4 py-3 border-b border-neutral-100 bg-neutral-50 flex items-center justify-between">
+    <div className="bg-white rounded-2xl shadow-sm border border-[#f0e0d6] overflow-hidden">
+      <div className="px-4 py-3 border-b border-neutral-100 bg-[#fdfaf7] flex items-center justify-between">
         <span className="font-semibold text-sm text-neutral-800">Danh mục</span>
       </div>
 
@@ -94,13 +94,13 @@ export default function CategoryPanel({ selectedIds, onChange }: CategoryPanelPr
       <div className="flex border-b border-neutral-100 text-xs font-medium">
         <button
           onClick={() => setTab('all')}
-          className={`flex-1 py-2 transition-colors ${tab === 'all' ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-neutral-50'}`}
+          className={`flex-1 py-2 transition-colors ${tab === 'all' ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-[#fdfaf7]'}`}
         >
           Tất cả danh mục
         </button>
         <button
           onClick={() => setTab('most_used')}
-          className={`flex-1 py-2 transition-colors ${tab === 'most_used' ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-neutral-50'}`}
+          className={`flex-1 py-2 transition-colors ${tab === 'most_used' ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-[#fdfaf7]'}`}
         >
           Dùng nhiều nhất
         </button>
@@ -111,7 +111,7 @@ export default function CategoryPanel({ selectedIds, onChange }: CategoryPanelPr
         {displayCats.length === 0 ? (
           <p className="text-xs text-neutral-400 text-center py-4">Chưa có danh mục nào</p>
         ) : displayCats.map(cat => (
-          <label key={cat.id} className="flex items-center gap-2 cursor-pointer hover:bg-neutral-50 px-2 py-1.5 rounded-lg transition-colors">
+          <label key={cat.id} className="flex items-center gap-2 cursor-pointer hover:bg-[#fdfaf7] px-2 py-1.5 rounded-lg transition-colors">
             <div
               onClick={() => handleToggle(cat.id)}
               className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors cursor-pointer ${
@@ -141,18 +141,18 @@ export default function CategoryPanel({ selectedIds, onChange }: CategoryPanelPr
               value={newName}
               onChange={handleNameChange}
               placeholder="Tên danh mục"
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none"
+              className="w-full px-3 py-2 border border-[#f0e0d6] rounded-lg text-sm focus:border-primary outline-none"
             />
             <input
               value={newSlug}
               onChange={e => setNewSlug(e.target.value)}
               placeholder="Slug (tự động)"
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none font-mono text-xs"
+              className="w-full px-3 py-2 border border-[#f0e0d6] rounded-lg text-sm focus:border-primary outline-none font-mono text-xs"
             />
             <select
               value={parentId}
               onChange={e => setParentId(e.target.value)}
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none bg-white"
+              className="w-full px-3 py-2 border border-[#f0e0d6] rounded-lg text-sm focus:border-primary outline-none bg-white"
             >
               <option value="">Danh mục gốc</option>
               {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}

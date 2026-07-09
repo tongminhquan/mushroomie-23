@@ -355,7 +355,7 @@ export default function SeoAnalyzer({ form, setForm, onScoreChange }: SeoAnalyze
   }, [form, keyword, onScoreChange])
 
   const scoreColor = score >= 80 ? 'text-green-700' : score >= 50 ? 'text-orange-600' : score > 0 ? 'text-red-600' : 'text-neutral-400'
-  const scoreBg = score >= 80 ? 'bg-green-50 border-green-200' : score >= 50 ? 'bg-orange-50 border-orange-200' : score > 0 ? 'bg-red-50 border-red-100' : 'bg-neutral-50 border-neutral-200'
+  const scoreBg = score >= 80 ? 'bg-green-50 border-green-200' : score >= 50 ? 'bg-orange-50 border-orange-200' : score > 0 ? 'bg-red-50 border-red-100' : 'bg-[#fdfaf7] border-[#f0e0d6]'
   const scoreLabel = score >= 80 ? '🌿 Tốt' : score >= 50 ? '⚠️ Cần cải thiện' : score > 0 ? '❌ Kém' : '—'
 
   const groupedResults = (Object.keys(GROUP_INFO) as Array<keyof typeof GROUP_INFO>).map(group => ({
@@ -399,7 +399,7 @@ export default function SeoAnalyzer({ form, setForm, onScoreChange }: SeoAnalyze
               placeholder="Ví dụ: vòng tay handmade"
               value={form.focus_keyword || ''}
               onChange={e => setForm((p: any) => ({ ...p, focus_keyword: e.target.value }))}
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none bg-white"
+              className="w-full px-3 py-2 border border-[#f0e0d6] rounded-lg text-sm focus:border-primary outline-none bg-white"
             />
             <p className="text-xs text-neutral-400 mt-1">Hệ thống sẽ phân tích dựa trên từ khóa này.</p>
           </div>
@@ -407,7 +407,7 @@ export default function SeoAnalyzer({ form, setForm, onScoreChange }: SeoAnalyze
       </div>
 
       {/* ─── SEO Preview + Title/Slug/Desc ─── */}
-      <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#f0e0d6] shadow-sm overflow-hidden">
         {/* Tabs */}
         <div className="flex border-b border-neutral-100 text-sm">
           <button
@@ -427,38 +427,38 @@ export default function SeoAnalyzer({ form, setForm, onScoreChange }: SeoAnalyze
         {activeTab === 'overview' && (
           <div className="p-4 space-y-4">
             {/* SEO Title */}
-            <div className="space-y-2 bg-neutral-50 rounded-xl p-3 border border-neutral-100">
+            <div className="space-y-2 bg-[#fdfaf7] rounded-xl p-3 border border-neutral-100">
               <LengthGauge value={seoTitleLen} min={30} ideal={60} max={100} label="Tiêu đề SEO" />
               <input
                 value={form.seo_title}
                 onChange={e => setForm((p: any) => ({ ...p, seo_title: e.target.value }))}
                 placeholder={form.title || 'Nhập tiêu đề SEO...'}
-                className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none bg-white"
+                className="w-full px-3 py-2 border border-[#f0e0d6] rounded-lg text-sm focus:border-primary outline-none bg-white"
               />
               <p className="text-xs text-neutral-400">Sẽ xuất hiện ở dòng đầu tiên khi hiển thị trong kết quả tìm kiếm.</p>
             </div>
 
             {/* Slug */}
-            <div className="space-y-2 bg-neutral-50 rounded-xl p-3 border border-neutral-100">
+            <div className="space-y-2 bg-[#fdfaf7] rounded-xl p-3 border border-neutral-100">
               <LengthGauge value={slugLen} min={15} ideal={75} max={120} label="Liên kết cố định (Slug)" />
               <input
                 value={form.slug}
                 onChange={e => setForm((p: any) => ({ ...p, slug: e.target.value }))}
                 placeholder="duong-dan-bai-viet"
-                className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none bg-white font-mono text-xs"
+                className="w-full px-3 py-2 border border-[#f0e0d6] rounded-lg text-sm focus:border-primary outline-none bg-white font-mono text-xs"
               />
               <p className="text-xs text-neutral-400">URL duy nhất của trang này trong kết quả tìm kiếm.</p>
             </div>
 
             {/* Meta Description */}
-            <div className="space-y-2 bg-neutral-50 rounded-xl p-3 border border-neutral-100">
+            <div className="space-y-2 bg-[#fdfaf7] rounded-xl p-3 border border-neutral-100">
               <LengthGauge value={metaLen} min={120} ideal={160} max={230} label="Thẻ mô tả (Meta Description)" />
               <textarea
                 value={form.meta_description}
                 onChange={e => setForm((p: any) => ({ ...p, meta_description: e.target.value }))}
                 rows={3}
                 placeholder="Viết mô tả 120–160 ký tự, có chứa từ khóa chính."
-                className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none resize-none bg-white"
+                className="w-full px-3 py-2 border border-[#f0e0d6] rounded-lg text-sm focus:border-primary outline-none resize-none bg-white"
               />
               <p className="text-xs text-neutral-400">Nội dung xuất hiện làm mô tả khi bài viết hiển thị trên Google.</p>
             </div>
@@ -471,17 +471,17 @@ export default function SeoAnalyzer({ form, setForm, onScoreChange }: SeoAnalyze
             <div className="flex items-center justify-between mb-1">
               <p className="text-xs font-bold text-neutral-500 uppercase tracking-wide">Xem trước Google</p>
               <div className="flex gap-1">
-                <button onClick={() => setPreviewDevice('desktop')} className={`p-1.5 rounded-lg transition-colors ${previewDevice === 'desktop' ? 'bg-primary text-white' : 'hover:bg-neutral-100 text-neutral-500'}`}>
+                <button onClick={() => setPreviewDevice('desktop')} className={`p-1.5 rounded-lg transition-colors ${previewDevice === 'desktop' ? 'bg-primary text-white' : 'hover:bg-[#fdf6f2] text-neutral-500'}`}>
                   <Monitor size={14} />
                 </button>
-                <button onClick={() => setPreviewDevice('mobile')} className={`p-1.5 rounded-lg transition-colors ${previewDevice === 'mobile' ? 'bg-primary text-white' : 'hover:bg-neutral-100 text-neutral-500'}`}>
+                <button onClick={() => setPreviewDevice('mobile')} className={`p-1.5 rounded-lg transition-colors ${previewDevice === 'mobile' ? 'bg-primary text-white' : 'hover:bg-[#fdf6f2] text-neutral-500'}`}>
                   <Smartphone size={14} />
                 </button>
               </div>
             </div>
 
             {/* Google snippet preview */}
-            <div className={`border border-neutral-200 rounded-xl p-4 bg-white ${previewDevice === 'mobile' ? 'max-w-xs' : ''}`}>
+            <div className={`border border-[#f0e0d6] rounded-xl p-4 bg-white ${previewDevice === 'mobile' ? 'max-w-xs' : ''}`}>
               <p className="text-xs text-neutral-400 truncate mb-0.5">https://mushroomie.io.vn/tin-tuc/{displaySlug}</p>
               <p className={`text-blue-700 font-medium leading-snug mt-0.5 ${previewDevice === 'desktop' ? 'text-[18px]' : 'text-[16px]'} line-clamp-1`}>
                 {displayTitle}
@@ -496,8 +496,8 @@ export default function SeoAnalyzer({ form, setForm, onScoreChange }: SeoAnalyze
 
       {/* ─── SEO Checklist ─── */}
       {results.length > 0 && (
-        <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-neutral-100 bg-neutral-50">
+        <div className="bg-white rounded-2xl border border-[#f0e0d6] shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-neutral-100 bg-[#fdfaf7]">
             <p className="text-sm font-bold text-neutral-800">Kết quả phân tích SEO</p>
           </div>
           <div className="divide-y divide-neutral-100">
@@ -510,7 +510,7 @@ export default function SeoAnalyzer({ form, setForm, onScoreChange }: SeoAnalyze
                 <div key={group}>
                   <button
                     onClick={() => setExpandedGroups(p => ({ ...p, [group]: !isExpanded }))}
-                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-neutral-50 transition-colors"
+                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-[#fdfaf7] transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-sm">{info.icon}</span>

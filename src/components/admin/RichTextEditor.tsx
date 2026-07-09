@@ -305,7 +305,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
   }, [uploadFiles])
 
   return (
-    <div className="rich-editor border border-neutral-200 rounded-xl overflow-hidden bg-white relative">
+    <div className="rich-editor border border-[#f0e0d6] rounded-xl overflow-hidden bg-white relative">
       <style>{`
         .rich-editor .editor-toolbar {
           display: flex; flex-wrap: wrap; gap: 2px; padding: 6px 8px;
@@ -389,7 +389,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       )}
 
       {/* Media Button */}
-      <div className="p-2 border-b border-neutral-200 bg-neutral-50 flex items-center">
+      <div className="p-2 border-b border-[#f0e0d6] bg-[#fdfaf7] flex items-center">
         <button onClick={() => setShowMediaPicker(true)} className="flex items-center gap-2 px-3 py-1.5 border border-primary text-primary rounded-lg text-sm font-semibold hover:bg-primary/5 transition-colors">
           <ImageIcon size={16} /> Thêm tệp Media
         </button>
@@ -501,15 +501,15 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       {/* Floating Image Toolbar */}
       {selectedImage && !showImageDetails && (
         <div
-          className="img-floating-toolbar absolute z-10 flex items-center bg-white border border-neutral-200 shadow-lg rounded-lg overflow-hidden transition-all"
+          className="img-floating-toolbar absolute z-10 flex items-center bg-white border border-[#f0e0d6] shadow-lg rounded-lg overflow-hidden transition-all"
           style={{ top: Math.max(0, imgOffset.top - 45), left: imgOffset.left, transform: 'translateX(-50%)' }}
         >
-          <button className="p-2 hover:bg-neutral-100 text-neutral-600" onClick={() => handleAlign('left')} title="Căn trái"><AlignLeft size={16} /></button>
-          <button className="p-2 hover:bg-neutral-100 text-neutral-600" onClick={() => handleAlign('center')} title="Căn giữa"><AlignCenter size={16} /></button>
-          <button className="p-2 hover:bg-neutral-100 text-neutral-600" onClick={() => handleAlign('right')} title="Căn phải"><AlignRight size={16} /></button>
-          <button className="p-2 hover:bg-neutral-100 text-neutral-600" onClick={() => handleAlign('none')} title="Không căn lề"><AlignJustify size={16} /></button>
+          <button className="p-2 hover:bg-[#fdf6f2] text-neutral-600" onClick={() => handleAlign('left')} title="Căn trái"><AlignLeft size={16} /></button>
+          <button className="p-2 hover:bg-[#fdf6f2] text-neutral-600" onClick={() => handleAlign('center')} title="Căn giữa"><AlignCenter size={16} /></button>
+          <button className="p-2 hover:bg-[#fdf6f2] text-neutral-600" onClick={() => handleAlign('right')} title="Căn phải"><AlignRight size={16} /></button>
+          <button className="p-2 hover:bg-[#fdf6f2] text-neutral-600" onClick={() => handleAlign('none')} title="Không căn lề"><AlignJustify size={16} /></button>
           <div className="w-px h-6 bg-neutral-200 mx-1" />
-          <button className="p-2 hover:bg-neutral-100 text-neutral-600" onClick={() => setShowImageDetails(true)} title="Chỉnh sửa chi tiết"><Edit2 size={16} /></button>
+          <button className="p-2 hover:bg-[#fdf6f2] text-neutral-600" onClick={() => setShowImageDetails(true)} title="Chỉnh sửa chi tiết"><Edit2 size={16} /></button>
           <button className="p-2 hover:bg-red-50 text-red-500" onClick={() => {
             const p = selectedImage.parentElement
             if (p && p.tagName === 'FIGURE') p.remove()
@@ -573,29 +573,29 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       {showImageDetails && selectedImage && (
         <div className="img-details-modal fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden">
-            <div className="p-4 border-b border-neutral-200 flex justify-between items-center">
+            <div className="p-4 border-b border-[#f0e0d6] flex justify-between items-center">
               <h3 className="font-bold text-lg text-neutral-800">Chi tiết hình ảnh</h3>
-              <button onClick={() => setShowImageDetails(false)} className="p-1 text-neutral-400 hover:bg-neutral-100 rounded-lg"><X size={20}/></button>
+              <button onClick={() => setShowImageDetails(false)} className="p-1 text-neutral-400 hover:bg-[#fdf6f2] rounded-lg"><X size={20}/></button>
             </div>
             <div className="p-6 flex flex-col md:flex-row gap-6">
               <div className="flex-1 space-y-4">
                 <div>
                   <label className="block text-sm font-semibold mb-1 text-neutral-700">Văn bản thay thế (Alt text)</label>
-                  <input id="img-details-alt" defaultValue={selectedImage.alt} className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:border-primary outline-none" />
+                  <input id="img-details-alt" defaultValue={selectedImage.alt} className="w-full px-3 py-2 text-sm border border-[#f0e0d6] rounded-lg focus:border-primary outline-none" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold mb-1 text-neutral-700">Chú thích (Caption)</label>
-                  <textarea id="img-details-caption" defaultValue={selectedImage.parentElement?.tagName === 'FIGURE' ? (selectedImage.parentElement.querySelector('figcaption')?.textContent || '') : ''} className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:border-primary outline-none resize-none" rows={2} />
+                  <textarea id="img-details-caption" defaultValue={selectedImage.parentElement?.tagName === 'FIGURE' ? (selectedImage.parentElement.querySelector('figcaption')?.textContent || '') : ''} className="w-full px-3 py-2 text-sm border border-[#f0e0d6] rounded-lg focus:border-primary outline-none resize-none" rows={2} />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold mb-1 text-neutral-700">Kích thước (pixel)</label>
                   <div className="flex gap-2">
-                    <input id="img-details-width" placeholder="Rộng" defaultValue={selectedImage.getAttribute('width') || ''} className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:border-primary outline-none" />
-                    <input id="img-details-height" placeholder="Cao" defaultValue={selectedImage.getAttribute('height') || ''} className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:border-primary outline-none" />
+                    <input id="img-details-width" placeholder="Rộng" defaultValue={selectedImage.getAttribute('width') || ''} className="w-full px-3 py-2 text-sm border border-[#f0e0d6] rounded-lg focus:border-primary outline-none" />
+                    <input id="img-details-height" placeholder="Cao" defaultValue={selectedImage.getAttribute('height') || ''} className="w-full px-3 py-2 text-sm border border-[#f0e0d6] rounded-lg focus:border-primary outline-none" />
                   </div>
                 </div>
               </div>
-              <div className="w-full md:w-64 flex flex-col items-center justify-center border border-neutral-200 rounded-xl p-4 bg-white shadow-sm">
+              <div className="w-full md:w-64 flex flex-col items-center justify-center border border-[#f0e0d6] rounded-xl p-4 bg-white shadow-sm">
                 <img src={selectedImage.src} className="max-w-full max-h-48 object-contain rounded" alt="" />
                 <div className="mt-4 flex gap-2 w-full justify-center">
                   <button onClick={() => setShowImageEditor(true)} className="px-3 py-1.5 border border-primary text-primary rounded text-xs font-semibold hover:bg-primary/5 bg-white transition-colors">
@@ -607,8 +607,8 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                 </div>
               </div>
             </div>
-            <div className="p-4 border-t border-neutral-200 bg-neutral-50 flex justify-end gap-2">
-              <button onClick={() => setShowImageDetails(false)} className="px-4 py-2 bg-white border border-neutral-200 text-neutral-600 rounded-xl text-sm font-semibold hover:bg-neutral-100">Hủy</button>
+            <div className="p-4 border-t border-[#f0e0d6] bg-[#fdfaf7] flex justify-end gap-2">
+              <button onClick={() => setShowImageDetails(false)} className="px-4 py-2 bg-white border border-[#f0e0d6] text-neutral-600 rounded-xl text-sm font-semibold hover:bg-[#fdf6f2]">Hủy</button>
               <button onClick={() => {
                 const alt = (document.getElementById('img-details-alt') as HTMLInputElement).value
                 const caption = (document.getElementById('img-details-caption') as HTMLTextAreaElement).value

@@ -15,7 +15,7 @@ export default function SingleImageUploader({ value, onChange }: SingleImageUplo
   return (
     <div className="space-y-4">
       {value ? (
-        <div className="relative group w-32 h-32 rounded-xl overflow-hidden border border-neutral-200 bg-neutral-50 shadow-sm">
+        <div className="relative group w-32 h-32 rounded-xl overflow-hidden border border-[#f0e0d6] bg-[#fdfaf7] shadow-sm">
           <Image
             src={value}
             alt="Main product image"
@@ -39,7 +39,7 @@ export default function SingleImageUploader({ value, onChange }: SingleImageUplo
         <button
           type="button"
           onClick={() => setShowPicker(true)}
-          className="w-32 h-32 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-50 text-neutral-500 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all"
+          className="w-32 h-32 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-300 bg-[#fdfaf7] text-neutral-500 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all"
         >
           <ImageIcon size={24} />
           <span className="text-sm font-semibold">Chọn ảnh</span>

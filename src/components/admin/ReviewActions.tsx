@@ -31,7 +31,7 @@ export default function ReviewActions({ review }: { review: { id: number, rating
   return (
     <div>
       {isReplying && (
-        <div className="mt-3 bg-neutral-50 p-3 rounded-xl border border-neutral-200">
+        <div className="mt-3 bg-[#fdfaf7] p-3 rounded-xl border border-[#f0e0d6]">
           <textarea
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
@@ -40,7 +40,7 @@ export default function ReviewActions({ review }: { review: { id: number, rating
             placeholder="Nhập nội dung phản hồi..."
           />
           <div className="flex gap-2 justify-end">
-            <button onClick={() => setIsReplying(false)} className="text-xs px-3 py-1.5 rounded-lg border hover:bg-neutral-100">Hủy</button>
+            <button onClick={() => setIsReplying(false)} className="text-xs px-3 py-1.5 rounded-lg border hover:bg-[#fdf6f2]">Hủy</button>
             <button disabled={isLoading} onClick={() => updateReview({ admin_reply: replyText })} className="text-xs px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-primary-dark">Lưu phản hồi</button>
           </div>
         </div>

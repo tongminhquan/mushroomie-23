@@ -26,7 +26,7 @@ export default function MultiImageUploader({ images, onChange }: MultiImageUploa
     <div className="space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {images.map((img, index) => (
-          <div key={`${img}-${index}`} className="relative group aspect-[3/4] rounded-xl overflow-hidden border border-neutral-200 bg-neutral-50 shadow-sm">
+          <div key={`${img}-${index}`} className="relative group aspect-[3/4] rounded-xl overflow-hidden border border-[#f0e0d6] bg-[#fdfaf7] shadow-sm">
             <Image
               src={img}
               alt="Sub product image"
@@ -52,7 +52,7 @@ export default function MultiImageUploader({ images, onChange }: MultiImageUploa
         <button
           type="button"
           onClick={() => setShowPicker(true)}
-          className="aspect-[3/4] flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-50 text-neutral-500 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all"
+          className="aspect-[3/4] flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-300 bg-[#fdfaf7] text-neutral-500 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all"
         >
           <Plus size={24} />
           <span className="text-sm font-semibold">Thêm ảnh phụ</span>

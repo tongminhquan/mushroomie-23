@@ -81,7 +81,7 @@ export default async function AdminContactsPage({ searchParams }: { searchParams
                 <span className="text-neutral-400 text-xs">{formatDate(contact.created_at)}</span>
               </div>
             </div>
-            <p className="text-neutral-600 text-sm leading-relaxed bg-neutral-50 border-[1.5px] border-[#f0e0d6] rounded-lg p-3">{contact.message}</p>
+            <p className="text-neutral-600 text-sm leading-relaxed bg-[#fdfaf7] border-[1.5px] border-[#f0e0d6] rounded-lg p-3">{contact.message}</p>
               <ContactActions contact={contact} />
           </div>
         ))}

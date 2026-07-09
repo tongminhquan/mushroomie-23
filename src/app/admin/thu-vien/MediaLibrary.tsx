@@ -150,7 +150,7 @@ export default function MediaLibrary() {
           <button 
             onClick={fetchImages}
             disabled={loading}
-            className="p-2 border border-neutral-200 rounded-xl text-neutral-600 hover:bg-neutral-50"
+            className="p-2 border border-[#f0e0d6] rounded-xl text-neutral-600 hover:bg-[#fdfaf7]"
             title="Làm mới"
           >
             <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
@@ -169,7 +169,7 @@ export default function MediaLibrary() {
         </div>
       ) : images.length === 0 ? (
         <div className="bg-white rounded-2xl p-12 text-center shadow-card border border-neutral-100">
-          <div className="w-16 h-16 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-[#fdfaf7] rounded-full flex items-center justify-center mx-auto mb-4">
             <FolderOpen className="text-neutral-400" size={24} />
           </div>
           <h3 className="font-semibold text-lg mb-2">Thư viện trống</h3>
@@ -264,13 +264,13 @@ export default function MediaLibrary() {
             <div className="w-full md:w-80 bg-white p-6 border-l border-neutral-100 flex flex-col gap-6 overflow-y-auto">
               <div className="flex justify-between items-center">
                 <h2 className="font-bold text-lg">Chi tiết hình ảnh</h2>
-                <button onClick={() => setSelectedImage(null)} className="p-2 hover:bg-neutral-100 rounded-full text-neutral-500 transition-colors">
+                <button onClick={() => setSelectedImage(null)} className="p-2 hover:bg-[#fdf6f2] rounded-full text-neutral-500 transition-colors">
                   <X size={20} />
                 </button>
               </div>
               
               <div className="space-y-4">
-                <div className="bg-neutral-50 p-3 rounded-xl text-sm break-all text-neutral-600">
+                <div className="bg-[#fdfaf7] p-3 rounded-xl text-sm break-all text-neutral-600">
                   <p className="font-medium text-neutral-800 mb-1 break-words">{selectedImage.filename}</p>
                   <p>Dung lượng: <span className="font-semibold">{formatBytes(selectedImage.size)}</span></p>
                   <p>Ngày tải lên: {formatDate(selectedImage.created_at)}</p>
@@ -317,7 +317,7 @@ export default function MediaLibrary() {
                         <button
                           key={fmt}
                           onClick={() => setEditFormat(fmt)}
-                          className={`py-2 text-sm font-medium rounded-lg uppercase border transition-colors ${editFormat === fmt ? 'bg-primary/5 border-primary text-primary' : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'}`}
+                          className={`py-2 text-sm font-medium rounded-lg uppercase border transition-colors ${editFormat === fmt ? 'bg-primary/5 border-primary text-primary' : 'bg-white border-[#f0e0d6] text-neutral-600 hover:bg-[#fdfaf7]'}`}
                         >
                           {fmt}
                         </button>
@@ -359,7 +359,7 @@ export default function MediaLibrary() {
                   <button 
                     onClick={() => handleProcessImage(false)}
                     disabled={isProcessing}
-                    className="w-full py-2.5 bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-700 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="w-full py-2.5 bg-white border border-[#f0e0d6] hover:bg-[#fdfaf7] text-neutral-700 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     Tạo bản sao mới
                   </button>

@@ -74,7 +74,7 @@ export default function WebhookLogsPage() {
       case 'PROCESSED': return 'bg-green-100 text-green-700 border-green-200'
       case 'VERIFIED': return 'bg-blue-100 text-blue-700 border-blue-200'
       case 'RECEIVED': return 'bg-blue-50 text-blue-600 border-blue-100'
-      case 'IGNORED': return 'bg-neutral-100 text-neutral-700 border-neutral-200'
+      case 'IGNORED': return 'bg-neutral-100 text-neutral-700 border-[#f0e0d6]'
       case 'FAILED': return 'bg-red-100 text-red-700 border-red-200'
       default: return 'bg-gray-100 text-gray-700 border-gray-200'
     }

@@ -72,7 +72,7 @@ export function DashboardContent() {
         </div>
         <div className="flex items-center gap-2">
           <select 
-            className="border-neutral-200 rounded-lg text-sm px-3 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+            className="border-[#f0e0d6] rounded-lg text-sm px-3 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
             value={range}
             onChange={(e) => setRange(e.target.value)}
             disabled={loading}
@@ -84,7 +84,7 @@ export function DashboardContent() {
           </select>
           <button 
             onClick={() => setRange(range)} 
-            className="bg-white border border-neutral-200 px-3 py-2 rounded-lg text-sm hover:bg-neutral-50 active:scale-95 transition"
+            className="bg-white border border-[#f0e0d6] px-3 py-2 rounded-lg text-sm hover:bg-[#fdfaf7] active:scale-95 transition"
             disabled={loading}
           >
             Làm mới
@@ -97,7 +97,7 @@ export function DashboardContent() {
         {statsCards.map((stat, idx) => {
           const Icon = stat.icon
           return (
-            <div key={idx} className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm relative overflow-hidden">
+            <div key={idx} className="rounded-xl border border-[#f0e0d6] bg-white p-4 shadow-sm relative overflow-hidden">
               {loading && <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 animate-pulse" />}
               <div className={`mb-3 flex h-8 w-8 items-center justify-center rounded-lg ${stat.bg} ${stat.color}`}>
                 <Icon size={16} />

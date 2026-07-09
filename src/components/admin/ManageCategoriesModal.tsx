@@ -101,7 +101,7 @@ export default function ManageCategoriesModal() {
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] flex flex-col">
             <h3 className="font-bold text-lg mb-4 text-neutral-800">Quản lý danh mục sản phẩm</h3>
             
-            <div className="bg-neutral-50 p-4 rounded-xl border border-neutral-100 mb-4 space-y-3">
+            <div className="bg-[#fdfaf7] p-4 rounded-xl border border-neutral-100 mb-4 space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="font-semibold text-sm text-neutral-700">{mode === 'add' ? 'Thêm mới' : 'Chỉnh sửa'}</h4>
                 {mode === 'edit' && (
@@ -116,19 +116,19 @@ export default function ManageCategoriesModal() {
                       value={icon}
                       onChange={e => setIcon(e.target.value)}
                       placeholder="Icon (VD: 💛)"
-                      className="w-16 px-3 py-2 border border-neutral-200 rounded-xl outline-none focus:border-primary text-sm text-center"
+                      className="w-16 px-3 py-2 border border-[#f0e0d6] rounded-xl outline-none focus:border-primary text-sm text-center"
                     />
                     <input 
                       value={name}
                       onChange={e => setName(e.target.value)}
                       placeholder="Tên danh mục mới (VD: Vòng tay)..."
-                      className="flex-1 px-4 py-2 border border-neutral-200 rounded-xl outline-none focus:border-primary text-sm"
+                      className="flex-1 px-4 py-2 border border-[#f0e0d6] rounded-xl outline-none focus:border-primary text-sm"
                       onKeyDown={e => e.key === 'Enter' && handleSave()}
                     />
                   </div>
                   <div className="flex items-center gap-2">
                     {imageUrl ? (
-                      <div className="relative h-12 w-12 rounded-lg overflow-hidden border border-neutral-200 group">
+                      <div className="relative h-12 w-12 rounded-lg overflow-hidden border border-[#f0e0d6] group">
                         <img src={imageUrl} alt="preview" className="w-full h-full object-cover" />
                         <button 
                           onClick={() => setImageUrl('')}
@@ -156,12 +156,12 @@ export default function ManageCategoriesModal() {
 
             <div className="flex-1 overflow-y-auto mb-4 border border-neutral-100 rounded-lg">
               {categories.map(c => (
-                <div key={c.id} className="flex items-center justify-between p-3 border-b border-neutral-100 last:border-0 hover:bg-neutral-50">
+                <div key={c.id} className="flex items-center justify-between p-3 border-b border-neutral-100 last:border-0 hover:bg-[#fdfaf7]">
                   <div className="flex items-center gap-3">
                     {c.image_url ? (
-                      <img src={c.image_url} alt={c.name} className="w-8 h-8 rounded-lg object-cover border border-neutral-200" />
+                      <img src={c.image_url} alt={c.name} className="w-8 h-8 rounded-lg object-cover border border-[#f0e0d6]" />
                     ) : (
-                      <div className="w-8 h-8 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-400 border border-neutral-200">
+                      <div className="w-8 h-8 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-400 border border-[#f0e0d6]">
                         {c.icon ? <span className="text-lg">{c.icon}</span> : <ImageIcon size={14} />}
                       </div>
                     )}

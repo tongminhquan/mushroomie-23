@@ -21,7 +21,7 @@ export function ChartCard({
   className?: string
 }) {
   return (
-    <div className={`rounded-xl border border-neutral-200 bg-white p-4 sm:p-6 shadow-sm flex flex-col ${className}`}>
+    <div className={`rounded-xl border border-[#f0e0d6] bg-white p-4 sm:p-6 shadow-sm flex flex-col ${className}`}>
       <div className="mb-4">
         <h3 className="font-heading font-bold text-lg text-neutral-900">{title}</h3>
         {description && <p className="text-xs text-neutral-500 mt-1">{description}</p>}

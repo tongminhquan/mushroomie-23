@@ -362,7 +362,7 @@ export default function AdminBannersPage() {
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                         banner.status === 'active'
                           ? 'bg-green-50 text-green-700 border border-green-200'
-                          : 'bg-neutral-100 text-neutral-600 border border-neutral-200'
+                          : 'bg-neutral-100 text-neutral-600 border border-[#f0e0d6]'
                       }`}>
                         {banner.status === 'active' ? 'Đang hoạt động' : 'Đang ẩn'}
                       </span>
@@ -406,7 +406,7 @@ export default function AdminBannersPage() {
                   {/* Buttons Info */}
                   <div className="flex flex-wrap gap-4 pt-2">
                     {banner.button_text && (
-                      <div className="flex items-center gap-1.5 text-xs text-neutral-500 bg-neutral-50 border-[1.5px] border-[#f0e0d6] px-3 py-1.5 rounded-full">
+                      <div className="flex items-center gap-1.5 text-xs text-neutral-500 bg-[#fdfaf7] border-[1.5px] border-[#f0e0d6] px-3 py-1.5 rounded-full">
                         <span className="font-semibold text-neutral-700">Nút chính:</span>
                         <span>&quot;{banner.button_text}&quot;</span>
                         <span className="text-neutral-300">|</span>
@@ -414,7 +414,7 @@ export default function AdminBannersPage() {
                       </div>
                     )}
                     {banner.secondary_button_text && (
-                      <div className="flex items-center gap-1.5 text-xs text-neutral-500 bg-neutral-50 border-[1.5px] border-[#f0e0d6] px-3 py-1.5 rounded-full">
+                      <div className="flex items-center gap-1.5 text-xs text-neutral-500 bg-[#fdfaf7] border-[1.5px] border-[#f0e0d6] px-3 py-1.5 rounded-full">
                         <span className="font-semibold text-neutral-700">Nút phụ:</span>
                         <span>&quot;{banner.secondary_button_text}&quot;</span>
                         <span className="text-neutral-300">|</span>
@@ -430,7 +430,7 @@ export default function AdminBannersPage() {
                     onClick={() => handleToggleStatus(banner)}
                     className={`px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 border-[1.5px] transition-all ${
                       banner.status === 'active'
-                        ? 'border-[#e2d3c8] text-neutral-700 hover:bg-neutral-50'
+                        ? 'border-[#e2d3c8] text-neutral-700 hover:bg-[#fdfaf7]'
                         : 'border-green-300 text-green-700 hover:bg-green-50'
                     }`}
                   >

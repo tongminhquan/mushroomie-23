@@ -155,15 +155,15 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
       <div className="media-picker-modal fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#f0e0d6]">
           <h2 className="font-bold text-lg text-neutral-800">{title || 'Ảnh đại diện'}</h2>
-          <button type="button" onClick={onClose} className="p-2 hover:bg-neutral-100 rounded-lg transition-colors">
+          <button type="button" onClick={onClose} className="p-2 hover:bg-[#fdf6f2] rounded-lg transition-colors">
             <X size={20} />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-neutral-200 px-6">
+        <div className="flex border-b border-[#f0e0d6] px-6">
           <button type="button"
             onClick={() => setTab('upload')}
             className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${tab === 'upload' ? 'border-primary text-primary' : 'border-transparent text-neutral-500 hover:text-neutral-700'}`}
@@ -220,10 +220,10 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
                       value={search}
                       onChange={e => setSearch(e.target.value)}
                       placeholder="Tìm tệp media..."
-                      className="w-full pl-8 pr-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none"
+                      className="w-full pl-8 pr-3 py-2 border border-[#f0e0d6] rounded-lg text-sm focus:border-primary outline-none"
                     />
                   </div>
-                  <select className="px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none bg-white">
+                  <select className="px-3 py-2 border border-[#f0e0d6] rounded-lg text-sm focus:border-primary outline-none bg-white">
                     <option>Hình ảnh</option>
                     <option>Video</option>
                     <option>Tất cả</option>
@@ -254,15 +254,15 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
           </div>
 
           {/* Right: Meta panel */}
-          <div className="w-72 border-l border-neutral-200 overflow-y-auto flex flex-col">
-            <div className="p-4 border-b border-neutral-100 bg-neutral-50">
+          <div className="w-72 border-l border-[#f0e0d6] overflow-y-auto flex flex-col">
+            <div className="p-4 border-b border-neutral-100 bg-[#fdfaf7]">
               <p className="text-xs font-bold text-neutral-700 uppercase tracking-wide">Chi tiết tệp đính kèm</p>
             </div>
 
             {selected ? (
               <div className="p-4 space-y-4 flex-1">
                 {/* Preview */}
-                <div className="aspect-video rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200">
+                <div className="aspect-video rounded-xl overflow-hidden bg-neutral-100 border border-[#f0e0d6]">
                   <img src={selected.url} alt="" className="w-full h-full object-cover" />
                 </div>
 
@@ -272,7 +272,7 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
                   {selected.width && <p>{selected.width} × {selected.height} pixel</p>}
                 </div>
 
-                <hr className="border-neutral-200" />
+                <hr className="border-[#f0e0d6]" />
 
                 <div className="space-y-3">
                   <div>
@@ -282,7 +282,7 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
                       onChange={e => setMeta(p => ({ ...p, alt_text: e.target.value }))}
                       rows={2}
                       placeholder="Mô tả nội dung ảnh..."
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none resize-none"
+                      className="w-full px-3 py-2 border border-[#f0e0d6] rounded-lg text-xs focus:border-primary outline-none resize-none"
                     />
                     <p className="text-xs text-neutral-400 mt-1">Để trống nếu ảnh chỉ dùng làm hiệu ứng trình bày.</p>
                   </div>
@@ -293,7 +293,7 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
                       value={meta.seo_title}
                       onChange={e => setMeta(p => ({ ...p, seo_title: e.target.value }))}
                       placeholder="Tiêu đề tối ưu SEO cho ảnh"
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none"
+                      className="w-full px-3 py-2 border border-[#f0e0d6] rounded-lg text-xs focus:border-primary outline-none"
                     />
                   </div>
 
@@ -304,7 +304,7 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
                       onChange={e => setMeta(p => ({ ...p, caption: e.target.value }))}
                       rows={2}
                       placeholder="Chú thích hiển thị dưới ảnh..."
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none resize-none"
+                      className="w-full px-3 py-2 border border-[#f0e0d6] rounded-lg text-xs focus:border-primary outline-none resize-none"
                     />
                   </div>
 
@@ -315,7 +315,7 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
                       onChange={e => setMeta(p => ({ ...p, description: e.target.value }))}
                       rows={2}
                       placeholder="Mô tả chi tiết về ảnh..."
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none resize-none"
+                      className="w-full px-3 py-2 border border-[#f0e0d6] rounded-lg text-xs focus:border-primary outline-none resize-none"
                     />
                   </div>
 
@@ -324,7 +324,7 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
                     <input
                       value={meta.url || selected.url}
                       onChange={handleUrlInput}
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-xs focus:border-primary outline-none font-mono"
+                      className="w-full px-3 py-2 border border-[#f0e0d6] rounded-lg text-xs focus:border-primary outline-none font-mono"
                     />
                   </div>
                 </div>
@@ -338,7 +338,7 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
 
             {/* Confirm button */}
             {selected && (
-              <div className="p-4 border-t border-neutral-200">
+              <div className="p-4 border-t border-[#f0e0d6]">
                 <button type="button"
                   onClick={handleConfirm}
                   className="w-full bg-primary text-white py-2.5 rounded-xl font-semibold text-sm hover:bg-primary-dark transition-colors"

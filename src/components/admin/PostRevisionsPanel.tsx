@@ -63,7 +63,7 @@ export default function PostRevisionsPanel({ postId, onRestored }: { postId: num
 
   return (
     <div className="bg-white rounded-2xl border-[1.5px] border-[#f0e0d6] shadow-sm overflow-hidden">
-      <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100 flex items-center gap-2">
+      <div className="px-4 py-3 bg-[#fdfaf7] border-b border-neutral-100 flex items-center gap-2">
         <History size={14} className="text-[#b9794b]" />
         <span className="font-semibold text-sm text-neutral-800">Lịch sử phiên bản</span>
         {revisions.length > 0 && <span className="text-xs text-neutral-400">({revisions.length})</span>}
