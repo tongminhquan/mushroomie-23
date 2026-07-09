@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { generateSlug } from '@/lib/utils'
 import { logAdminAction } from '@/lib/admin-logger'
 import { buildPostContentMetrics, normalizeOptionalPostImage, serializePostForEditor, serializeStringArray } from '@/lib/post-normalization'
+import { isValidPostStatus, makeExcerpt, savePostRevision, syncPostTags, trashData } from '@/lib/post-workflow'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
