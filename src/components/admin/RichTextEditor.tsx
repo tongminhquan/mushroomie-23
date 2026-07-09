@@ -66,16 +66,26 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
   const [isDragging, setIsDragging] = useState(false)
   const [uploadingCount, setUploadingCount] = useState(0)
   const dragCounter = useRef(0)
+  // Chế độ soạn thảo kiểu WordPress: Visual (trực quan) | HTML (mã nguồn)
+  const [htmlMode, setHtmlMode] = useState(false)
 
   useEffect(() => {
-    if (!editorRef.current) return
+    if (!editorRef.current || htmlMode) return
     const normalizedValue = normalizeArticleImages(value || '', 'storage')
     if (editorRef.current.innerHTML !== normalizedValue && lastValue.current !== normalizedValue) {
       editorRef.current.innerHTML = normalizedValue
       lastValue.current = normalizedValue
       setWordCount(editorRef.current.innerText?.trim().split(/\s+/).filter(Boolean).length ?? 0)
     }
-  }, [value])
+  }, [value, htmlMode])
+
+  const switchMode = useCallback((toHtml: boolean) => {
+    if (!toHtml) {
+      // Quay về Visual: ép đồng bộ lại innerHTML từ value ở effect trên
+      lastValue.current = null
+    }
+    setHtmlMode(toHtml)
+  }, [])
 
   const execCmd = useCallback((cmd: string, val?: string) => {
     if (!editorRef.current) return
