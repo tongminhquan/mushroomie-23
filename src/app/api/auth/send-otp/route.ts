@@ -11,14 +11,16 @@ function generateOTP() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json()
-    if (!email || typeof email !== 'string') {
+    const body = await request.json()
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
+
+    if (!email) {
       return NextResponse.json({ error: 'Thiếu email' }, { status: 400 })
     }
 
     // Chống email bombing / lạm dụng: giới hạn theo IP và theo địa chỉ email
     const byIp = checkRateLimit(request, 'send-otp-ip', { limit: 10, windowMs: 60 * 60 * 1000 })
-    const byEmail = checkRateLimit(request, 'send-otp-email', { limit: 5, windowMs: 60 * 60 * 1000, identity: email.toLowerCase() })
+    const byEmail = checkRateLimit(request, 'send-otp-email', { limit: 5, windowMs: 60 * 60 * 1000, identity: email })
     if (!byIp.allowed || !byEmail.allowed) {
       const retryAfter = Math.max(byIp.retryAfter, byEmail.retryAfter)
       return NextResponse.json(
