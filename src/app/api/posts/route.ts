@@ -97,8 +97,12 @@ export async function POST(request: NextRequest) {
       og_title, og_description, og_image,
       twitter_title, twitter_description, twitter_image,
       canonical_url, robots_index, robots_follow, schema_type,
-      secondary_keywords, publish_date,
+      secondary_keywords, publish_date, tags,
     } = body
+
+    if (status && !isValidPostStatus(status)) {
+      return NextResponse.json({ error: 'Trạng thái bài viết không hợp lệ' }, { status: 400 })
+    }
 
     // Lên lịch đăng (Đăng bài tự động): cần thời điểm hợp lệ trong tương lai
     let scheduledAt: Date | null = null
