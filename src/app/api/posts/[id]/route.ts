@@ -151,17 +151,35 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const { id } = await params
-    const deleted = await prisma.post.delete({ where: { id: Number(id) } })
-    
+    const existing = await prisma.post.findUnique({ where: { id: Number(id) } })
+    if (!existing) {
+      return NextResponse.json({ error: 'Không tìm thấy bài viết' }, { status: 404 })
+    }
+
+    // Kiểu WordPress: lần xóa đầu → thùng rác; đã ở thùng rác → xóa vĩnh viễn
+    if (existing.status !== 'trash') {
+      const trashed = await prisma.post.update({ where: { id: existing.id }, data: trashData(existing.status) })
+      await logAdminAction({
+        userId: Number(session.user.id),
+        action: 'DELETE',
+        entity: 'POST',
+        details: { id: trashed.id, title: trashed.title, soft: true },
+        ipAddress: request.headers.get('x-forwarded-for') || undefined
+      })
+      return NextResponse.json({ success: true, trashed: true })
+    }
+
+    const deleted = await prisma.post.delete({ where: { id: existing.id } })
+
     await logAdminAction({
       userId: Number(session.user.id),
       action: 'DELETE',
       entity: 'POST',
-      details: { id: deleted.id, title: deleted.title },
+      details: { id: deleted.id, title: deleted.title, permanent: true },
       ipAddress: request.headers.get('x-forwarded-for') || undefined
     })
-    
-    return NextResponse.json({ success: true })
+
+    return NextResponse.json({ success: true, permanent: true })
   } catch (error) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
