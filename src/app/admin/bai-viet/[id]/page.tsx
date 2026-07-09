@@ -777,6 +777,9 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
               </div>
             </div>
 
+            {/* Revisions Panel (WordPress-like) */}
+            <PostRevisionsPanel postId={postId} onRestored={() => setLoadAttempt((v) => v + 1)} />
+
             {/* Featured Image Panel */}
             <div className="bg-white rounded-2xl border-[1.5px] border-[#f0e0d6] shadow-sm overflow-hidden">
               <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
