@@ -142,7 +142,18 @@ export default async function PostDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const post = await getPublishedPostBySlug(slug)
+  let post = await getPublishedPostBySlug(slug)
+
+  // Xem trước kiểu WordPress: admin đăng nhập xem được bài chưa xuất bản
+  let isPreview = false
+  if (!post) {
+    const session = await auth()
+    const isAdmin = ['super_admin', 'admin'].includes((session?.user as any)?.role)
+    if (isAdmin) {
+      post = await getAnyPostBySlug(slug)
+      isPreview = Boolean(post)
+    }
+  }
 
   if (!post) {
     notFound()
