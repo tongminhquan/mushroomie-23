@@ -486,10 +486,23 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('redo') }} title="Làm lại (Ctrl+Y)">↪</button>
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('removeFormat') }} title="Xóa định dạng">✕A</button>
       </div>
+      )}
+
+      {/* HTML source mode */}
+      {htmlMode && (
+        <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          spellCheck={false}
+          className="w-full min-h-[450px] p-5 font-mono text-[13px] leading-relaxed text-neutral-800 outline-none resize-y bg-[#fcfbfa]"
+          placeholder="<p>Viết HTML thuần tại đây…</p>"
+        />
+      )}
 
       {/* Editor area */}
       <div
         ref={editorRef}
+        style={{ display: htmlMode ? 'none' : undefined }}
         className="ql-editor-area"
         contentEditable
         suppressContentEditableWarning
