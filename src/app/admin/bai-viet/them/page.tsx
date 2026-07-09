@@ -490,6 +490,7 @@ export default function AddPostPage() {
                     <option value="draft">Bản nháp</option>
                     <option value="published">Công khai</option>
                     <option value="scheduled">⏰ Lên lịch</option>
+                    <option value="private">🔒 Riêng tư</option>
                     <option value="hidden">Ẩn</option>
                   </select>
                 </div>
