@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
       data: {
         title,
         slug: postSlug,
-        excerpt,
+        excerpt: makeExcerpt(content, excerpt),
         content: normalizedContent,
         featured_image: normalizeOptionalPostImage(featured_image),
         featured_image_alt,
