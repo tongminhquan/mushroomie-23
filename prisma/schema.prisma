@@ -484,12 +484,35 @@ model Post {
   secondary_keywords        String?   @db.Text
   reading_time              Int?
   word_count                Int?
+  // Trash (WordPress-like): thời điểm vào thùng rác + trạng thái trước đó để khôi phục
+  deleted_at                DateTime?
+  status_before_trash       String?
 
   category                  Category? @relation(fields: [category_id], references: [id])
   author                    User?     @relation(fields: [author_id], references: [id])
   tags                      PostTagMap[]
+  revisions                 PostRevision[]
 
   @@map("posts")
+}
+
+// Lịch sử chỉnh sửa bài viết (WordPress-like revisions) — snapshot trước mỗi lần update
+model PostRevision {
+  id               Int      @id @default(autoincrement())
+  post_id          Int
+  title            String
+  content          String?  @db.LongText
+  excerpt          String?  @db.Text
+  seo_title        String?
+  meta_description String?  @db.Text
+  status           String
+  author_id        Int?
+  created_at       DateTime @default(now())
+
+  post             Post     @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  @@index([post_id])
+  @@map("post_revisions")
 }
 
 
