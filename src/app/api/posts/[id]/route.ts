@@ -101,11 +101,33 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       data.word_count = wordCount
     }
     data.slug = slug || (title ? generateSlug(title) : undefined)
-    if (status === 'published') data.published_at = new Date()
+    // published_at: giữ mốc cũ khi bài đã published (tránh reset ngày đăng mỗi lần sửa)
+    if (status === 'published') data.published_at = existing.published_at ?? new Date()
     if (status === 'scheduled') data.published_at = scheduledAt
+
+    // Chuyển trạng thái thùng rác kiểu WordPress
+    if (status === 'trash' && existing.status !== 'trash') {
+      Object.assign(data, trashData(existing.status))
+    } else if (status !== 'trash' && existing.status === 'trash') {
+      data.deleted_at = null
+      data.status_before_trash = null
+    }
+
+    // Excerpt fallback khi để trống
+    data.excerpt = makeExcerpt(typeof content === 'string' ? content : existing.content, excerpt)
+
     // Remove undefined keys
     Object.keys(data).forEach(k => data[k] === undefined && delete data[k])
+
+    // Snapshot bản hiện tại thành revision TRƯỚC khi ghi đè
+    await savePostRevision(existing, Number(session.user.id))
+
     const post = await prisma.post.update({ where: { id: Number(id) }, data })
+
+    // Đồng bộ tags (mảng tên tag; undefined = không đụng)
+    if (Array.isArray(tags)) {
+      await syncPostTags(post.id, tags.filter((t: unknown): t is string => typeof t === 'string'))
+    }
     
     await logAdminAction({
       userId: Number(session.user.id),
