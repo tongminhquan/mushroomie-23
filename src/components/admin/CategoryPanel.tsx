@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { Plus, X, ChevronDown, ChevronUp, Check } from 'lucide-react'
+import { Check, Plus } from 'lucide-react'
 
 interface Category {
   id: number
@@ -85,51 +85,51 @@ export default function CategoryPanel({ selectedIds, onChange }: CategoryPanelPr
     : categories
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
-      <div className="px-4 py-3 border-b border-neutral-100 bg-neutral-50 flex items-center justify-between">
-        <span className="font-semibold text-sm text-neutral-800">Danh mục</span>
+    <div className="overflow-hidden rounded-[4px] border border-[#c3c4c7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div className="flex items-center justify-between border-b border-[#dcdcde] bg-[#f6f7f7] px-4 py-3">
+        <span className="text-sm font-semibold text-[#1d2327]">Danh mục</span>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-neutral-100 text-xs font-medium">
+      <div className="flex border-b border-[#dcdcde] bg-white text-xs font-semibold">
         <button
           onClick={() => setTab('all')}
-          className={`flex-1 py-2 transition-colors ${tab === 'all' ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-neutral-50'}`}
+          className={`flex-1 py-2 transition-colors ${tab === 'all' ? 'border-b-2 border-primary text-primary' : 'text-[#646970] hover:text-[#1d2327]'}`}
         >
           Tất cả danh mục
         </button>
         <button
           onClick={() => setTab('most_used')}
-          className={`flex-1 py-2 transition-colors ${tab === 'most_used' ? 'bg-primary text-white' : 'text-neutral-600 hover:bg-neutral-50'}`}
+          className={`flex-1 py-2 transition-colors ${tab === 'most_used' ? 'border-b-2 border-primary text-primary' : 'text-[#646970] hover:text-[#1d2327]'}`}
         >
           Dùng nhiều nhất
         </button>
       </div>
 
       {/* Category list */}
-      <div className="p-3 max-h-52 overflow-y-auto space-y-1">
+      <div className="max-h-52 space-y-1 overflow-y-auto p-3">
         {displayCats.length === 0 ? (
-          <p className="text-xs text-neutral-400 text-center py-4">Chưa có danh mục nào</p>
+          <p className="py-4 text-center text-xs text-[#646970]">Chưa có danh mục nào</p>
         ) : displayCats.map(cat => (
-          <label key={cat.id} className="flex items-center gap-2 cursor-pointer hover:bg-neutral-50 px-2 py-1.5 rounded-lg transition-colors">
+          <label key={cat.id} className="flex cursor-pointer items-center gap-2 rounded-[4px] px-2 py-1.5 transition-colors hover:bg-[#f6f7f7]">
             <div
               onClick={() => handleToggle(cat.id)}
-              className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors cursor-pointer ${
-                selectedIds.includes(cat.id) ? 'bg-primary border-primary' : 'border-neutral-300 hover:border-primary'
+              className={`flex h-4 w-4 flex-shrink-0 cursor-pointer items-center justify-center rounded-[3px] border transition-colors ${
+                selectedIds.includes(cat.id) ? 'border-primary bg-primary' : 'border-[#8c8f94] hover:border-primary'
               }`}
             >
               {selectedIds.includes(cat.id) && <Check size={10} className="text-white" />}
             </div>
-            <span className="text-sm text-neutral-700">{cat.name}</span>
+            <span className="text-sm text-[#1d2327]">{cat.name}</span>
           </label>
         ))}
       </div>
 
       {/* Add category */}
-      <div className="border-t border-neutral-100 p-3">
+      <div className="border-t border-[#dcdcde] p-3">
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="text-sm text-primary font-medium hover:underline flex items-center gap-1"
+          className="flex items-center gap-1 text-sm font-semibold text-[#2271b1] hover:text-primary hover:underline"
         >
           <Plus size={14} />
           Thêm danh mục mới
@@ -141,18 +141,18 @@ export default function CategoryPanel({ selectedIds, onChange }: CategoryPanelPr
               value={newName}
               onChange={handleNameChange}
               placeholder="Tên danh mục"
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none"
+              className="w-full rounded-[4px] border border-[#8c8f94] px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
             <input
               value={newSlug}
               onChange={e => setNewSlug(e.target.value)}
               placeholder="Slug (tự động)"
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none font-mono text-xs"
+              className="w-full rounded-[4px] border border-[#8c8f94] px-3 py-2 font-mono text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
             <select
               value={parentId}
               onChange={e => setParentId(e.target.value)}
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-primary outline-none bg-white"
+              className="w-full rounded-[4px] border border-[#8c8f94] bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             >
               <option value="">Danh mục gốc</option>
               {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -160,7 +160,7 @@ export default function CategoryPanel({ selectedIds, onChange }: CategoryPanelPr
             <button
               onClick={handleAddCategory}
               disabled={isAdding || !newName.trim()}
-              className="w-full bg-primary text-white py-2 rounded-lg text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50"
+              className="w-full rounded-[4px] bg-primary py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-50"
             >
               {isAdding ? 'Đang thêm...' : 'Thêm danh mục'}
             </button>

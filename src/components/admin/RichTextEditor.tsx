@@ -1,6 +1,28 @@
 'use client'
 import { useEffect, useRef, useCallback, useState } from 'react'
-import { ImageIcon, AlignLeft, AlignCenter, AlignRight, AlignJustify, Edit2, X, Upload } from 'lucide-react'
+import {
+  AlignCenter,
+  AlignJustify,
+  AlignLeft,
+  AlignRight,
+  Bold,
+  Indent,
+  Italic,
+  Link2,
+  List,
+  ListOrdered,
+  Minus,
+  Outdent,
+  Redo2,
+  RemoveFormatting,
+  Strikethrough,
+  Underline,
+  Undo2,
+  Edit2,
+  ImageIcon,
+  Upload,
+  X,
+} from 'lucide-react'
 import MediaPicker from './MediaPicker'
 import ImageEditorModal from './ImageEditorModal'
 import { normalizeArticleImages } from '@/lib/sanitize'
@@ -10,47 +32,6 @@ interface RichTextEditorProps {
   onChange: (value: string) => void
   placeholder?: string
 }
-
-const TOOLBAR_BUTTONS = [
-  { group: 'format', items: [
-    { cmd: 'formatBlock', val: 'p', icon: 'Đoạn', title: 'Đoạn văn' },
-    { cmd: 'formatBlock', val: 'h1', icon: 'H1', title: 'Tiêu đề 1' },
-    { cmd: 'formatBlock', val: 'h2', icon: 'H2', title: 'Tiêu đề 2' },
-    { cmd: 'formatBlock', val: 'h3', icon: 'H3', title: 'Tiêu đề 3' },
-    { cmd: 'formatBlock', val: 'h4', icon: 'H4', title: 'Tiêu đề 4' },
-    { cmd: 'formatBlock', val: 'h5', icon: 'H5', title: 'Tiêu đề 5' },
-    { cmd: 'formatBlock', val: 'h6', icon: 'H6', title: 'Tiêu đề 6' },
-  ]},
-  { group: 'inline', items: [
-    { cmd: 'bold', icon: '<b>B</b>', title: 'In đậm (Ctrl+B)' },
-    { cmd: 'italic', icon: '<i>I</i>', title: 'In nghiêng (Ctrl+I)' },
-    { cmd: 'underline', icon: '<u>U</u>', title: 'Gạch chân (Ctrl+U)' },
-    { cmd: 'strikeThrough', icon: '<s>S</s>', title: 'Gạch ngang' },
-  ]},
-  { group: 'align', items: [
-    { cmd: 'justifyLeft', icon: '⬛◻◻', title: 'Căn trái' },
-    { cmd: 'justifyCenter', icon: '◻⬛◻', title: 'Căn giữa' },
-    { cmd: 'justifyRight', icon: '◻◻⬛', title: 'Căn phải' },
-    { cmd: 'justifyFull', icon: '⬛⬛⬛', title: 'Căn đều' },
-  ]},
-  { group: 'list', items: [
-    { cmd: 'insertUnorderedList', icon: '• ≡', title: 'Danh sách dấu chấm' },
-    { cmd: 'insertOrderedList', icon: '1. ≡', title: 'Danh sách số thứ tự' },
-    { cmd: 'outdent', icon: '←⬛', title: 'Giảm thụt đầu dòng' },
-    { cmd: 'indent', icon: '⬛→', title: 'Tăng thụt đầu dòng' },
-  ]},
-  { group: 'insert', items: [
-    { cmd: 'createLink', icon: '🔗', title: 'Chèn liên kết' },
-    { cmd: 'insertHorizontalRule', icon: '─', title: 'Kẻ ngang' },
-    { cmd: 'formatBlock', val: 'blockquote', icon: '❝', title: 'Trích dẫn' },
-    { cmd: 'formatBlock', val: 'pre', icon: '{ }', title: 'Code block' },
-  ]},
-  { group: 'history', items: [
-    { cmd: 'undo', icon: '↩', title: 'Hoàn tác (Ctrl+Z)' },
-    { cmd: 'redo', icon: '↪', title: 'Làm lại (Ctrl+Y)' },
-    { cmd: 'removeFormat', icon: '✕⁰', title: 'Xóa định dạng' },
-  ]},
-]
 
 export default function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
@@ -305,31 +286,31 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
   }, [uploadFiles])
 
   return (
-    <div className="rich-editor border border-neutral-200 rounded-xl overflow-hidden bg-white relative">
+    <div className="rich-editor relative overflow-hidden rounded-[4px] border border-[#c3c4c7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <style>{`
         .rich-editor .editor-toolbar {
-          display: flex; flex-wrap: wrap; gap: 2px; padding: 6px 8px;
-          border-bottom: 1px solid #e5e7eb; background: #f9fafb;
+          display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 10px;
+          border-bottom: 1px solid #dcdcde; background: #f6f7f7;
         }
-        .rich-editor .editor-toolbar .sep { width: 1px; background: #d1d5db; margin: 2px 3px; align-self: stretch; }
+        .rich-editor .editor-toolbar .sep { width: 1px; background: #dcdcde; margin: 3px 4px; align-self: stretch; }
         .rich-editor .toolbar-btn {
-          padding: 3px 7px; border-radius: 5px; font-size: 13px; cursor: pointer;
-          border: 1px solid transparent; background: transparent; min-width: 28px;
+          height: 32px; min-width: 32px; padding: 0 8px; border-radius: 4px; font-size: 13px; cursor: pointer;
+          border: 1px solid transparent; background: transparent;
           display: flex; align-items: center; justify-content: center; line-height: 1.4;
-          color: #374151; transition: all 0.1s;
+          color: #1d2327; transition: background-color 0.12s, border-color 0.12s, color 0.12s;
         }
-        .rich-editor .toolbar-btn:hover { background: #e5e7eb; border-color: #d1d5db; }
-        .rich-editor .toolbar-btn:active { background: #dbeafe; border-color: #3b82f6; }
+        .rich-editor .toolbar-btn:hover { background: #fff; border-color: #8c8f94; color: #e41d1d; }
+        .rich-editor .toolbar-btn:active { background: #fff7f2; border-color: #e41d1d; }
         .rich-editor .toolbar-select {
-          padding: 3px 6px; border-radius: 5px; font-size: 13px; cursor: pointer;
-          border: 1px solid #d1d5db; background: white; color: #374151; height: 28px;
+          padding: 4px 28px 4px 8px; border-radius: 4px; font-size: 13px; cursor: pointer;
+          border: 1px solid #8c8f94; background: white; color: #1d2327; height: 32px;
         }
-        .rich-editor .color-btn { width: 28px; height: 28px; border-radius: 5px; border: 1px solid #d1d5db; cursor: pointer; padding: 0; overflow: hidden; }
+        .rich-editor .color-btn { width: 32px; height: 32px; border-radius: 4px; border: 1px solid #8c8f94; cursor: pointer; padding: 0; overflow: hidden; }
         .rich-editor .color-btn input { width: 100%; height: 100%; border: none; cursor: pointer; opacity: 0; position: absolute; }
         .rich-editor .color-btn { position: relative; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
         .rich-editor .ql-editor-area {
-          min-height: 450px; padding: 20px 24px; outline: none; font-size: 15px;
-          line-height: 1.8; color: #111827;
+          min-height: 520px; padding: 28px 32px; outline: none; font-size: 16px;
+          line-height: 1.82; color: #1d2327; background: #fff;
         }
         .rich-editor .ql-editor-area:empty:before {
           content: attr(data-placeholder); color: #9ca3af; pointer-events: none;
@@ -343,8 +324,8 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         .rich-editor .ql-editor-area ul { list-style: disc; padding-left: 1.5em; margin: 0.5em 0; }
         .rich-editor .ql-editor-area ol { list-style: decimal; padding-left: 1.5em; margin: 0.5em 0; }
         .rich-editor .ql-editor-area blockquote {
-          border-left: 4px solid #e5305b; margin: 1em 0; padding: 0.5em 1em;
-          background: #fef2f2; color: #6b7280; font-style: italic; border-radius: 0 8px 8px 0;
+          border-left: 4px solid #e41d1d; margin: 1em 0; padding: 0.5em 1em;
+          background: #fff7f2; color: #50575e; font-style: italic; border-radius: 0 6px 6px 0;
         }
         .rich-editor .ql-editor-area pre {
           background: #1f2937; color: #f9fafb; padding: 1em; border-radius: 8px;
@@ -353,7 +334,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         .rich-editor .ql-editor-area figure.image {
           display: block; margin: 1em 0; text-align: center;
         }
-        .rich-editor .ql-editor-area img { max-width: 100%; border-radius: 8px; margin: 0.5em 0; }
+        .rich-editor .ql-editor-area img { max-width: 100%; border-radius: 10px; margin: 0.5em 0; }
         .rich-editor .ql-editor-area img[data-uploading] {
           opacity: 0.6; outline: 2px dashed #e5305b; outline-offset: 2px;
           animation: pulse-upload 1s ease-in-out infinite;
@@ -365,8 +346,8 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         .rich-editor .ql-editor-area a { color: #2563eb; text-decoration: underline; }
         .rich-editor .ql-editor-area hr { border: none; border-top: 2px solid #e5e7eb; margin: 1em 0; }
         .rich-editor .status-bar {
-          padding: 4px 12px; font-size: 11px; color: #9ca3af; background: #f9fafb;
-          border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;
+          padding: 7px 12px; font-size: 12px; color: #646970; background: #f6f7f7;
+          border-top: 1px solid #dcdcde; display: flex; justify-content: space-between; align-items: center; gap: 12px;
         }
         .rich-editor .drag-overlay {
           position: absolute; inset: 0; z-index: 20;
@@ -376,7 +357,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         }
         .rich-editor .drag-overlay svg { color: #e5305b; }
         .rich-editor .drag-overlay span { font-size: 15px; font-weight: 600; color: #e5305b; }
-        .rich-editor .drag-overlay small { font-size: 12px; color: #9ca3af; }
+        .rich-editor .drag-overlay small { font-size: 12px; color: #646970; }
       `}</style>
 
       {/* Drag-over overlay */}
@@ -384,15 +365,16 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         <div className="drag-overlay" aria-hidden>
           <Upload size={36} />
           <span>Thả ảnh vào đây</span>
-          <small>Hỗ trợ JPG, PNG, WebP, AVIF — không giới hạn số lượng</small>
+          <small>Hỗ trợ JPG, PNG, WebP, AVIF. Có thể thả nhiều ảnh cùng lúc.</small>
         </div>
       )}
 
       {/* Media Button */}
-      <div className="p-2 border-b border-neutral-200 bg-neutral-50 flex items-center">
-        <button onClick={() => setShowMediaPicker(true)} className="flex items-center gap-2 px-3 py-1.5 border border-primary text-primary rounded-lg text-sm font-semibold hover:bg-primary/5 transition-colors">
-          <ImageIcon size={16} /> Thêm tệp Media
+      <div className="flex items-center justify-between gap-3 border-b border-[#dcdcde] bg-white px-3 py-2">
+        <button onClick={() => setShowMediaPicker(true)} className="inline-flex h-9 items-center gap-2 rounded-[4px] border border-primary bg-white px-3 text-sm font-semibold text-primary transition hover:bg-[#fff7f2]">
+          <ImageIcon size={16} /> Thêm Media
         </button>
+        <span className="hidden text-xs font-medium text-[#646970] sm:inline">Classic editor cho bài SEO Mushroomie</span>
       </div>
 
       {/* Toolbar */}
@@ -417,16 +399,16 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         <div className="sep" />
 
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('bold') }} title="In đậm (Ctrl+B)">
-          <strong>B</strong>
+          <Bold size={16} />
         </button>
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('italic') }} title="In nghiêng (Ctrl+I)">
-          <em>I</em>
+          <Italic size={16} />
         </button>
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('underline') }} title="Gạch chân (Ctrl+U)">
-          <u>U</u>
+          <Underline size={16} />
         </button>
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('strikeThrough') }} title="Gạch ngang">
-          <s>S</s>
+          <Strikethrough size={16} />
         </button>
 
         <label className="color-btn" title="Màu chữ" style={{ background: '#374151' }}>
@@ -435,34 +417,34 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         </label>
 
         <label className="color-btn" title="Màu nền chữ" style={{ background: '#fbbf24' }}>
-          <span style={{ pointerEvents: 'none', fontSize: 10 }}>A▲</span>
+          <span style={{ pointerEvents: 'none', fontSize: 10 }}>Bg</span>
           <input type="color" style={{ position: 'absolute', width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} onChange={handleBackColor} />
         </label>
 
         <div className="sep" />
 
-        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('justifyLeft') }} title="Căn trái">⬛◻◻</button>
-        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('justifyCenter') }} title="Căn giữa">◻⬛◻</button>
-        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('justifyRight') }} title="Căn phải">◻◻⬛</button>
-        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('justifyFull') }} title="Căn đều">⬛⬛⬛</button>
+        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('justifyLeft') }} title="Căn trái"><AlignLeft size={16} /></button>
+        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('justifyCenter') }} title="Căn giữa"><AlignCenter size={16} /></button>
+        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('justifyRight') }} title="Căn phải"><AlignRight size={16} /></button>
+        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('justifyFull') }} title="Căn đều"><AlignJustify size={16} /></button>
 
         <div className="sep" />
 
-        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('insertUnorderedList') }} title="Danh sách dấu chấm">• ≡</button>
-        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('insertOrderedList') }} title="Danh sách số">1.≡</button>
-        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('outdent') }} title="Giảm thụt">⇤</button>
-        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('indent') }} title="Tăng thụt">⇥</button>
+        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('insertUnorderedList') }} title="Danh sách dấu chấm"><List size={16} /></button>
+        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('insertOrderedList') }} title="Danh sách số"><ListOrdered size={16} /></button>
+        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('outdent') }} title="Giảm thụt"><Outdent size={16} /></button>
+        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('indent') }} title="Tăng thụt"><Indent size={16} /></button>
 
         <div className="sep" />
 
-        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('createLink') }} title="Chèn liên kết">🔗</button>
-        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('insertHorizontalRule') }} title="Kẻ ngang">—</button>
+        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('createLink') }} title="Chèn liên kết"><Link2 size={16} /></button>
+        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('insertHorizontalRule') }} title="Kẻ ngang"><Minus size={16} /></button>
 
         <div className="sep" />
 
-        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('undo') }} title="Hoàn tác (Ctrl+Z)">↩</button>
-        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('redo') }} title="Làm lại (Ctrl+Y)">↪</button>
-        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('removeFormat') }} title="Xóa định dạng">✕A</button>
+        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('undo') }} title="Hoàn tác (Ctrl+Z)"><Undo2 size={16} /></button>
+        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('redo') }} title="Làm lại (Ctrl+Y)"><Redo2 size={16} /></button>
+        <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('removeFormat') }} title="Xóa định dạng"><RemoveFormatting size={16} /></button>
       </div>
 
       {/* Editor area */}
@@ -524,7 +506,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       <div className="status-bar">
         <span>
           {uploadingCount > 0
-            ? `⏳ Đang tải lên ${uploadingCount} ảnh…`
+            ? `Đang tải lên ${uploadingCount} ảnh...`
             : 'Kéo ảnh vào đây hoặc dán (Ctrl+V) để chèn trực tiếp'}
         </span>
         <span>{wordCount} từ</span>
