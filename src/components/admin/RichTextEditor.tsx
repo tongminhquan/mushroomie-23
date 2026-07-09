@@ -398,14 +398,26 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         </div>
       )}
 
-      {/* Media Button */}
-      <div className="p-2 border-b border-neutral-200 bg-neutral-50 flex items-center">
-        <button onClick={() => setShowMediaPicker(true)} className="flex items-center gap-2 px-3 py-1.5 border border-primary text-primary rounded-lg text-sm font-semibold hover:bg-primary/5 transition-colors">
+      {/* Media Button + tabs Visual/HTML kiểu WordPress */}
+      <div className="p-2 border-b border-neutral-200 bg-neutral-50 flex items-center justify-between gap-2">
+        <button onClick={() => setShowMediaPicker(true)} disabled={htmlMode}
+          className="flex items-center gap-2 px-3 py-1.5 border border-primary text-primary rounded-lg text-sm font-semibold hover:bg-primary/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
           <ImageIcon size={16} /> Thêm tệp Media
         </button>
+        <div className="flex rounded-lg overflow-hidden border border-neutral-300 text-xs font-semibold">
+          <button type="button" onClick={() => switchMode(false)}
+            className={`px-3 py-1.5 transition-colors ${!htmlMode ? 'bg-primary text-white' : 'bg-white text-neutral-600 hover:text-primary'}`}>
+            Soạn thảo
+          </button>
+          <button type="button" onClick={() => switchMode(true)}
+            className={`px-3 py-1.5 transition-colors ${htmlMode ? 'bg-primary text-white' : 'bg-white text-neutral-600 hover:text-primary'}`}>
+            HTML
+          </button>
+        </div>
       </div>
 
       {/* Toolbar */}
+      {!htmlMode && (
       <div className="editor-toolbar">
         <select
           className="toolbar-select"
