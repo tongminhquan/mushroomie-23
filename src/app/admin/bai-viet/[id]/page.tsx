@@ -8,6 +8,7 @@ import SeoAnalyzer from '@/components/admin/SeoAnalyzer'
 import MediaPicker from '@/components/admin/MediaPicker'
 import CategoryPanel from '@/components/admin/CategoryPanel'
 import InternalLinkSuggester from '@/components/admin/InternalLinkSuggester'
+import PostRevisionsPanel from '@/components/admin/PostRevisionsPanel'
 import { generateSlug } from '@/lib/utils'
 import SafeImage from '@/components/ui/SafeImage'
 
