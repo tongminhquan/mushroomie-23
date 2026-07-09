@@ -48,8 +48,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       og_title, og_description, og_image,
       twitter_title, twitter_description, twitter_image,
       canonical_url, robots_index, robots_follow, schema_type,
-      secondary_keywords, publish_date,
+      secondary_keywords, publish_date, tags,
     } = body
+
+    if (status && !isValidPostStatus(status)) {
+      return NextResponse.json({ error: 'Trạng thái bài viết không hợp lệ' }, { status: 400 })
+    }
 
     // Lên lịch đăng (Đăng bài tự động): cần thời điểm hợp lệ trong tương lai
     let scheduledAt: Date | null = null
@@ -61,6 +65,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       if (scheduledAt.getTime() <= Date.now()) {
         return NextResponse.json({ error: 'Thời gian hẹn đăng phải ở tương lai' }, { status: 400 })
       }
+    }
+
+    // Bài hiện tại: cần cho revision snapshot + xử lý chuyển trạng thái thùng rác
+    const existing = await prisma.post.findUnique({ where: { id: Number(id) } })
+    if (!existing) {
+      return NextResponse.json({ error: 'Không tìm thấy bài viết' }, { status: 404 })
     }
 
     const data: any = {
