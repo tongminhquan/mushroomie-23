@@ -17,7 +17,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <ProfileCompletionGuard>
         <div className="flex h-screen overflow-hidden bg-admin-bg">
           <AdminSidebar />
-          <main id="main-content" className="flex-1 overflow-auto pt-16 md:pt-0">
+          <main
+            id="main-content"
+            className="flex-1 overflow-auto pt-16 md:pt-0 bg-[radial-gradient(circle_at_88%_-8%,rgba(255,214,214,0.55),transparent_38%),radial-gradient(circle_at_-6%_30%,rgba(255,231,163,0.32),transparent_30%)]"
+          >
             {children}
           </main>
         </div>
