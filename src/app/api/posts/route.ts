@@ -152,6 +152,11 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Gắn tags (form gửi mảng tên tag)
+    if (Array.isArray(tags)) {
+      await syncPostTags(post.id, tags.filter((t: unknown): t is string => typeof t === 'string'))
+    }
+
     await logAdminAction({
       userId: Number(session.user.id),
       action: 'CREATE',
