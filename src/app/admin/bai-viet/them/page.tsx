@@ -316,12 +316,12 @@ export default function AddPostPage() {
               <Save size={14} /> Lưu nháp
             </button>
             <button
-              onClick={() => handleSubmit(form.status === 'scheduled' ? 'scheduled' : 'published')}
+              onClick={() => handleSubmit(['scheduled', 'private', 'hidden'].includes(form.status) ? form.status : 'published')}
               disabled={isLoading}
               className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60"
             >
               <Eye size={14} />
-              {isLoading ? 'Đang lưu...' : form.status === 'scheduled' ? '⏰ Lên lịch' : 'Xuất bản'}
+              {isLoading ? 'Đang lưu...' : form.status === 'scheduled' ? '⏰ Lên lịch' : form.status === 'private' ? '🔒 Lưu riêng tư' : 'Xuất bản'}
             </button>
           </div>
         </div>
@@ -527,8 +527,8 @@ export default function AddPostPage() {
                   <button onClick={() => handleSubmit('draft')} className="flex-1 py-2 border-[1.5px] border-[#e2d3c8] rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors">
                     Lưu nháp
                   </button>
-                  <button onClick={() => handleSubmit(form.status === 'scheduled' ? 'scheduled' : 'published')} disabled={isLoading} className="flex-1 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60">
-                    {form.status === 'scheduled' ? '⏰ Lên lịch' : 'Xuất bản'}
+                  <button onClick={() => handleSubmit(['scheduled', 'private', 'hidden'].includes(form.status) ? form.status : 'published')} disabled={isLoading} className="flex-1 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60">
+                    {form.status === 'scheduled' ? '⏰ Lên lịch' : form.status === 'private' ? '🔒 Riêng tư' : 'Xuất bản'}
                   </button>
                 </div>
               </div>

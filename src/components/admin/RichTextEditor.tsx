@@ -66,26 +66,16 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
   const [isDragging, setIsDragging] = useState(false)
   const [uploadingCount, setUploadingCount] = useState(0)
   const dragCounter = useRef(0)
-  // Chế độ soạn thảo kiểu WordPress: Visual (trực quan) | HTML (mã nguồn)
-  const [htmlMode, setHtmlMode] = useState(false)
 
   useEffect(() => {
-    if (!editorRef.current || htmlMode) return
+    if (!editorRef.current) return
     const normalizedValue = normalizeArticleImages(value || '', 'storage')
     if (editorRef.current.innerHTML !== normalizedValue && lastValue.current !== normalizedValue) {
       editorRef.current.innerHTML = normalizedValue
       lastValue.current = normalizedValue
       setWordCount(editorRef.current.innerText?.trim().split(/\s+/).filter(Boolean).length ?? 0)
     }
-  }, [value, htmlMode])
-
-  const switchMode = useCallback((toHtml: boolean) => {
-    if (!toHtml) {
-      // Quay về Visual: ép đồng bộ lại innerHTML từ value ở effect trên
-      lastValue.current = null
-    }
-    setHtmlMode(toHtml)
-  }, [])
+  }, [value])
 
   const execCmd = useCallback((cmd: string, val?: string) => {
     if (!editorRef.current) return
@@ -398,26 +388,14 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         </div>
       )}
 
-      {/* Media Button + tabs Visual/HTML kiểu WordPress */}
-      <div className="p-2 border-b border-neutral-200 bg-neutral-50 flex items-center justify-between gap-2">
-        <button onClick={() => setShowMediaPicker(true)} disabled={htmlMode}
-          className="flex items-center gap-2 px-3 py-1.5 border border-primary text-primary rounded-lg text-sm font-semibold hover:bg-primary/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+      {/* Media Button */}
+      <div className="p-2 border-b border-neutral-200 bg-neutral-50 flex items-center">
+        <button onClick={() => setShowMediaPicker(true)} className="flex items-center gap-2 px-3 py-1.5 border border-primary text-primary rounded-lg text-sm font-semibold hover:bg-primary/5 transition-colors">
           <ImageIcon size={16} /> Thêm tệp Media
         </button>
-        <div className="flex rounded-lg overflow-hidden border border-neutral-300 text-xs font-semibold">
-          <button type="button" onClick={() => switchMode(false)}
-            className={`px-3 py-1.5 transition-colors ${!htmlMode ? 'bg-primary text-white' : 'bg-white text-neutral-600 hover:text-primary'}`}>
-            Soạn thảo
-          </button>
-          <button type="button" onClick={() => switchMode(true)}
-            className={`px-3 py-1.5 transition-colors ${htmlMode ? 'bg-primary text-white' : 'bg-white text-neutral-600 hover:text-primary'}`}>
-            HTML
-          </button>
-        </div>
       </div>
 
       {/* Toolbar */}
-      {!htmlMode && (
       <div className="editor-toolbar">
         <select
           className="toolbar-select"
@@ -486,23 +464,10 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('redo') }} title="Làm lại (Ctrl+Y)">↪</button>
         <button className="toolbar-btn" onMouseDown={e => { e.preventDefault(); execCmd('removeFormat') }} title="Xóa định dạng">✕A</button>
       </div>
-      )}
-
-      {/* HTML source mode */}
-      {htmlMode && (
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          spellCheck={false}
-          className="w-full min-h-[450px] p-5 font-mono text-[13px] leading-relaxed text-neutral-800 outline-none resize-y bg-[#fcfbfa]"
-          placeholder="<p>Viết HTML thuần tại đây…</p>"
-        />
-      )}
 
       {/* Editor area */}
       <div
         ref={editorRef}
-        style={{ display: htmlMode ? 'none' : undefined }}
         className="ql-editor-area"
         contentEditable
         suppressContentEditableWarning

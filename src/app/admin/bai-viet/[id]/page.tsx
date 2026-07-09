@@ -544,7 +544,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
               <Save size={14} /> Lưu nháp
             </button>
             <button
-              onClick={() => handleSubmit(form.status === 'scheduled' ? 'scheduled' : 'published')}
+              onClick={() => handleSubmit(['scheduled', 'private', 'hidden'].includes(form.status) ? form.status : 'published')}
               disabled={isLoading}
               className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60"
             >
@@ -754,7 +754,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                   <button onClick={() => handleSubmit('draft')} className="flex-1 py-2 border-[1.5px] border-[#f0e0d6] rounded-xl text-sm font-medium text-neutral-600 hover:bg-neutral-50 transition-colors">
                     Lưu nháp
                   </button>
-                  <button onClick={() => handleSubmit(form.status === 'scheduled' ? 'scheduled' : 'published')} disabled={isLoading} className="flex-1 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60">
+                  <button onClick={() => handleSubmit(['scheduled', 'private', 'hidden'].includes(form.status) ? form.status : 'published')} disabled={isLoading} className="flex-1 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60">
                     {form.status === 'scheduled' ? '⏰ Lên lịch' : 'Cập nhật'}
                   </button>
                 </div>
