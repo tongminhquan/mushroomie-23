@@ -30,6 +30,22 @@ const getPublishedPostBySlug = cache(async (slug: string) => {
   })
 })
 
+// Xem trước cho admin: lấy bài ở mọi trạng thái (chỉ gọi sau khi đã xác thực admin)
+const getAnyPostBySlug = cache(async (slug: string) => {
+  return prisma.post.findFirst({
+    where: { slug },
+    include: { category: true, author: true },
+  })
+})
+
+const PREVIEW_LABELS: Record<string, string> = {
+  draft: 'Bản nháp',
+  scheduled: 'Chờ đăng theo lịch',
+  private: 'Riêng tư',
+  hidden: 'Đang ẩn',
+  trash: 'Trong thùng rác',
+}
+
 export async function generateMetadata({
   params,
 }: {
