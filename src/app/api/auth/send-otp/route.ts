@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createTransporter } from '@/lib/email'
+import { rateLimiter } from '@/lib/rate-limit'
 
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString()
@@ -8,7 +9,16 @@ function generateOTP() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json()
+    if (rateLimiter.isLimited(request, 3, 60 * 1000, 'auth_send_otp')) {
+      return NextResponse.json(
+        { error: 'Bạn đã yêu cầu gửi mã OTP quá nhiều lần. Vui lòng thử lại sau ít phút.' },
+        { status: 429 }
+      )
+    }
+
+    const body = await request.json()
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
+
     if (!email) {
       return NextResponse.json({ error: 'Thiếu email' }, { status: 400 })
     }
