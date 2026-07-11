@@ -154,6 +154,7 @@ export async function POST(request: NextRequest) {
           payment_method,
           payment_status: 'PENDING',
           order_status: orderStatus,
+          inventory_reserved_at: new Date(),
           items: {
             create: authoritativeItems.map((item) => ({
               product_id: item.product_id,

@@ -94,11 +94,17 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const updatedOrder = await prisma.$transaction(async (tx) => {
       const transitioned = await tx.order.updateMany({
         where: { id: Number(id), order_status: order.order_status },
-        data: { order_status },
+        data: {
+          order_status,
+          ...(order_status === 'CANCELLED' ? { inventory_reserved_at: null } : {}),
+          ...(order.order_status === 'CANCELLED' && order_status !== 'CANCELLED'
+            ? { inventory_reserved_at: new Date() }
+            : {}),
+        },
       })
       if (transitioned.count !== 1) throw new Error('ORDER_CHANGED')
 
-      if (order.order_status !== 'CANCELLED' && order_status === 'CANCELLED') {
+      if (order.inventory_reserved_at && order.order_status !== 'CANCELLED' && order_status === 'CANCELLED') {
         for (const item of order.items) {
           if (item.product_id) {
             await tx.product.update({
@@ -117,6 +123,19 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
             data: { stock: { decrement: item.quantity } },
           })
           if (reserved.count !== 1) throw new Error('PRODUCT_UNAVAILABLE')
+        }
+
+        if (order.voucher_id) {
+          const restoredVoucher = await tx.userVoucher.updateMany({
+            where: {
+              id: order.voucher_id,
+              status: 'AVAILABLE',
+              orderId: null,
+              OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+            },
+            data: { status: 'USED', orderId: order.id, usedAt: new Date() },
+          })
+          if (restoredVoucher.count !== 1) throw new Error('VOUCHER_NOT_AVAILABLE')
         }
       }
 
@@ -162,6 +181,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
     if (error instanceof Error && error.message === 'ORDER_CHANGED') {
       return NextResponse.json({ error: 'Order status changed, please reload and try again' }, { status: 409 })
+    }
+    if (error instanceof Error && error.message === 'VOUCHER_NOT_AVAILABLE') {
+      return NextResponse.json({ error: 'The order voucher is no longer available' }, { status: 409 })
     }
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }

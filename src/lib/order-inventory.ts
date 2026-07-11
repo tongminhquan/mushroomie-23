@@ -13,16 +13,18 @@ export async function cancelOrderAndReleaseInventory(
 
   const transitioned = await tx.order.updateMany({
     where: { id: input.orderId, order_status: order.order_status },
-    data: { order_status: 'CANCELLED' },
+    data: { order_status: 'CANCELLED', inventory_reserved_at: null },
   })
   if (transitioned.count !== 1) return false
 
-  for (const item of order.items) {
-    if (!item.product_id) continue
-    await tx.product.update({
-      where: { id: item.product_id },
-      data: { stock: { increment: item.quantity } },
-    })
+  if (order.inventory_reserved_at) {
+    for (const item of order.items) {
+      if (!item.product_id) continue
+      await tx.product.update({
+        where: { id: item.product_id },
+        data: { stock: { increment: item.quantity } },
+      })
+    }
   }
 
   await tx.userVoucher.updateMany({
@@ -49,6 +51,7 @@ export async function releaseExpiredOrderReservations() {
     where: {
       order_status: 'PENDING_PAYMENT',
       payment_status: 'PENDING',
+      inventory_reserved_at: { not: null },
       created_at: { lte: fallbackCutoff },
     },
     include: { payment: true },
