@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
 
 export default function ProfileCompletionGuard({ children }: { children: React.ReactNode }) {

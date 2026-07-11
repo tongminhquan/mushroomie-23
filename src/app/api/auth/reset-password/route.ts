@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs'
 export async function POST(req: Request) {
   try {
     // Chống dò/brute-force reset token
-    const rl = checkRateLimit(req, 'reset-pw-ip', { limit: 20, windowMs: 15 * 60 * 1000 })
+    const rl = await checkRateLimit(req, 'reset-pw-ip', { limit: 20, windowMs: 15 * 60 * 1000 })
     if (!rl.allowed) {
       return NextResponse.json(
         { message: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.' },
@@ -46,6 +46,7 @@ export async function POST(req: Request) {
       where: { id: user.id },
       data: {
         password_hash: hashedPassword,
+        is_email_verified: true,
         reset_token: null,
         reset_token_expires: null,
       },

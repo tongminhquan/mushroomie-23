@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { isGameKey } from '@/lib/game-config'
 import { createGameToken } from '@/lib/game-server'
-
-const SECRET = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || 'mushroomie-secret-fallback'
+import { getApplicationSecret } from '@/lib/security'
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +17,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid game' }, { status: 400 })
     }
 
-    const token = createGameToken(Number(session.user.id), game, SECRET)
+    const token = createGameToken(Number(session.user.id), game, getApplicationSecret())
     return NextResponse.json({ token })
   } catch (error) {
     console.error('[GAME START]', error)

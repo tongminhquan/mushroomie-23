@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -12,15 +12,54 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<Record<string, string[]>>({})
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const [otp, setOtp] = useState('')
+  const [otpSent, setOtpSent] = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return
+    const timer = window.setInterval(() => setResendCooldown((value) => Math.max(0, value - 1)), 1000)
+    return () => window.clearInterval(timer)
+  }, [resendCooldown])
+
+  const handleSendOtp = async () => {
+    setErrors({})
+    if (!form.email) {
+      setErrors({ email: ['Vui lòng nhập email trước khi nhận mã OTP'] })
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: form.email }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Không thể gửi mã OTP')
+      setOtpSent(true)
+      setOtp('')
+      setResendCooldown(60)
+    } catch (error) {
+      setErrors({ otp: [error instanceof Error ? error.message : 'Không thể gửi mã OTP'] })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!otpSent || !otp) {
+      setErrors({ otp: ['Vui lòng nhận và nhập mã OTP trước khi tạo tài khoản'] })
+      return
+    }
     setIsLoading(true)
     setErrors({})
     const res = await fetch('/api/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, otp }),
     })
     const data = await res.json()
     if (!res.ok) {
@@ -110,6 +149,31 @@ export default function RegisterPage() {
                 )}
               </div>
             ))}
+            <div className="rounded-xl border border-[#f0e0d6] bg-[#fffaf7] p-4">
+              <label className="mb-1.5 block text-sm font-semibold text-neutral-700">Mã xác minh email</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  value={otp}
+                  onChange={(event) => setOtp(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                  disabled={!otpSent}
+                  placeholder="6 chữ số"
+                  className="min-w-0 flex-1 rounded-xl border-[1.5px] border-[#e2d3c8] bg-white px-4 py-3 text-center font-bold tracking-[0.25em] outline-none focus:border-primary disabled:bg-neutral-100"
+                />
+                <button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={isLoading || resendCooldown > 0}
+                  className="min-h-11 rounded-xl border border-primary px-4 text-sm font-bold text-primary disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {otpSent ? (resendCooldown > 0 ? `${resendCooldown}s` : 'Gửi lại') : 'Nhận mã'}
+                </button>
+              </div>
+              {errors.otp && <p className="mt-2 text-xs text-red-500">{errors.otp[0]}</p>}
+              {otpSent && !errors.otp && <p className="mt-2 text-xs text-neutral-500">Mã có hiệu lực 5 phút. Hãy kiểm tra cả Spam/Quảng cáo.</p>}
+            </div>
             <Button type="submit" isLoading={isLoading} className="w-full rounded-full font-bold shadow-[0_8px_20px_rgba(201,20,20,0.3)]" size="lg">Tạo tài khoản</Button>
           </form>
           <p className="text-center text-sm text-neutral-500 mt-5">

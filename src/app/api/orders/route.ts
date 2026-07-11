@@ -26,7 +26,7 @@ const orderSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    if (rateLimiter.isLimited(request, 5, 60_000, 'order_post')) {
+    if (await rateLimiter.isLimited(request, 5, 60_000, 'order_post')) {
       return rateLimiter.getLimitResponse()
     }
 
@@ -80,10 +80,22 @@ export async function POST(request: NextRequest) {
     })
 
     const subtotal = authoritativeItems.reduce((sum, item) => sum + item.price_snapshot * item.quantity, 0)
+    const reservedQuantities = authoritativeItems.reduce((result, item) => {
+      result.set(item.product_id, (result.get(item.product_id) || 0) + item.quantity)
+      return result
+    }, new Map<number, number>())
     const shippingFee = 30_000
     const orderCode = generateOrderCode()
 
     const order = await prisma.$transaction(async (tx) => {
+      for (const [productId, quantity] of reservedQuantities) {
+        const reserved = await tx.product.updateMany({
+          where: { id: productId, status: 'active', stock: { gte: quantity } },
+          data: { stock: { decrement: quantity } },
+        })
+        if (reserved.count !== 1) throw new Error('PRODUCT_UNAVAILABLE')
+      }
+
       let voucherDiscountAmount = 0
 
       let userVoucher = null

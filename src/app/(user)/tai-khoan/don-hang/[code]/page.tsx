@@ -8,6 +8,7 @@ import Breadcrumb from '@/components/layout/Breadcrumb'
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 import ReviewOrderModal from '@/components/account/ReviewOrderModal'
 import type { Metadata } from 'next'
+import { verifyOrderAccessToken } from '@/lib/order-access'
 
 export const metadata: Metadata = { title: 'Chi tiết đơn hàng | Mushroomie' }
 
@@ -31,10 +32,10 @@ const statusLabels: Record<string, string> = {
   CANCELLED: 'Đã hủy',
 }
 
-export default async function OrderDetailsPage({ params, searchParams }: { params: Promise<{ code: string }>, searchParams: Promise<{ phone?: string, email?: string }> }) {
+export default async function OrderDetailsPage({ params, searchParams }: { params: Promise<{ code: string }>, searchParams: Promise<{ accessToken?: string }> }) {
   const session = await auth()
   const { code } = await params
-  const { phone, email } = await searchParams
+  const { accessToken } = await searchParams
 
   const userId = session ? parseInt((session.user as any).id) : null
 
@@ -58,14 +59,8 @@ export default async function OrderDetailsPage({ params, searchParams }: { param
   if (userId) {
     if (order.user_id !== userId) notFound()
   } else {
-    // Nếu chưa đăng nhập (khách vãng lai), phải cung cấp phone hoặc email đúng với đơn hàng
-    if (!phone && !email) {
+    if (!verifyOrderAccessToken(accessToken, order.id, order.order_code)) {
       redirect(`/tai-khoan/dang-nhap?callbackUrl=/tai-khoan/don-hang/${code}`)
-    }
-    const matchPhone = phone && order.customer_phone === phone
-    const matchEmail = email && order.customer_email === email
-    if (!matchPhone && !matchEmail) {
-      notFound()
     }
   }
 
@@ -190,7 +185,7 @@ export default async function OrderDetailsPage({ params, searchParams }: { param
 
               {order.payment_status === 'PENDING' && order.payment_method !== 'cod' && !isExpired && (
                 <div className="mt-6">
-                  <Link href={`/thanh-toan/xac-nhan?orderCode=${order.order_code}`}>
+                  <Link href={`/thanh-toan/xac-nhan?orderCode=${order.order_code}&accessToken=${encodeURIComponent(accessToken || '')}`}>
                     <button className="w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary-dark transition-colors">
                       Thanh toán ngay
                     </button>

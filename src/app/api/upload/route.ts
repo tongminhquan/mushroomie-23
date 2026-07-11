@@ -50,7 +50,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const req = request as any
-    if (rateLimiter.isLimited(req, 10, 60000, 'upload_post')) {
+    if (await rateLimiter.isLimited(req, 10, 60000, 'upload_post')) {
       return rateLimiter.getLimitResponse()
     }
     
@@ -85,7 +85,7 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const req = request as any
-    if (rateLimiter.isLimited(req, 10, 60000, 'upload_del')) {
+    if (await rateLimiter.isLimited(req, 10, 60000, 'upload_del')) {
       return rateLimiter.getLimitResponse()
     }
 

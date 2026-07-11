@@ -13,8 +13,10 @@ export async function POST(req: Request) {
     }
 
     // Chống lạm dụng gửi email reset (email bombing) theo IP và theo email
-    const byIp = checkRateLimit(req, 'forgot-pw-ip', { limit: 10, windowMs: 60 * 60 * 1000 })
-    const byEmail = checkRateLimit(req, 'forgot-pw-email', { limit: 5, windowMs: 60 * 60 * 1000, identity: email.toLowerCase() })
+    const [byIp, byEmail] = await Promise.all([
+      checkRateLimit(req, 'forgot-pw-ip', { limit: 10, windowMs: 60 * 60 * 1000 }),
+      checkRateLimit(req, 'forgot-pw-email', { limit: 5, windowMs: 60 * 60 * 1000, identity: email.toLowerCase() }),
+    ])
     if (!byIp.allowed || !byEmail.allowed) {
       // Vẫn trả OK để không lộ thông tin, nhưng không thực hiện gửi mail
       return NextResponse.json({ message: 'OK' }, { status: 200 })

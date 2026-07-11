@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { isGameKey } from '@/lib/game-config'
-import { issueGameVoucher, isScoreReasonable, normalizeDurationSec, verifyGameToken } from '@/lib/game-server'
+import { hashGameToken, issueGameVoucher, isScoreReasonable, normalizeDurationSec, verifyGameToken } from '@/lib/game-server'
+import { getApplicationSecret } from '@/lib/security'
+import { Prisma } from '@prisma/client'
 import { z } from 'zod'
-
-const SECRET = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || 'mushroomie-secret-fallback'
 
 const submitScoreSchema = z.object({
   game: z.string(),
-  score: z.number().int().nonnegative(),
+  score: z.number().int().nonnegative().max(1_000_000),
   lines: z.number().int().nonnegative().max(10_000).optional().default(0),
   combo: z.number().int().nonnegative().max(10_000).optional().default(0),
   level: z.number().int().nonnegative().max(10_000).optional().default(1),
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = Number(session.user.id)
-    const verified = verifyGameToken(token, userId, game, SECRET)
+    const verified = verifyGameToken(token, userId, game, getApplicationSecret())
     if (!verified.ok) {
       return NextResponse.json({ error: 'Invalid game session' }, { status: 403 })
     }
@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     const safeDurationSec = normalizeDurationSec(durationSec, verified.elapsedMs)
+    const sessionTokenHash = hashGameToken(token!)
 
     // DB-based rate-limit: max 10 submissions per 60s per user (uses existing game_scores index)
     const recentCount = await prisma.gameScore.count({
@@ -65,6 +66,7 @@ export async function POST(request: NextRequest) {
           combo,
           level: Math.max(1, level),
           duration_sec: safeDurationSec,
+          session_token_hash: sessionTokenHash,
         },
       })
 
@@ -96,6 +98,9 @@ export async function POST(request: NextRequest) {
         : null,
     })
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      return NextResponse.json({ error: 'Game session already submitted' }, { status: 409 })
+    }
     console.error('[GAME SUBMIT SCORE]', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }

@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { releaseExpiredOrderReservations } from '@/lib/order-inventory'
 
 /**
  * Bộ xuất bản bài viết theo lịch (tính năng "Đăng bài tự động").
@@ -36,13 +37,23 @@ export async function publishDuePosts(): Promise<number> {
   }
 }
 
+async function runMaintenance() {
+  await publishDuePosts()
+  try {
+    const released = await releaseExpiredOrderReservations()
+    if (released > 0) console.log(`[inventory] Released ${released} expired order reservations`)
+  } catch (error) {
+    console.error('[inventory] Failed to release expired order reservations:', error)
+  }
+}
+
 export function startScheduledPublisher() {
   if (globalStore.__mushroomieScheduledPublisher) return
 
   // Chạy ngay một lần lúc khởi động để không bỏ lỡ bài đến hạn khi server restart.
-  void publishDuePosts()
+  void runMaintenance()
 
-  const timer = setInterval(() => { void publishDuePosts() }, TICK_MS)
+  const timer = setInterval(() => { void runMaintenance() }, TICK_MS)
   // Không giữ event loop sống chỉ vì job này (an toàn khi chạy script/test).
   timer.unref?.()
   globalStore.__mushroomieScheduledPublisher = timer

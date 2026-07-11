@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { Suspense, useEffect, useState, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { formatPrice } from '@/lib/utils'
 import { AlertTriangle, CheckCircle, Clock, Landmark, RefreshCw, XCircle } from 'lucide-react'
@@ -104,7 +104,7 @@ function uniqueUrls(urls: string[]): string[] {
   return Array.from(new Set(urls.filter(Boolean)))
 }
 
-export default function ConfirmPage() {
+function ConfirmPageContent() {
   const searchParams = useSearchParams()
   const orderCode = searchParams.get('orderCode') || ''
   const accessToken = searchParams.get('accessToken') || ''
@@ -237,7 +237,7 @@ export default function ConfirmPage() {
           <p className="text-neutral-500 mb-2">Mã đơn hàng: <strong>#{orderCode}</strong></p>
           <p className="mb-6 text-sm text-neutral-500">Mushroomie đã nhận được thanh toán và sẽ bắt đầu làm sản phẩm cho bạn.</p>
           <div className="space-y-3">
-            <Link href={`/tai-khoan/don-hang/${orderCode}`}>
+            <Link href={`/tai-khoan/don-hang/${orderCode}?accessToken=${encodeURIComponent(accessToken)}`}>
               <Button className="w-full">Xem chi tiết đơn hàng</Button>
             </Link>
             <Link href="/san-pham">
@@ -258,7 +258,7 @@ export default function ConfirmPage() {
           <p className="text-neutral-500 mb-2">Mã đơn hàng: <strong>#{orderCode}</strong></p>
           <p className="mb-6 text-sm text-neutral-500">Mushroomie sẽ liên hệ và giao hàng đến bạn trong thời gian sớm nhất. Bạn thanh toán khi nhận hàng.</p>
           <div className="space-y-3">
-            <Link href={`/tai-khoan/don-hang/${orderCode}`}>
+            <Link href={`/tai-khoan/don-hang/${orderCode}?accessToken=${encodeURIComponent(accessToken)}`}>
               <Button className="w-full">Xem chi tiết đơn hàng</Button>
             </Link>
             <Link href="/san-pham">
@@ -398,5 +398,13 @@ export default function ConfirmPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ConfirmPage() {
+  return (
+    <Suspense fallback={<div className="brand-container py-16 text-center text-sm text-neutral-500">Đang tải thông tin thanh toán...</div>}>
+      <ConfirmPageContent />
+    </Suspense>
   )
 }

@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 
-export const dynamic = 'force-dynamic'
-
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -12,7 +10,10 @@ export async function GET(request: NextRequest) {
       where: type ? { type } : {},
       orderBy: { name: 'asc' },
     })
-    return NextResponse.json({ categories })
+    return NextResponse.json(
+      { categories },
+      { headers: { 'Cache-Control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400' } },
+    )
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { verifyOrderAccessToken } from '@/lib/order-access'
 import { checkRateLimit } from '@/lib/security'
+import { cancelOrderAndReleaseInventory } from '@/lib/order-inventory'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const rateLimit = checkRateLimit(request, 'payment-status', {
+    const rateLimit = await checkRateLimit(request, 'payment-status', {
       limit: 120,
       windowMs: 5 * 60 * 1000,
       identity: session?.user?.id || undefined,
@@ -42,13 +43,19 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     // Check expiry
     if (status === 'PENDING' && payment?.expires_at && new Date(payment.expires_at) < new Date()) {
-      await prisma.$transaction([
-        prisma.payment.update({ where: { id: payment.id }, data: { status: 'EXPIRED' } }),
-        prisma.userVoucher.updateMany({
-          where: { orderId: order.id, status: 'USED' },
-          data: { status: 'AVAILABLE', orderId: null, usedAt: null },
-        }),
-      ])
+      await prisma.$transaction(async (tx) => {
+        const expired = await tx.payment.updateMany({
+          where: { id: payment.id, status: 'PENDING' },
+          data: { status: 'EXPIRED' },
+        })
+        if (expired.count === 1) {
+          await cancelOrderAndReleaseInventory(tx, {
+            orderId: order.id,
+            changedBy: 'SYSTEM',
+            note: 'Payment expired; inventory released',
+          })
+        }
+      })
       status = 'EXPIRED'
     }
 

@@ -30,7 +30,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    if (rateLimiter.isLimited(request, 6, 60_000, 'admin_wordpress_auto_poster')) {
+    if (await rateLimiter.isLimited(request, 6, 60_000, 'admin_wordpress_auto_poster')) {
       return rateLimiter.getLimitResponse()
     }
 

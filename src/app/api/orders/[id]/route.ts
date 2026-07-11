@@ -26,8 +26,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const session = await auth()
     const { searchParams } = new URL(request.url)
-    const phone = searchParams.get('phone')
-    const email = searchParams.get('email')
     const accessToken = searchParams.get('accessToken')
 
     const { id } = await params
@@ -55,7 +53,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json(order)
     }
 
-    const rateLimit = checkRateLimit(request, 'order-lookup', { limit: 60, windowMs: 5 * 60 * 1000 })
+    const rateLimit = await checkRateLimit(request, 'order-lookup', { limit: 30, windowMs: 5 * 60 * 1000 })
     if (!rateLimit.allowed) {
       return NextResponse.json(
         { error: 'Too many lookup requests' },
@@ -66,10 +64,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (verifyOrderAccessToken(accessToken, order.id, order.order_code)) {
       return NextResponse.json(order)
     }
-
-    // Guest lookup requires matching contact information.
-    if (phone && order.customer_phone === phone) return NextResponse.json(order)
-    if (email && order.customer_email.toLowerCase() === email.trim().toLowerCase()) return NextResponse.json(order)
 
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   } catch {
@@ -91,14 +85,40 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
     const { order_status, note } = parsed.data
 
-    const order = await prisma.order.findUnique({ where: { id: Number(id) } })
+    const order = await prisma.order.findUnique({
+      where: { id: Number(id) },
+      include: { items: true },
+    })
     if (!order) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
     const updatedOrder = await prisma.$transaction(async (tx) => {
-      const nextOrder = await tx.order.update({
-        where: { id: Number(id) },
+      const transitioned = await tx.order.updateMany({
+        where: { id: Number(id), order_status: order.order_status },
         data: { order_status },
       })
+      if (transitioned.count !== 1) throw new Error('ORDER_CHANGED')
+
+      if (order.order_status !== 'CANCELLED' && order_status === 'CANCELLED') {
+        for (const item of order.items) {
+          if (item.product_id) {
+            await tx.product.update({
+              where: { id: item.product_id },
+              data: { stock: { increment: item.quantity } },
+            })
+          }
+        }
+      }
+
+      if (order.order_status === 'CANCELLED' && order_status !== 'CANCELLED') {
+        for (const item of order.items) {
+          if (!item.product_id) continue
+          const reserved = await tx.product.updateMany({
+            where: { id: item.product_id, status: 'active', stock: { gte: item.quantity } },
+            data: { stock: { decrement: item.quantity } },
+          })
+          if (reserved.count !== 1) throw new Error('PRODUCT_UNAVAILABLE')
+        }
+      }
 
       if (order_status === 'CANCELLED') {
         await tx.userVoucher.updateMany({
@@ -107,19 +127,18 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         })
       }
 
-      return nextOrder
-    })
+      await tx.orderStatusHistory.create({
+        data: {
+          order_id: Number(id),
+          old_status: order.order_status,
+          new_status: order_status,
+          changed_by: 'ADMIN',
+          changed_by_user_id: Number(session.user.id),
+          note: note || null,
+        },
+      })
 
-    // Log status history
-    await prisma.orderStatusHistory.create({
-      data: {
-        order_id: Number(id),
-        old_status: order.order_status,
-        new_status: order_status,
-        changed_by: 'ADMIN',
-        changed_by_user_id: Number((session.user as any).id),
-        note: note || null,
-      },
+      return tx.order.findUniqueOrThrow({ where: { id: Number(id) } })
     })
 
     // Send email nếu có template
@@ -138,6 +157,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(updatedOrder)
   } catch (error) {
+    if (error instanceof Error && error.message === 'PRODUCT_UNAVAILABLE') {
+      return NextResponse.json({ error: 'Product is unavailable or out of stock' }, { status: 409 })
+    }
+    if (error instanceof Error && error.message === 'ORDER_CHANGED') {
+      return NextResponse.json({ error: 'Order status changed, please reload and try again' }, { status: 409 })
+    }
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

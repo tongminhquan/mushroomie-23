@@ -5,6 +5,7 @@ import { getPaymentProvider } from '@/lib/payment/factory'
 import { z } from 'zod'
 import { verifyOrderAccessToken } from '@/lib/order-access'
 import { checkRateLimit } from '@/lib/security'
+import { Prisma } from '@prisma/client'
 
 const paymentSchema = z.object({
   orderId: z.number().int().positive(),
@@ -13,7 +14,7 @@ const paymentSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const rateLimit = checkRateLimit(request, 'payment-create', { limit: 20, windowMs: 15 * 60 * 1000 })
+    const rateLimit = await checkRateLimit(request, 'payment-create', { limit: 20, windowMs: 15 * 60 * 1000 })
     if (!rateLimit.allowed) {
       return NextResponse.json(
         { error: 'Too many payment requests' },
@@ -67,22 +68,30 @@ export async function POST(request: NextRequest) {
       expiresAt,
     })
 
-    const payment = await prisma.payment.create({
-      data: {
-        order_id: orderId,
-        provider: provider.providerKey,
-        bank_name: result.bankName,
-        bank_account: result.bankAccount,
-        account_name: result.accountName,
-        amount: order.total,
-        currency: 'VND',
-        transfer_content: result.transferContent,
-        qr_code_url: result.qrCodeUrl,
-        qr_code_payload: result.qrCodePayload,
-        status: 'PENDING',
-        expires_at: expiresAt,
-      },
-    })
+    let payment
+    try {
+      payment = await prisma.payment.create({
+        data: {
+          order_id: orderId,
+          provider: provider.providerKey,
+          bank_name: result.bankName,
+          bank_account: result.bankAccount,
+          account_name: result.accountName,
+          amount: order.total,
+          currency: 'VND',
+          transfer_content: result.transferContent,
+          qr_code_url: result.qrCodeUrl,
+          qr_code_payload: result.qrCodePayload,
+          status: 'PENDING',
+          expires_at: expiresAt,
+        },
+      })
+    } catch (error) {
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') throw error
+      payment = await prisma.payment.findUnique({ where: { order_id: orderId } })
+      if (!payment) throw error
+      return NextResponse.json(payment)
+    }
 
     return NextResponse.json(payment, { status: 201 })
   } catch (error) {

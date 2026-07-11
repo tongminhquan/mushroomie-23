@@ -1,4 +1,11 @@
 import { ORDER_STATUS_LABELS, EmailTemplateKey } from '@/types'
+import { createOrderAccessToken } from '@/lib/order-access'
+
+function getOrderDetailUrl(order: { id: number; order_code: string }) {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://mushroomie.io.vn'
+  const accessToken = createOrderAccessToken(order.id, order.order_code)
+  return `${baseUrl}/tai-khoan/don-hang/${encodeURIComponent(order.order_code)}?accessToken=${encodeURIComponent(accessToken)}`
+}
 
 function emailWrapper(content: string): string {
   return `
@@ -66,7 +73,7 @@ export function renderPaymentSuccessEmail(order: any): string {
         <div class="info-row"><span>Phí vận chuyển</span><span>${formatMoney(order.shipping_fee)}</span></div>
         <div class="info-row"><span>Tổng cộng</span><span>${formatMoney(order.total)}</span></div>
       </div>
-      <a href="${process.env.NEXT_PUBLIC_APP_URL}/tai-khoan/don-hang/${order.order_code}" class="btn">Xem chi tiết đơn hàng →</a>
+      <a href="${getOrderDetailUrl(order)}" class="btn">Xem chi tiết đơn hàng →</a>
     </div>
     <div class="footer">Cảm ơn bạn đã tin tưởng Mushroomie 🍄<br><small>Nếu có thắc mắc, liên hệ chúng mình qua email hoặc mạng xã hội nhé!</small></div>
   `)
@@ -96,7 +103,7 @@ export function renderOrderStatusEmail(order: any, templateKey: EmailTemplateKey
         <div class="info-row"><span>Mã đơn hàng</span><strong>#${order.order_code}</strong></div>
         <div class="info-row"><span>Trạng thái</span><span>${ORDER_STATUS_LABELS[order.order_status as keyof typeof ORDER_STATUS_LABELS] || order.order_status}</span></div>
       </div>
-      <a href="${process.env.NEXT_PUBLIC_APP_URL}/tai-khoan/don-hang/${order.order_code}" class="btn">Theo dõi đơn hàng →</a>
+      <a href="${getOrderDetailUrl(order)}" class="btn">Theo dõi đơn hàng →</a>
     </div>
     <div class="footer">Mushroomie — Phụ kiện Handmade Cá nhân hóa 🍄</div>
   `)

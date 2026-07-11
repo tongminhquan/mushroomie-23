@@ -90,27 +90,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (account?.provider === 'google') {
         if (!user.email) return false
         try {
+          if (profile?.email_verified !== true) return false
+
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email },
           })
-          if (!existingUser || !existingUser.phone || !existingUser.address) {
-            // Thay vì tạo user ngay hoặc cho qua, redirect sang trang hoàn tất đăng ký
-            const params = new URLSearchParams({
-              email: user.email,
-              name: user.name || existingUser?.name || '',
-              avatar: user.image || existingUser?.avatar || '',
-              google_id: account.providerAccountId || existingUser?.google_id || ''
-            })
-            return `/tai-khoan/hoan-tat-dang-ky?${params.toString()}`
-          } else {
-            // Cập nhật thông tin Google nếu người dùng đã tồn tại và đã có đủ phone, address
+
+          if (existingUser) {
+            if (existingUser.google_id && existingUser.google_id !== account.providerAccountId) return false
+            // Legacy password accounts created before OTP enforcement must prove email ownership first.
+            if (existingUser.password_hash && !existingUser.is_email_verified) return false
+
             await prisma.user.update({
               where: { email: user.email },
               data: {
                 avatar: user.image || existingUser.avatar,
                 google_id: account.providerAccountId,
-                is_email_verified: (profile?.email_verified as boolean) ?? existingUser.is_email_verified,
+                is_email_verified: true,
               }
+            })
+          } else {
+            await prisma.user.create({
+              data: {
+                email: user.email,
+                name: user.name || 'Người dùng Google',
+                password_hash: '',
+                avatar: user.image || null,
+                google_id: account.providerAccountId,
+                is_email_verified: true,
+                role: 'user',
+              },
             })
           }
           return true

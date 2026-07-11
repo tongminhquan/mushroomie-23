@@ -10,6 +10,10 @@ export function createGameToken(userId: number, game: GameKey, secret: string) {
   return `${payload}.${signature}`
 }
 
+export function hashGameToken(token: string) {
+  return crypto.createHash('sha256').update(token).digest('hex')
+}
+
 export function verifyGameToken(token: string | undefined, userId: number, game: GameKey, secret: string) {
   if (!token) return { ok: false as const, error: 'missing-token' }
 
@@ -114,17 +118,27 @@ export async function issueGameVoucher(
 
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days
 
-  // upsert: avoids P2002 unique([userId, voucherId]) if user previously held and used this tier
-  return tx.userVoucher.upsert({
-    where: { userId_voucherId: { userId: input.userId, voucherId: template.id } },
-    update: {
-      status: 'AVAILABLE',
-      source: 'mini_game',
-      sourceGame: input.game,
-      score: input.scoreId,
-      expiresAt,
-    },
-    create: {
+  const existing = await tx.userVoucher.findFirst({
+    where: { userId: input.userId, voucherId: template.id },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  if (existing) {
+    return tx.userVoucher.update({
+      where: { id: existing.id },
+      data: {
+        status: 'AVAILABLE',
+        source: 'mini_game',
+        sourceGame: input.game,
+        score: input.scoreId,
+        expiresAt,
+      },
+      include: { voucher: true },
+    })
+  }
+
+  return tx.userVoucher.create({
+    data: {
       userId: input.userId,
       voucherId: template.id,
       source: 'mini_game',

@@ -1,11 +1,11 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import Button from '@/components/ui/Button'
 
-export default function ResetPasswordPage() {
+function ResetPasswordPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
@@ -132,5 +132,13 @@ export default function ResetPasswordPage() {
         <p className="text-center text-xs text-neutral-500 mt-6">Làm bằng tay, trao bằng tim 🍄</p>
       </div>
     </div>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-secondary py-16 text-center text-sm text-neutral-500">Đang tải trang đặt lại mật khẩu...</div>}>
+      <ResetPasswordPageContent />
+    </Suspense>
   )
 }

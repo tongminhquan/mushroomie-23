@@ -19,8 +19,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Chống email bombing / lạm dụng: giới hạn theo IP và theo địa chỉ email
-    const byIp = checkRateLimit(request, 'send-otp-ip', { limit: 10, windowMs: 60 * 60 * 1000 })
-    const byEmail = checkRateLimit(request, 'send-otp-email', { limit: 5, windowMs: 60 * 60 * 1000, identity: email })
+    const [byIp, byEmail] = await Promise.all([
+      checkRateLimit(request, 'send-otp-ip', { limit: 10, windowMs: 60 * 60 * 1000 }),
+      checkRateLimit(request, 'send-otp-email', { limit: 5, windowMs: 60 * 60 * 1000, identity: email }),
+    ])
     if (!byIp.allowed || !byEmail.allowed) {
       const retryAfter = Math.max(byIp.retryAfter, byEmail.retryAfter)
       return NextResponse.json(

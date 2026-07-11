@@ -1,6 +1,8 @@
 import net from 'node:net'
+import { lookup } from 'node:dns/promises'
 import path from 'node:path'
 import JSZip from 'jszip'
+import { Agent, fetch as undiciFetch, type RequestInit as UndiciRequestInit } from 'undici'
 
 type SheetData = unknown[][]
 
@@ -608,15 +610,81 @@ async function fetchWithTimeout(
 ) {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), init.timeoutMs)
+  const requestInit = { ...init }
+  delete (requestInit as { timeoutMs?: number }).timeoutMs
   try {
-    return await fetch(input, {
-      ...init,
-      signal: controller.signal,
-      cache: 'no-store',
-    })
+    let currentUrl = new URL(input)
+    for (let redirectCount = 0; redirectCount <= 3; redirectCount += 1) {
+      const destination = await assertPublicDestination(currentUrl)
+      const dispatcher = new Agent({
+        connect: {
+          lookup: (_hostname, _options, callback) => callback(null, destination.address, destination.family),
+        },
+      })
+
+      let response
+      try {
+        response = await undiciFetch(currentUrl, {
+          ...requestInit,
+          signal: controller.signal,
+          cache: 'no-store',
+          redirect: 'manual',
+          dispatcher,
+        } as unknown as UndiciRequestInit)
+      } catch (error) {
+        await dispatcher.close()
+        throw error
+      }
+
+      if (response.status < 300 || response.status >= 400) {
+        const body = await response.arrayBuffer()
+        const responseHeaders = new Headers()
+        response.headers.forEach((value, key) => responseHeaders.append(key, value))
+        const result = new Response(body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: responseHeaders,
+        })
+        await dispatcher.close()
+        return result
+      }
+      const location = response.headers.get('location')
+      await response.body?.cancel()
+      await dispatcher.close()
+      if (!location || redirectCount === 3) {
+        throw new WordPressAutoPosterError('WordPress API chuyển hướng quá nhiều lần')
+      }
+
+      const nextUrl = new URL(location, currentUrl)
+      if (nextUrl.origin !== currentUrl.origin) {
+        throw new WordPressAutoPosterError('WordPress API không được chuyển hướng sang tên miền khác')
+      }
+      currentUrl = nextUrl
+    }
+
+    throw new WordPressAutoPosterError('Không thể kết nối WordPress API')
   } finally {
     clearTimeout(timeout)
   }
+}
+
+async function assertPublicDestination(url: URL) {
+  if (!['http:', 'https:'].includes(url.protocol) || isPrivateHost(url.hostname)) {
+    throw new WordPressAutoPosterError('Không cho phép URL nội bộ hoặc giao thức không an toàn')
+  }
+
+  let addresses: Array<{ address: string; family: number }>
+  try {
+    addresses = await lookup(url.hostname, { all: true, verbatim: true })
+  } catch {
+    throw new WordPressAutoPosterError('Không phân giải được tên miền WordPress')
+  }
+
+  if (addresses.length === 0 || addresses.some(({ address }) => isPrivateHost(address))) {
+    throw new WordPressAutoPosterError('Tên miền WordPress trỏ tới địa chỉ mạng không được phép')
+  }
+
+  return addresses[0]
 }
 
 async function readXlsxSheets(buffer: Buffer): Promise<Array<{ sheet: string; data: SheetData }>> {
@@ -943,7 +1011,7 @@ function normalizeExternalUrl(rawUrl: string, options: { allowPrivateInDevelopme
   return url.toString().replace(/\/+$/, '')
 }
 
-function isPrivateHost(hostname: string) {
+export function isPrivateHost(hostname: string) {
   const normalized = hostname.toLowerCase()
   if (normalized === 'localhost' || normalized.endsWith('.localhost')) return true
   if (normalized === '::1') return true
@@ -951,16 +1019,31 @@ function isPrivateHost(hostname: string) {
   if (net.isIP(normalized) === 4) {
     const parts = normalized.split('.').map(Number)
     return (
+      parts[0] === 0 ||
       parts[0] === 10 ||
       parts[0] === 127 ||
+      (parts[0] === 100 && parts[1] >= 64 && parts[1] <= 127) ||
       (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) ||
       (parts[0] === 192 && parts[1] === 168) ||
-      (parts[0] === 169 && parts[1] === 254)
+      (parts[0] === 169 && parts[1] === 254) ||
+      (parts[0] === 192 && parts[1] === 0 && (parts[2] === 0 || parts[2] === 2)) ||
+      (parts[0] === 198 && (parts[1] === 18 || parts[1] === 19 || parts[1] === 51)) ||
+      (parts[0] === 203 && parts[1] === 0 && parts[2] === 113) ||
+      parts[0] >= 224
     )
   }
 
   if (net.isIP(normalized) === 6) {
-    return normalized.startsWith('fc') || normalized.startsWith('fd') || normalized.startsWith('fe80:')
+    if (normalized.startsWith('::ffff:')) return isPrivateHost(normalized.slice(7))
+    return (
+      normalized === '::' ||
+      normalized === '::1' ||
+      normalized.startsWith('fc') ||
+      normalized.startsWith('fd') ||
+      normalized.startsWith('fe80:') ||
+      normalized.startsWith('ff') ||
+      normalized.startsWith('2001:db8:')
+    )
   }
 
   return false

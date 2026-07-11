@@ -70,13 +70,20 @@ export async function POST(request: NextRequest) {
       }
 
       const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) // 30 days
-      // upsert: avoids P2002 @@unique([userId, voucherId]) if user previously held and used this tier
-      const userVoucher = await tx.userVoucher.upsert({
-        where: { userId_voucherId: { userId, voucherId: template.id } },
-        update: { status: 'AVAILABLE', source: 'exchange', sourceGame: null, expiresAt },
-        create: { userId, voucherId: template.id, source: 'exchange', expiresAt },
-        include: { voucher: true }
+      const existing = await tx.userVoucher.findFirst({
+        where: { userId, voucherId: template.id },
+        orderBy: { createdAt: 'desc' },
       })
+      const userVoucher = existing
+        ? await tx.userVoucher.update({
+            where: { id: existing.id },
+            data: { status: 'AVAILABLE', source: 'exchange', sourceGame: null, expiresAt },
+            include: { voucher: true },
+          })
+        : await tx.userVoucher.create({
+            data: { userId, voucherId: template.id, source: 'exchange', expiresAt },
+            include: { voucher: true },
+          })
 
       return userVoucher
     })

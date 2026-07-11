@@ -61,9 +61,13 @@ verify_public_assets "public"
 echo "Cài đặt dependencies..."
 npm ci --legacy-peer-deps
 
+echo "Kiểm tra kiểu dữ liệu và regression tests..."
+npm run typecheck
+npm test
+
 echo "Cập nhật database và Prisma Client..."
-npx prisma db push
-npx prisma generate
+npm exec prisma db push
+npm exec prisma generate
 
 # Build dự án
 echo "Đang build Next.js app trong thư mục staging..."

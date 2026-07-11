@@ -137,7 +137,7 @@ model UserVoucher {
   @@index([voucherId])
   @@index([status])
   @@index([expiresAt])
-  @@unique([userId, voucherId])
+  @@index([userId, voucherId])
   @@map("user_vouchers")
 }
 
@@ -170,6 +170,7 @@ model GameScore {
   combo        Int      @default(0)
   level        Int      @default(1)
   duration_sec Int      @default(0)
+  session_token_hash String? @unique @db.VarChar(64)
   created_at   DateTime @default(now())
 
   user         User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
@@ -179,6 +180,16 @@ model GameScore {
   @@index([game, created_at])
   @@index([user_id, game])
   @@map("game_scores")
+}
+
+model RateLimitBucket {
+  key        String   @id @db.VarChar(64)
+  count      Int      @default(0)
+  reset_at   DateTime
+  updated_at DateTime @updatedAt
+
+  @@index([reset_at])
+  @@map("rate_limit_buckets")
 }
 
 

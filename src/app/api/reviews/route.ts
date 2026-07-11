@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Chống spam đánh giá vào hàng chờ duyệt
-    const rl = checkRateLimit(request, 'reviews-post-ip', { limit: 5, windowMs: 10 * 60 * 1000 })
+    const rl = await checkRateLimit(request, 'reviews-post-ip', { limit: 5, windowMs: 10 * 60 * 1000 })
     if (!rl.allowed) {
       return NextResponse.json(
         { error: 'Bạn gửi đánh giá quá nhanh. Vui lòng thử lại sau.' },

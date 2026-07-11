@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cancelOrderAndReleaseInventory } from '@/lib/order-inventory'
 import { prisma } from '@/lib/prisma'
 import { getPaymentProvider } from '@/lib/payment/factory'
 import { sendOrderEmail } from '@/lib/payment/email/sender'
@@ -129,16 +130,19 @@ export async function POST(request: Request) {
 
     // ─── STEP 6: Kiểm tra hết hạn ─────────────────────────────────
     if (payment.expires_at && new Date(payment.expires_at) < new Date()) {
-      await prisma.$transaction([
-        prisma.payment.update({
-          where: { id: payment.id },
+      await prisma.$transaction(async (tx) => {
+        const expired = await tx.payment.updateMany({
+          where: { id: payment.id, status: 'PENDING' },
           data: { status: 'EXPIRED' },
-        }),
-        prisma.userVoucher.updateMany({
-          where: { orderId: payment.order_id, status: 'USED' },
-          data: { status: 'AVAILABLE', orderId: null, usedAt: null },
-        }),
-        prisma.paymentWebhookEvent.update({
+        })
+        if (expired.count === 1) {
+          await cancelOrderAndReleaseInventory(tx, {
+            orderId: payment.order_id,
+            changedBy: 'PAYMENT_WEBHOOK',
+            note: 'Payment expired; inventory released',
+          })
+        }
+        await tx.paymentWebhookEvent.update({
           where: { id: savedEvent.id },
           data: {
             status: 'FAILED',
@@ -146,8 +150,8 @@ export async function POST(request: Request) {
             order_id: payment.order_id,
             error_message: 'Payment expired',
           },
-        }),
-      ])
+        })
+      })
       return NextResponse.json({ ok: true })
     }
 

@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export const GET = handlers.GET
 
 export async function POST(request: NextRequest) {
-  const rateLimit = checkRateLimit(request, 'auth', { limit: 30, windowMs: 15 * 60 * 1000 })
+  const rateLimit = await checkRateLimit(request, 'auth', { limit: 30, windowMs: 15 * 60 * 1000 })
   if (!rateLimit.allowed) {
     return NextResponse.json(
       { error: 'Too many authentication requests' },

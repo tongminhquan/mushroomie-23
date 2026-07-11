@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -7,7 +7,7 @@ import Image from 'next/image'
 import Button from '@/components/ui/Button'
 import { sanitizeCallbackUrl } from '@/lib/url'
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = sanitizeCallbackUrl(searchParams.get('callbackUrl'))
@@ -124,5 +124,13 @@ export default function LoginPage() {
         <p className="text-center text-xs text-neutral-400 mt-6">Làm bằng tay, trao bằng tim 🍄</p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-secondary py-16 text-center text-sm text-neutral-500">Đang tải trang đăng nhập...</div>}>
+      <LoginPageContent />
+    </Suspense>
   )
 }
