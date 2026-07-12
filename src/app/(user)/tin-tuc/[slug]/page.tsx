@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import PostCard from '@/components/blog/PostCard'
+import PostAdminAction from '@/components/blog/PostAdminAction'
 import SafeImage from '@/components/ui/SafeImage'
 import { formatDate } from '@/lib/utils'
 import { sanitizeHtml } from '@/lib/sanitize'
@@ -148,7 +149,8 @@ export default async function PostDetailPage({
   let isPreview = false
   if (!post) {
     const session = await auth()
-    const isAdmin = ['super_admin', 'admin'].includes((session?.user as any)?.role)
+    const role = (session?.user as { role?: string } | undefined)?.role
+    const isAdmin = Boolean(role && ['super_admin', 'admin'].includes(role))
     if (isAdmin) {
       post = await getAnyPostBySlug(slug)
       isPreview = Boolean(post)
@@ -253,15 +255,18 @@ export default async function PostDetailPage({
                 </div>
               </div>
 
-              {post.published_at && (
-                <span
-                  className="inline-flex items-center gap-1.5 text-sm text-neutral-500"
-                  suppressHydrationWarning
-                >
-                  <CalendarDays size={15} />
-                  Đăng {formatDate(post.published_at)}
-                </span>
-              )}
+              <div className="flex flex-wrap items-center justify-end gap-3">
+                {post.published_at && (
+                  <span
+                    className="inline-flex items-center gap-1.5 text-sm text-neutral-500"
+                    suppressHydrationWarning
+                  >
+                    <CalendarDays size={15} />
+                    Đăng {formatDate(post.published_at)}
+                  </span>
+                )}
+                <PostAdminAction postId={post.id} />
+              </div>
             </div>
           </div>
 
