@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { deferThirdPartyScript } from '@/lib/deferThirdPartyScript'
 
 const GTM_ID = 'GTM-K55B6RVG'
 
@@ -22,12 +23,7 @@ export default function GtmInit() {
       document.head.appendChild(script)
     }
 
-    const events: Array<keyof WindowEventMap> = ['pointerdown', 'keydown']
-    events.forEach((event) => window.addEventListener(event, load, { once: true, passive: true }))
-
-    return () => {
-      events.forEach((event) => window.removeEventListener(event, load))
-    }
+    return deferThirdPartyScript(load)
   }, [])
 
   return null

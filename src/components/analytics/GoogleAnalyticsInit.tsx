@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { deferThirdPartyScript } from '@/lib/deferThirdPartyScript'
 
 const GA_ID = 'G-R95TLDCP0W'
 
@@ -24,10 +25,7 @@ export default function GoogleAnalyticsInit() {
       document.head.appendChild(script)
     }
 
-    const events: Array<keyof WindowEventMap> = ['pointerdown', 'keydown']
-    events.forEach((event) => window.addEventListener(event, load, { once: true, passive: true }))
-
-    return () => events.forEach((event) => window.removeEventListener(event, load))
+    return deferThirdPartyScript(load)
   }, [])
 
   return null

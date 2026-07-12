@@ -122,6 +122,8 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
               fill
               priority={current === 0}
               fetchPriority={current === 0 ? 'high' : 'auto'}
+              decoding={current === 0 ? 'sync' : 'async'}
+              quality={70}
               sizes="(max-width: 640px) calc(100vw - 20px), (max-width: 1312px) calc(100vw - 32px), 1280px"
               className={activeBanner.id === 0 ? 'object-contain p-12 md:p-24' : 'object-contain'}
             />

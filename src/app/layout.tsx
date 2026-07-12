@@ -13,6 +13,7 @@ const paytoneOne = Paytone_One({
   subsets: ['latin', 'vietnamese'],
   variable: '--font-heading',
   display: 'swap',
+  preload: false,
 })
 
 export const metadata: Metadata = {
