@@ -1,10 +1,23 @@
 'use client'
 import { useState } from 'react'
+import Link from 'next/link'
 import Button from '@/components/ui/Button'
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 import SafeEmail from '@/components/ui/SafeEmail'
+import { BRAND } from '@/lib/local-seo'
 
 const LINE = '#f0e0d6' // warm hairline từ Claude Design
+
+// Định dạng SĐT hiển thị: 0947192590 -> 0947 192 590
+const PHONE_DISPLAY = BRAND.phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
+
+// Liên kết Local SEO trong thân trang liên hệ (nội bộ, anchor tự nhiên)
+const LOCAL_LINKS = [
+  { href: '/phu-kien-handmade-dong-nai', label: 'Phụ kiện handmade Đồng Nai' },
+  { href: '/vong-tay-custom-dong-nai', label: 'Vòng tay custom Đồng Nai' },
+  { href: '/moc-khoa-handmade-dong-nai', label: 'Móc khóa handmade Đồng Nai' },
+  { href: '/qua-tang-ca-nhan-hoa-dong-nai', label: 'Quà tặng cá nhân hóa Đồng Nai' },
+]
 
 const socials = [
   { name: 'Facebook', handle: 'fb.com/mushr00mie', href: 'https://www.facebook.com/mushr00mie', emoji: '📘', chip: '#e7f0ff' },
