@@ -29,7 +29,7 @@ const socials = [
 const infoItems = [
   { emoji: '📍', chip: '#ffd6d6', label: 'Địa chỉ', value: <>Hẻm 2 tổ 11, Phường Trảng Dài, Thành phố Đồng Nai</> },
   { emoji: '✉️', chip: '#ffe7a3', label: 'Email', value: <SafeEmail email="cskh@mushroomie.io.vn" /> },
-  { emoji: '☎️', chip: '#ffece6', label: 'Hotline', value: <a href="tel:+84848744060" className="hover:text-primary">0848 744 060</a> },
+  { emoji: '☎️', chip: '#ffece6', label: 'Hotline / Zalo', value: <a href={`tel:${BRAND.phoneE164}`} className="hover:text-primary">{PHONE_DISPLAY}</a> },
 ]
 
 export default function ContactPage() {
