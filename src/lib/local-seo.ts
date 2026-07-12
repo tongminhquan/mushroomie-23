@@ -70,7 +70,7 @@ const productHub = {
   all: { label: 'Xem tất cả sản phẩm', href: '/san-pham' },
   bracelet: { label: 'Danh mục vòng tay handmade', href: '/san-pham?category=vong-tay' },
   keychain: { label: 'Danh mục móc khóa & charm', href: '/san-pham?category=moc-khoa' },
-  gift: { label: 'Set quà tặng & hộp quà', href: '/san-pham?category=qua-tang' },
+  gift: { label: 'Set quà tặng & hộp quà', href: '/san-pham' },
   contact: { label: 'Đặt hàng / tư vấn custom', href: '/lien-he' },
 }
 
@@ -295,7 +295,7 @@ export const LOCAL_PAGES: LocalPage[] = [
       { emoji: '💗', title: 'Cá nhân hóa cảm xúc', body: 'Thêm tên, màu hoặc charm ý nghĩa để món quà thật sự dành riêng cho ai đó.' },
     ],
     productLinks: [productHub.gift, productHub.all, productHub.contact],
-    cta: { label: 'Xem set quà tặng', href: '/san-pham?category=qua-tang' },
+    cta: { label: 'Xem set quà tặng', href: '/san-pham' },
     related: ['qua-tang-ca-nhan-hoa-dong-nai', 'vong-tay-handmade-dong-nai', 'phu-kien-handmade-dong-nai'],
   },
   {
@@ -316,7 +316,7 @@ export const LOCAL_PAGES: LocalPage[] = [
       { emoji: '💝', title: 'Ý nghĩa hơn quà mua sẵn', body: 'Một món quà làm riêng luôn chạm cảm xúc hơn đồ đại trà.' },
     ],
     productLinks: [productHub.gift, productHub.contact, productHub.all],
-    cta: { label: 'Xem set quà tặng', href: '/san-pham?category=qua-tang' },
+    cta: { label: 'Xem set quà tặng', href: '/san-pham' },
     related: ['qua-tang-handmade-dong-nai', 'vong-tay-custom-dong-nai', 'moc-khoa-handmade-theo-yeu-cau-dong-nai'],
   },
 ]
