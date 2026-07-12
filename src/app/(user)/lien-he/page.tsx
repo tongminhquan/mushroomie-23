@@ -72,8 +72,33 @@ export default function ContactPage() {
           <span className="inline-block text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-3">Liên hệ</span>
           <h1 className="font-heading text-3xl md:text-[44px] leading-tight text-neutral-900 mb-3">Ghé Nhà Nấm nhỏ ♡</h1>
           <p className="m-0 mx-auto max-w-md text-[15px] leading-relaxed text-neutral-500">
-            Có câu hỏi, muốn custom đặc biệt hay chỉ muốn nói &ldquo;hi&rdquo;? Nhắn cho chúng mình nhé!
+            Có câu hỏi, muốn custom đặc biệt hay chỉ muốn nói &ldquo;hi&rdquo;? Nhắn cho chúng mình nhé! Mushroomie ở{' '}
+            <strong className="text-neutral-700">Trảng Dài, Thành phố Đồng Nai</strong> (gần Biên Hòa) và giao online đến TP.HCM.
           </p>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
+            <a
+              href={`tel:${BRAND.phoneE164}`}
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-card transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
+            >
+              📞 Gọi {PHONE_DISPLAY}
+            </a>
+            <a
+              href="https://www.facebook.com/mushr00mie"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-primary bg-white px-5 py-2.5 text-sm font-bold text-primary transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
+            >
+              💬 Nhắn tin tư vấn
+            </a>
+            <a
+              href={BRAND.shopee}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-warm-border bg-white px-5 py-2.5 text-sm font-bold text-neutral-700 transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
+            >
+              🛒 Mua trên Shopee
+            </a>
+          </div>
         </div>
       </section>
 
