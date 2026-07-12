@@ -25,7 +25,8 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
 
   return (
     <div className="min-h-screen bg-secondary pb-16">
-      {/* JSON-LD: Breadcrumb + Service (LocalBusiness đặt ở layout gốc) */}
+      {/* JSON-LD: LocalBusiness + Breadcrumb + Service (self-contained để @id resolve) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(localBusinessSchema()) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbSchema(crumbs)) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(localServiceSchema(page)) }} />
 
