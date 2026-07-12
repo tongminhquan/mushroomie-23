@@ -1,28 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
-import { z } from 'zod'
 import { generateOrderCode } from '@/lib/utils'
 import { rateLimiter } from '@/lib/rate-limit'
 import { createOrderAccessToken } from '@/lib/order-access'
-
-const orderSchema = z.object({
-  customer_name: z.string().trim().min(1).max(120),
-  customer_email: z.string().email(),
-  customer_phone: z.string().trim().regex(/^(0|\+84)[0-9]{8,9}$/),
-  shipping_address: z.string().trim().min(10).max(1000),
-  note: z.string().trim().max(2000).optional(),
-  items: z.array(z.object({
-    product_id: z.number().int().positive(),
-    product_name: z.string().optional(),
-    quantity: z.number().int().positive().max(99),
-    price_snapshot: z.number().optional(),
-    selected_options: z.record(z.string().max(100), z.string().max(300)).optional(),
-    custom_note: z.string().trim().max(1000).optional(),
-  })).min(1).max(50),
-  payment_method: z.enum(['bank_transfer', 'cod']).default('bank_transfer'),
-  user_voucher_id: z.string().optional().nullable(),
-})
+import { orderSchema } from '@/lib/order-schema'
+import {
+  buildAuthoritativeOrderItems,
+  calculateOrderTotal,
+  calculateVoucherDiscount,
+} from '@/lib/order-pricing'
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,39 +33,11 @@ export async function POST(request: NextRequest) {
       where: { id: { in: productIds }, status: 'active' },
       include: { options: true },
     })
-    const productById = new Map(products.map((product) => [product.id, product]))
     if (products.length !== productIds.length) {
       return NextResponse.json({ error: 'One or more products are unavailable' }, { status: 400 })
     }
 
-    const authoritativeItems = items.map((item) => {
-      const product = productById.get(item.product_id)
-      if (!product || product.stock < item.quantity) throw new Error('PRODUCT_UNAVAILABLE')
-
-      const selectedOptions = item.selected_options || {}
-      const optionByName = new Map(product.options.map((option) => [option.option_name, option]))
-      for (const [name, value] of Object.entries(selectedOptions)) {
-        const option = optionByName.get(name)
-        if (!option) throw new Error('INVALID_PRODUCT_OPTIONS')
-        if (option.option_type !== 'text') {
-          const allowedValues = JSON.parse(option.option_values || '[]')
-          if (!Array.isArray(allowedValues) || !allowedValues.includes(value)) {
-            throw new Error('INVALID_PRODUCT_OPTIONS')
-          }
-        }
-      }
-
-      const regularPrice = Number(product.price)
-      const salePrice = product.sale_price === null ? null : Number(product.sale_price)
-      const unitPrice = salePrice !== null && salePrice > 0 && salePrice < regularPrice ? salePrice : regularPrice
-
-      return {
-        ...item,
-        product_name: product.name,
-        price_snapshot: unitPrice,
-        total_price: unitPrice * item.quantity,
-      }
-    })
+    const authoritativeItems = buildAuthoritativeOrderItems(items, products)
 
     const subtotal = authoritativeItems.reduce((sum, item) => sum + item.price_snapshot * item.quantity, 0)
     const reservedQuantities = authoritativeItems.reduce((result, item) => {
@@ -121,23 +81,13 @@ export async function POST(request: NextRequest) {
           throw new Error('MIN_ORDER_VALUE_NOT_MET')
         }
 
-        if (template.discountType === 'PERCENT') {
-          itemDiscountAmount = Math.floor((subtotal * Number(template.discountValue)) / 100)
-          if (template.maxDiscount) {
-            itemDiscountAmount = Math.min(itemDiscountAmount, Number(template.maxDiscount))
-          }
-        } else if (template.discountType === 'FIXED') {
-          itemDiscountAmount = Number(template.discountValue)
-        } else if (template.discountType === 'FREE_SHIPPING') {
-          shippingDiscountAmount = shippingFee
-        }
-
-        itemDiscountAmount = Math.min(subtotal, itemDiscountAmount)
-        shippingDiscountAmount = Math.min(shippingFee, shippingDiscountAmount)
-        voucherDiscountAmount = itemDiscountAmount + shippingDiscountAmount
+        const discounts = calculateVoucherDiscount(subtotal, shippingFee, template)
+        itemDiscountAmount = discounts.itemDiscountAmount
+        shippingDiscountAmount = discounts.shippingDiscountAmount
+        voucherDiscountAmount = discounts.voucherDiscountAmount
       }
 
-      const total = Math.max(0, subtotal - itemDiscountAmount) + Math.max(0, shippingFee - shippingDiscountAmount)
+      const total = calculateOrderTotal(subtotal, shippingFee, itemDiscountAmount, shippingDiscountAmount)
       const orderStatus = payment_method === 'cod' ? 'PROCESSING' : 'PENDING_PAYMENT'
 
       const createdOrder = await tx.order.create({
@@ -231,14 +181,15 @@ export async function GET(request: NextRequest) {
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const isAdmin = ['super_admin', 'admin', 'viewer'].includes((session.user as any).role)
-    const userId = Number((session.user as any).id)
+    const role = session.user.role
+    const isAdmin = Boolean(role && ['super_admin', 'admin', 'viewer'].includes(role))
+    const userId = Number(session.user.id)
     const { searchParams } = new URL(request.url)
     const page = Math.max(1, Number(searchParams.get('page') || 1) || 1)
     const limit = Math.min(100, Math.max(1, Number(searchParams.get('limit') || 20) || 20))
     const status = searchParams.get('status')
 
-    const where: any = isAdmin ? {} : { user_id: userId }
+    const where: Prisma.OrderWhereInput = isAdmin ? {} : { user_id: userId }
     if (status) where.order_status = status
 
     const [orders, total] = await Promise.all([

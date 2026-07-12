@@ -1,8 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { cancelOrderAndReleaseInventory } from '@/lib/order-inventory'
 import { prisma } from '@/lib/prisma'
 import { getPaymentProvider } from '@/lib/payment/factory'
 import { sendOrderEmail } from '@/lib/payment/email/sender'
+import {
+  extractOrderCodes,
+  redactWebhookPayload,
+  sanitizeWebhookHeaders,
+} from '@/lib/payment/webhook-security'
 
 /**
  * POST /api/webhooks/payment
@@ -22,8 +27,8 @@ export async function POST(request: Request) {
     // ─── STEP 2: Verify chữ ký webhook ────────────────────────────
     const verifyResult = await provider.verifyWebhookSignature(clonedRequest)
 
-    const sanitizedHeaders = sanitizeHeaders(request.headers)
-    const sanitizedPayload = sanitizePayload(verifyResult.rawPayload)
+    const sanitizedHeaders = sanitizeWebhookHeaders(request.headers)
+    const sanitizedPayload = redactWebhookPayload(verifyResult.rawPayload)
     const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null
     const userAgent = request.headers.get('user-agent') || null
 
@@ -223,50 +228,4 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-}
-
-function extractOrderCodes(content: string, prefix: string): string[] {
-  // Allow optional hyphens or spaces between prefix and the rest of the code
-  const regex = new RegExp(`${prefix}[\\-\\s]*[A-Z0-9]+`, 'g')
-  const matches = content.match(regex) || []
-  
-  return matches.map(match => {
-    // Remove all spaces and hyphens
-    const cleanMatch = match.replace(/[\-\s]/g, '')
-    // Reconstruct with exact format: PREFIX-SUFFIX
-    const suffix = cleanMatch.substring(prefix.length)
-    return `${prefix}-${suffix}`
-  })
-}
-
-const SENSITIVE_HEADER_KEYS = [
-  'authorization', 'x-api-key', 'api-key', 'x-webhook-secret',
-  'x-casso-signature', 'x-sepay-signature', 'cookie', 'payos-signature'
-]
-
-function sanitizeHeaders(headers: Headers) {
-  const result: Record<string, string> = {}
-  headers.forEach((value, key) => {
-    const lowerKey = key.toLowerCase()
-    if (SENSITIVE_HEADER_KEYS.includes(lowerKey)) {
-      result[key] = '[REDACTED]'
-    } else {
-      result[key] = value
-    }
-  })
-  return result
-}
-
-function sanitizePayload(payload: any): any {
-  if (!payload || typeof payload !== 'object') return payload
-  const result = { ...payload }
-  const sensitiveKeys = ['token', 'secret', 'signature', 'password', 'apikey', 'authorization', 'securehash']
-  for (const key of Object.keys(result)) {
-    if (sensitiveKeys.includes(key.toLowerCase())) {
-      result[key] = '[REDACTED]'
-    } else if (typeof result[key] === 'object') {
-      result[key] = sanitizePayload(result[key])
-    }
-  }
-  return result
 }

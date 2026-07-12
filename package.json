@@ -11,6 +11,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/**/*.test.ts",
+    "test:coverage": "tsx --test --experimental-test-coverage --test-coverage-lines=60 --test-coverage-branches=80 --test-coverage-functions=65 tests/**/*.test.ts",
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
