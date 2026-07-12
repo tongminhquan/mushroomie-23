@@ -238,6 +238,36 @@ export default function ContactPage() {
           </div>
         </AnimateOnScroll>
       </section>
+
+      {/* Khu vực phục vụ + internal links (Local SEO) */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 mt-6">
+        <AnimateOnScroll animation="fade-up">
+          <div className="rounded-[20px] bg-white p-6 border-[1.5px] shadow-card" style={{ borderColor: LINE }}>
+            <h2 className="font-heading text-xl text-neutral-900">Mushroomie phục vụ khu vực nào?</h2>
+            <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+              Mushroomie làm phụ kiện handmade cá nhân hóa tại <strong>Trảng Dài, Thành phố Đồng Nai</strong>, thuận tiện cho khách ở{' '}
+              <strong>Biên Hòa</strong> và các khu vực lân cận, đồng thời nhận đặt online giao đến <strong>TP.HCM</strong>. Bạn có thể
+              đặt vòng tay, móc khóa, charm và quà tặng custom theo màu sắc, kiểu dáng và cá tính riêng.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {LOCAL_LINKS.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className="inline-flex items-center rounded-full border-[1.5px] border-warm-border bg-secondary px-4 py-2 text-[13px] font-semibold text-neutral-700 transition-colors hover:border-primary hover:text-primary"
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </div>
+            <div className="mt-5">
+              <Link href="/san-pham">
+                <Button size="lg">Xem tất cả sản phẩm ♡</Button>
+              </Link>
+            </div>
+          </div>
+        </AnimateOnScroll>
+      </section>
     </div>
   )
 }
