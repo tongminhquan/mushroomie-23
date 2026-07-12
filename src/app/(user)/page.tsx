@@ -54,6 +54,7 @@ export default async function HomePage() {
   return (
     <div>
       <h1 className="sr-only">Mushroomie - phụ kiện handmade cá nhân hóa: vòng tay, charm, móc khóa, quà tặng</h1>
+      {/* siteUrl cũ đã bỏ; NAP/schema lấy từ lib local-seo để nhất quán */}
       {/* NAP nhất quán qua lib local-seo (địa chỉ Trảng Dài–Đồng Nai, SĐT, sameAs, SearchAction) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(localBusinessSchema()) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema()) }} />
