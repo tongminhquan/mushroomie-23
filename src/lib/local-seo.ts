@@ -81,7 +81,10 @@ export function deliveryNote(area: LocalArea, onlineOnly?: boolean): string {
   if (onlineOnly) {
     return `Mushroomie đặt tại Đồng Nai và nhận đơn online giao đến ${area === 'TP.HCM' ? 'TP.HCM' : area} qua các đơn vị vận chuyển. Bạn chọn mẫu, chốt màu và charm qua website hoặc nhắn tin, Mushroomie làm thủ công rồi gửi đi.`
   }
-  return `Mushroomie ở khu vực Trảng Dài, ${area === 'Đồng Nai' ? 'Đồng Nai' : area} và hỗ trợ nhận đơn trực tiếp lẫn giao hàng linh hoạt trong ${area}, đồng thời giao online đến TP.HCM.`
+  if (area === 'Trảng Dài') {
+    return 'Mushroomie ở ngay khu vực Trảng Dài, Thành phố Đồng Nai — bạn có thể hẹn nhận trực tiếp hoặc chọn giao hàng linh hoạt trong khu vực, đồng thời Mushroomie giao online đến TP.HCM.'
+  }
+  return `Mushroomie ở khu vực Trảng Dài, ${area === 'Đồng Nai' ? 'Thành phố Đồng Nai' : area} và hỗ trợ nhận đơn trực tiếp lẫn giao hàng linh hoạt trong ${area}, đồng thời giao online đến TP.HCM.`
 }
 
 /**
