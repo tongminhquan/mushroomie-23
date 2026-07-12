@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { prisma } from '@/lib/prisma'
+import { LOCAL_PAGES } from '@/lib/local-seo'
 
 // Regenerate the sitemap at most once an hour (ISR) so newly published posts /
 // products and slug fixes appear without needing a full redeploy. The query is
