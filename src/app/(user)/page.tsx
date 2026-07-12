@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import HomeLanding from '@/components/home/landing/HomeLanding'
 import type { Metadata } from 'next'
 import { safeJsonLd } from '@/lib/security'
+import { localBusinessSchema, websiteSchema } from '@/lib/local-seo'
+import HomeLocalAreas from '@/components/home/landing/HomeLocalAreas'
 
 export const metadata: Metadata = {
   title: 'Mushroomie - Phụ kiện handmade cá nhân hóa',
