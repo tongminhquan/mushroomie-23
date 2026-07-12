@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
@@ -31,7 +31,7 @@ const navLinks = [
   { href: '/lien-he', label: 'Liên hệ' },
 ]
 
-export default function Header() {
+export default function Header({ categories }: { categories: CategoryLink[] }) {
   const pathname = usePathname()
   const router = useRouter()
   const { data: session } = useSession()
@@ -39,36 +39,12 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [categories, setCategories] = useState<CategoryLink[]>([])
 
   const hydrated = useSyncExternalStore(
     () => () => undefined,
     () => true,
     () => false,
   )
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    fetch('/api/categories?type=product', { signal: controller.signal })
-      .then((response) => response.json())
-      .then((data) => {
-        if (!Array.isArray(data.categories)) return
-        setCategories(
-          data.categories.map((category: { slug: string; name: string }) => ({
-            href: `/san-pham?category=${category.slug}`,
-            label: category.name,
-          })),
-        )
-      })
-      .catch((error) => {
-        if (error instanceof Error && error.name !== 'AbortError') {
-          console.error(error)
-        }
-      })
-
-    return () => controller.abort()
-  }, [])
 
   const submitSearch = (event: React.FormEvent) => {
     event.preventDefault()
@@ -113,7 +89,8 @@ export default function Header() {
               fallbackSrc="/logo.webp"
               alt="Mushroomie"
               fill
-              priority
+              loading="eager"
+              fetchPriority="low"
               sizes="144px"
               className="object-contain"
             />

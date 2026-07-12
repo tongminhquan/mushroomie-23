@@ -57,5 +57,24 @@ function ResolvedImage({
 }
 
 function shouldBypassOptimizer(src: string) {
-  return src.startsWith('data:') || src.startsWith('blob:') || src.endsWith('.svg') || /^https?:\/\//i.test(src)
+  if (src.startsWith('data:') || src.startsWith('blob:') || src.endsWith('.svg')) return true
+  if (!/^https?:\/\//i.test(src)) return false
+
+  try {
+    const hostname = new URL(src).hostname.toLowerCase()
+    const exactHosts = new Set([
+      'img.vietqr.io',
+      'api.qrserver.com',
+      'res.cloudinary.com',
+      'lh3.googleusercontent.com',
+      'avatars.githubusercontent.com',
+      'mushroomie.io.vn',
+      'down-vn.img.susercontent.com',
+      'cf.shopee.vn',
+    ])
+
+    return !exactHosts.has(hostname) && !hostname.endsWith('.amazonaws.com')
+  } catch {
+    return true
+  }
 }

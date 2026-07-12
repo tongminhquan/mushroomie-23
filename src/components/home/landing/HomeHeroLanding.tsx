@@ -42,6 +42,7 @@ const proofItems = [
 export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) {
   const [current, setCurrent] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [hasInteracted, setHasInteracted] = useState(false)
 
   const slides = useMemo(() => {
     const activeBanners = banners
@@ -58,17 +59,30 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
   }, [current, slides.length])
 
   useEffect(() => {
-    if (slides.length < 2 || paused) return undefined
+    if (slides.length < 2 || paused || !hasInteracted) return undefined
 
     const timer = window.setInterval(() => {
       setCurrent((value) => (value + 1) % slides.length)
     }, 4500)
 
     return () => window.clearInterval(timer)
-  }, [paused, slides.length])
+  }, [hasInteracted, paused, slides.length])
 
-  const previous = () => setCurrent((value) => (value - 1 + slides.length) % slides.length)
-  const next = () => setCurrent((value) => (value + 1) % slides.length)
+  const previous = () => {
+    setHasInteracted(true)
+    setCurrent((value) => (value - 1 + slides.length) % slides.length)
+  }
+  const next = () => {
+    setHasInteracted(true)
+    setCurrent((value) => (value + 1) % slides.length)
+  }
+  const selectSlide = (index: number) => {
+    setHasInteracted(true)
+    setCurrent(index)
+  }
+
+  const activeBanner = slides[current] || slides[0]
+  const activeHref = activeBanner.link || activeBanner.button_link
 
   return (
     <section
@@ -99,35 +113,22 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
             }}
           />
 
-          {slides.map((banner, index) => {
-            const active = index === current
-            const href = banner.link || banner.button_link
-
-            return (
-              <article
-                key={banner.id}
-                aria-hidden={!active}
-                className={`absolute inset-0 transition-opacity duration-500 ${
-                  active ? 'z-10 opacity-100' : 'pointer-events-none opacity-0'
-                }`}
-              >
-                <SafeImage
-                  src={getPublicImageUrl(banner.image_url, 'banner')}
-                  fallbackSrc="/logo.webp"
-                  imageKind="banner"
-                  alt={banner.title || 'Phụ kiện handmade Mushroomie'}
-                  fill
-                  priority={index === 0}
-                  fetchPriority={index === 0 ? 'high' : 'auto'}
-                  sizes="(max-width: 640px) 100vw, 1280px"
-                  className={banner.id === 0 ? 'object-contain p-12 md:p-24' : 'object-contain'}
-                />
-                {href && (
-                  <Link href={href} className="absolute inset-0" aria-label={banner.title || 'Mở bộ sưu tập'} />
-                )}
-              </article>
-            )
-          })}
+          <article key={activeBanner.id} className="absolute inset-0 z-10">
+            <SafeImage
+              src={getPublicImageUrl(activeBanner.image_url, 'banner')}
+              fallbackSrc="/logo.webp"
+              imageKind="banner"
+              alt={activeBanner.title || 'Phụ kiện handmade Mushroomie'}
+              fill
+              priority={current === 0}
+              fetchPriority={current === 0 ? 'high' : 'auto'}
+              sizes="(max-width: 640px) calc(100vw - 20px), (max-width: 1312px) calc(100vw - 32px), 1280px"
+              className={activeBanner.id === 0 ? 'object-contain p-12 md:p-24' : 'object-contain'}
+            />
+            {activeHref && (
+              <Link href={activeHref} className="absolute inset-0" aria-label={activeBanner.title || 'Mở bộ sưu tập'} />
+            )}
+          </article>
 
           {slides.length > 1 && (
             <>
@@ -152,14 +153,14 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
                   <button
                     key={banner.id}
                     type="button"
-                    onClick={() => setCurrent(index)}
+                    onClick={() => selectSlide(index)}
                     aria-label={`Chuyển đến banner ${index + 1}`}
                     aria-current={index === current}
                     className="grid h-10 min-w-10 place-items-center"
                   >
                     <span
-                      className={`h-2 rounded-full bg-primary transition-[width,opacity] ${
-                        index === current ? 'w-6 opacity-100' : 'w-2 opacity-35'
+                      className={`h-2 w-6 origin-center rounded-full bg-primary transition-[transform,opacity] ${
+                        index === current ? 'scale-x-100 opacity-100' : 'scale-x-[0.333] opacity-35'
                       }`}
                     />
                   </button>

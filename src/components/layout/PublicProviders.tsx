@@ -5,7 +5,7 @@ import ProfileCompletionGuard from '@/components/layout/ProfileCompletionGuard'
 
 export default function PublicProviders({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
+    <SessionProvider refetchInterval={0} refetchOnWindowFocus={false}>
       <ProfileCompletionGuard>{children}</ProfileCompletionGuard>
     </SessionProvider>
   )

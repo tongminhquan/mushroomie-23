@@ -2,16 +2,8 @@ import Link from 'next/link'
 import { Globe, Mail, MapPin, Phone } from 'lucide-react'
 import SafeEmail from '@/components/ui/SafeEmail'
 import SafeImage from '@/components/ui/SafeImage'
-import { prisma } from '@/lib/prisma'
 
-export default async function Footer() {
-  const categories = await prisma.category
-    .findMany({
-      where: { type: 'product' },
-      take: 5,
-      orderBy: { created_at: 'asc' },
-    })
-    .catch(() => [])
+export default function Footer({ categories }: { categories: Array<{ id: number; name: string; slug: string }> }) {
 
   return (
     <footer className="border-t border-neutral-200 bg-text text-white">

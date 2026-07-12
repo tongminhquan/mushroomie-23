@@ -1,5 +1,19 @@
 import type { Metadata } from 'next'
+import { Montserrat, Paytone_One } from 'next/font/google'
 import './globals.css'
+
+const montserrat = Montserrat({
+  subsets: ['latin', 'vietnamese'],
+  variable: '--font-body',
+  display: 'swap',
+})
+
+const paytoneOne = Paytone_One({
+  weight: '400',
+  subsets: ['latin', 'vietnamese'],
+  variable: '--font-heading',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://mushroomie.io.vn'),
@@ -43,12 +57,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="vi" suppressHydrationWarning className="font-heading font-body">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Paytone+One&display=swap" rel="stylesheet" />
-      </head>
+    <html lang="vi" suppressHydrationWarning className={`${montserrat.variable} ${paytoneOne.variable}`}>
       <body suppressHydrationWarning className="font-body bg-secondary min-h-screen">
         <a href="#main-content" className="skip-link">Đi đến nội dung chính</a>
         {children}

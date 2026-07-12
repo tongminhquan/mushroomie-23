@@ -1,43 +1,36 @@
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import CartDrawer from '@/components/cart/CartDrawer'
-import FloatingWidgets from '@/components/layout/FloatingWidgets'
 import MobileBottomNav from '@/components/layout/MobileBottomNav'
-import Script from 'next/script'
 import ClarityInit from '@/components/analytics/ClarityInit'
 import GtmInit from '@/components/analytics/GtmInit'
+import GoogleAnalyticsInit from '@/components/analytics/GoogleAnalyticsInit'
+import DeferredPublicWidgets from '@/components/layout/DeferredPublicWidgets'
 import PublicProviders from '@/components/layout/PublicProviders'
+import { prisma } from '@/lib/prisma'
 
-const GA_ID = 'G-R95TLDCP0W'
+export const revalidate = 3600
 
-export default function UserLayout({ children }: { children: React.ReactNode }) {
+export default async function UserLayout({ children }: { children: React.ReactNode }) {
+  const categories = await prisma.category.findMany({
+    where: { type: 'product' },
+    select: { id: true, name: true, slug: true },
+    orderBy: { created_at: 'asc' },
+    take: 8,
+  }).catch(() => [])
+
   return (
     <PublicProviders>
-        <Header />
+        <Header categories={categories.map((category) => ({
+          href: `/san-pham?category=${category.slug}`,
+          label: category.name,
+        }))} />
         <main id="main-content" className="pb-20 md:pb-0">{children}</main>
-        <Footer />
+        <Footer categories={categories.slice(0, 5)} />
         <MobileBottomNav />
-        <CartDrawer />
-        <FloatingWidgets />
+        <DeferredPublicWidgets />
         <ClarityInit />
         <GtmInit />
-        <Script
-          id="ga4-gtag-src"
-          strategy="lazyOnload"
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-        />
-        <Script
-          id="ga4-gtag-init"
-          strategy="lazyOnload"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${GA_ID}');
-            `,
-          }}
-        />
+        <GoogleAnalyticsInit />
     </PublicProviders>
   )
 }

@@ -16,7 +16,7 @@ export default function ClarityInit() {
       document.head.appendChild(script)
     }
 
-    const events: Array<keyof WindowEventMap> = ['pointerdown', 'keydown', 'scroll']
+    const events: Array<keyof WindowEventMap> = ['pointerdown', 'keydown']
     events.forEach((event) => window.addEventListener(event, load, { once: true, passive: true }))
 
     return () => {

@@ -33,7 +33,7 @@
   --color-accent-peach: #ffd6d6; /* Hồng nhạt */
   --color-accent-mint: #ffe7a3;  /* Vàng kem */
   --color-accent-orange: #ff6b6b; /* Coral */
-  --color-accent-kraft: #b9794b; /* Kraft brown */
+  --color-accent-kraft: #8a5635; /* Accessible kraft brown for text */
   
   /* Neutrals */
   --color-neutral-50: #ffffff;
@@ -60,7 +60,7 @@
   --shadow-strong: 0 22px 55px rgba(91, 48, 35, 0.14);
 
   /* Design Bible overrides */
-  --color-primary: #e41d1d;
+  --color-primary: #d71919;
   --color-primary-dark: #b91515;
   --color-kraft: #8a5635;
   --color-admin-bg: #faf4ee; /* kem ấm Mushroomie thay xám lạnh — card trắng nổi rõ trên nền này */
