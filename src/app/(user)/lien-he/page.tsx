@@ -261,8 +261,11 @@ export default function ContactPage() {
               ))}
             </div>
             <div className="mt-5">
-              <Link href="/san-pham">
-                <Button size="lg">Xem tất cả sản phẩm ♡</Button>
+              <Link
+                href="/san-pham"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary px-7 py-3 text-base font-bold text-white shadow-[0_10px_24px_rgba(228,29,29,0.22)] transition hover:-translate-y-0.5 hover:bg-primary-dark motion-reduce:transform-none"
+              >
+                Xem tất cả sản phẩm ♡
               </Link>
             </div>
           </div>
