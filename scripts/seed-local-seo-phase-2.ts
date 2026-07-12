@@ -578,10 +578,18 @@ function buildContent(article: Article) {
 
 function publishDateFor(index: number, now: Date) {
   if (index < 2) return now
-  const date = new Date(now)
-  date.setDate(date.getDate() + (index - 1) * PUBLISH_INTERVAL_DAYS)
-  date.setHours(9, 0, 0, 0)
-  return date
+
+  // Production runs in UTC. Build the calendar date in Vietnam time, then
+  // persist 02:00 UTC so scheduled posts publish at 09:00 Asia/Ho_Chi_Minh.
+  const vietnamNow = new Date(now.getTime() + 7 * 60 * 60 * 1000)
+  return new Date(Date.UTC(
+    vietnamNow.getUTCFullYear(),
+    vietnamNow.getUTCMonth(),
+    vietnamNow.getUTCDate() + (index - 1) * PUBLISH_INTERVAL_DAYS,
+    2,
+    0,
+    0,
+  ))
 }
 
 function buildPlan(existing: Set<string>, now = new Date()) {
