@@ -10,8 +10,7 @@ import {
   Palette,
   Sparkles,
 } from 'lucide-react'
-import SafeImage from '@/components/ui/SafeImage'
-import { getPublicImageUrl } from '@/lib/utils'
+import HomeBannerImage from './HomeBannerImage'
 import type { HomeBanner } from './types'
 
 const fallbackSlide: HomeBanner = {
@@ -114,17 +113,10 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
           />
 
           <article key={activeBanner.id} className="absolute inset-0 z-10">
-            <SafeImage
-              src={getPublicImageUrl(activeBanner.image_url, 'banner')}
-              fallbackSrc="/logo.webp"
-              imageKind="banner"
+            <HomeBannerImage
+              src={activeBanner.image_url}
               alt={activeBanner.title || 'Phụ kiện handmade Mushroomie'}
-              fill
               priority={current === 0}
-              fetchPriority={current === 0 ? 'high' : 'auto'}
-              decoding={current === 0 ? 'sync' : 'async'}
-              quality={70}
-              sizes="(max-width: 640px) calc(100vw - 20px), (max-width: 1312px) calc(100vw - 32px), 1280px"
               className={activeBanner.id === 0 ? 'object-contain p-12 md:p-24' : 'object-contain'}
             />
             {activeHref && (

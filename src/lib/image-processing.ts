@@ -29,7 +29,8 @@ export interface OptimizedUploadResult {
   created_at: string
 }
 
-const WEBP_QUALITY = 90
+const WEBP_QUALITY = 85
+const BANNER_VARIANT_WIDTHS = [750, 1280] as const
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024
 const MAX_INPUT_PIXELS = 40_000_000
 const sharpInputOptions = { failOn: 'warning' as const, animated: false, limitInputPixels: MAX_INPUT_PIXELS }
@@ -107,6 +108,19 @@ export async function optimizeUploadImage({
     .toBuffer({ resolveWithObject: true })
 
   await writeFile(outputPath, output.data)
+
+  if (purpose === 'banner') {
+    await Promise.all(
+      BANNER_VARIANT_WIDTHS.map(async (width) => {
+        const variant = await sharp(output.data, sharpInputOptions)
+          .resize({ width, fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: WEBP_QUALITY, effort: 5 })
+          .toBuffer()
+        await writeFile(path.join(uploadDir, `${path.parse(filename).name}-${width}.webp`), variant)
+      }),
+    )
+  }
+
   const fileStat = await stat(outputPath)
 
   return {
