@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next'
 import { prisma } from '@/lib/prisma'
-import { LOCAL_PAGES } from '@/lib/local-seo'
+import { LOCAL_SEO_LAST_MODIFIED, PUBLISHED_LOCAL_PAGES } from '@/lib/local-seo'
 
 // Regenerate the sitemap at most once an hour (ISR) so newly published posts /
 // products and slug fixes appear without needing a full redeploy. The query is
@@ -30,9 +30,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   // Landing pages Local SEO (Đồng Nai / Biên Hòa / TP.HCM)
-  const localPages: MetadataRoute.Sitemap = LOCAL_PAGES.map((p) => ({
+  const localPages: MetadataRoute.Sitemap = PUBLISHED_LOCAL_PAGES.map((p) => ({
     url: `${baseUrl}/${p.slug}`,
-    lastModified: new Date(),
+    lastModified: LOCAL_SEO_LAST_MODIFIED,
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }))

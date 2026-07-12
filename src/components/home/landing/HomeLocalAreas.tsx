@@ -11,6 +11,8 @@ const AREAS = [
   { href: '/vong-tay-custom-dong-nai', emoji: '🎨', label: 'Vòng tay custom Đồng Nai', desc: 'Chọn màu, chọn charm theo gu riêng' },
   { href: '/moc-khoa-handmade-dong-nai', emoji: '🔑', label: 'Móc khóa handmade Đồng Nai', desc: 'Điểm nhấn cho túi, balo, điện thoại' },
   { href: '/qua-tang-handmade-dong-nai', emoji: '🎁', label: 'Quà tặng handmade Đồng Nai', desc: 'Set quà nhỏ xinh, cá nhân hóa theo dịp' },
+  { href: '/phu-kien-handmade-bien-hoa', emoji: '📍', label: 'Phụ kiện handmade Biên Hòa', desc: 'Đặt gần Biên Hòa, tư vấn và giao hàng linh hoạt' },
+  { href: '/vong-tay-custom-bien-hoa', emoji: '🪄', label: 'Vòng tay custom Biên Hòa', desc: 'Đặt theo tên, màu và charm mang dấu ấn riêng' },
 ]
 
 export default function HomeLocalAreas() {
@@ -25,7 +27,7 @@ export default function HomeLocalAreas() {
           Đặt vòng tay, móc khóa, charm và quà tặng handmade cá nhân hóa — nhận đơn tại Đồng Nai và giao online đến TP.HCM.
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {AREAS.map((a) => (
           <Link
             key={a.href}

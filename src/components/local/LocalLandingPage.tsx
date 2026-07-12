@@ -1,10 +1,12 @@
 import Link from 'next/link'
-import { ArrowRight, MapPin, MessageCircle, ShoppingBag, Sparkles } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Clock, MapPin, MessageCircle, PackageCheck, Phone, Send, ShoppingBag, Sparkles } from 'lucide-react'
 import { safeJsonLd } from '@/lib/security'
 import {
   BRAND,
   breadcrumbSchema,
   deliveryNote,
+  faqPageSchema,
+  getLocalFaqs,
   getRelatedPages,
   localBusinessSchema,
   localServiceSchema,
@@ -18,6 +20,7 @@ import {
  */
 export default function LocalLandingPage({ page }: { page: LocalPage }) {
   const related = getRelatedPages(page.slug)
+  const faqs = getLocalFaqs(page)
   const crumbs = [
     { name: 'Trang chủ', url: '/' },
     { name: page.crumb, url: `/${page.slug}` },
@@ -29,6 +32,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(localBusinessSchema()) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbSchema(crumbs)) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(localServiceSchema(page)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqPageSchema(faqs)) }} />
 
       {/* Breadcrumb hiển thị */}
       <nav aria-label="Breadcrumb" className="brand-container pt-5 text-sm text-neutral-500">
@@ -76,6 +80,48 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
         </div>
       </section>
 
+      {/* Thông tin địa phương hiển thị đồng nhất với LocalBusiness schema */}
+      <section className="brand-container mt-8" aria-labelledby="local-contact-heading">
+        <div className="grid gap-4 rounded-[18px] border-[1.5px] border-warm-border bg-white p-5 shadow-card sm:grid-cols-3 sm:p-6">
+          <div>
+            <h2 id="local-contact-heading" className="flex items-center gap-2 font-heading text-base text-neutral-900">
+              <MapPin size={17} className="text-primary" /> Mushroomie tại Đồng Nai
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+              {BRAND.streetAddress}, {BRAND.addressLocality}
+            </p>
+            <a
+              href={BRAND.mapUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-primary hover:underline"
+            >
+              Xem vị trí trên bản đồ <ArrowRight size={14} className="ml-1" />
+            </a>
+          </div>
+          <div>
+            <h2 className="flex items-center gap-2 font-heading text-base text-neutral-900">
+              <Clock size={17} className="text-primary" /> Giờ phản hồi
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+              {BRAND.openingHours.opens}–{BRAND.openingHours.closes} mỗi ngày, từ thứ Hai đến Chủ nhật.
+            </p>
+          </div>
+          <div>
+            <h2 className="flex items-center gap-2 font-heading text-base text-neutral-900">
+              <Phone size={17} className="text-primary" /> Tư vấn đặt hàng
+            </h2>
+            <a
+              href={`tel:${BRAND.phoneE164}`}
+              className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-neutral-700 hover:text-primary"
+            >
+              0947 192 590
+            </a>
+            <p className="text-xs leading-relaxed text-neutral-500">Nên liên hệ trước nếu bạn muốn hẹn nhận trực tiếp.</p>
+          </div>
+        </div>
+      </section>
+
       {/* Highlights */}
       <section className="brand-container mt-8">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -87,6 +133,39 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Quy trình đặt hàng rõ ràng cho truy vấn có ý định mua */}
+      <section className="brand-container mt-8" aria-labelledby="order-process-heading">
+        <h2 id="order-process-heading" className="font-heading text-xl text-neutral-900">
+          Đặt phụ kiện handmade theo yêu cầu như thế nào?
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-600">
+          Ba bước gọn để Mushroomie hiểu đúng ý tưởng, xác nhận chi phí và hoàn thiện sản phẩm trước khi giao đến {page.area}.
+        </p>
+        <ol className="mt-4 grid gap-4 sm:grid-cols-3">
+          <li className="rounded-[18px] border-[1.5px] border-warm-border bg-white p-5 shadow-card">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-pink text-primary" aria-hidden>
+              <Send size={18} />
+            </span>
+            <h3 className="mt-3 font-heading text-base text-neutral-900">1. Gửi ý tưởng</h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-neutral-600">Cho Mushroomie biết màu, charm, size, dịp tặng và khoảng ngân sách bạn mong muốn.</p>
+          </li>
+          <li className="rounded-[18px] border-[1.5px] border-warm-border bg-white p-5 shadow-card">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fff3cf] text-[#9b6500]" aria-hidden>
+              <CheckCircle2 size={18} />
+            </span>
+            <h3 className="mt-3 font-heading text-base text-neutral-900">2. Chốt mẫu và chi phí</h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-neutral-600">Hai bên xác nhận cách phối, nội dung chữ, thời gian hoàn thiện và tổng chi phí trước khi làm.</p>
+          </li>
+          <li className="rounded-[18px] border-[1.5px] border-warm-border bg-white p-5 shadow-card">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#eaf8ef] text-[#237a43]" aria-hidden>
+              <PackageCheck size={18} />
+            </span>
+            <h3 className="mt-3 font-heading text-base text-neutral-900">3. Làm và giao sản phẩm</h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-neutral-600">Mushroomie làm thủ công, kiểm tra chi tiết rồi hẹn nhận hoặc gửi qua đơn vị vận chuyển.</p>
+          </li>
+        </ol>
       </section>
 
       {/* Giao hàng địa phương + USP */}
@@ -136,6 +215,23 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
           </div>
         </section>
       )}
+
+      <section className="brand-container mt-8" aria-labelledby="local-faq-heading">
+        <h2 id="local-faq-heading" className="font-heading text-xl text-neutral-900">
+          Câu hỏi thường gặp
+        </h2>
+        <div className="mt-4 divide-y divide-neutral-200 rounded-[18px] border-[1.5px] border-warm-border bg-white px-5 shadow-card sm:px-6">
+          {faqs.map((faq) => (
+            <details key={faq.question} className="group py-4">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 font-bold text-neutral-800 marker:content-none">
+                {faq.question}
+                <span className="shrink-0 text-xl font-normal text-primary transition-transform group-open:rotate-45" aria-hidden>+</span>
+              </summary>
+              <p className="max-w-3xl pb-1 pr-8 text-sm leading-relaxed text-neutral-600">{faq.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
 
       {/* Final CTA */}
       <section className="brand-container mt-10">

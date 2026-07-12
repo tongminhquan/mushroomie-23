@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Globe, Mail, MapPin, Phone } from 'lucide-react'
 import SafeEmail from '@/components/ui/SafeEmail'
 import SafeImage from '@/components/ui/SafeImage'
+import { BRAND } from '@/lib/local-seo'
 
 export default function Footer({ categories }: { categories: Array<{ id: number; name: string; slug: string }> }) {
 
@@ -54,6 +55,8 @@ export default function Footer({ categories }: { categories: Array<{ id: number;
               <li><Link href="/voucher" className="hover:text-white">Voucher</Link></li>
               <li><Link href="/mini-game" className="hover:text-white">Mini game</Link></li>
               <li><Link href="/lien-he" className="hover:text-white">Liên hệ</Link></li>
+              <li><Link href="/phu-kien-handmade-dong-nai" className="hover:text-white">Phụ kiện handmade Đồng Nai</Link></li>
+              <li><Link href="/vong-tay-custom-bien-hoa" className="hover:text-white">Vòng tay custom Biên Hòa</Link></li>
             </ul>
           </div>
 
@@ -71,7 +74,7 @@ export default function Footer({ categories }: { categories: Array<{ id: number;
             <ul className="space-y-4 text-sm leading-6 text-white/60">
               <li className="flex gap-3">
                 <MapPin size={17} className="mt-1 shrink-0 text-coral" />
-                Hẻm 2 tổ 11, Phường Trảng Dài, Đồng Nai
+                {BRAND.streetAddress}, {BRAND.addressLocality}
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={17} className="shrink-0 text-coral" />

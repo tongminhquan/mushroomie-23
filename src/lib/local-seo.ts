@@ -30,6 +30,15 @@ export const BRAND = {
     'https://shopee.vn/shop/475544379',
   ],
   shopee: 'https://shopee.vn/shop/475544379',
+  mapUrl: 'https://www.google.com/maps?q=10.996333,106.882306',
+  geo: {
+    latitude: 10.996333,
+    longitude: 106.882306,
+  },
+  openingHours: {
+    opens: '08:00',
+    closes: '21:00',
+  },
   logo: `${SITE_URL}/logo.webp`,
 } as const
 
@@ -65,6 +74,31 @@ export interface LocalPage {
   /** loại dịch vụ cho schema */
   serviceType: string
 }
+
+export interface LocalFaq {
+  question: string
+  answer: string
+}
+
+/**
+ * Chỉ các slug có route thật mới được đưa vào sitemap và liên kết nội bộ.
+ * LOCAL_PAGES còn chứa nội dung dự kiến cho các đợt sau, không đồng nghĩa đã xuất bản.
+ */
+export const PUBLISHED_LOCAL_SLUGS = [
+  'phu-kien-handmade-dong-nai',
+  'shop-phu-kien-handmade-dong-nai',
+  'phu-kien-handmade-bien-hoa',
+  'phu-kien-handmade-tphcm',
+  'vong-tay-handmade-dong-nai',
+  'vong-tay-custom-dong-nai',
+  'vong-tay-custom-bien-hoa',
+  'moc-khoa-handmade-dong-nai',
+  'moc-khoa-handmade-theo-yeu-cau-dong-nai',
+  'qua-tang-handmade-dong-nai',
+  'qua-tang-ca-nhan-hoa-dong-nai',
+] as const
+
+export const LOCAL_SEO_LAST_MODIFIED = new Date('2026-07-13T00:00:00.000Z')
 
 const productHub = {
   all: { label: 'Xem tất cả sản phẩm', href: '/san-pham' },
@@ -587,10 +621,58 @@ export function getLocalPage(slug: string): LocalPage | undefined {
   return LOCAL_PAGES.find((p) => p.slug === slug)
 }
 
+const publishedLocalSlugSet = new Set<string>(PUBLISHED_LOCAL_SLUGS)
+
+export const PUBLISHED_LOCAL_PAGES = LOCAL_PAGES.filter((page) => publishedLocalSlugSet.has(page.slug))
+
+export function isPublishedLocalPage(slug: string): boolean {
+  return publishedLocalSlugSet.has(slug)
+}
+
 export function getRelatedPages(slug: string): LocalPage[] {
   const page = getLocalPage(slug)
   if (!page) return []
-  return page.related.map(getLocalPage).filter((p): p is LocalPage => Boolean(p))
+  return page.related
+    .filter(isPublishedLocalPage)
+    .map(getLocalPage)
+    .filter((p): p is LocalPage => Boolean(p))
+}
+
+function productLabel(group: LocalGroup): string {
+  if (group === 'vong-tay') return 'vòng tay'
+  if (group === 'moc-khoa') return 'móc khóa'
+  if (group === 'qua-tang') return 'quà tặng'
+  return 'phụ kiện'
+}
+
+export function getLocalFaqs(page: LocalPage): LocalFaq[] {
+  const product = productLabel(page.group)
+  const locationAnswer = page.onlineOnly
+    ? `Mushroomie không có cửa hàng tại ${page.area}. Sản phẩm được làm thủ công tại Trảng Dài, Đồng Nai và nhận đơn online giao đến ${page.area}.`
+    : 'Mushroomie hoạt động tại Hẻm 2, tổ 11, Phường Trảng Dài, Thành phố Đồng Nai. Nếu muốn nhận trực tiếp, bạn nên liên hệ trước để Mushroomie xác nhận thời gian.'
+
+  return [
+    {
+      question: `Mushroomie có cửa hàng ${product} tại ${page.area} không?`,
+      answer: locationAnswer,
+    },
+    {
+      question: `${product.charAt(0).toUpperCase() + product.slice(1)} có thể custom theo yêu cầu không?`,
+      answer:
+        'Có. Bạn có thể gửi màu sắc, charm, chữ cái, kích thước và phong cách mong muốn. Mushroomie sẽ tư vấn phương án phù hợp rồi xác nhận mẫu và chi phí trước khi làm.',
+    },
+    {
+      question: `Đặt ${product} handmade mất bao lâu?`,
+      answer:
+        'Thời gian hoàn thiện phụ thuộc mẫu có sẵn hay thiết kế custom và số lượng chi tiết. Mushroomie sẽ báo thời gian dự kiến trước khi chốt đơn để bạn chủ động cho ngày cần nhận.',
+    },
+    {
+      question: `Mushroomie giao ${product} đến ${page.area} bằng cách nào?`,
+      answer: page.onlineOnly
+        ? `Đơn được gửi từ Đồng Nai đến ${page.area} qua đơn vị vận chuyển. Mã vận đơn và thời gian dự kiến sẽ được thông báo sau khi sản phẩm hoàn thiện.`
+        : `Khách tại ${page.area} có thể chọn giao hàng phù hợp hoặc hẹn nhận trực tiếp sau khi được xác nhận. Đơn ở khu vực khác được gửi qua đơn vị vận chuyển.`,
+    },
+  ]
 }
 
 // ─────────────────────────────────────────────
@@ -612,6 +694,18 @@ export function localBusinessSchema() {
     telephone: BRAND.phoneE164,
     email: BRAND.email,
     priceRange: '₫₫',
+    hasMap: BRAND.mapUrl,
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: BRAND.geo.latitude,
+      longitude: BRAND.geo.longitude,
+    },
+    openingHoursSpecification: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      opens: BRAND.openingHours.opens,
+      closes: BRAND.openingHours.closes,
+    },
     address: {
       '@type': 'PostalAddress',
       streetAddress: BRAND.streetAddress,
@@ -666,5 +760,20 @@ export function localServiceSchema(page: LocalPage) {
     areaServed: { '@type': 'Place', name: page.area },
     provider: { '@id': `${SITE_URL}/#localbusiness` },
     url: `${SITE_URL}/${page.slug}`,
+  }
+}
+
+export function faqPageSchema(faqs: LocalFaq[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
   }
 }
