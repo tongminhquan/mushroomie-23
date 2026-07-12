@@ -75,7 +75,7 @@ export default function Footer({ categories }: { categories: Array<{ id: number;
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={17} className="shrink-0 text-coral" />
-                <a href="tel:+84848744060" className="hover:text-white">0848 744 060</a>
+                <a href="tel:+84947192590" className="hover:text-white">0947 192 590</a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={17} className="shrink-0 text-coral" />
