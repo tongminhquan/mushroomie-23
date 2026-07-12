@@ -69,7 +69,9 @@ export interface LocalPage {
 const productHub = {
   all: { label: 'Xem tất cả sản phẩm', href: '/san-pham' },
   bracelet: { label: 'Danh mục vòng tay handmade', href: '/san-pham?category=vong-tay' },
-  keychain: { label: 'Danh mục móc khóa & charm', href: '/san-pham?category=moc-khoa' },
+  keychain: { label: 'Danh mục móc khóa handmade', href: '/san-pham?category=moc-khoa' },
+  charm: { label: 'Danh mục charm', href: '/san-pham?category=charm' },
+  necklace: { label: 'Danh mục dây chuyền & vòng cổ', href: '/san-pham?category=vong-co' },
   gift: { label: 'Set quà tặng & hộp quà', href: '/san-pham' },
   contact: { label: 'Đặt hàng / tư vấn custom', href: '/lien-he' },
 }
