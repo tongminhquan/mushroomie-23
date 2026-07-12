@@ -49,38 +49,12 @@ export default async function HomePage() {
     }).catch(() => []),
   ])
 
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://mushroomie.io.vn'
-
-  const localBusinessSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'LocalBusiness',
-    name: 'Mushroomie Handmade',
-    image: `${siteUrl}/logo.webp`,
-    '@id': siteUrl,
-    url: siteUrl,
-    telephone: '+84848744060',
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: 'Hẻm 2 tổ 11, Phường Trảng Dài',
-      addressLocality: 'Biên Hòa',
-      addressRegion: 'Đồng Nai',
-      addressCountry: 'VN',
-    },
-  }
-
-  const webSiteSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'Mushroomie',
-    alternateName: ['Mushroomie Handmade'],
-    url: `${siteUrl}/`,
-  }
-
   return (
     <div>
       <h1 className="sr-only">Mushroomie - phụ kiện handmade cá nhân hóa: vòng tay, charm, móc khóa, quà tặng</h1>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(localBusinessSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(webSiteSchema) }} />
+      {/* NAP nhất quán qua lib local-seo (địa chỉ Trảng Dài–Đồng Nai, SĐT, sameAs, SearchAction) */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(localBusinessSchema()) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema()) }} />
       <HomeLanding
         banners={JSON.parse(JSON.stringify(banners))}
         products={JSON.parse(JSON.stringify(featuredProducts))}
@@ -88,6 +62,7 @@ export default async function HomePage() {
         posts={JSON.parse(JSON.stringify(posts))}
         reviews={JSON.parse(JSON.stringify(reviews))}
       />
+      <HomeLocalAreas />
     </div>
   )
 }
