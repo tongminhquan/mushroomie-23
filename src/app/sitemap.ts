@@ -28,6 +28,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/lien-he`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
   ]
 
+  // Landing pages Local SEO (Đồng Nai / Biên Hòa / TP.HCM)
+  const localPages: MetadataRoute.Sitemap = LOCAL_PAGES.map((p) => ({
+    url: `${baseUrl}/${p.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }))
+
   let products: MetadataRoute.Sitemap = []
   let posts: MetadataRoute.Sitemap = []
   let categories: MetadataRoute.Sitemap = []
