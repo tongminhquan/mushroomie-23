@@ -6,6 +6,7 @@ import {
   breadcrumbSchema,
   deliveryNote,
   getRelatedPages,
+  localBusinessSchema,
   localServiceSchema,
   type LocalPage,
 } from '@/lib/local-seo'
