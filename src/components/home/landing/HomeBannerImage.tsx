@@ -47,8 +47,8 @@ export default function HomeBannerImage({
     <>
       {priority && (
         <>
-          <link rel="preload" as="image" href={mobileSrc} media="(max-width: 640px)" />
-          <link rel="preload" as="image" href={desktopSrc} media="(min-width: 641px)" />
+          <link rel="preload" as="image" href={mobileSrc} media="(max-width: 640px)" fetchPriority="high" />
+          <link rel="preload" as="image" href={desktopSrc} media="(min-width: 641px)" fetchPriority="high" />
         </>
       )}
       <picture>
