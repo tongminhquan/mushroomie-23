@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { matchImagesForRow, parseCsv, rewriteContentImages } from '../src/lib/bulk-import'
+import ExcelJS from 'exceljs'
+import {
+  matchImagesForRow,
+  normalizePostCanonicalUrl,
+  parseBulkImportFile,
+  parseCsv,
+  rewriteContentImages,
+} from '../src/lib/bulk-import'
 import { clampImageLimit, normalizeWordPressStatus } from '../src/lib/wordpress-auto-poster'
 
 test('CSV parser preserves quoted commas, newlines and escaped quotes', () => {
@@ -30,6 +37,50 @@ test('content image rewriting replaces exact filenames without touching unrelate
     ['post01_10.jpg', '/uploads/ten.webp'],
   ]))
   assert.equal(rewritten, '<img src="/uploads/one.webp"><img src="/uploads/ten.webp"><img src="other.jpg">')
+})
+
+test('bulk import maps SEO fields and Vietnamese boolean values', async () => {
+  const csv = [
+    'title,content,slug,seo_title,focus_keyword,secondary_keywords,canonical_url,robots_index,robots_follow,featured_image_alt',
+    'Vòng tay handmade,<p>Nội dung hữu ích</p>,vong-tay-handmade,Vòng tay handmade Đồng Nai,vòng tay handmade,"vòng tay custom, charm",/tin-tuc/vong-tay-handmade,có,không,Ảnh vòng tay handmade',
+  ].join('\n')
+
+  const parsed = await parseBulkImportFile(Buffer.from(csv), 'posts.csv', [])
+  const row = parsed.rows[0]
+
+  assert.deepEqual(parsed.errors, [])
+  assert.ok(row)
+  assert.equal(row.seo_title, 'Vòng tay handmade Đồng Nai')
+  assert.equal(row.focus_keyword, 'vòng tay handmade')
+  assert.equal(row.secondary_keywords, 'vòng tay custom, charm')
+  assert.equal(row.canonical_url, 'https://mushroomie.io.vn/tin-tuc/vong-tay-handmade')
+  assert.equal(row.robots_index, true)
+  assert.equal(row.robots_follow, false)
+  assert.equal(row.featured_image_alt, 'Ảnh vòng tay handmade')
+})
+
+test('canonical URL is restricted to the Mushroomie origin', () => {
+  assert.equal(
+    normalizePostCanonicalUrl('https://example.com/fake', 'vong-tay-handmade'),
+    'https://mushroomie.io.vn/tin-tuc/vong-tay-handmade',
+  )
+})
+
+test('bulk import prefers the Import_60_Bai worksheet in a multi-sheet workbook', async () => {
+  const workbook = new ExcelJS.Workbook()
+  const overview = workbook.addWorksheet('Tong quan')
+  overview.addRow(['Huong dan', 'Khong phai du lieu nhap'])
+
+  const importSheet = workbook.addWorksheet('Import_60_Bai')
+  importSheet.addRow(['title', 'content', 'slug', 'status'])
+  importSheet.addRow(['Vong tay handmade', '<p>Noi dung huu ich</p>', 'vong-tay-handmade', 'draft'])
+
+  const buffer = Buffer.from(await workbook.xlsx.writeBuffer())
+  const parsed = await parseBulkImportFile(buffer, 'posts.xlsx', [])
+
+  assert.deepEqual(parsed.errors, [])
+  assert.equal(parsed.rows.length, 1)
+  assert.equal(parsed.rows[0]?.slug, 'vong-tay-handmade')
 })
 
 test('WordPress status and image limits fail to safe defaults', () => {

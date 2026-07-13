@@ -6,7 +6,7 @@ import { generateSlug } from '@/lib/utils'
 import { logAdminAction } from '@/lib/admin-logger'
 import { optimizeUploadImage } from '@/lib/image-processing'
 import { buildPostContentMetrics, normalizeOptionalPostImage } from '@/lib/post-normalization'
-import { parseBulkImportFile, rewriteContentImages } from '@/lib/bulk-import'
+import { normalizePostCanonicalUrl, parseBulkImportFile, rewriteContentImages } from '@/lib/bulk-import'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -144,15 +144,30 @@ export async function POST(request: NextRequest) {
           : null
 
         const { content: normalizedContent, readingTime, wordCount } = buildPostContentMetrics(content)
+        const seoTitle = row.seo_title || row.title
+        const metaDescription = row.meta_description || null
         const baseData = {
           title: row.title,
-          excerpt: row.meta_description || null,
+          excerpt: metaDescription,
           content: normalizedContent,
-          featured_image: featuredImage,
-          featured_image_alt: row.title,
+          ...(featuredImage ? {
+            featured_image: featuredImage,
+            featured_image_alt: row.featured_image_alt || row.title,
+          } : {}),
           status: row.status,
-          category_id: categoryId,
-          meta_description: row.meta_description || null,
+          ...(categoryId !== null ? { category_id: categoryId } : {}),
+          seo_title: seoTitle,
+          meta_description: metaDescription,
+          focus_keyword: row.focus_keyword || null,
+          secondary_keywords: row.secondary_keywords || null,
+          canonical_url: normalizePostCanonicalUrl(row.canonical_url, row.slug),
+          robots_index: row.robots_index,
+          robots_follow: row.robots_follow,
+          schema_type: 'BlogPosting',
+          og_title: seoTitle,
+          og_description: metaDescription,
+          twitter_title: seoTitle,
+          twitter_description: metaDescription,
           reading_time: readingTime,
           word_count: wordCount,
           published_at: publishedAt,

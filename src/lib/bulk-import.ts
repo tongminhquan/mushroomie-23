@@ -33,6 +33,13 @@ export interface BulkImportRow {
   publish_date: string | null
   slug: string
   meta_description: string
+  seo_title: string
+  focus_keyword: string
+  secondary_keywords: string
+  canonical_url: string
+  robots_index: boolean
+  robots_follow: boolean
+  featured_image_alt: string
   warnings: string[]
   /** Tên file ảnh đại diện khớp quy ước (trong danh sách ảnh tải lên) */
   featuredImageFile: string | null
@@ -66,6 +73,37 @@ const HEADER_ALIASES: Record<string, string> = {
   publish_date: 'publish_date', ngay_dang: 'publish_date', lich_dang: 'publish_date',
   slug: 'slug', duong_dan: 'slug',
   meta_description: 'meta_description', mo_ta: 'meta_description', the_mo_ta: 'meta_description',
+  seo_title: 'seo_title', tieu_de_seo: 'seo_title',
+  focus_keyword: 'focus_keyword', tu_khoa_chinh: 'focus_keyword',
+  secondary_keywords: 'secondary_keywords', tu_khoa_phu: 'secondary_keywords',
+  canonical_url: 'canonical_url', canonical: 'canonical_url',
+  robots_index: 'robots_index', index: 'robots_index',
+  robots_follow: 'robots_follow', follow: 'robots_follow',
+  featured_image_alt: 'featured_image_alt', alt_anh_dai_dien: 'featured_image_alt',
+}
+
+function parseBoolean(raw: string, fallback: boolean): boolean {
+  if (!raw.trim()) return fallback
+  const value = normalizeHeader(raw)
+  if (['true', '1', 'yes', 'co', 'bat'].includes(value)) return true
+  if (['false', '0', 'no', 'khong', 'tat'].includes(value)) return false
+  return fallback
+}
+
+export function normalizePostCanonicalUrl(raw: string, slug: string, siteUrl = 'https://mushroomie.io.vn'): string {
+  const fallback = `${siteUrl.replace(/\/$/, '')}/tin-tuc/${slug}`
+  if (!raw.trim()) return fallback
+
+  try {
+    const base = new URL(siteUrl)
+    const canonical = new URL(raw.trim(), base)
+    if (canonical.origin !== base.origin) return fallback
+    canonical.search = ''
+    canonical.hash = ''
+    return canonical.toString().replace(/\/$/, '')
+  } catch {
+    return fallback
+  }
 }
 
 function cellToString(value: unknown): string {
@@ -154,7 +192,10 @@ async function readTable(buffer: Buffer, filename: string): Promise<string[][]> 
 
   const workbook = new ExcelJS.Workbook()
   await workbook.xlsx.load(buffer as unknown as ArrayBuffer)
-  const sheet = workbook.worksheets[0]
+  const preferredSheetNames = new Set(['import_60_bai', 'import'])
+  const sheet = workbook.worksheets.find((worksheet) => (
+    preferredSheetNames.has(worksheet.name.trim().toLowerCase())
+  )) ?? workbook.worksheets[0]
   if (!sheet) return []
 
   const rows: string[][] = []
@@ -294,6 +335,13 @@ export async function parseBulkImportFile(
       publish_date: publishDate ? publishDate.toISOString() : null,
       slug,
       meta_description: col(raw, 'meta_description'),
+      seo_title: col(raw, 'seo_title'),
+      focus_keyword: col(raw, 'focus_keyword'),
+      secondary_keywords: col(raw, 'secondary_keywords'),
+      canonical_url: normalizePostCanonicalUrl(col(raw, 'canonical_url'), slug),
+      robots_index: parseBoolean(col(raw, 'robots_index'), true),
+      robots_follow: parseBoolean(col(raw, 'robots_follow'), true),
+      featured_image_alt: col(raw, 'featured_image_alt'),
       warnings,
       featuredImageFile: images.featured,
       contentImageFiles: images.content,
