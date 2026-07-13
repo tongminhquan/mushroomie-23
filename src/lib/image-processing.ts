@@ -30,6 +30,9 @@ export interface OptimizedUploadResult {
 }
 
 const WEBP_QUALITY = 85
+export const MAX_WEB_IMAGE_BYTES = 500 * 1024 - 1
+const WEBP_QUALITY_STEPS = [WEBP_QUALITY, 80, 74, 68, 62, 56] as const
+const WEBP_WIDTH_SCALES = [1, 0.85, 0.7, 0.55, 0.4] as const
 const BANNER_VARIANT_WIDTHS = [750, 1280] as const
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024
 const MAX_INPUT_PIXELS = 40_000_000
@@ -98,25 +101,16 @@ export async function optimizeUploadImage({
   const filename = `${randomUUID()}.webp`
   const outputPath = path.join(uploadDir, filename)
 
-  const output = await pipeline
-    .resize({
-      width: maxWidthByPurpose[purpose],
-      fit: 'inside',
-      withoutEnlargement: true,
-    })
-    .webp({ quality: WEBP_QUALITY, effort: 5 })
-    .toBuffer({ resolveWithObject: true })
+  const preparedBuffer = await pipeline.toBuffer()
+  const output = await encodeWebpWithinLimit(preparedBuffer, maxWidthByPurpose[purpose])
 
   await writeFile(outputPath, output.data)
 
   if (purpose === 'banner') {
     await Promise.all(
       BANNER_VARIANT_WIDTHS.map(async (width) => {
-        const variant = await sharp(output.data, sharpInputOptions)
-          .resize({ width, fit: 'inside', withoutEnlargement: true })
-          .webp({ quality: WEBP_QUALITY, effort: 5 })
-          .toBuffer()
-        await writeFile(path.join(uploadDir, `${path.parse(filename).name}-${width}.webp`), variant)
+        const variant = await encodeWebpWithinLimit(output.data, width)
+        await writeFile(path.join(uploadDir, `${path.parse(filename).name}-${width}.webp`), variant.data)
       }),
     )
   }
@@ -132,6 +126,34 @@ export async function optimizeUploadImage({
     height: output.info.height,
     created_at: fileStat.mtime.toISOString(),
   }
+}
+
+export async function encodeWebpWithinLimit(buffer: Buffer, maxWidth: number) {
+  const metadata = await sharp(buffer, sharpInputOptions).metadata()
+  const sourceWidth = metadata.width || maxWidth
+  const initialWidth = Math.max(1, Math.min(sourceWidth, maxWidth))
+  const minimumWidth = Math.min(initialWidth, 320)
+  const widths = [...new Set(
+    WEBP_WIDTH_SCALES.map((scale) => Math.max(minimumWidth, Math.round(initialWidth * scale))),
+  )]
+
+  let smallestBytes: number | null = null
+
+  for (const width of widths) {
+    for (const quality of WEBP_QUALITY_STEPS) {
+      const output = await sharp(buffer, sharpInputOptions)
+        .resize({ width, fit: 'inside', withoutEnlargement: true })
+        .webp({ quality, effort: 5 })
+        .toBuffer({ resolveWithObject: true })
+
+      if (smallestBytes === null || output.data.length < smallestBytes) smallestBytes = output.data.length
+      if (output.data.length <= MAX_WEB_IMAGE_BYTES) return output
+    }
+  }
+
+  throw new Error(
+    `Unable to optimize image below 500 KB (smallest output: ${smallestBytes || 0} bytes)`,
+  )
 }
 
 async function assertSafeImage(buffer: Buffer, declaredMime?: string) {

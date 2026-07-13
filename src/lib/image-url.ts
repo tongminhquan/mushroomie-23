@@ -6,10 +6,10 @@ const SITE_URL =
   'https://mushroomie.io.vn'
 
 const FALLBACK_BY_KIND: Record<PublicImageKind, string> = {
-  banner: '/images/banner-placeholder.png',
-  post: '/images/product-placeholder.png',
-  product: '/images/product-placeholder.png',
-  user: '/images/avatar-placeholder.png',
+  banner: '/images/banner-placeholder.webp',
+  post: '/images/product-placeholder.webp',
+  product: '/images/product-placeholder.webp',
+  user: '/logo.webp',
 }
 
 const INTERNAL_HOSTS = new Set(
