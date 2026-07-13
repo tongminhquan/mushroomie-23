@@ -36,17 +36,17 @@ export default function HomeLanding({
     <>
       <HomeHeroLanding banners={banners} />
       <HomeCategoryShowcase categories={categories} />
-      <HomeFeaturedProducts products={products} />
-      <HomeCustomCTA />
-      <HomeBrandStory products={products} />
-      <HomeVisionMissionGoals />
-      <HomeCoreValues />
-      <HomeCustomProcess products={products} />
-      <HomeHandmadeBehindScenes products={products} />
-      <HomeMiniGameCTA />
-      <HomeTrust reviews={reviews} />
-      <HomeLatestPosts posts={posts} />
-      <HomeFinalCTA />
+      <div className="home-deferred-section"><HomeFeaturedProducts products={products} /></div>
+      <div className="home-deferred-section"><HomeCustomCTA /></div>
+      <div className="home-deferred-section"><HomeBrandStory products={products} /></div>
+      <div className="home-deferred-section"><HomeVisionMissionGoals /></div>
+      <div className="home-deferred-section"><HomeCoreValues /></div>
+      <div className="home-deferred-section"><HomeCustomProcess products={products} /></div>
+      <div className="home-deferred-section"><HomeHandmadeBehindScenes products={products} /></div>
+      <div className="home-deferred-section"><HomeMiniGameCTA /></div>
+      <div className="home-deferred-section"><HomeTrust reviews={reviews} /></div>
+      <div className="home-deferred-section"><HomeLatestPosts posts={posts} /></div>
+      <div className="home-deferred-section"><HomeFinalCTA /></div>
     </>
   )
 }

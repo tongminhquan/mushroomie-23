@@ -17,13 +17,19 @@ export default function DeferredPublicWidgets() {
       cancelIdleCallback?: (handle: number) => void
     }
 
-    if (typeof idleWindow.requestIdleCallback === 'function') {
-      const idleId = idleWindow.requestIdleCallback(() => setWidgetsReady(true), { timeout: 5000 })
-      return () => idleWindow.cancelIdleCallback?.(idleId)
-    }
+    let idleId: number | undefined
+    const timer = window.setTimeout(() => {
+      if (typeof idleWindow.requestIdleCallback === 'function') {
+        idleId = idleWindow.requestIdleCallback(() => setWidgetsReady(true), { timeout: 2000 })
+        return
+      }
+      setWidgetsReady(true)
+    }, 5000)
 
-    const timer = window.setTimeout(() => setWidgetsReady(true), 4000)
-    return () => window.clearTimeout(timer)
+    return () => {
+      window.clearTimeout(timer)
+      if (idleId !== undefined) idleWindow.cancelIdleCallback?.(idleId)
+    }
   }, [])
 
   return (

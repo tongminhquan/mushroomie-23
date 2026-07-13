@@ -228,6 +228,11 @@ body {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+.home-deferred-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 720px;
+}
+
 /* ========== Animations ========== */
 
 /* Skeleton shimmer */
