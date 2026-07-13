@@ -10,6 +10,7 @@ import {
 import {
   buildPostContentMetrics,
   extractTagNames,
+  isSquareSeoArticleImage,
   normalizeOptionalPostImage,
   normalizeStoredPostImage,
   serializeStringArray,
@@ -57,6 +58,9 @@ test('post content metrics, tags and optional images have stable shapes', () => 
   assert.equal(serializeStringArray([]), null)
   assert.equal(normalizeStoredPostImage('a.webp'), '/uploads/a.webp')
   assert.equal(normalizeOptionalPostImage('  '), null)
+  assert.equal(isSquareSeoArticleImage('/uploads/seo-article-vong-tay-charm.webp'), true)
+  assert.equal(isSquareSeoArticleImage('https://mushroomie.io.vn/uploads/seo-article-qua-tang.webp?width=1024'), true)
+  assert.equal(isSquareSeoArticleImage('/uploads/existing-cover.webp'), false)
 })
 
 test('post workflow validates statuses, excerpts, trash and restore transitions', () => {

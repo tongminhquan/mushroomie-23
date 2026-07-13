@@ -19,6 +19,7 @@ import {
   resolveImageUrlForRender,
 } from '@/lib/server-image'
 import { safeJsonLd } from '@/lib/security'
+import { isSquareSeoArticleImage } from '@/lib/post-normalization'
 
 const SITE_URL = 'https://mushroomie.io.vn'
 const SITE_NAME = 'Mushroomie'
@@ -182,6 +183,7 @@ export default async function PostDetailPage({
   ])
 
   const jsonLd = generateJsonLd(post, structuredImageUrl)
+  const usesSquareSeoCover = isSquareSeoArticleImage(coverImage.renderSrc)
 
   return (
     <div className="min-h-screen bg-secondary pb-16">
@@ -270,7 +272,11 @@ export default async function PostDetailPage({
             </div>
           </div>
 
-          <div className="relative mt-6 aspect-[16/9] w-full overflow-hidden rounded-[28px] border border-warm-border bg-white shadow-card">
+          <div
+            className={`relative mt-6 w-full overflow-hidden rounded-[28px] border border-warm-border bg-white shadow-card ${
+              usesSquareSeoCover ? 'mx-auto aspect-square max-w-3xl' : 'aspect-[16/9]'
+            }`}
+          >
             <SafeImage
               src={coverImage.renderSrc}
               alt={post.featured_image_alt || post.title}

@@ -17,6 +17,13 @@ export function normalizeOptionalPostImage(value?: string | null) {
   return normalizeStoredImagePath(value)
 }
 
+export function isSquareSeoArticleImage(value?: string | null) {
+  if (!value || typeof value !== 'string') return false
+
+  const normalizedPath = normalizeStoredImagePath(value).split(/[?#]/, 1)[0]
+  return /^\/uploads\/seo-article-[^/]+\.webp$/i.test(normalizedPath)
+}
+
 export function extractTagNames(tags: unknown): string[] {
   if (!Array.isArray(tags)) return []
 
