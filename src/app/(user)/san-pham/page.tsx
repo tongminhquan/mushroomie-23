@@ -269,7 +269,7 @@ export default async function ProductsPage({
 
       <BrandContainer className="mt-8">
         <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <aside>
+          <aside className="min-w-0">
             <div className="sticky top-24 rounded-[24px] border border-warm-border bg-white p-5 shadow-card">
               <div className="mb-4 flex items-center gap-2 border-b border-warm-border pb-3">
                 <SlidersHorizontal size={18} className="text-primary" />
@@ -314,7 +314,7 @@ export default async function ProductsPage({
             </div>
           </aside>
 
-          <main>
+          <main className="min-w-0">
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-neutral-700">
