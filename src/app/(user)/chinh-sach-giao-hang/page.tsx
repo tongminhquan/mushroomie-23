@@ -2,7 +2,9 @@ import React from 'react';
 import PolicyLayout from '@/components/layout/PolicyLayout';
 
 export const metadata = {
-  title: 'Chính sách giao hàng | Mushroomie',
+  title: 'Chính sách giao hàng',
+  description: 'Thông tin thời gian xử lý, giao hàng và phí vận chuyển đơn phụ kiện handmade Mushroomie.',
+  alternates: { canonical: 'https://mushroomie.io.vn/chinh-sach-giao-hang' },
 };
 
 export default function DeliveryPolicyPage() {

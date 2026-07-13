@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { useCartStore } from '@/store/cart'
 import { getPublicImageUrl } from '@/lib/utils'
+import { trackAnalyticsEvent } from '@/lib/analytics'
 
 interface ProductOption {
   id: number
@@ -49,6 +50,23 @@ export default function AddToCartButton({ product }: Props) {
       selectedOptions: Object.keys(selectedOptions).length > 0 ? selectedOptions : undefined,
       customNote: customNote.trim() || undefined,
     })
+    trackAnalyticsEvent('add_to_cart', {
+      currency: 'VND',
+      value: displayPrice * quantity,
+      items: [{
+        item_id: String(product.id),
+        item_name: product.name,
+        price: displayPrice,
+        quantity,
+      }],
+    })
+    if (product.is_customizable) {
+      trackAnalyticsEvent('click_custom_order', {
+        item_id: String(product.id),
+        item_name: product.name,
+        has_custom_note: Boolean(customNote.trim()),
+      })
+    }
   }
 
   const handleAddToCart = () => {

@@ -3,8 +3,9 @@ import { Shield, Database, Lock, RefreshCcw, UserCheck, AlertTriangle } from 'lu
 import PolicyLayout from '@/components/layout/PolicyLayout';
 
 export const metadata = {
-  title: 'Chính sách bảo mật | Mushroomie',
+  title: 'Chính sách bảo mật',
   description: 'Chính sách và bảo mật thông tin khách hàng tại Mushroomie',
+  alternates: { canonical: 'https://mushroomie.io.vn/chinh-sach-bao-mat' },
 };
 
 export default function PrivacyPolicyPage() {

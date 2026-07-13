@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useCartStore } from '@/store/cart'
 import { useSession } from 'next-auth/react'
 import { formatPrice, getPublicImageUrl } from '@/lib/utils'
@@ -11,6 +11,7 @@ import { Landmark, PackageCheck, ShieldCheck } from 'lucide-react'
 import FormInput from '@/components/ui/FormInput'
 import Textarea from '@/components/ui/Textarea'
 import CheckoutStepper from '@/components/checkout/CheckoutStepper'
+import { trackAnalyticsEvent } from '@/lib/analytics'
 
 interface CheckoutUser {
   name?: string | null
@@ -52,6 +53,7 @@ export default function CheckoutPage() {
   const [manualCode, setManualCode] = useState('')
   const [manualLoading, setManualLoading] = useState(false)
   const [manualMessage, setManualMessage] = useState({ text: '', type: '' })
+  const beginCheckoutTracked = useRef(false)
 
   const user = session?.user as CheckoutUser | undefined
   const [form, setForm] = useState({
@@ -83,6 +85,21 @@ export default function CheckoutPage() {
     : 0
   const itemDiscount = selectedVoucher?.discountType === 'FREE_SHIPPING' ? 0 : voucherDiscount
   const total = Math.max(0, subtotal - itemDiscount) + Math.max(0, shippingFee - shippingDiscount)
+
+  useEffect(() => {
+    if (beginCheckoutTracked.current || items.length === 0 || subtotal <= 0) return
+    beginCheckoutTracked.current = true
+    trackAnalyticsEvent('begin_checkout', {
+      currency: 'VND',
+      value: subtotal,
+      items: items.map((item) => ({
+        item_id: String(item.productId),
+        item_name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+    })
+  }, [items, subtotal])
 
   useEffect(() => {
     setVoucherDismissed(window.sessionStorage.getItem('mushroomie_checkout_voucher_dismissed') === '1')

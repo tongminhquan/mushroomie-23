@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next'
 import { prisma } from '@/lib/prisma'
 import { LOCAL_SEO_LAST_MODIFIED, PUBLISHED_LOCAL_PAGES } from '@/lib/local-seo'
+import { isCatalogCategory } from '@/lib/catalog-seo'
 
 // Regenerate the sitemap at most once an hour (ISR) so newly published posts /
 // products and slug fixes appear without needing a full redeploy. The query is
@@ -19,14 +20,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://mushroomie.io.vn'
 
   const staticPages: MetadataRoute.Sitemap = [
-    { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
-    { url: `${baseUrl}/san-pham`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/tin-tuc`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: baseUrl, changeFrequency: 'daily', priority: 1 },
+    { url: `${baseUrl}/san-pham`, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/tin-tuc`, changeFrequency: 'weekly', priority: 0.8 },
     // /cau-chuyen 307-redirects to /gioi-thieu, so the canonical /gioi-thieu (below)
     // is the sitemap entry — listing the alias would put a redirect URL in the sitemap.
-    { url: `${baseUrl}/gioi-thieu`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${baseUrl}/mini-game`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
-    { url: `${baseUrl}/lien-he`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${baseUrl}/gioi-thieu`, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${baseUrl}/lien-he`, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${baseUrl}/chinh-sach-giao-hang`, changeFrequency: 'yearly', priority: 0.4 },
+    { url: `${baseUrl}/chinh-sach-doi-tra`, changeFrequency: 'yearly', priority: 0.4 },
+    { url: `${baseUrl}/chinh-sach-bao-mat`, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${baseUrl}/chinh-sach-quy-dinh`, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${baseUrl}/chinh-sach-tra-gop`, changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${baseUrl}/dieu-khoan-dich-vu`, changeFrequency: 'yearly', priority: 0.3 },
   ]
 
   // Landing pages Local SEO (Đồng Nai / Biên Hòa / TP.HCM)
@@ -45,7 +51,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const [productList, postList, categoryList] = await Promise.all([
       prisma.product.findMany({ where: { status: 'active' }, select: { slug: true, updated_at: true } }),
       prisma.post.findMany({ where: { status: 'published' }, select: { slug: true, updated_at: true } }),
-      prisma.category.findMany({ where: { type: 'product' }, select: { slug: true } }),
+      prisma.category.findMany({
+        where: { type: 'product' },
+        select: { slug: true, updated_at: true },
+      }),
     ])
 
     products = productList.filter((p) => isValidSlug(p.slug)).map((p) => ({
@@ -62,9 +71,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }))
 
-    categories = categoryList.filter((c) => isValidSlug(c.slug)).map((c) => ({
+    categories = categoryList.filter((c) => isValidSlug(c.slug) && isCatalogCategory(c.slug)).map((c) => ({
       url: `${baseUrl}/san-pham?category=${encodeURIComponent(c.slug)}`,
-      lastModified: new Date(),
+      lastModified: c.updated_at,
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     }))

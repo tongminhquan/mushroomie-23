@@ -6,8 +6,9 @@ import { localBusinessSchema, websiteSchema } from '@/lib/local-seo'
 import HomeLocalAreas from '@/components/home/landing/HomeLocalAreas'
 
 export const metadata: Metadata = {
-  title: 'Mushroomie - Phụ kiện handmade cá nhân hóa',
+  title: { absolute: 'Mushroomie - Phụ kiện handmade cá nhân hóa' },
   description: 'Mushroomie mang đến vòng tay, charm, móc khóa và phụ kiện handmade cá nhân hóa. Làm bằng tay, trao bằng tim.',
+  alternates: { canonical: 'https://mushroomie.io.vn' },
 }
 
 export const revalidate = 3600

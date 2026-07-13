@@ -14,9 +14,9 @@ export default function GoogleAnalyticsInit() {
       loaded = true
 
       window.dataLayer = window.dataLayer || []
-      const gtag = (...args: unknown[]) => window.dataLayer?.push(args)
-      gtag('js', new Date())
-      gtag('config', GA_ID)
+      window.gtag = (...args: unknown[]) => window.dataLayer?.push(args)
+      window.gtag('js', new Date())
+      window.gtag('config', GA_ID)
 
       const script = document.createElement('script')
       script.async = true
@@ -34,5 +34,6 @@ export default function GoogleAnalyticsInit() {
 declare global {
   interface Window {
     dataLayer?: unknown[]
+    gtag?: (...args: unknown[]) => void
   }
 }

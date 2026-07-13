@@ -3,8 +3,9 @@ import { ScrollText, FileCheck, AlertCircle, Scale, ShieldAlert } from 'lucide-r
 import PolicyLayout from '@/components/layout/PolicyLayout';
 
 export const metadata = {
-  title: 'Điều khoản dịch vụ | Mushroomie',
+  title: 'Điều khoản dịch vụ',
   description: 'Điều khoản và điều kiện sử dụng dịch vụ tại Mushroomie',
+  alternates: { canonical: 'https://mushroomie.io.vn/dieu-khoan-dich-vu' },
 };
 
 export default function TermsOfServicePage() {

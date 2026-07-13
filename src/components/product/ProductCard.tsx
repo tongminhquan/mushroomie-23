@@ -10,6 +10,7 @@ import { useCartStore } from '@/store/cart'
 import { useVoucherStore } from '@/store/voucher'
 import { useSession } from 'next-auth/react'
 import { formatPrice, getPublicImageUrl } from '@/lib/utils'
+import { trackAnalyticsEvent } from '@/lib/analytics'
 
 interface ProductCardProps {
   product: {
@@ -93,6 +94,17 @@ export default function ProductCard({ product }: ProductCardProps) {
       image: imageUrl,
       quantity: 1,
     })
+    trackAnalyticsEvent('add_to_cart', {
+      currency: 'VND',
+      value: displayPrice,
+      items: [{
+        item_id: String(product.id),
+        item_name: product.name,
+        item_category: product.category?.name,
+        price: displayPrice,
+        quantity: 1,
+      }],
+    })
 
     setAdded(true)
     window.setTimeout(() => {
@@ -101,9 +113,21 @@ export default function ProductCard({ product }: ProductCardProps) {
     }, 600)
   }
 
+  const handleSelectItem = () => {
+    trackAnalyticsEvent('select_item', {
+      item_list_name: product.category?.name || 'Tất cả sản phẩm',
+      items: [{
+        item_id: String(product.id),
+        item_name: product.name,
+        item_category: product.category?.name,
+        price: displayPrice,
+      }],
+    })
+  }
+
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-[24px] border-[1.5px] border-warm-border bg-white transition duration-200 hover:-translate-y-1.5 hover:border-pink hover:shadow-hover">
-      <Link href={`/san-pham/${product.slug}`} className="relative block aspect-[3/4] w-full shrink-0 overflow-hidden bg-secondary">
+      <Link href={`/san-pham/${product.slug}`} onClick={handleSelectItem} className="relative block aspect-[3/4] w-full shrink-0 overflow-hidden bg-secondary">
         <SafeImage
           src={imageUrl}
           alt={product.name}
@@ -126,7 +150,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.category.name}
           </p>
         )}
-        <Link href={`/san-pham/${product.slug}`} className="mb-3 block flex-1">
+        <Link href={`/san-pham/${product.slug}`} onClick={handleSelectItem} className="mb-3 block flex-1">
           <h3 className="line-clamp-2 text-sm font-extrabold leading-snug text-text transition-colors group-hover:text-primary sm:text-[15px]">
             {product.name}
           </h3>

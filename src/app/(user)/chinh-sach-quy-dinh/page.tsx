@@ -2,7 +2,9 @@ import React from 'react';
 import PolicyLayout from '@/components/layout/PolicyLayout';
 
 export const metadata = {
-  title: 'Chính sách & Quy định chung | Mushroomie',
+  title: 'Chính sách và quy định chung',
+  description: 'Các quy định chung khi truy cập, đặt hàng và sử dụng dịch vụ của Mushroomie.',
+  alternates: { canonical: 'https://mushroomie.io.vn/chinh-sach-quy-dinh' },
 };
 
 export default function GeneralPolicyPage() {

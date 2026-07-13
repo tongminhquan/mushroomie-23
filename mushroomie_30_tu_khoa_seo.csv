@@ -1,0 +1,31 @@
+STT,Tu_khoa_chinh,Cum_tu_khoa,Y_dinh_tim_kiem,Muc_do_uu_tien,Trang_dich_de_xuat,Slug_de_xuat,Ghi_chu_trien_khai
+1,vòng tay handmade,Vòng tay handmade,Thương mại,Rất cao,Trang danh mục trụ cột,vong-tay-handmade,Từ khóa trọng tâm của toàn bộ cụm vòng tay
+2,vòng tay,Vòng tay handmade,Thương mại,Rất cao,Trang danh mục vòng tay,vong-tay,"Từ khóa rộng, cần kết hợp nội dung và sản phẩm thực tế"
+3,vòng tay nữ,Vòng tay handmade,Thương mại,Rất cao,Trang danh mục vòng tay nữ,vong-tay-nu,Ưu tiên mẫu dễ phối đồ và quà tặng
+4,vòng tay handmade nữ,Vòng tay handmade,Thương mại,Cao,Trang danh mục vòng tay nữ,vong-tay-handmade-nu,Biến thể sát sản phẩm Mushroomie
+5,vòng tay custom,Vòng tay cá nhân hóa,Thương mại,Rất cao,Trang dịch vụ custom,vong-tay-custom,"Nhấn mạnh chọn màu, charm và kiểu dáng"
+6,vòng tay theo yêu cầu,Vòng tay cá nhân hóa,Thương mại,Cao,Trang dịch vụ custom,vong-tay-theo-yeu-cau,Từ khóa có ý định đặt hàng cao
+7,vòng tay hạt cườm,Vòng tay theo chất liệu,Thương mại,Cao,Trang danh mục hạt cườm,vong-tay-hat-cuom,Phù hợp danh mục sản phẩm chủ lực
+8,vòng tay charm,Vòng tay theo thiết kế,Thương mại,Cao,Trang danh mục charm,vong-tay-charm,Liên kết chéo với trang charm handmade
+9,vòng tay đôi,Vòng tay theo đối tượng,Thương mại,Cao,Landing page vòng tay đôi,vong-tay-doi,Phù hợp quà tặng người yêu và bạn thân
+10,vòng tay tình bạn,Vòng tay theo đối tượng,Thương mại,Cao,Landing page vòng tay tình bạn,vong-tay-tinh-ban,Tập trung giá trị cảm xúc và kỷ niệm
+11,vòng tay bạn thân,Vòng tay theo đối tượng,Thương mại,Cao,Landing page vòng tay bạn thân,vong-tay-ban-than,Có thể gom cùng cụm vòng tay tình bạn
+12,vòng tay handmade cute,Vòng tay theo phong cách,Thương mại,Khá cao,Trang danh mục phong cách cute,vong-tay-handmade-cute,"Dùng tự nhiên, tránh lạm dụng từ cute"
+13,vòng tay handmade giá rẻ,Vòng tay theo giá,Thương mại,Khá cao,Trang danh mục theo khoảng giá,vong-tay-handmade-gia-re,Không tạo cam kết giá nếu dữ liệu sản phẩm không phù hợp
+14,vòng tay handmade theo tên,Vòng tay cá nhân hóa,Thương mại,Cao,Trang custom theo tên,vong-tay-handmade-theo-ten,"Nhấn mạnh chữ cái, tên và thông điệp riêng"
+15,vòng tay handmade làm quà,Vòng tay quà tặng,Thương mại,Cao,Landing page quà tặng,vong-tay-handmade-lam-qua,Liên kết với hộp quà và đóng gói
+16,phụ kiện handmade,Phụ kiện handmade,Thương mại,Rất cao,Trang danh mục tổng,phu-kien-handmade,Từ khóa trụ cột toàn website
+17,shop phụ kiện handmade,Phụ kiện handmade,Điều hướng/Thương mại,Cao,Trang chủ hoặc giới thiệu,shop-phu-kien-handmade,Tối ưu thương hiệu và độ tin cậy
+18,trang sức handmade,Phụ kiện handmade,Thương mại,Cao,Trang danh mục trang sức,trang-suc-handmade,"Gom vòng tay, vòng cổ và dây chuyền"
+19,phụ kiện nữ,Phụ kiện thời trang,Thương mại,Rất cao,Trang danh mục phụ kiện nữ,phu-kien-nu,"Từ khóa rộng, cần nội dung danh mục chất lượng"
+20,phụ kiện thời trang,Phụ kiện thời trang,Thương mại,Rất cao,Trang danh mục tổng,phu-kien-thoi-trang,Không làm lệch định vị handmade
+21,móc khóa handmade,Móc khóa handmade,Thương mại,Cao,Trang danh mục móc khóa,moc-khoa-handmade,Danh mục sản phẩm có nhu cầu rõ
+22,móc khóa điện thoại,Móc khóa handmade,Thương mại,Cao,Trang danh mục dây đeo điện thoại,moc-khoa-dien-thoai,Kết hợp sản phẩm dây đeo và charm
+23,móc khóa cute,Móc khóa handmade,Thương mại,Cao,Trang danh mục móc khóa,moc-khoa-cute,Sử dụng ảnh thật và mô tả đúng sản phẩm
+24,charm handmade,Charm handmade,Thương mại/Thông tin,Cao,Trang danh mục charm,charm-handmade,Có thể kết hợp bài hướng dẫn chọn charm
+25,charm vòng tay,Charm handmade,Thương mại,Cao,Trang danh mục charm vòng tay,charm-vong-tay,Liên kết tới vòng tay charm và custom
+26,vòng cổ handmade,Trang sức handmade,Thương mại,Cao,Trang danh mục vòng cổ,vong-co-handmade,Ưu tiên ảnh phối đồ và thông tin chất liệu
+27,dây chuyền handmade,Trang sức handmade,Thương mại,Cao,Trang danh mục dây chuyền,day-chuyen-handmade,"Tách trang khi có đủ sản phẩm, tránh nội dung mỏng"
+28,quà tặng handmade,Quà tặng handmade,Thương mại,Rất cao,Landing page quà tặng,qua-tang-handmade,Từ khóa trụ cột cho cụm quà tặng
+29,quà sinh nhật cho bạn thân,Quà tặng theo đối tượng,Thương mại/Thông tin,Cao,Bài tư vấn hoặc landing page,qua-sinh-nhat-cho-ban-than,"Đề xuất vòng tay, móc khóa và hộp quà"
+30,quà handmade cho người yêu,Quà tặng theo đối tượng,Thương mại/Thông tin,Cao,Bài tư vấn hoặc landing page,qua-handmade-cho-nguoi-yeu,Nhấn mạnh cá nhân hóa và cảm xúc

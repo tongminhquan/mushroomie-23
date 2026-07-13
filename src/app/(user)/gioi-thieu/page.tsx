@@ -7,8 +7,9 @@ import { prisma } from '@/lib/prisma'
 import { Category } from '@prisma/client'
 
 export const metadata: Metadata = {
-  title: 'Câu chuyện Mushroomie | Phụ kiện handmade',
+  title: 'Câu chuyện thương hiệu phụ kiện handmade',
   description: 'Làm bằng tay, Trao bằng tim. Khám phá hành trình và giá trị cốt lõi của Mushroomie - thương hiệu phụ kiện handmade cá nhân hóa.',
+  alternates: { canonical: 'https://mushroomie.io.vn/gioi-thieu' },
 }
 
 const LINE = '#f0e0d6'

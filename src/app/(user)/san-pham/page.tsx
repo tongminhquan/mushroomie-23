@@ -4,15 +4,19 @@ import type { Prisma } from '@prisma/client'
 import { SlidersHorizontal, X } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import ProductCard from '@/components/product/ProductCard'
+import CatalogSeoContent from '@/components/product/CatalogSeoContent'
 import EmptyState from '@/components/ui/EmptyState'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import BrandContainer from '@/components/ui/BrandContainer'
-
-export const metadata: Metadata = {
-  title: 'Sản phẩm handmade cá nhân hóa | Mushroomie',
-  description:
-    'Khám phá bộ sưu tập vòng tay, móc khóa, charm và phụ kiện handmade cá nhân hóa của Mushroomie.',
-}
+import {
+  getCatalogCanonicalPath,
+  getCatalogSeo,
+  shouldIndexCatalog,
+  SITE_URL,
+} from '@/lib/catalog-seo'
+import { safeJsonLd } from '@/lib/security'
+import { getPublicImageUrl } from '@/lib/utils'
+import { toAbsoluteUrl } from '@/lib/url'
 
 type ParamValue = string | string[] | undefined
 
@@ -40,6 +44,48 @@ type ProductListItem = Omit<ProductListRecord, 'price' | 'sale_price'> & {
 
 function readParam(value: ParamValue) {
   return Array.isArray(value) ? value[0] : value
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>
+}): Promise<Metadata> {
+  const sp = await searchParams
+  const categorySlug = readParam(sp.category)
+  const searchKeyword = readParam(sp.search)?.trim()
+  const sortValue = readParam(sp.sort)
+  const page = Math.max(1, parseInt(readParam(sp.page) || '1', 10) || 1)
+  const catalogSeo = getCatalogSeo(categorySlug)
+  const canonicalPath = getCatalogCanonicalPath(categorySlug)
+  const shouldIndex = shouldIndexCatalog({ categorySlug, searchKeyword, sortValue, page })
+  const canonicalUrl = `${SITE_URL}${canonicalPath}`
+
+  return {
+    title: searchKeyword ? `Tìm kiếm sản phẩm “${searchKeyword}”` : catalogSeo.title,
+    description: catalogSeo.description,
+    alternates: { canonical: canonicalUrl },
+    robots: {
+      index: shouldIndex,
+      follow: true,
+      googleBot: { index: shouldIndex, follow: true },
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'vi_VN',
+      url: canonicalUrl,
+      siteName: 'Mushroomie',
+      title: `${catalogSeo.title} | Mushroomie`,
+      description: catalogSeo.description,
+      images: [{ url: `${SITE_URL}/logo.webp`, width: 500, height: 500, alt: 'Phụ kiện handmade Mushroomie' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${catalogSeo.title} | Mushroomie`,
+      description: catalogSeo.description,
+      images: [`${SITE_URL}/logo.webp`],
+    },
+  }
 }
 
 export default async function ProductsPage({
@@ -91,14 +137,31 @@ export default async function ProductsPage({
 
   const totalPages = Math.ceil(total / limit)
   const activeCategory = categories.find((category) => category.slug === categorySlug)
+  const catalogSeo = getCatalogSeo(activeCategory?.slug)
   const title = searchKeyword
     ? `Kết quả cho “${searchKeyword}”`
-    : activeCategory?.name || 'Tất cả sản phẩm'
+    : catalogSeo.h1
   const description = searchKeyword
     ? 'Chọn mẫu phù hợp rồi cá nhân hóa màu sắc, charm và lời nhắn theo ý bạn.'
-    : activeCategory
-      ? `Khám phá các thiết kế ${activeCategory.name.toLowerCase()} được Mushroomie làm thủ công cho quà tặng và phong cách hằng ngày.`
-      : 'Khám phá bộ sưu tập vòng tay, charm, móc khóa và quà tặng handmade cá nhân hóa từ Mushroomie.'
+    : catalogSeo.description
+
+  const canonicalPath = getCatalogCanonicalPath(activeCategory?.slug)
+  const itemListSchema = products.length > 0 && !searchKeyword
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: catalogSeo.h1,
+        url: `${SITE_URL}${canonicalPath}`,
+        numberOfItems: total,
+        itemListElement: products.map((product, index) => ({
+          '@type': 'ListItem',
+          position: (page - 1) * limit + index + 1,
+          url: `${SITE_URL}/san-pham/${encodeURIComponent(product.slug)}`,
+          name: product.name,
+          image: toAbsoluteUrl(getPublicImageUrl(product.featured_image || product.images[0]?.image_url, 'product')),
+        })),
+      }
+    : null
 
   const buildUrl = (
     params: Partial<Record<'category' | 'search' | 'sort' | 'page', string | undefined>>,
@@ -122,6 +185,9 @@ export default async function ProductsPage({
 
   return (
     <div className="min-h-screen bg-secondary pb-16">
+      {itemListSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(itemListSchema) }} />
+      )}
       <section
         className="relative overflow-hidden border-b border-warm-border"
         style={{
@@ -130,12 +196,17 @@ export default async function ProductsPage({
         }}
       >
         <BrandContainer className="py-5 md:py-7">
-          <Breadcrumb items={[{ label: 'Sản phẩm' }]} />
+          <Breadcrumb
+            items={[
+              { label: 'Sản phẩm', ...(activeCategory ? { href: '/san-pham' } : {}) },
+              ...(activeCategory ? [{ label: activeCategory.name }] : []),
+            ]}
+          />
 
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
             <div>
               <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.14em] text-primary">
-                Bộ sưu tập Mushroomie
+                {catalogSeo.eyebrow}
               </p>
               <h1 className="text-balance font-heading text-3xl leading-tight text-neutral-900 md:text-5xl">
                 {title}
@@ -299,6 +370,7 @@ export default async function ProductsPage({
           </main>
         </div>
       </BrandContainer>
+      {!searchKeyword && page === 1 && <CatalogSeoContent content={catalogSeo} />}
     </div>
   )
 }

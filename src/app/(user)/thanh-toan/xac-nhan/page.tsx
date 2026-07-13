@@ -6,6 +6,7 @@ import { AlertTriangle, CheckCircle, Clock, Landmark, RefreshCw, XCircle } from 
 import Button from '@/components/ui/Button'
 import Link from 'next/link'
 import CheckoutStepper from '@/components/checkout/CheckoutStepper'
+import { trackAnalyticsEventOnce } from '@/lib/analytics'
 
 interface Payment {
   status: string
@@ -29,6 +30,13 @@ interface PaymentStatusData {
 interface OrderInfo {
   payment_method?: 'bank_transfer' | 'cod'
   payment?: Payment | null
+  total?: number | string
+  items?: Array<{
+    product_id?: number | null
+    product_name?: string
+    quantity?: number
+    price_snapshot?: number | string
+  }>
 }
 
 type QrStatus = 'loading' | 'loaded' | 'error'
@@ -162,6 +170,24 @@ function ConfirmPageContent() {
     const timer = setInterval(() => setTimeLeft((t) => (t !== null ? Math.max(0, t - 1) : null)), 1000)
     return () => clearInterval(timer)
   }, [timeLeft])
+
+  useEffect(() => {
+    const isCompleted = paymentStatus?.status === 'PAID' || orderInfo?.payment_method === 'cod'
+    if (!isCompleted || !orderCode) return
+
+    const value = Number(payment?.amount || orderInfo?.total || 0)
+    trackAnalyticsEventOnce(`purchase_${orderCode}`, 'purchase', {
+      transaction_id: orderCode,
+      currency: 'VND',
+      value,
+      items: orderInfo?.items?.map((item) => ({
+        item_id: item.product_id ? String(item.product_id) : item.product_name || 'unknown',
+        item_name: item.product_name || 'Sản phẩm Mushroomie',
+        price: Number(item.price_snapshot || 0),
+        quantity: Number(item.quantity || 1),
+      })) || [],
+    })
+  }, [orderCode, orderInfo, payment?.amount, paymentStatus?.status])
 
   // Compute QR image candidates. Direct VietQR is fastest; /api/qr is kept as fallback.
   const qrImageUrls = useMemo(() => {

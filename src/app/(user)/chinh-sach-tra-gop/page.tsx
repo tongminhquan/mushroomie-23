@@ -2,8 +2,9 @@ import React from 'react';
 import PolicyLayout from '@/components/layout/PolicyLayout';
 
 export const metadata = {
-  title: 'Chính sách trả góp | Mushroomie',
+  title: 'Chính sách trả góp',
   description: 'Hướng dẫn và chính sách trả góp khi mua sắm tại Mushroomie',
+  alternates: { canonical: 'https://mushroomie.io.vn/chinh-sach-tra-gop' },
 };
 
 export default function InstallmentPolicyPage() {

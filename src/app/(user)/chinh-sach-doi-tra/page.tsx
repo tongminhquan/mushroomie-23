@@ -2,7 +2,9 @@ import React from 'react';
 import PolicyLayout from '@/components/layout/PolicyLayout';
 
 export const metadata = {
-  title: 'Chính sách đổi trả | Mushroomie',
+  title: 'Chính sách đổi trả',
+  description: 'Điều kiện, thời hạn và quy trình đổi trả sản phẩm handmade tại Mushroomie.',
+  alternates: { canonical: 'https://mushroomie.io.vn/chinh-sach-doi-tra' },
 };
 
 export default function ReturnPolicyPage() {

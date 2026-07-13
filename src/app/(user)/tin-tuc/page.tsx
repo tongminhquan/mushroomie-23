@@ -8,11 +8,6 @@ import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 import BrandContainer from '@/components/ui/BrandContainer'
 import EmptyState from '@/components/ui/EmptyState'
 
-export const metadata: Metadata = {
-  title: 'Tin tức handmade | Mushroomie',
-  description: 'Chia sẻ tips, hướng dẫn và câu chuyện handmade từ Mushroomie.',
-}
-
 type ParamValue = string | string[] | undefined
 
 interface SearchParams {
@@ -22,6 +17,44 @@ interface SearchParams {
 
 function readParam(value: ParamValue) {
   return Array.isArray(value) ? value[0] : value
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>
+}): Promise<Metadata> {
+  const sp = await searchParams
+  const categorySlug = readParam(sp.category)
+  const page = Math.max(1, parseInt(readParam(sp.page) || '1', 10) || 1)
+  const category = categorySlug
+    ? await prisma.category.findFirst({
+        where: { slug: categorySlug, type: 'post' },
+        select: { name: true, slug: true },
+      }).catch(() => null)
+    : null
+  const canonicalPath = category ? `/tin-tuc?category=${encodeURIComponent(category.slug)}` : '/tin-tuc'
+  const title = category ? `${category.name} - Cảm hứng handmade` : 'Tin tức và cảm hứng handmade'
+  const description = category
+    ? `Bài viết về ${category.name.toLowerCase()}, cách chọn phụ kiện và quà tặng handmade từ Mushroomie.`
+    : 'Chia sẻ cách chọn, phối và bảo quản vòng tay, charm, móc khóa cùng những câu chuyện quà tặng handmade từ Mushroomie.'
+  const shouldIndex = (!categorySlug || Boolean(category)) && page === 1
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `https://mushroomie.io.vn${canonicalPath}` },
+    robots: { index: shouldIndex, follow: true },
+    openGraph: {
+      type: 'website',
+      locale: 'vi_VN',
+      url: `https://mushroomie.io.vn${canonicalPath}`,
+      siteName: 'Mushroomie',
+      title: `${title} | Mushroomie`,
+      description,
+      images: [{ url: 'https://mushroomie.io.vn/logo.webp', width: 500, height: 500, alt: 'Mushroomie handmade' }],
+    },
+  }
 }
 
 export default async function BlogPage({

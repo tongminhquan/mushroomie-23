@@ -10,6 +10,7 @@ import BrandContainer from '@/components/ui/BrandContainer'
 import PriceText from '@/components/ui/PriceText'
 import ProductCard from '@/components/product/ProductCard'
 import ProductGallery from '@/components/product/ProductGallery'
+import ProductViewTracker from '@/components/product/ProductViewTracker'
 import ReviewForm from '@/components/product/ReviewForm'
 import SectionHeader from '@/components/ui/SectionHeader'
 import { getPublicImageUrl } from '@/lib/utils'
@@ -18,7 +19,7 @@ import { safeJsonLd } from '@/lib/security'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { toAbsoluteUrl } from '@/lib/url'
 
-const SITE_NAME = 'Mushroomie Handmade'
+const SITE_NAME = 'Mushroomie'
 
 type RelatedProductRecord = Prisma.ProductGetPayload<{
   include: { category: true; images: true }
@@ -68,7 +69,7 @@ export async function generateMetadata({
   const product = await getProductBySlug(slug)
 
   if (!product) {
-    return { title: 'Sản phẩm không tồn tại | Mushroomie' }
+    return { title: 'Sản phẩm không tồn tại', robots: { index: false, follow: true } }
   }
 
   const description =
@@ -77,8 +78,9 @@ export async function generateMetadata({
   const absoluteImageUrl = toAbsoluteUrl(imageUrl || getPublicImageUrl(null, 'product'))
 
   return {
-    title: `${product.name} | ${SITE_NAME}`,
+    title: product.name,
     description,
+    alternates: { canonical: toAbsoluteUrl(`/san-pham/${product.slug}`) },
     openGraph: {
       title: `${product.name} | ${SITE_NAME}`,
       description,
@@ -164,6 +166,7 @@ export default async function ProductDetailPage({
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
+    brand: { '@type': 'Brand', name: 'Mushroomie' },
     image: galleryImages.map((image) => toAbsoluteUrl(image)),
     description: product.short_description || product.name,
     sku: product.slug,
@@ -177,6 +180,7 @@ export default async function ProductDetailPage({
           ? 'https://schema.org/InStock'
           : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
+      seller: { '@type': 'Organization', name: 'Mushroomie' },
     },
     ...(reviewAverage
       ? {
@@ -191,6 +195,14 @@ export default async function ProductDetailPage({
 
   return (
     <div className="min-h-screen bg-secondary py-5 md:py-8">
+      <ProductViewTracker
+        product={{
+          id: product.id,
+          name: product.name,
+          category: product.category?.name,
+          price: displayPrice,
+        }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(productSchema) }}
