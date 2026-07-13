@@ -1,13 +1,12 @@
 import Link from 'next/link'
 import {
-  ChevronLeft,
-  ChevronRight,
   Gift,
   HeartHandshake,
   Palette,
   Sparkles,
 } from 'lucide-react'
 import HomeBannerImage from './HomeBannerImage'
+import HomeHeroControls from './HomeHeroControls'
 import type { HomeBanner } from './types'
 
 const fallbackSlide: HomeBanner = {
@@ -35,16 +34,14 @@ const proofItems = [
   { icon: Sparkles, label: 'Mỗi món một câu chuyện' },
 ]
 
-function getSlideId(banner: HomeBanner, index: number) {
-  return `home-banner-${banner.id}-${index}`
-}
-
 export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) {
   const activeBanners = banners
     .filter((banner) => banner.status === 'active')
     .slice()
     .sort((a, b) => a.sort_order - b.sort_order)
   const slides = activeBanners.length > 0 ? activeBanners : [fallbackSlide]
+  const firstBanner = slides[0]
+  const firstHref = firstBanner.link || firstBanner.button_link
 
   return (
     <section
@@ -70,73 +67,18 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
             }}
           />
 
-          <div className="no-scrollbar relative z-10 flex h-full snap-x snap-mandatory overflow-x-auto scroll-smooth motion-reduce:scroll-auto">
-            {slides.map((banner, index) => {
-              const activeHref = banner.link || banner.button_link
-              const previousIndex = (index - 1 + slides.length) % slides.length
-              const nextIndex = (index + 1) % slides.length
-
-              return (
-                <article
-                  id={getSlideId(banner, index)}
-                  key={`${banner.id}-${index}`}
-                  className="relative h-full w-full shrink-0 snap-start"
-                  aria-label={`${banner.title || 'Banner Mushroomie'} (${index + 1}/${slides.length})`}
-                >
-                  <HomeBannerImage
-                    src={banner.image_url}
-                    alt={banner.title || 'Phụ kiện handmade Mushroomie'}
-                    priority={index === 0}
-                    className={banner.id === 0 ? 'object-contain p-12 md:p-24' : 'object-contain'}
-                  />
-
-                  {activeHref && (
-                    <Link
-                      href={activeHref}
-                      className="absolute inset-0 z-10"
-                      aria-label={banner.title || 'Mở bộ sưu tập'}
-                    />
-                  )}
-
-                  {slides.length > 1 && (
-                    <>
-                      <a
-                        href={`#${getSlideId(slides[previousIndex], previousIndex)}`}
-                        aria-label="Banner trước"
-                        className="absolute left-3 top-1/2 z-20 grid h-11 w-11 min-h-[44px] min-w-[44px] -translate-y-1/2 place-items-center rounded-full border-[1.5px] border-warm-border bg-white/95 text-text shadow-card transition-transform hover:scale-105 hover:bg-pink"
-                      >
-                        <ChevronLeft size={20} />
-                      </a>
-                      <a
-                        href={`#${getSlideId(slides[nextIndex], nextIndex)}`}
-                        aria-label="Banner tiếp theo"
-                        className="absolute right-3 top-1/2 z-20 grid h-11 w-11 min-h-[44px] min-w-[44px] -translate-y-1/2 place-items-center rounded-full border-[1.5px] border-warm-border bg-white/95 text-text shadow-card transition-transform hover:scale-105 hover:bg-pink"
-                      >
-                        <ChevronRight size={20} />
-                      </a>
-                      <div className="absolute bottom-3 right-3 z-20 flex rounded-full border-[1.5px] border-warm-border bg-white/90 p-1 shadow-card md:bottom-[204px]">
-                        {slides.map((dotBanner, dotIndex) => (
-                          <a
-                            key={`${dotBanner.id}-${dotIndex}`}
-                            href={`#${getSlideId(dotBanner, dotIndex)}`}
-                            aria-label={`Chuyển đến banner ${dotIndex + 1}`}
-                            aria-current={dotIndex === index ? 'true' : undefined}
-                            className="grid h-10 min-w-10 place-items-center"
-                          >
-                            <span
-                              className={`h-2 w-6 origin-center rounded-full bg-primary transition-[transform,opacity] ${
-                                dotIndex === index ? 'scale-x-100 opacity-100' : 'scale-x-[0.333] opacity-35'
-                              }`}
-                            />
-                          </a>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </article>
-              )
-            })}
-          </div>
+          <article className="absolute inset-0 z-10" aria-label={`${firstBanner.title || 'Banner Mushroomie'} (1/${slides.length})`}>
+            <HomeBannerImage
+              src={firstBanner.image_url}
+              alt={firstBanner.title || 'Phụ kiện handmade Mushroomie'}
+              priority
+              className={firstBanner.id === 0 ? 'object-contain p-12 md:p-24' : 'object-contain'}
+            />
+            {firstHref && (
+              <Link href={firstHref} className="absolute inset-0 z-10" aria-label={firstBanner.title || 'Mở bộ sưu tập'} />
+            )}
+          </article>
+          <HomeHeroControls slides={slides} />
         </div>
       </div>
 

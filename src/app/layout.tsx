@@ -1,16 +1,18 @@
 import type { Metadata } from 'next'
-import { Montserrat, Paytone_One } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
 
-const montserrat = Montserrat({
-  subsets: ['latin', 'vietnamese'],
+const montserrat = localFont({
+  src: './fonts/montserrat-vietnamese.woff2',
   variable: '--font-body',
+  weight: '100 900',
   display: 'swap',
+  preload: false,
 })
 
-const paytoneOne = Paytone_One({
+const paytoneOne = localFont({
+  src: './fonts/paytone-vietnamese.woff2',
   weight: '400',
-  subsets: ['latin', 'vietnamese'],
   variable: '--font-heading',
   display: 'swap',
   preload: false,
