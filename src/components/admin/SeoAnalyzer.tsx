@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { CheckCircle2, XCircle, AlertCircle, TrendingUp, ChevronDown, ChevronUp, Monitor, Smartphone } from 'lucide-react'
+import { calculatePostSeoAnalysis } from '@/lib/post-seo-score'
 
 interface FormData {
   title: string
@@ -345,7 +346,7 @@ export default function SeoAnalyzer({ form, setForm, onScoreChange }: SeoAnalyze
       checks.push({ status: 'warning', text: 'Nên thêm ảnh đại diện (Featured Image) hoặc OG/Twitter Image để bài viết nổi bật khi chia sẻ.', group: 'additional' });
     }
 
-    const finalScore = Math.min(100, pts)
+    const finalScore = Math.min(calculatePostSeoAnalysis(form).score, Math.min(100, pts))
     setScore(finalScore)
     setResults(checks)
     onScoreChange?.(finalScore)

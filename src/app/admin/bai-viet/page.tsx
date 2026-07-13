@@ -7,6 +7,7 @@ import {
   AlertTriangle, ChevronLeft, ChevronRight, Copy, Eye, Loader2,
   Pencil, RotateCcw, Search, Trash2, X,
 } from 'lucide-react'
+import { calculatePostSeoAnalysis, getPostSeoRating, type PostSeoInput } from '@/lib/post-seo-score'
 
 /**
  * Quản lý bài viết kiểu WordPress Posts List:
@@ -15,7 +16,7 @@ import {
  * UI theo brand Mushroomie (nền kem, đỏ #e41d1d, card bo góc).
  */
 
-interface PostRow {
+interface PostRow extends PostSeoInput {
   id: number
   title: string
   slug: string
@@ -24,6 +25,7 @@ interface PostRow {
   published_at: string | null
   category: { id: number; name: string } | null
   author: { id: number; name: string } | null
+  seoScore: number
 }
 
 interface Category { id: number; name: string; slug: string }
@@ -59,6 +61,29 @@ const SORT_OPTIONS = [
 function fmtDate(iso: string | null) {
   if (!iso) return '—'
   return new Date(iso).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+const SEO_TONE_CLASSES = {
+  good: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  warning: 'border-amber-200 bg-amber-50 text-amber-700',
+  poor: 'border-red-200 bg-red-50 text-red-700',
+  empty: 'border-neutral-200 bg-neutral-50 text-neutral-500',
+}
+
+function SeoScoreBadge({ score }: { score: number }) {
+  const rating = getPostSeoRating(score)
+
+  return (
+    <div
+      className={`inline-flex min-w-[104px] items-center gap-2 rounded-md border px-2 py-1 ${SEO_TONE_CLASSES[rating.tone]}`}
+      title={`Điểm SEO: ${score}/100. ${rating.label}`}
+      aria-label={`Điểm SEO ${score} trên 100, ${rating.label}`}
+    >
+      <span className="font-bold tabular-nums leading-none">{score}</span>
+      <span className="h-4 w-px bg-current opacity-20" aria-hidden="true" />
+      <span className="text-[11px] font-semibold leading-none">{rating.label}</span>
+    </div>
+  )
 }
 
 export default function AdminPostsPage() {
@@ -112,7 +137,10 @@ export default function AdminPostsPage() {
       const res = await fetch(`/api/posts?${params}`)
       if (!res.ok) throw new Error('Không tải được danh sách bài viết')
       const data = await res.json()
-      setPosts(data.posts || [])
+      setPosts((data.posts || []).map((post: PostSeoInput & Omit<PostRow, 'seoScore'>) => ({
+        ...post,
+        seoScore: calculatePostSeoAnalysis(post).score,
+      })))
       setTotalPages(data.pagination?.totalPages || 1)
       setTotal(data.pagination?.total || 0)
       if (data.counts) setCounts(data.counts)
@@ -312,14 +340,14 @@ export default function AdminPostsPage() {
                     checked={posts.length > 0 && selected.size === posts.length}
                     onChange={(e) => toggleAll(e.target.checked)} />
                 </th>
-                {['Tiêu đề', 'Danh mục', 'Tác giả', 'Trạng thái', 'Ngày', 'Hành động'].map((h, i) => (
-                  <th key={h} className={`py-3 px-4 text-[11px] font-bold uppercase tracking-[0.06em] text-neutral-400 ${i === 5 ? 'text-right' : 'text-left'}`}>{h}</th>
+                {['Tiêu đề', 'Danh mục', 'Tác giả', 'Trạng thái', 'SEO', 'Ngày', 'Hành động'].map((h, i) => (
+                  <th key={h} className={`py-3 px-4 text-[11px] font-bold uppercase tracking-[0.06em] text-neutral-400 ${i === 6 ? 'text-right' : 'text-left'}`}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f6ece5]">
               {loading ? (
-                <tr><td colSpan={7} className="py-12 text-center text-neutral-400">
+                <tr><td colSpan={8} className="py-12 text-center text-neutral-400">
                   <Loader2 size={20} className="animate-spin mx-auto mb-2" />Đang tải bài viết…
                 </td></tr>
               ) : posts.map((post) => {
@@ -345,6 +373,7 @@ export default function AdminPostsPage() {
                         <div className="text-[11px] text-blue-600 mt-1">⏰ {fmtDate(post.published_at)}</div>
                       )}
                     </td>
+                    <td className="py-3 px-4"><SeoScoreBadge score={post.seoScore} /></td>
                     <td className="py-3 px-4 text-neutral-500 text-xs">{fmtDate(post.created_at)}</td>
                     <td className="py-3 px-4">
                       <div className="flex justify-end items-center gap-2.5 text-neutral-400">
