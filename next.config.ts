@@ -36,6 +36,22 @@ const nextConfig: NextConfig = {
     inlineCss: true,
     serverActions: { allowedOrigins: ['localhost:3000', 'mushroomie.io.vn', '*.mushroomie.io.vn'] },
   },
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.mushroomie.io.vn' }],
+        destination: 'https://mushroomie.io.vn/:path*',
+        permanent: true,
+      },
+      {
+        source: '/:path*',
+        has: [{ type: 'header', key: 'x-forwarded-proto', value: 'http' }],
+        destination: 'https://mushroomie.io.vn/:path*',
+        permanent: true,
+      },
+    ]
+  },
   async headers() {
     return [
       ...['/admin/:path*', '/api/:path*', '/tai-khoan/:path*', '/gio-hang', '/thanh-toan/:path*'].map((source) => ({

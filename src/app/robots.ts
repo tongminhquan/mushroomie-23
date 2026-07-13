@@ -8,7 +8,8 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin', '/api', '/tai-khoan', '/gio-hang', '/thanh-toan'],
+        // Utility pages stay crawlable so search engines can read their noindex metadata.
+        disallow: ['/admin', '/api'],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
