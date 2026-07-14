@@ -22,7 +22,7 @@ export default async function PostCard({ post }: PostCardProps) {
   return (
     <Link href={`/tin-tuc/${post.slug}`} className="group block h-full">
       <article className="flex h-full flex-col overflow-hidden rounded-[24px] border-[1.5px] border-warm-border bg-white shadow-card transition duration-200 hover:-translate-y-1 hover:border-primary hover:shadow-hover">
-        <div className="relative aspect-[16/11] overflow-hidden bg-secondary">
+        <div className="relative aspect-[16/9] overflow-hidden bg-secondary">
           <SafeImage
             src={featuredImageSrc}
             alt={post.title}
