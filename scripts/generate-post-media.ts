@@ -284,7 +284,7 @@ function squareSvg(post: PostRecord, slot: 1 | 2) {
     '.label{font-family:"DejaVu Sans","Arial",sans-serif;font-size:18px;font-weight:900;letter-spacing:2px;fill:#b9794b;}',
     '.keyword{font-family:"DejaVu Sans","Arial",sans-serif;font-size:22px;font-weight:800;fill:#2b2b2b;}',
     '</style>',
-    '<text x="76" y="94" class="label">' + label + '</text>',
+    '<text x="76" y="94" class="label">' + escapeXml(label) + '</text>',
     '<text x="82" y="914" class="keyword">' + keyword + '</text>',
     '</svg>',
   ].join(''))
