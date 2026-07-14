@@ -231,7 +231,10 @@ async function roundedPhoto(filePath: string, width: number, height: number, rad
 }
 
 function coverSvg(post: PostRecord) {
-  const lines = wrapText(post.seo_title || post.title, 22, 3)
+  const displayTitle = (post.seo_title || post.title)
+    .replace(/\s*\|\s*Mushroomie.*$/i, '')
+    .trim()
+  const lines = wrapText(displayTitle, 22, 3)
   const title = lines
     .map((line, index) => (
       '<text x="62" y="' + (300 + index * 66) + '" class="title">' + escapeXml(line) + '</text>'
