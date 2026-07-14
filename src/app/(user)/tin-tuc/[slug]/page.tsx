@@ -20,6 +20,8 @@ import {
 } from '@/lib/server-image'
 import { safeJsonLd } from '@/lib/security'
 import { isSquareSeoArticleImage } from '@/lib/post-normalization'
+import { extractImageSources } from '@/lib/post-media'
+import { geoImageGraph, geoImageObject } from '@/lib/geo-image-schema'
 
 const SITE_URL = 'https://mushroomie.io.vn'
 const SITE_NAME = 'Mushroomie'
@@ -114,7 +116,13 @@ function generateJsonLd(post: Post, imageUrl: string) {
       : 'BlogPosting',
     headline: post.seo_title || post.title,
     description: post.meta_description || post.excerpt || '',
-    image: imageUrl,
+    image: geoImageObject(imageUrl, {
+      name: post.title + ' - ảnh bìa bài viết',
+      caption: post.featured_image_caption || post.title,
+      description: post.featured_image_description || post.meta_description,
+      width: 1200,
+      height: 675,
+    }),
     url: postUrl,
     author: {
       '@type': 'Organization',
@@ -183,6 +191,18 @@ export default async function PostDetailPage({
   ])
 
   const jsonLd = generateJsonLd(post, structuredImageUrl)
+  const articleGeoImages = geoImageGraph([
+    {
+      url: structuredImageUrl,
+      name: post.title + ' - ảnh bìa bài viết',
+      caption: post.featured_image_caption || post.title,
+    },
+    ...extractImageSources(articleHtml).map((source, index) => ({
+      url: toAbsoluteUrl(source),
+      name: post.title + ' - ảnh nội dung ' + (index + 1),
+      caption: (post.focus_keyword || post.title) + ' tại Mushroomie Handmade, Đồng Nai.',
+    })),
+  ])
   const usesSquareSeoCover = isSquareSeoArticleImage(coverImage.renderSrc)
 
   return (
@@ -194,6 +214,10 @@ export default async function PostDetailPage({
         </div>
       )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(articleGeoImages) }}
+      />
 
       <section
         className="relative overflow-hidden border-b border-warm-border"

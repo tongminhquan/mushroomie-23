@@ -18,6 +18,7 @@ import { prisma } from '@/lib/prisma'
 import { safeJsonLd } from '@/lib/security'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { toAbsoluteUrl } from '@/lib/url'
+import { geoImageGraph } from '@/lib/geo-image-schema'
 
 const SITE_NAME = 'Mushroomie'
 
@@ -192,6 +193,13 @@ export default async function ProductDetailPage({
         }
       : {}),
   }
+  const productGeoImages = geoImageGraph(
+    galleryImages.map((image, index) => ({
+      url: toAbsoluteUrl(image),
+      name: product.name + ' - ảnh sản phẩm ' + (index + 1),
+      caption: product.name + ' handmade tại Mushroomie, Đồng Nai.',
+    })),
+  )
 
   return (
     <div className="min-h-screen bg-secondary py-5 md:py-8">
@@ -206,6 +214,10 @@ export default async function ProductDetailPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(productGeoImages) }}
       />
 
       <BrandContainer>
