@@ -3,6 +3,8 @@ import test from 'node:test'
 import nextConfig from '../next.config'
 import {
   GOOGLE_ADS_ID,
+  GOOGLE_ADS_PURCHASE_LABEL,
+  GOOGLE_ADS_PURCHASE_SEND_TO,
   GOOGLE_ANALYTICS_ID,
   configureGoogleTags,
 } from '../src/lib/google-tags'
