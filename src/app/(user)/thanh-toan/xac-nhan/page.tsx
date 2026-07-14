@@ -188,15 +188,6 @@ function ConfirmPageContent() {
         quantity: Number(item.quantity || 1),
       })) || [],
     })
-
-    // Chuyển đổi "Lượt mua hàng" của Google Ads. transaction_id là mã đơn thật để
-    // Google khử trùng lặp nếu khách tải lại trang xác nhận.
-    trackAnalyticsEventOnce(`ads_purchase_${orderCode}`, 'conversion', {
-      send_to: GOOGLE_ADS_PURCHASE_SEND_TO,
-      transaction_id: orderCode,
-      currency: 'VND',
-      value,
-    })
   }, [orderCode, orderInfo, payment?.amount, paymentStatus?.status])
 
   // Compute QR image candidates. Direct VietQR is fastest; /api/qr is kept as fallback.
