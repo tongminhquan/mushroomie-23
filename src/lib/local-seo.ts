@@ -82,7 +82,8 @@ export interface LocalFaq {
 
 /**
  * Chỉ các slug có route thật mới được đưa vào sitemap và liên kết nội bộ.
- * LOCAL_PAGES còn chứa nội dung dự kiến cho các đợt sau, không đồng nghĩa đã xuất bản.
+ * Mỗi slug ở đây bắt buộc phải có src/app/(user)/<slug>/page.tsx — tests/local-seo.test.ts
+ * kiểm tra ràng buộc này, và không slug nào được `related` tới trang chưa xuất bản.
  */
 export const PUBLISHED_LOCAL_SLUGS = [
   'phu-kien-handmade-dong-nai',
@@ -96,9 +97,22 @@ export const PUBLISHED_LOCAL_SLUGS = [
   'moc-khoa-handmade-theo-yeu-cau-dong-nai',
   'qua-tang-handmade-dong-nai',
   'qua-tang-ca-nhan-hoa-dong-nai',
+  // Đợt 2: mở rộng Trảng Dài / Biên Hòa / TP.HCM + loại sản phẩm
+  'phu-kien-handmade-trang-dai',
+  'vong-tay-handmade-trang-dai',
+  'shop-phu-kien-handmade-bien-hoa',
+  'vong-tay-handmade-bien-hoa',
+  'moc-khoa-handmade-bien-hoa',
+  'qua-tang-handmade-bien-hoa',
+  'vong-tay-custom-tphcm',
+  'moc-khoa-handmade-tphcm',
+  'qua-tang-handmade-tphcm',
+  'vong-tay-cap-doi-dong-nai',
+  'charm-handmade-dong-nai',
+  'day-chuyen-handmade-dong-nai',
 ] as const
 
-export const LOCAL_SEO_LAST_MODIFIED = new Date('2026-07-13T00:00:00.000Z')
+export const LOCAL_SEO_LAST_MODIFIED = new Date('2026-07-14T00:00:00.000Z')
 
 const productHub = {
   all: { label: 'Xem tất cả sản phẩm', href: '/san-pham' },
