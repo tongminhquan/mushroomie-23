@@ -40,6 +40,8 @@ interface LineClearAnim {
 
 interface TetrisGameProps {
   onGameOver?: (result: GameOverPayload) => void
+  onRestart: () => void
+  restartDisabled?: boolean
   soundEnabled?: boolean
   onSoundToggle?: (enabled: boolean) => void
 }
@@ -125,7 +127,13 @@ function sfxGameOver(ctx: AudioContext) {
   })
 }
 
-export default function TetrisGame({ onGameOver, soundEnabled = true, onSoundToggle }: TetrisGameProps) {
+export default function TetrisGame({
+  onGameOver,
+  onRestart,
+  restartDisabled = false,
+  soundEnabled = true,
+  onSoundToggle,
+}: TetrisGameProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const nextCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -703,6 +711,25 @@ export default function TetrisGame({ onGameOver, soundEnabled = true, onSoundTog
               <div className="tetris-pause-hint mobile-only">Nhấn nút tiếp tục</div>
             </div>
           )}
+          {isOver && (
+            <div
+              className="tetris-game-over-overlay"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="tetris-game-over-title"
+            >
+              <div id="tetris-game-over-title" className="tetris-game-over-title">LƯỢT CHƠI KẾT THÚC</div>
+              <div className="tetris-game-over-score">{score.toLocaleString('vi-VN')} điểm</div>
+              <button
+                type="button"
+                onClick={onRestart}
+                disabled={restartDisabled}
+                className="tetris-game-over-button"
+              >
+                {restartDisabled ? 'Đang lưu điểm...' : 'Chơi lại'}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}
@@ -822,6 +849,29 @@ export default function TetrisGame({ onGameOver, soundEnabled = true, onSoundTog
           background: rgba(5,5,16,0.85); display: flex; flex-direction: column;
           align-items: center; justify-content: center; gap: 8px;
         }
+        .tetris-game-over-overlay {
+          position: absolute; inset: 0; z-index: 4; border-radius: 14px;
+          background: rgba(5,5,16,0.92); backdrop-filter: blur(8px);
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          gap: 12px; padding: 24px; text-align: center;
+        }
+        .tetris-game-over-title {
+          max-width: 260px; color: #ff6b7f; font-size: 28px; line-height: 1.2;
+          font-weight: 900; text-shadow: 0 0 24px rgba(255,77,106,0.58);
+        }
+        .tetris-game-over-score {
+          color: #00e5ff; font-size: 22px; font-weight: 900;
+          text-shadow: 0 0 18px rgba(0,229,255,0.45);
+        }
+        .tetris-game-over-button {
+          min-height: 48px; min-width: 156px; margin-top: 8px; padding: 0 24px;
+          border: 0; border-radius: 12px; background: #e41d1d; color: #fff;
+          font: 800 15px var(--font-body), Montserrat, sans-serif; cursor: pointer;
+          box-shadow: 0 12px 28px rgba(228,29,29,0.34); transition: transform .2s, background-color .2s;
+        }
+        .tetris-game-over-button:hover { background: #ba1717; transform: translateY(-1px); }
+        .tetris-game-over-button:focus-visible { outline: 3px solid rgba(255,255,255,.88); outline-offset: 3px; }
+        .tetris-game-over-button:disabled { cursor: wait; opacity: .55; transform: none; }
         .tetris-pause-hint { font-size: 13px; color: rgba(255,255,255,0.4); }
 
         .tetris-sidebar { display: flex; flex-direction: column; gap: 10px; min-width: 160px; max-width: 180px; }
@@ -882,6 +932,11 @@ export default function TetrisGame({ onGameOver, soundEnabled = true, onSoundTog
         }
         @media (max-width: 767px) and (max-height: 700px) {
           .tetris-canvas { width: min(50vw, 200px) !important; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .tetris-glow-ring { animation: none; }
+          .tetris-game-over-button, .tetris-score-val, .tetris-progress-fill { transition: none; }
+          .tetris-game-over-button:hover { transform: none; }
         }
       `}</style>
     </div>

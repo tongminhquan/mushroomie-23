@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { useSession } from 'next-auth/react'
@@ -52,6 +52,7 @@ interface SubmitState {
 export default function GamePageClient({ game }: { game: GameKey }) {
   const config = GAME_DEFINITIONS[game]
   const { data: session } = useSession()
+  const userId = session?.user?.id
   const [phase, setPhase] = useState<'start' | 'playing' | 'result'>('start')
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [token, setToken] = useState('')
@@ -63,6 +64,8 @@ export default function GamePageClient({ game }: { game: GameKey }) {
   const [leaderboardLoading, setLeaderboardLoading] = useState(true)
   const [leaderboardError, setLeaderboardError] = useState('')
   const [refreshTick, setRefreshTick] = useState(0)
+  const resultHandledRef = useRef(false)
+  const startingRef = useRef(false)
 
   useGameAudio({
     game,
@@ -108,13 +111,15 @@ export default function GamePageClient({ game }: { game: GameKey }) {
     }
   }, [loadLeaderboard, refreshTick])
 
-  const startGame = async () => {
+  const startGame = useCallback(async () => {
+    if (startingRef.current) return
+    startingRef.current = true
     setSubmitState({ status: 'idle' })
     setLastResult(null)
 
-    let nextToken = ''
-    if (session?.user?.id) {
-      try {
+    try {
+      let nextToken = ''
+      if (userId) {
         const response = await fetch('/api/game/start', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -123,18 +128,25 @@ export default function GamePageClient({ game }: { game: GameKey }) {
         const data = await response.json()
         if (response.ok && data.token) nextToken = data.token
         else setSubmitState({ status: 'error', message: 'Không tạo được phiên lưu điểm. Bạn vẫn có thể chơi.' })
-      } catch {
-        setSubmitState({ status: 'error', message: 'Không tạo được phiên lưu điểm. Bạn vẫn có thể chơi.' })
       }
-    }
 
-    setToken(nextToken)
-    setRunId((value) => value + 1)
-    setPhase('playing')
-  }
+      resultHandledRef.current = false
+      setToken(nextToken)
+      setRunId((value) => value + 1)
+      setPhase('playing')
+    } catch {
+      resultHandledRef.current = false
+      setToken('')
+      setSubmitState({ status: 'error', message: 'Không tạo được phiên lưu điểm. Bạn vẫn có thể chơi.' })
+      setRunId((value) => value + 1)
+      setPhase('playing')
+    } finally {
+      startingRef.current = false
+    }
+  }, [game, userId])
 
   const submitScore = useCallback(async (result: GameOverPayload) => {
-    if (!session?.user?.id) {
+    if (!userId) {
       setSubmitState({ status: 'guest', message: 'Đăng nhập để lưu điểm và nhận voucher.' })
       return
     }
@@ -178,9 +190,12 @@ export default function GamePageClient({ game }: { game: GameKey }) {
     } finally {
       setToken('')
     }
-  }, [game, session?.user?.id, token])
+  }, [game, token, userId])
 
   const handleGameOver = useCallback((payload: GameOverPayload | number) => {
+    if (resultHandledRef.current) return
+    resultHandledRef.current = true
+
     const result = typeof payload === 'number'
       ? { game, score: payload, durationSec: 0 }
       : { ...payload, game }
@@ -244,19 +259,13 @@ export default function GamePageClient({ game }: { game: GameKey }) {
                     {config.title}
                   </h2>
                 </div>
-                <button
-                  type="button"
-                  onClick={startGame}
-                  className="inline-flex w-fit items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-extrabold text-white/68 hover:bg-white/10"
-                >
-                  <RotateCcw size={15} />
-                  Chơi lại
-                </button>
               </div>
               <GameErrorBoundary resetKey={`${game}-${runId}`}>
                 <GameComponent
                   key={`${game}-${runId}`}
                   onGameOver={handleGameOver}
+                  onRestart={startGame}
+                  restartDisabled={submitState.status === 'saving'}
                   soundEnabled={soundEnabled}
                   onSoundToggle={persistSound}
                 />
@@ -270,7 +279,8 @@ export default function GamePageClient({ game }: { game: GameKey }) {
             result={lastResult}
             state={submitState}
             onRestart={startGame}
-            signedIn={!!session?.user?.id}
+            restartDisabled={submitState.status === 'saving'}
+            signedIn={!!userId}
           />
           <VoucherTierPanel game={game} />
           <LeaderboardPanel
@@ -390,11 +400,13 @@ function ResultPanel({
   result,
   state,
   onRestart,
+  restartDisabled,
   signedIn,
 }: {
   result: GameOverPayload | null
   state: SubmitState
   onRestart: () => void
+  restartDisabled: boolean
   signedIn: boolean
 }) {
   return (
@@ -432,10 +444,11 @@ function ResultPanel({
           <button
             type="button"
             onClick={onRestart}
-            className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 text-sm font-extrabold text-white/72 hover:bg-white/10"
+            disabled={restartDisabled}
+            className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 text-sm font-extrabold text-white/72 hover:bg-white/10 disabled:cursor-wait disabled:opacity-50"
           >
             <RotateCcw size={16} />
-            Chơi lại
+            {restartDisabled ? 'Đang lưu điểm...' : 'Chơi lại'}
           </button>
         </div>
       ) : (

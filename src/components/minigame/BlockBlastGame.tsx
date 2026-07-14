@@ -129,9 +129,13 @@ const playSound = (type: 'move' | 'drop' | 'invalid' | 'clear', combo: number = 
 // ─── Main Game ──────────────────────────────────────────────────────────────────
 export default function BlockBlastGame({
   onGameOver,
+  onRestart,
+  restartDisabled = false,
   soundEnabled = true,
 }: {
   onGameOver: (result: GameOverPayload) => void
+  onRestart: () => void
+  restartDisabled?: boolean
   soundEnabled?: boolean
   onSoundToggle?: (enabled: boolean) => void
 }) {
@@ -148,6 +152,7 @@ export default function BlockBlastGame({
   const [lines, setLines]     = useState(0);  const linesRef = useRef(0)
   const [combo, setCombo]     = useState(0);  const comboRef = useRef(0)
   const [isOver, setIsOver]   = useState(false); const isOverRef = useRef(false)
+  const [endReason, setEndReason] = useState<'blocked' | 'manual'>('blocked')
   const soundEnabledRef       = useRef(soundEnabled)
   const startedAtRef          = useRef(Date.now())
   const [clearing, setClearing] = useState<Cell[]>([])
@@ -289,22 +294,34 @@ export default function BlockBlastGame({
   }, [getVisualPos])
 
   // ── Piece placement ──────────────────────────────────────────────────────────
+  const completeGame = useCallback((finalScore: number, reason: 'blocked' | 'manual') => {
+    if (isOverRef.current) return
+
+    isOverRef.current = true
+    setEndReason(reason)
+    setIsOver(true)
+    onGameOver({
+      game: 'block-blast',
+      score: finalScore,
+      lines: linesRef.current,
+      combo: comboRef.current,
+      level: 1,
+      durationSec: Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000)),
+    })
+  }, [onGameOver])
+
   const checkGameOver = useCallback((b: (string|null)[][], h: (Piece|null)[], sc: number) => {
     const any = h.some(p => p && Array.from({ length: ROWS }, (_, r) =>
       Array.from({ length: COLS }, (_, c) => canPlace(b, p.matrix, r, c))
     ).flat().some(Boolean))
     if (!any && h.some(Boolean)) {
-      setIsOver(true)
-      onGameOver({
-        game: 'block-blast',
-        score: sc,
-        lines: linesRef.current,
-        combo: comboRef.current,
-        level: 1,
-        durationSec: Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000)),
-      })
+      completeGame(sc, 'blocked')
     }
-  }, [canPlace, onGameOver])
+  }, [canPlace, completeGame])
+
+  const endGame = useCallback(() => {
+    completeGame(scoreRef.current, 'manual')
+  }, [completeGame])
 
   const placePiece = useCallback((piece: Piece, idx: number, row: number, col: number) => {
     const nb = boardRef.current.map(r => [...r])
@@ -514,18 +531,6 @@ export default function BlockBlastGame({
     setHl(null)
   }, [overlayToCell, canPlace, placePiece])
 
-  // ── RESTART ─────────────────────────────────────────────────────────────────
-  const restart = () => {
-    const nb = emptyBoard(); setBoard(nb); boardRef.current = nb
-    const nh = mkHand(nb); setHand(nh); handRef.current = nh
-    setScore(0); scoreRef.current = 0
-    setLines(0); linesRef.current = 0
-    setCombo(0); comboRef.current = 0
-    setIsOver(false); isOverRef.current = false
-    startedAtRef.current = Date.now()
-    setHl(null)
-  }
-
   // ── RENDER ──────────────────────────────────────────────────────────────────
   return (
     <div
@@ -583,14 +588,12 @@ export default function BlockBlastGame({
               return (
                 <div
                   key={`${r}-${c}`}
+                  className={isClearing ? 'bb-pop' : isPlaced ? 'bb-in' : undefined}
                   style={{
                     width: cs, height: cs,
                     background: 'rgba(255,255,255,.025)',
                     borderRadius: 5,
                     boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.04)',
-                    animation: isClearing ? 'bbPop .4s ease-out forwards'
-                              : isPlaced   ? 'bbIn .3s cubic-bezier(.175,.885,.32,1.275)'
-                              : undefined,
                   }}
                 >
                   {(color || inHl) && (
@@ -678,20 +681,27 @@ export default function BlockBlastGame({
             </div>
           ))}
           <button
-            onClick={restart}
+            type="button"
+            onClick={endGame}
+            disabled={isOver || clearing.length > 0}
             style={{
               padding: '11px 0', borderRadius: 14,
-              background: 'rgba(0,229,255,.1)', border: '1px solid rgba(0,229,255,.2)',
-              color: '#00e5ff', fontWeight: 800, fontSize: 15,
-              cursor: 'pointer', fontFamily: 'inherit',
+              background: 'rgba(255,77,106,.12)', border: '1px solid rgba(255,77,106,.24)',
+              color: '#ff8a9d', fontWeight: 800, fontSize: 15,
+              cursor: isOver || clearing.length > 0 ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+              opacity: isOver || clearing.length > 0 ? 0.5 : 1,
             }}
-          >🔄 Chơi lại</button>
+          >{clearing.length > 0 ? 'Đang tính điểm...' : 'Kết thúc lượt'}</button>
         </div>
       </div>
 
       {/* Game Over overlay */}
       {isOver && (
-        <div style={{
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="block-blast-game-over-title"
+          style={{
           position: 'absolute', inset: 0,
           background: 'rgba(0,0,0,.88)',
           borderRadius: 14, display: 'flex',
@@ -699,18 +709,23 @@ export default function BlockBlastGame({
           zIndex: 200, backdropFilter: 'blur(10px)',
         }}>
           <div style={{ textAlign: 'center', padding: '0 20px' }}>
-            <div style={{ color: '#ff4d6a', fontSize: 46, fontWeight: 900, marginBottom: 10, textShadow: '0 0 20px rgba(255,77,106,.6)' }}>HẾT CHỖ!</div>
+            <div id="block-blast-game-over-title" style={{ color: '#ff4d6a', fontSize: 40, lineHeight: 1.15, fontWeight: 900, marginBottom: 10, textShadow: '0 0 20px rgba(255,77,106,.6)' }}>
+              {endReason === 'manual' ? 'LƯỢT CHƠI KẾT THÚC' : 'HẾT CHỖ!'}
+            </div>
             <div style={{ color: 'rgba(255,255,255,.8)', fontSize: 20, marginBottom: 28 }}>Tổng điểm: {score.toLocaleString()}</div>
             <button
-              onClick={restart}
+              type="button"
+              onClick={onRestart}
+              disabled={restartDisabled}
               style={{
                 padding: '14px 44px', borderRadius: 14,
                 background: 'linear-gradient(135deg,#e41d1d,#ff4d6a)',
                 border: 'none', color: '#fff', fontSize: 18, fontWeight: 800,
-                cursor: 'pointer', fontFamily: 'inherit',
+                cursor: restartDisabled ? 'wait' : 'pointer', fontFamily: 'inherit',
+                opacity: restartDisabled ? 0.55 : 1,
                 boxShadow: '0 6px 24px rgba(228,29,29,.5)',
               }}
-            >Chơi Lại</button>
+            >{restartDisabled ? 'Đang lưu điểm...' : 'Chơi lại'}</button>
           </div>
         </div>
       )}
@@ -718,6 +733,11 @@ export default function BlockBlastGame({
       <style>{`
         @keyframes bbIn  { 0%{transform:scale(.4);opacity:0} 70%{transform:scale(1.12)} 100%{transform:scale(1);opacity:1} }
         @keyframes bbPop { 0%{transform:scale(1);opacity:1} 50%{transform:scale(1.25);opacity:.8;filter:brightness(2)} 100%{transform:scale(0);opacity:0} }
+        .bb-in { animation: bbIn .3s cubic-bezier(.175,.885,.32,1.275); }
+        .bb-pop { animation: bbPop .4s ease-out forwards; }
+        @media (prefers-reduced-motion: reduce) {
+          .bb-in, .bb-pop { animation: none !important; }
+        }
       `}</style>
     </div>
   )

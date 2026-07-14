@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { Prisma } from '@prisma/client'
-import { getVoucherPercentForScore, isGameKey } from '../src/lib/game-config'
+import { GAME_DEFINITIONS, getVoucherPercentForScore, isGameKey } from '../src/lib/game-config'
 import {
   createGameToken,
   getGameTitle,
@@ -18,6 +18,8 @@ test('game configuration validates keys, titles and reward tiers', () => {
   assert.equal(isGameKey('block-blast'), true)
   assert.equal(isGameKey('other'), false)
   assert.equal(getGameTitle('tetris'), 'Tetris Mushroomie')
+  assert.equal(GAME_DEFINITIONS.tetris.instructions.some((item) => item.includes('Kết thúc lượt')), true)
+  assert.equal(GAME_DEFINITIONS['block-blast'].instructions.some((item) => item.includes('Kết thúc lượt')), true)
   assert.equal(getVoucherPercentForScore('tetris', 499), 0)
   assert.equal(getVoucherPercentForScore('tetris', 500), 5)
   assert.equal(getVoucherPercentForScore('tetris', 3500), 15)

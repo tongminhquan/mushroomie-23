@@ -62,6 +62,7 @@ export const GAME_DEFINITIONS: Record<GameKey, GameDefinition> = {
       'Kéo thả khối vào bảng.',
       'Xóa hàng hoặc cột để ghi điểm.',
       'Combo càng cao, điểm càng lớn.',
+      'Nút Kết thúc lượt: Dừng game và lưu điểm hiện tại.',
       'Hết chỗ đặt khối thì game over.',
     ],
     voucherTiers: [
