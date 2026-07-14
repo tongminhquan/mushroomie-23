@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button'
 import Link from 'next/link'
 import CheckoutStepper from '@/components/checkout/CheckoutStepper'
 import { trackAnalyticsEventOnce } from '@/lib/analytics'
+import { GOOGLE_ADS_PURCHASE_SEND_TO } from '@/lib/google-tags'
 
 interface Payment {
   status: string
