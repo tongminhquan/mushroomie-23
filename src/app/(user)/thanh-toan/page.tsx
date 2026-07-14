@@ -11,7 +11,8 @@ import { Landmark, PackageCheck, ShieldCheck } from 'lucide-react'
 import FormInput from '@/components/ui/FormInput'
 import Textarea from '@/components/ui/Textarea'
 import CheckoutStepper from '@/components/checkout/CheckoutStepper'
-import { trackAnalyticsEvent } from '@/lib/analytics'
+import { trackAnalyticsEvent, trackAnalyticsEventOnce } from '@/lib/analytics'
+import { GOOGLE_ADS_PURCHASE_SEND_TO } from '@/lib/google-tags'
 
 interface CheckoutUser {
   name?: string | null
