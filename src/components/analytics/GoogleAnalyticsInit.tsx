@@ -2,26 +2,35 @@
 
 import { useEffect } from 'react'
 import { deferThirdPartyScript } from '@/lib/deferThirdPartyScript'
-
-const GA_ID = 'G-R95TLDCP0W'
+import {
+  GOOGLE_ADS_ID,
+  GOOGLE_ANALYTICS_ID,
+  configureGoogleTags,
+} from '@/lib/google-tags'
 
 export default function GoogleAnalyticsInit() {
   useEffect(() => {
     let loaded = false
 
     const load = () => {
-      if (loaded || document.querySelector(`script[data-ga-id="${GA_ID}"]`)) return
+      if (loaded) return
       loaded = true
 
       window.dataLayer = window.dataLayer || []
-      window.gtag = (...args: unknown[]) => window.dataLayer?.push(args)
-      window.gtag('js', new Date())
-      window.gtag('config', GA_ID)
+      const gtag = window.gtag || ((...args: unknown[]) => window.dataLayer?.push(args))
+      window.gtag = gtag
+
+      if (!window.mushroomieGoogleTagsConfigured) {
+        configureGoogleTags(gtag)
+        window.mushroomieGoogleTagsConfigured = true
+      }
+
+      if (document.querySelector('script[src^="https://www.googletagmanager.com/gtag/js"]')) return
 
       const script = document.createElement('script')
       script.async = true
-      script.dataset.gaId = GA_ID
-      script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`
+      script.dataset.googleTagIds = `${GOOGLE_ANALYTICS_ID},${GOOGLE_ADS_ID}`
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_ID}`
       document.head.appendChild(script)
     }
 
@@ -35,5 +44,6 @@ declare global {
   interface Window {
     dataLayer?: unknown[]
     gtag?: (...args: unknown[]) => void
+    mushroomieGoogleTagsConfigured?: boolean
   }
 }
