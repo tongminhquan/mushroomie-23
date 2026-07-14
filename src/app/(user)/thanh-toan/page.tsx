@@ -211,6 +211,17 @@ export default function CheckoutPage() {
       }
       const { orderId, orderCode, accessToken } = await orderRes.json()
 
+      // Chuyển đổi "Lượt mua hàng" của Google Ads (kiểu Nhấp chuột — đo lúc khách bấm
+      // đặt hàng). Bắn sau khi đơn đã tạo xong nên vẫn gửi được mã đơn và tổng tiền
+      // thật, thay vì transaction_id rỗng + value 1.0 như snippet mặc định.
+      // Lưu ý: đơn chuyển khoản chưa chắc được thanh toán, nên số này là ý định mua.
+      trackAnalyticsEventOnce(`ads_click_${orderCode}`, 'conversion', {
+        send_to: GOOGLE_ADS_PURCHASE_SEND_TO,
+        transaction_id: orderCode,
+        currency: 'VND',
+        value: total,
+      })
+
       if (paymentMethod === 'bank_transfer') {
         const payRes = await fetch('/api/payments', {
           method: 'POST',
