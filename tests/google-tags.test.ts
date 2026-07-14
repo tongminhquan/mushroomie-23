@@ -24,6 +24,12 @@ test('Google tag configures GA4 and Google Ads from one shared data layer', () =
   assert.equal(GOOGLE_ADS_ID, 'AW-18206718336')
 })
 
+test('đích chuyển đổi "Lượt mua hàng" ghép đúng ID và nhãn từ Google Ads', () => {
+  assert.equal(GOOGLE_ADS_PURCHASE_LABEL, 'OMl8CKSds9AcEIDz0elD')
+  assert.equal(GOOGLE_ADS_PURCHASE_SEND_TO, `${GOOGLE_ADS_ID}/${GOOGLE_ADS_PURCHASE_LABEL}`)
+  assert.equal(GOOGLE_ADS_PURCHASE_SEND_TO, 'AW-18206718336/OMl8CKSds9AcEIDz0elD')
+})
+
 test('content security policy allows Google Ads measurement endpoints', async () => {
   assert.equal(typeof nextConfig.headers, 'function')
 
