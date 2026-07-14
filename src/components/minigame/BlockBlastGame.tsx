@@ -2,6 +2,11 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import type { GameOverPayload } from '@/lib/game-config'
+import {
+  canPlace as canPlacePure,
+  generateHandMatrices,
+  type Board,
+} from '@/lib/minigame/block-blast'
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 const DEBUG_DRAG = false // Set true to log drag coordinates to console
@@ -24,61 +29,24 @@ const COLORS: Record<string, string> = {
 }
 const COLOR_KEYS = Object.keys(COLORS)
 
-const SHAPES = [
-  [[1]],
-  [[1,1]], [[1],[1]],
-  [[1,1,1]], [[1],[1],[1]],
-  [[1,1,1,1]], [[1],[1],[1],[1]],
-  [[1,1,1,1,1]], [[1],[1],[1],[1],[1]],
-  [[1,1],[1,1]],
-  [[1,1,1],[1,1,1],[1,1,1]],
-  [[1,1],[1,0]], [[1,1],[0,1]], [[1,0],[1,1]], [[0,1],[1,1]],
-  [[1,0,0],[1,0,0],[1,1,1]], [[0,0,1],[0,0,1],[1,1,1]],
-  [[1,1,1],[1,0,0],[1,0,0]], [[1,1,1],[0,0,1],[0,0,1]],
-  [[1,1,1],[0,1,0]], [[0,1,0],[1,1,1]],
-  [[1,0],[1,1],[1,0]], [[0,1],[1,1],[0,1]],
-  [[0,1,0],[1,1,1],[0,1,0]],
-  [[1,1,0],[0,1,1]], [[0,1,1],[1,1,0]],
-  [[1,0],[1,1],[0,1]], [[0,1],[1,1],[1,0]],
-]
-
 // ─── Types ──────────────────────────────────────────────────────────────────────
 type Piece = { id: string; matrix: number[][]; color: string }
 type Cell  = { r: number; c: number }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
-function normalizeShape(matrix: number[][]): number[][] {
-  let minR = matrix.length, maxR = -1, minC = matrix[0].length, maxC = -1
-  for (let r = 0; r < matrix.length; r++) {
-    for (let c = 0; c < matrix[r].length; c++) {
-      if (matrix[r][c]) {
-        if (r < minR) minR = r
-        if (r > maxR) maxR = r
-        if (c < minC) minC = c
-        if (c > maxC) maxC = c
-      }
-    }
-  }
-  if (minR > maxR) return [[1]]
-  const res: number[][] = []
-  for (let r = minR; r <= maxR; r++) {
-    const row: number[] = []
-    for (let c = minC; c <= maxC; c++) {
-      row.push(matrix[r][c])
-    }
-    res.push(row)
-  }
-  return res
-}
-
-function mkPiece(): Piece {
+function mkPieceFrom(matrix: number[][]): Piece {
   return {
     id: Math.random().toString(36).slice(2),
-    matrix: normalizeShape(SHAPES[Math.floor(Math.random() * SHAPES.length)]),
+    matrix,
     color: COLOR_KEYS[Math.floor(Math.random() * COLOR_KEYS.length)],
   }
 }
-function emptyBoard(): (string | null)[][] {
+
+function mkHand(board: Board): Piece[] {
+  return generateHandMatrices(board).map(mkPieceFrom)
+}
+
+function emptyBoard(): Board {
   return Array.from({ length: ROWS }, () => Array(COLS).fill(null))
 }
 
@@ -173,8 +141,8 @@ export default function BlockBlastGame({
 
   // ── Game state ──────────────────────────────────────────────────────────────
   const [board, setBoard]     = useState(emptyBoard)
-  const boardRef              = useRef<(string | null)[][]>(emptyBoard())
-  const [hand, setHand]       = useState<(Piece | null)[]>(() => [mkPiece(), mkPiece(), mkPiece()])
+  const boardRef              = useRef<Board>(emptyBoard())
+  const [hand, setHand]       = useState<(Piece | null)[]>(() => mkHand(emptyBoard()))
   const handRef               = useRef<(Piece | null)[]>([])
   const [score, setScore]     = useState(0);  const scoreRef = useRef(0)
   const [lines, setLines]     = useState(0);  const linesRef = useRef(0)
@@ -234,13 +202,10 @@ export default function BlockBlastGame({
   }, [])
 
   // ── Logic helpers ───────────────────────────────────────────────────────────
-  const canPlace = useCallback((b: (string|null)[][], m: number[][], r: number, c: number) => {
-    for (let dr = 0; dr < m.length; dr++)
-      for (let dc = 0; dc < m[dr].length; dc++)
-        if (m[dr][dc] && (r+dr < 0 || r+dr >= ROWS || c+dc < 0 || c+dc >= COLS || b[r+dr][c+dc]))
-          return false
-    return true
-  }, [])
+  const canPlace = useCallback(
+    (b: Board, m: number[][], r: number, c: number) => canPlacePure(b, m, r, c),
+    [],
+  )
 
   /**
    * Compute the visual top-left of the overlay from the current pointer position.
@@ -358,7 +323,7 @@ export default function BlockBlastGame({
     const finish = (fb: (string|null)[][], sc: number) => {
       const nh = [...handRef.current]; nh[idx] = null
       const allGone = nh.every(p => !p)
-      const fh = allGone ? [mkPiece(), mkPiece(), mkPiece()] : nh
+      const fh = allGone ? mkHand(fb) : nh
       setHand(fh); handRef.current = fh
       checkGameOver(fb, fh, sc)
     }
@@ -552,7 +517,7 @@ export default function BlockBlastGame({
   // ── RESTART ─────────────────────────────────────────────────────────────────
   const restart = () => {
     const nb = emptyBoard(); setBoard(nb); boardRef.current = nb
-    const nh = [mkPiece(), mkPiece(), mkPiece()]; setHand(nh); handRef.current = nh
+    const nh = mkHand(nb); setHand(nh); handRef.current = nh
     setScore(0); scoreRef.current = 0
     setLines(0); linesRef.current = 0
     setCombo(0); comboRef.current = 0
