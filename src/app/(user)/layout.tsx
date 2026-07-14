@@ -24,7 +24,7 @@ export default async function UserLayout({ children }: { children: React.ReactNo
           href: `/san-pham?category=${category.slug}`,
           label: category.name,
         }))} />
-        <main id="main-content" className="pb-20 md:pb-0">{children}</main>
+        <main id="main-content" className="pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">{children}</main>
         <Footer categories={categories.slice(0, 5)} />
         <MobileBottomNav />
         <DeferredPublicWidgets />

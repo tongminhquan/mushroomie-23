@@ -40,7 +40,7 @@
   --color-neutral-100: #f7f2ee;
   --color-neutral-200: #e9dfd8;
   --color-neutral-300: #d3c7bf;
-  --color-neutral-400: #9e938c;
+  --color-neutral-400: #746d68;
   --color-neutral-500: #66615d;
   --color-neutral-700: #4a4542;
   --color-neutral-900: #2b2b2b;  /* Đen mềm */
@@ -165,7 +165,9 @@ body {
   border: none;
   color: white;
   box-shadow: 0 4px 25px rgba(228, 29, 29, 0.35);
-  transition: all 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .gradient-btn:hover {
   box-shadow: 0 6px 30px rgba(228, 29, 29, 0.5);

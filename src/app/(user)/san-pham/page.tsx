@@ -314,7 +314,7 @@ export default async function ProductsPage({
             </div>
           </aside>
 
-          <main className="min-w-0">
+          <section className="min-w-0" aria-label="Danh sách sản phẩm">
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-neutral-700">
@@ -356,7 +356,7 @@ export default async function ProductsPage({
                     key={pageNumber}
                     href={buildUrl({ page: String(pageNumber) })}
                     aria-current={pageNumber === page ? 'page' : undefined}
-                    className={`grid h-10 w-10 place-items-center rounded-full text-sm font-extrabold ${
+                    className={`grid h-11 w-11 place-items-center rounded-full text-sm font-extrabold ${
                       pageNumber === page
                         ? 'bg-primary text-white'
                         : 'border border-warm-border bg-white text-text hover:border-primary hover:text-primary'
@@ -367,7 +367,7 @@ export default async function ProductsPage({
                 ))}
               </nav>
             )}
-          </main>
+          </section>
         </div>
       </BrandContainer>
       {!searchKeyword && page === 1 && <CatalogSeoContent content={catalogSeo} />}

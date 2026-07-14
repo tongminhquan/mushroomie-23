@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
@@ -46,6 +46,25 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
     () => false,
   )
 
+  useEffect(() => {
+    if (!menuOpen && !searchOpen) return
+
+    const previousOverflow = document.body.style.overflow
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setMenuOpen(false)
+      setSearchOpen(false)
+    }
+
+    if (menuOpen) document.body.style.overflow = 'hidden'
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [menuOpen, searchOpen])
+
   const submitSearch = (event: React.FormEvent) => {
     event.preventDefault()
     const query = searchQuery.trim()
@@ -77,8 +96,10 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
           <button
             type="button"
             aria-label={menuOpen ? 'Đóng menu' : 'Mở menu'}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-main-navigation"
             onClick={() => setMenuOpen((value) => !value)}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-neutral-200 text-text md:hidden"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-neutral-200 text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 md:hidden"
           >
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -119,8 +140,10 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
             <button
               type="button"
               aria-label="Mở tìm kiếm"
+              aria-expanded={searchOpen}
+              aria-controls="mobile-product-search"
               onClick={() => setSearchOpen((value) => !value)}
-              className="grid h-10 w-10 place-items-center rounded-xl text-text hover:bg-neutral-100 md:hidden"
+              className="grid h-11 w-11 place-items-center rounded-xl text-text hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 md:hidden"
             >
               <Search size={20} />
             </button>
@@ -135,13 +158,14 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
             <div className="group relative hidden md:block">
               <Link
                 href={session ? '/tai-khoan' : '/tai-khoan/dang-nhap'}
+                aria-haspopup="menu"
                 className="flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-bold text-text hover:bg-neutral-100"
               >
                 <User size={19} className="text-primary" />
                 <span className="max-w-24 truncate">{session?.user?.name?.split(' ')[0] || 'Tài khoản'}</span>
                 <ChevronDown size={14} />
               </Link>
-              <div className="invisible absolute right-0 top-full w-52 translate-y-2 pt-2 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+              <div className="invisible absolute right-0 top-full w-52 translate-y-2 pt-2 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
                 <div className="rounded-xl border border-neutral-200 bg-white p-2 shadow-strong">
                   {session ? (
                     <>
@@ -187,7 +211,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
         </div>
 
         {searchOpen && (
-          <form onSubmit={submitSearch} className="brand-container pb-3 md:hidden">
+          <form id="mobile-product-search" onSubmit={submitSearch} className="brand-container pb-3 md:hidden">
             <div className="flex gap-2">
               <input
                 autoFocus
@@ -212,7 +236,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
               Danh mục
             </Link>
             {categories.length > 0 && (
-              <div className="invisible absolute left-0 top-full z-30 w-60 translate-y-2 pt-2 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+              <div className="invisible absolute left-0 top-full z-30 w-60 translate-y-2 pt-2 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
                 <div className="rounded-xl border border-neutral-200 bg-white p-2 shadow-strong">
                   <Link href="/san-pham" className="block rounded-lg px-3 py-2.5 text-sm font-bold hover:bg-neutral-100">Tất cả sản phẩm</Link>
                   {categories.map((category) => (
@@ -248,9 +272,16 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
       </nav>
 
       {menuOpen && (
-        <div className="fixed inset-0 z-[120] bg-black/35 md:hidden" onClick={() => setMenuOpen(false)}>
+        <div
+          className="fixed inset-0 z-[120] bg-black/35 md:hidden"
+          onClick={() => setMenuOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu điều hướng"
+        >
           <nav
-            className="h-full w-[84%] max-w-sm bg-white p-5 shadow-2xl"
+            id="mobile-main-navigation"
+            className="h-[100dvh] w-[84%] max-w-sm overflow-y-auto bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-6 flex items-center justify-between">
@@ -258,7 +289,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
               <button
                 aria-label="Đóng menu"
                 onClick={() => setMenuOpen(false)}
-                className="grid h-10 w-10 place-items-center rounded-xl bg-neutral-100"
+                className="grid h-11 w-11 place-items-center rounded-xl bg-neutral-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20"
                 type="button"
               >
                 <X size={20} />

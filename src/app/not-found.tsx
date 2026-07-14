@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <main className="paper-surface grid min-h-screen place-items-center bg-secondary p-4">
+    <main id="main-content" className="paper-surface grid min-h-[100dvh] place-items-center bg-secondary p-4">
       <div className="grid w-full max-w-4xl overflow-hidden rounded-[18px] border border-neutral-200 bg-white shadow-strong md:grid-cols-[0.8fr_1.2fr]">
         <div className="relative min-h-64 bg-pink">
           <Image src="/logo.webp" alt="Mushroomie" fill sizes="(max-width: 768px) 100vw, 40vw" className="object-contain p-12" />

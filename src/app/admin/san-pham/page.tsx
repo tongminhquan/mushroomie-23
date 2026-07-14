@@ -154,7 +154,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           <div className="flex justify-center gap-2 p-4 border-t-[1.5px] border-[#f0e0d6]">
             {Array.from({ length: Math.ceil(total / limit) }, (_, i) => i + 1).map((p) => (
               <Link key={p} href={`/admin/san-pham?${new URLSearchParams({ ...sp, page: String(p) })}`}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold transition-colors ${
+                className={`flex h-10 w-10 items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
                   p === page ? 'bg-primary text-white' : 'bg-white border-[1.5px] border-[#e2d3c8] text-neutral-600 hover:border-primary hover:text-primary'
                 }`}>{p}
               </Link>

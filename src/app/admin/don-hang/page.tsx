@@ -153,7 +153,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
           <div className="flex justify-center gap-2 p-4 border-t-[1.5px] border-[#f0e0d6]">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
               <Link key={p} href={`/admin/don-hang?${new URLSearchParams({ ...sp, page: String(p) })}`}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold transition-colors ${
+                className={`flex h-10 w-10 items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
                   p === page ? 'bg-primary text-white' : 'bg-secondary text-neutral-600 border-[1.5px] border-[#f0e0d6] hover:border-primary hover:text-primary'
                 }`}>{p}
               </Link>

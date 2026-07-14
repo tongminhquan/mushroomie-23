@@ -232,7 +232,7 @@ export default async function AdminVoucherHistoryPage({ searchParams }: { search
               const params = new URLSearchParams(currentParams)
               params.set('page', String(value))
               return (
-                <Link key={value} href={`/admin/voucher-history?${params.toString()}`} className={`grid h-8 w-8 place-items-center rounded-lg text-xs font-bold transition-colors ${page === value ? 'bg-primary text-white' : 'border-[1.5px] border-[#e2d3c8] bg-white text-neutral-600 hover:border-primary hover:text-primary'}`}>
+                <Link key={value} href={`/admin/voucher-history?${params.toString()}`} className={`grid h-10 w-10 place-items-center rounded-lg text-xs font-bold transition-colors ${page === value ? 'bg-primary text-white' : 'border-[1.5px] border-[#e2d3c8] bg-white text-neutral-600 hover:border-primary hover:text-primary'}`}>
                   {value}
                 </Link>
               )

@@ -15,7 +15,7 @@ import {
 } from '@/lib/game-config'
 
 const gameLoading = () => (
-  <div className="flex min-h-[420px] w-full items-center justify-center rounded-2xl border border-white/10 bg-black/25 text-sm font-bold text-white/50">
+  <div className="flex min-h-[420px] w-full items-center justify-center rounded-2xl border border-white/10 bg-black/25 text-sm font-bold text-white/72">
     Đang tải game...
   </div>
 )
@@ -193,10 +193,10 @@ export default function GamePageClient({ game }: { game: GameKey }) {
   const GameComponent = useMemo(() => (game === 'tetris' ? TetrisGame : BlockBlastGame), [game])
 
   return (
-    <main className="min-h-screen bg-[#090916] text-white">
+    <div className="min-h-[100dvh] bg-[#090916] text-white">
       <section className="border-b border-white/10 bg-[radial-gradient(circle_at_top,rgba(228,29,29,0.18),transparent_45%)]">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-7 md:px-6 md:py-9">
-          <Link href="/mini-game" className="inline-flex w-fit items-center gap-2 text-sm font-bold text-white/58 hover:text-white">
+          <Link href="/mini-game" className="inline-flex min-h-11 w-fit items-center gap-2 text-sm font-bold text-white/75 hover:text-white">
             <ArrowLeft size={16} />
             Về trang chọn game
           </Link>
@@ -208,7 +208,7 @@ export default function GamePageClient({ game }: { game: GameKey }) {
               <h1 className="mt-2 font-body text-4xl font-extrabold leading-tight tracking-normal md:text-5xl">
                 {config.title}
               </h1>
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-white/58 md:text-base">
+              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-white/75 md:text-base">
                 {config.description}
               </p>
             </div>
@@ -237,7 +237,7 @@ export default function GamePageClient({ game }: { game: GameKey }) {
             <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-3 shadow-[0_30px_90px_rgba(0,0,0,0.35)] sm:p-4 md:p-5">
               <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/42">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/65">
                     {config.controlMode}
                   </p>
                   <h2 className="mt-1 text-2xl font-extrabold tracking-normal text-white md:text-3xl">
@@ -282,7 +282,7 @@ export default function GamePageClient({ game }: { game: GameKey }) {
           />
         </aside>
       </section>
-    </main>
+    </div>
   )
 }
 
@@ -310,10 +310,10 @@ function StartScreen({
           <h2 className="mt-2 font-body text-3xl font-extrabold tracking-normal text-white md:text-4xl">
             {config.title}
           </h2>
-          <p className="mt-3 text-sm font-medium leading-6 text-white/58">{config.startHint}</p>
+          <p className="mt-3 text-sm font-medium leading-6 text-white/75">{config.startHint}</p>
 
           <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
-            <div className="mb-3 text-xs font-extrabold uppercase tracking-[0.16em] text-white/38">
+            <div className="mb-3 text-xs font-extrabold uppercase tracking-[0.16em] text-white/62">
               Hướng dẫn
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
@@ -368,7 +368,7 @@ function VoucherTierPanel({ game }: { game: GameKey }) {
 
   return (
     <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-5" id="game-voucher">
-      <div className="mb-4 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white/42">
+      <div className="mb-4 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white/65">
         <Ticket size={15} />
         Mốc voucher
       </div>
@@ -399,14 +399,14 @@ function ResultPanel({
 }) {
   return (
     <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
-      <div className="mb-4 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white/42">
+      <div className="mb-4 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white/65">
         <Trophy size={15} />
         Kết quả
       </div>
       {result ? (
         <div>
           <div className="text-4xl font-black text-[#00e5ff]">{result.score.toLocaleString('vi-VN')}</div>
-          <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs font-bold text-white/56">
+          <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs font-bold text-white/74">
             <div className="rounded-xl bg-black/20 p-2">Hàng<br />{result.lines ?? 0}</div>
             <div className="rounded-xl bg-black/20 p-2">Combo<br />{result.combo ?? 0}</div>
             <div className="rounded-xl bg-black/20 p-2">Giây<br />{result.durationSec ?? 0}</div>
@@ -439,7 +439,7 @@ function ResultPanel({
           </button>
         </div>
       ) : (
-        <p className="text-sm font-medium leading-6 text-white/48">
+        <p className="text-sm font-medium leading-6 text-white/70">
           {signedIn ? 'Kết quả lượt chơi sẽ hiển thị tại đây.' : 'Bạn có thể chơi khách, nhưng cần đăng nhập để lưu điểm.'}
         </p>
       )}
@@ -469,7 +469,7 @@ function LeaderboardPanel({
   return (
     <section id="game-leaderboard" className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white/42">
+        <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white/65">
           <BarChart3 size={15} />
           Bảng xếp hạng
         </div>
@@ -483,7 +483,7 @@ function LeaderboardPanel({
             className={`rounded-lg px-2 py-2 text-xs font-extrabold ${
               period === value
                 ? 'bg-[#e41d1d] text-white'
-                : 'border border-white/10 bg-black/20 text-white/52 hover:bg-white/10'
+                : 'border border-white/10 bg-black/20 text-white/72 hover:bg-white/10'
             }`}
           >
             {labels[value]}
@@ -511,14 +511,14 @@ function LeaderboardPanel({
             >
               <div className="min-w-0">
                 <div className="truncate text-sm font-extrabold text-white/80">#{item.rank} {item.name}</div>
-                <div className="text-xs font-semibold text-white/36">{new Date(item.createdAt).toLocaleDateString('vi-VN')}</div>
+                <div className="text-xs font-semibold text-white/62">{new Date(item.createdAt).toLocaleDateString('vi-VN')}</div>
               </div>
               <div className="text-right text-lg font-black text-[#00e5ff]">{item.score.toLocaleString('vi-VN')}</div>
             </div>
           ))}
         </div>
       ) : (
-        <p className="rounded-xl border border-white/10 bg-black/20 px-3 py-4 text-sm font-medium text-white/42">
+        <p className="rounded-xl border border-white/10 bg-black/20 px-3 py-4 text-sm font-medium text-white/65">
           Chưa có điểm cho bộ lọc này.
         </p>
       )}

@@ -8,7 +8,7 @@ import { useSession } from 'next-auth/react'
 
 export default function MobileBottomNav() {
   const pathname = usePathname()
-  const { items, openCart } = useCartStore()
+  const { items, isOpen: cartOpen, openCart } = useCartStore()
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
   const { data: session } = useSession()
 
@@ -19,11 +19,17 @@ export default function MobileBottomNav() {
     { name: 'Tài khoản', href: session ? '/tai-khoan' : '/tai-khoan/dang-nhap', icon: User },
   ]
 
+  const isRouteActive = (href: string) =>
+    href === '/' ? pathname === '/' : href !== '#' && (pathname === href || pathname.startsWith(`${href}/`))
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-warm-border bg-secondary/88 px-6 py-3 shadow-[0_-4px_20px_rgba(91,48,35,0.07)] backdrop-blur-md md:hidden">
-      <div className="flex items-center justify-between">
+    <nav
+      aria-label="Điều hướng nhanh trên di động"
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-warm-border bg-secondary/92 px-3 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(91,48,35,0.07)] backdrop-blur-md md:hidden"
+    >
+      <div className="mx-auto flex max-w-md items-center justify-between">
         {navItems.map((item, index) => {
-          const isActive = pathname === item.href
+          const isActive = item.onClick ? cartOpen : isRouteActive(item.href)
           const Icon = item.icon
 
           if (item.onClick) {
@@ -34,9 +40,11 @@ export default function MobileBottomNav() {
                   event.preventDefault()
                   item.onClick()
                 }}
-                className="group relative flex flex-col items-center gap-1"
+                aria-expanded={cartOpen}
+                aria-label={`${item.name}${item.badge ? `, ${item.badge} sản phẩm` : ''}`}
+                className="group relative flex min-h-14 min-w-16 flex-col items-center justify-center gap-0.5 rounded-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20"
               >
-                <div className={`rounded-xl p-2 transition-all duration-300 ${isActive ? 'scale-110 bg-primary-light text-primary' : 'text-neutral-500 group-hover:bg-white group-hover:text-primary'}`}>
+                <div className={`rounded-xl p-1.5 transition duration-200 ${isActive ? 'bg-primary-light text-primary' : 'text-neutral-500 group-hover:bg-white group-hover:text-primary'}`}>
                   <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
                   {item.badge !== undefined && item.badge > 0 && (
                     <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white shadow-sm">
@@ -44,21 +52,26 @@ export default function MobileBottomNav() {
                     </span>
                   )}
                 </div>
-                <span className={`text-[10px] font-bold transition-colors ${isActive ? 'text-primary' : 'text-neutral-500 group-hover:text-primary'}`}>{item.name}</span>
+                <span className={`text-[11px] font-bold transition-colors ${isActive ? 'text-primary' : 'text-neutral-500 group-hover:text-primary'}`}>{item.name}</span>
               </button>
             )
           }
 
           return (
-            <Link key={index} href={item.href} className="group flex flex-col items-center gap-1">
-              <div className={`rounded-xl p-2 transition-all duration-300 ${isActive ? 'scale-110 bg-primary-light text-primary' : 'text-neutral-500 group-hover:bg-white group-hover:text-primary'}`}>
+            <Link
+              key={index}
+              href={item.href}
+              aria-current={isActive ? 'page' : undefined}
+              className="group flex min-h-14 min-w-16 flex-col items-center justify-center gap-0.5 rounded-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20"
+            >
+              <div className={`rounded-xl p-1.5 transition duration-200 ${isActive ? 'bg-primary-light text-primary' : 'text-neutral-500 group-hover:bg-white group-hover:text-primary'}`}>
                 <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
               </div>
-              <span className={`text-[10px] font-bold transition-colors ${isActive ? 'text-primary' : 'text-neutral-500 group-hover:text-primary'}`}>{item.name}</span>
+              <span className={`text-[11px] font-bold transition-colors ${isActive ? 'text-primary' : 'text-neutral-500 group-hover:text-primary'}`}>{item.name}</span>
             </Link>
           )
         })}
       </div>
-    </div>
+    </nav>
   )
 }

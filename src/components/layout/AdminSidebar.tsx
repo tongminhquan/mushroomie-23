@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import {
   Activity,
@@ -18,13 +18,16 @@ import {
   ImageIcon,
   LayoutDashboard,
   LogOut,
+  Menu,
   MessageSquare,
   Package,
+  PanelLeftClose,
   Settings,
   ShoppingCart,
   Star,
   TicketPercent,
   Users,
+  X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -85,6 +88,23 @@ export default function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
 
+  useEffect(() => {
+    if (!isOpen) return
+
+    const previousOverflow = document.body.style.overflow
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false)
+    }
+
+    document.body.style.overflow = 'hidden'
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isOpen])
+
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`)
 
@@ -101,11 +121,11 @@ export default function AdminSidebar() {
         className="fixed left-4 top-3 z-40 grid h-11 w-11 place-items-center rounded-2xl border border-warm-border bg-white text-neutral-900 shadow-[0_12px_28px_rgba(91,48,35,0.12)] transition active:scale-95 md:hidden"
         onClick={() => setIsOpen(true)}
         aria-label="Mở menu admin"
+        aria-expanded={isOpen}
+        aria-controls="admin-sidebar"
         type="button"
       >
-        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
+        <Menu size={22} />
       </button>
 
       {isOpen && (
@@ -116,8 +136,10 @@ export default function AdminSidebar() {
       )}
 
       <aside
+        id="admin-sidebar"
+        aria-label="Điều hướng quản trị"
         className={cn(
-          'fixed inset-y-0 left-0 z-50 isolate flex h-screen flex-shrink-0 transform flex-col overflow-visible border-r border-[#ead8cd] shadow-[16px_0_40px_rgba(91,48,35,0.10)] transition-all duration-300 ease-in-out motion-reduce:transition-none md:relative md:translate-x-0 md:shadow-none',
+          'fixed inset-y-0 left-0 z-50 isolate flex h-[100dvh] flex-shrink-0 transform flex-col overflow-visible border-r border-[#ead8cd] shadow-[16px_0_40px_rgba(91,48,35,0.10)] transition-all duration-300 ease-in-out motion-reduce:transition-none md:relative md:translate-x-0 md:shadow-none',
           sidebarSurface,
           isOpen ? 'translate-x-0' : '-translate-x-full',
           isCollapsed ? 'w-[78px]' : 'w-[274px]',
@@ -163,26 +185,22 @@ export default function AdminSidebar() {
 
           {!isCollapsed && (
             <button
-              className="hidden h-9 w-9 items-center justify-center rounded-2xl border border-warm-border bg-white text-accent-kraft shadow-sm transition hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 md:flex"
+              className="hidden h-10 w-10 items-center justify-center rounded-2xl border border-warm-border bg-white text-accent-kraft shadow-sm transition hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 md:flex"
               onClick={() => setIsCollapsed(true)}
               aria-label="Thu gọn menu"
               type="button"
             >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
+              <PanelLeftClose size={19} />
             </button>
           )}
 
           <button
-            className="mr-2 rounded-xl p-2 text-neutral-500 transition-colors hover:bg-white hover:text-primary md:hidden"
+            className="mr-2 grid h-11 w-11 place-items-center rounded-xl text-neutral-500 transition-colors hover:bg-white hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 md:hidden"
             onClick={() => setIsOpen(false)}
             aria-label="Đóng menu admin"
             type="button"
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X size={22} />
           </button>
         </div>
 
