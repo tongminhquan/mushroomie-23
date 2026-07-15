@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState, useCallback } from 'react'
+import GameReadyOverlay, { type GameStartStateProps } from '@/components/minigame/GameReadyOverlay'
 import type { GameOverPayload } from '@/lib/game-config'
 import {
   canPlace as canPlacePure,
@@ -128,11 +129,15 @@ const playSound = (type: 'move' | 'drop' | 'invalid' | 'clear', combo: number = 
 
 // ─── Main Game ──────────────────────────────────────────────────────────────────
 export default function BlockBlastGame({
+  ready,
+  starting,
+  signedIn,
+  onStart,
   onGameOver,
   onRestart,
   restartDisabled = false,
   soundEnabled = true,
-}: {
+}: GameStartStateProps & {
   onGameOver: (result: GameOverPayload) => void
   onRestart: () => void
   restartDisabled?: boolean
@@ -146,7 +151,9 @@ export default function BlockBlastGame({
   // ── Game state ──────────────────────────────────────────────────────────────
   const [board, setBoard]     = useState(emptyBoard)
   const boardRef              = useRef<Board>(emptyBoard())
-  const [hand, setHand]       = useState<(Piece | null)[]>(() => mkHand(emptyBoard()))
+  const [hand, setHand]       = useState<(Piece | null)[]>(() =>
+    ready ? [null, null, null] : mkHand(emptyBoard()),
+  )
   const handRef               = useRef<(Piece | null)[]>([])
   const [score, setScore]     = useState(0);  const scoreRef = useRef(0)
   const [lines, setLines]     = useState(0);  const linesRef = useRef(0)
@@ -154,7 +161,7 @@ export default function BlockBlastGame({
   const [isOver, setIsOver]   = useState(false); const isOverRef = useRef(false)
   const [endReason, setEndReason] = useState<'blocked' | 'manual'>('blocked')
   const soundEnabledRef       = useRef(soundEnabled)
-  const startedAtRef          = useRef(Date.now())
+  const startedAtRef          = useRef(ready ? 0 : Date.now())
   const [clearing, setClearing] = useState<Cell[]>([])
   const [placed,   setPlaced]   = useState<Cell[]>([])
 
@@ -295,7 +302,7 @@ export default function BlockBlastGame({
 
   // ── Piece placement ──────────────────────────────────────────────────────────
   const completeGame = useCallback((finalScore: number, reason: 'blocked' | 'manual') => {
-    if (isOverRef.current) return
+    if (ready || isOverRef.current) return
 
     isOverRef.current = true
     setEndReason(reason)
@@ -308,7 +315,7 @@ export default function BlockBlastGame({
       level: 1,
       durationSec: Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000)),
     })
-  }, [onGameOver])
+  }, [onGameOver, ready])
 
   const checkGameOver = useCallback((b: (string|null)[][], h: (Piece|null)[], sc: number) => {
     const any = h.some(p => p && Array.from({ length: ROWS }, (_, r) =>
@@ -407,7 +414,7 @@ export default function BlockBlastGame({
 
   // ── POINTER DOWN – start drag ───────────────────────────────────────────────
   const startDrag = useCallback((e: React.PointerEvent<HTMLDivElement>, idx: number, piece: Piece) => {
-    if (dragging.current || isOverRef.current || clearing.length > 0) return
+    if (ready || dragging.current || isOverRef.current || clearing.length > 0) return
     e.preventDefault()
     e.stopPropagation()
 
@@ -468,7 +475,7 @@ export default function BlockBlastGame({
     const { row, col } = overlayToCell(vx, vy)
     const ok = canPlace(boardRef.current, piece.matrix, row, col)
     setHl({ piece, row, col, ok })
-  }, [clearing.length, buildOverlay, moveOverlay, overlayToCell, canPlace])
+  }, [ready, clearing.length, buildOverlay, moveOverlay, overlayToCell, canPlace])
 
   // ── POINTER MOVE ────────────────────────────────────────────────────────────
   const continueDrag = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
@@ -535,6 +542,7 @@ export default function BlockBlastGame({
   return (
     <div
       ref={containerRef}
+      aria-busy={ready && starting}
       style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center',
         width: '100%', userSelect: 'none',
@@ -557,7 +565,11 @@ export default function BlockBlastGame({
         }}
       />
 
-      <div style={{ display: 'flex', gap: 20, justifyContent: 'center', alignItems: 'flex-start', width: '100%', maxWidth: 860, flexWrap: 'wrap' }}>
+      <div
+        inert={ready ? true : undefined}
+        aria-hidden={ready ? true : undefined}
+        style={{ display: 'flex', gap: 20, justifyContent: 'center', alignItems: 'flex-start', width: '100%', maxWidth: 860, flexWrap: 'wrap' }}
+      >
 
         {/* ── Board column ── */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -683,13 +695,13 @@ export default function BlockBlastGame({
           <button
             type="button"
             onClick={endGame}
-            disabled={isOver || clearing.length > 0}
+            disabled={ready || isOver || clearing.length > 0}
             style={{
               padding: '11px 0', borderRadius: 14,
               background: 'rgba(255,77,106,.12)', border: '1px solid rgba(255,77,106,.24)',
               color: '#ff8a9d', fontWeight: 800, fontSize: 15,
-              cursor: isOver || clearing.length > 0 ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
-              opacity: isOver || clearing.length > 0 ? 0.5 : 1,
+              cursor: ready || isOver || clearing.length > 0 ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+              opacity: ready || isOver || clearing.length > 0 ? 0.5 : 1,
             }}
           >{clearing.length > 0 ? 'Đang tính điểm...' : 'Kết thúc lượt'}</button>
         </div>
@@ -728,6 +740,15 @@ export default function BlockBlastGame({
             >{restartDisabled ? 'Đang lưu điểm...' : 'Chơi lại'}</button>
           </div>
         </div>
+      )}
+
+      {ready && (
+        <GameReadyOverlay
+          game="block-blast"
+          starting={starting}
+          signedIn={signedIn}
+          onStart={onStart}
+        />
       )}
 
       <style>{`

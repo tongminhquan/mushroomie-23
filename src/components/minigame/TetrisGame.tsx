@@ -1,12 +1,16 @@
 'use client'
 
 import { useRef, useEffect, useCallback, useState } from 'react'
+import GameReadyOverlay, { type GameStartStateProps } from '@/components/minigame/GameReadyOverlay'
 import type { GameOverPayload } from '@/lib/game-config'
 
 // ── Constants ──
 const COLS = 10
 const ROWS = 20
 const CELL = 30
+
+const createGrid = (): (string | null)[][] =>
+  Array.from({ length: ROWS }, () => Array(COLS).fill(null))
 
 const COLORS: Record<string, string> = {
   I: '#00e5ff', J: '#4d7aff', L: '#ff8c1a',
@@ -38,7 +42,7 @@ interface LineClearAnim {
   duration: number     // ms
 }
 
-interface TetrisGameProps {
+interface TetrisGameProps extends GameStartStateProps {
   onGameOver?: (result: GameOverPayload) => void
   onRestart: () => void
   restartDisabled?: boolean
@@ -128,6 +132,10 @@ function sfxGameOver(ctx: AudioContext) {
 }
 
 export default function TetrisGame({
+  ready,
+  starting,
+  signedIn,
+  onStart,
   onGameOver,
   onRestart,
   restartDisabled = false,
@@ -159,13 +167,13 @@ export default function TetrisGame({
     particles: Particle[]
     startedAt: number
   }>({
-    grid: [], cur: null, nextType: '',
+    grid: createGrid(), cur: null, nextType: '',
     score: 0, lines: 0, level: 0,
     dropInterval: 1000, last: 0, acc: 0,
     over: false, paused: false, animFrame: null, flashTimer: 0,
     lineClearAnim: null,
     particles: [],
-    startedAt: Date.now(),
+    startedAt: 0,
   })
 
   const [score,  setScore]      = useState(0)
@@ -199,8 +207,6 @@ export default function TetrisGame({
 
   // ── Helpers ──
   const randomType = () => TYPES[Math.floor(Math.random() * TYPES.length)]
-  const newGrid = (): (string | null)[][] => Array.from({ length: ROWS }, () => Array(COLS).fill(null))
-
   // ── Particle system ──
   interface Particle {
     x: number; y: number; vx: number; vy: number
@@ -594,7 +600,7 @@ export default function TetrisGame({
 
   const start = useCallback(() => {
     const g = gameRef.current
-    g.grid = newGrid()
+    g.grid = createGrid()
     g.score = 0; g.lines = 0; g.level = 0
     g.startedAt = Date.now()
     g.over = false; g.paused = false
@@ -617,32 +623,54 @@ export default function TetrisGame({
 
   // ── Game Loop ──
   useEffect(() => {
-    let lastTime = 0
-    const loop = (t: number) => {
-      const g = gameRef.current
-      const dt = t - lastTime
-      lastTime = t
-      if (!g.last) g.last = t
-      const framedt = t - g.last
-      g.last = t
+    if (ready) {
+      const game = gameRef.current
+      game.grid = createGrid()
+      game.cur = null
+      game.nextType = ''
+      drawBoard()
+      drawNextPiece()
+      return
+    }
 
-      if (!g.over && !g.paused) {
+    let lastTime = 0
+    const loop = (time: number) => {
+      const game = gameRef.current
+      const delta = time - lastTime
+      lastTime = time
+      if (!game.last) game.last = time
+      const frameDelta = time - game.last
+      game.last = time
+
+      if (!game.over && !game.paused) {
         // Skip drop while line-clear animation is playing
-        if (!g.lineClearAnim) {
-          g.acc += framedt
-          if (g.acc > g.dropInterval) { softDrop(); g.acc = 0 }
+        if (!game.lineClearAnim) {
+          game.acc += frameDelta
+          if (game.acc > game.dropInterval) {
+            softDrop()
+            game.acc = 0
+          }
         }
-        drawBoard(dt)
+        drawBoard(delta)
       }
-      g.animFrame = requestAnimationFrame(loop)
+      game.animFrame = requestAnimationFrame(loop)
     }
     start()
-    gameRef.current.animFrame = requestAnimationFrame(loop)
-    return () => { if (gameRef.current.animFrame) cancelAnimationFrame(gameRef.current.animFrame) }
-  }, [])
+    const mountedGame = gameRef.current
+    mountedGame.animFrame = requestAnimationFrame(loop)
+    return () => {
+      if (mountedGame.animFrame) cancelAnimationFrame(mountedGame.animFrame)
+      mountedGame.animFrame = null
+    }
+    // GamePageClient changes runId for every new run, so `ready` is the only
+    // lifecycle transition this mounted instance can observe.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready])
 
   // ── Keyboard ──
   useEffect(() => {
+    if (ready) return
+
     const handleKey = (e: KeyboardEvent) => {
       if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault()
       const g = gameRef.current
@@ -661,7 +689,7 @@ export default function TetrisGame({
     window.addEventListener('keydown', handleKey)
     containerRef.current?.focus()
     return () => window.removeEventListener('keydown', handleKey)
-  }, [move, rotate, softDrop, hardDrop, gameOver, togglePause])
+  }, [ready, move, rotate, softDrop, hardDrop, gameOver, togglePause])
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -684,7 +712,8 @@ export default function TetrisGame({
     <div
       className={`tetris-game ${isFullscreen ? 'fullscreen-mode' : ''}`}
       ref={containerRef}
-      tabIndex={0}
+      tabIndex={ready ? -1 : 0}
+      aria-busy={ready && starting}
       onFocus={() => {}}
       style={{
         background: isFullscreen ? '#0a0a1a' : 'transparent',
@@ -694,7 +723,11 @@ export default function TetrisGame({
         outline: 'none',
       }}
     >
-      <div className="tetris-main">
+      <div
+        className="tetris-main"
+        inert={ready ? true : undefined}
+        aria-hidden={ready ? true : undefined}
+      >
         {/* Board */}
         <div className="tetris-board-wrap">
           <button
@@ -795,7 +828,11 @@ export default function TetrisGame({
       </div>
 
       {/* Mobile touch controls */}
-      <div className="tetris-touch-controls mobile-only">
+      <div
+        className="tetris-touch-controls mobile-only"
+        inert={ready ? true : undefined}
+        aria-hidden={ready ? true : undefined}
+      >
         <div className="tetris-touch-row">
           <MobileBtn onClick={() => move(-1)} label="←">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
@@ -822,6 +859,15 @@ export default function TetrisGame({
         </div>
       </div>
 
+      {ready && (
+        <GameReadyOverlay
+          game="tetris"
+          starting={starting}
+          signedIn={signedIn}
+          onStart={onStart}
+        />
+      )}
+
       <style>{`
         @keyframes glowSpin { to { filter: blur(6px) hue-rotate(360deg); } }
         @keyframes scoreFlash {
@@ -830,7 +876,7 @@ export default function TetrisGame({
           100% { transform: scale(1); }
         }
 
-        .tetris-game { display: flex; flex-direction: column; gap: 10px; width: 100%; align-items: center; }
+        .tetris-game { position: relative; display: flex; flex-direction: column; gap: 10px; width: 100%; align-items: center; }
         .tetris-main { display: flex; gap: 16px; justify-content: center; align-items: flex-start; }
 
         .tetris-board-wrap { position: relative; flex-shrink: 0; }

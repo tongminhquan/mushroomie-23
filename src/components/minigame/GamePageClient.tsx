@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { useSession } from 'next-auth/react'
-import { ArrowLeft, BarChart3, Music, Music2, Play, RotateCcw, Ticket, Trophy } from 'lucide-react'
+import { ArrowLeft, BarChart3, Music, Music2, RotateCcw, Ticket, Trophy } from 'lucide-react'
 import GameErrorBoundary from '@/components/minigame/GameErrorBoundary'
 import { useGameAudio } from '@/components/minigame/useGameAudio'
 import {
@@ -53,7 +53,8 @@ export default function GamePageClient({ game }: { game: GameKey }) {
   const config = GAME_DEFINITIONS[game]
   const { data: session } = useSession()
   const userId = session?.user?.id
-  const [phase, setPhase] = useState<'start' | 'playing' | 'result'>('start')
+  const [phase, setPhase] = useState<'ready' | 'playing' | 'result'>('ready')
+  const [starting, setStarting] = useState(false)
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [token, setToken] = useState('')
   const [runId, setRunId] = useState(0)
@@ -114,6 +115,7 @@ export default function GamePageClient({ game }: { game: GameKey }) {
   const startGame = useCallback(async () => {
     if (startingRef.current) return
     startingRef.current = true
+    setStarting(true)
     setSubmitState({ status: 'idle' })
     setLastResult(null)
 
@@ -142,6 +144,7 @@ export default function GamePageClient({ game }: { game: GameKey }) {
       setPhase('playing')
     } finally {
       startingRef.current = false
+      setStarting(false)
     }
   }, [game, userId])
 
@@ -241,37 +244,32 @@ export default function GamePageClient({ game }: { game: GameKey }) {
 
       <section className="mx-auto grid max-w-6xl gap-5 px-4 py-6 md:px-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0">
-          {phase === 'start' ? (
-            <StartScreen
-              game={game}
-              soundEnabled={soundEnabled}
-              onSoundChange={persistSound}
-              onStart={startGame}
-            />
-          ) : (
-            <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-3 shadow-[0_30px_90px_rgba(0,0,0,0.35)] sm:p-4 md:p-5">
-              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/65">
-                    {config.controlMode}
-                  </p>
-                  <h2 className="mt-1 text-2xl font-extrabold tracking-normal text-white md:text-3xl">
-                    {config.title}
-                  </h2>
-                </div>
+          <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-3 shadow-[0_30px_90px_rgba(0,0,0,0.35)] sm:p-4 md:p-5">
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/65">
+                  {config.controlMode}
+                </p>
+                <h2 className="mt-1 text-2xl font-extrabold tracking-normal text-white md:text-3xl">
+                  {config.title}
+                </h2>
               </div>
-              <GameErrorBoundary resetKey={`${game}-${runId}`}>
-                <GameComponent
-                  key={`${game}-${runId}`}
-                  onGameOver={handleGameOver}
-                  onRestart={startGame}
-                  restartDisabled={submitState.status === 'saving'}
-                  soundEnabled={soundEnabled}
-                  onSoundToggle={persistSound}
-                />
-              </GameErrorBoundary>
-            </section>
-          )}
+            </div>
+            <GameErrorBoundary resetKey={`${game}-${runId}`}>
+              <GameComponent
+                key={`${game}-${runId}`}
+                ready={phase === 'ready'}
+                starting={starting}
+                signedIn={!!userId}
+                onStart={startGame}
+                onGameOver={handleGameOver}
+                onRestart={startGame}
+                restartDisabled={submitState.status === 'saving'}
+                soundEnabled={soundEnabled}
+                onSoundToggle={persistSound}
+              />
+            </GameErrorBoundary>
+          </section>
         </div>
 
         <aside className="space-y-5">
@@ -293,83 +291,6 @@ export default function GamePageClient({ game }: { game: GameKey }) {
         </aside>
       </section>
     </div>
-  )
-}
-
-function StartScreen({
-  game,
-  soundEnabled,
-  onSoundChange,
-  onStart,
-}: {
-  game: GameKey
-  soundEnabled: boolean
-  onSoundChange: (enabled: boolean) => void
-  onStart: () => void
-}) {
-  const { data: session } = useSession()
-  const config = GAME_DEFINITIONS[game]
-
-  return (
-    <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-5 shadow-[0_30px_90px_rgba(0,0,0,0.35)] md:p-7">
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-[#ff6b6b]">
-            Sẵn sàng chơi
-          </p>
-          <h2 className="mt-2 font-body text-3xl font-extrabold tracking-normal text-white md:text-4xl">
-            {config.title}
-          </h2>
-          <p className="mt-3 text-sm font-medium leading-6 text-white/75">{config.startHint}</p>
-
-          <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
-            <div className="mb-3 text-xs font-extrabold uppercase tracking-[0.16em] text-white/62">
-              Hướng dẫn
-            </div>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {config.instructions.map((item) => (
-                <div key={item} className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm font-semibold text-white/68">
-                  {item}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {!session && (
-            <div className="mt-5 rounded-2xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm font-semibold text-amber-100">
-              Đăng nhập để lưu điểm và nhận voucher.
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={onStart}
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#e41d1d] px-5 text-sm font-extrabold text-white shadow-[0_16px_36px_rgba(228,29,29,0.28)] hover:bg-[#c91515]"
-          >
-            <Play size={18} />
-            Bắt đầu chơi
-          </button>
-          <button
-            type="button"
-            onClick={() => document.getElementById('game-leaderboard')?.scrollIntoView({ behavior: 'smooth' })}
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 text-sm font-extrabold text-white/72 hover:bg-white/10"
-          >
-            <BarChart3 size={18} />
-            Xem bảng xếp hạng
-          </button>
-          <button
-            type="button"
-            onClick={() => onSoundChange(!soundEnabled)}
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/20 px-5 text-sm font-extrabold text-white/72 hover:bg-white/10"
-          >
-            {soundEnabled ? <Music2 size={18} /> : <Music size={18} />}
-            {soundEnabled ? 'Tắt nhạc nền' : 'Bật nhạc nền'}
-          </button>
-        </div>
-      </div>
-    </section>
   )
 }
 

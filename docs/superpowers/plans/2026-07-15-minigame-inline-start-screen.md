@@ -274,22 +274,17 @@ Return early from the keyboard effect when `ready` is true and include `ready` i
 )}
 ```
 
-- [ ] **Step 4: Run focused tests and typecheck**
+- [ ] **Step 4: Run the focused tests**
 
 Run: `npm exec tsx -- --test tests/minigame-start-flow.test.ts`
 
 Expected: PASS.
 
-Run: `npm run typecheck`
+- [ ] **Step 5: Hold the Tetris change for the shared-contract checkpoint**
 
-Expected: PASS with no new TypeScript errors.
-
-- [ ] **Step 5: Commit Tetris lifecycle changes**
-
-```bash
-git add src/components/minigame/TetrisGame.tsx tests/minigame-start-flow.test.ts
-git commit -m "fix: wait for user start before running Tetris"
-```
+Do not commit yet: `GamePageClient` cannot satisfy the new shared props until
+both dynamic game components expose the same interface. Keep the focused test
+green and commit Tasks 2-4 atomically after route orchestration is complete.
 
 ### Task 3: Block Blast Ready Lifecycle
 
@@ -386,22 +381,16 @@ Make the board/tray/sidebar wrapper inert while ready, disable the manual end ac
 )}
 ```
 
-- [ ] **Step 4: Run focused tests and typecheck**
+- [ ] **Step 4: Run the focused tests**
 
 Run: `npm exec tsx -- --test tests/minigame-start-flow.test.ts`
 
 Expected: PASS.
 
-Run: `npm run typecheck`
+- [ ] **Step 5: Hold the Block Blast change for the shared-contract checkpoint**
 
-Expected: PASS.
-
-- [ ] **Step 5: Commit Block Blast lifecycle changes**
-
-```bash
-git add src/components/minigame/BlockBlastGame.tsx tests/minigame-start-flow.test.ts
-git commit -m "fix: wait for user start before running Block Blast"
-```
+Do not commit yet. The full TypeScript contract becomes valid in Task 4 when
+`GamePageClient` passes the shared props to both components.
 
 ### Task 4: Route-Level Orchestration
 
@@ -487,7 +476,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit route orchestration**
 
 ```bash
-git add src/components/minigame/GamePageClient.tsx tests/minigame-start-flow.test.ts
+git add docs/superpowers/plans/2026-07-15-minigame-inline-start-screen.md src/components/minigame/GamePageClient.tsx src/components/minigame/TetrisGame.tsx src/components/minigame/BlockBlastGame.tsx tests/minigame-start-flow.test.ts
 git commit -m "feat: open mini games on an inline start screen"
 ```
 
