@@ -23,7 +23,7 @@ impression, click va vi tri trung binh phai lay tu Google Search Console.
 | P1 | Dry-run migrate slug + redirect vinh vien | Bao toan URL cu va backlink | Cho backup/xac nhan apply |
 | P2 | Audit 23 local landing bang GSC | Tranh doorway page va cannibalization | Cho du lieu GSC |
 | P2 | Lam day 10 bai trong tam | Tang E-E-A-T va gia tri tim kiem | Can noi dung/anh that |
-| P3 | Citation va outreach hop le | Xay authority khong spam | Marketing thuc hien |
+| P3 | Citation va outreach hop le | Xay authority khong spam | Tracker/baseline xong; marketing thuc hien |
 | P3 | Theo doi 30 tu khoa, CWV, index, Local Pack | Do tac dong thay vi doan | Can GSC/GA4/GBP |
 
 ## Quyen so huu tu khoa
@@ -108,3 +108,16 @@ Thu thap hang tuan trong 12 tuan dau:
 - Bai viet nam trong MySQL/Prisma; chat luong 64 bai can export DB chi doc hoac
   crawl production de cham tung URL.
 - Khong cam ket top 10. Roadmap nay toi uu xac suat va giu tin hieu sach.
+
+## Phase 5 backlink
+
+- Tracker van hanh: `docs/backlink-tracker.md`.
+- Baseline: `docs/backlink-baseline-2026-07-17.md`.
+- Backlink Health Score hien tai: `INSUFFICIENT DATA (0/7 yeu to)`.
+- Bon profile Facebook, Instagram, TikTok va Shopee tra HTTP 200 nhung backlink
+  chua xac minh duoc tu HTML khong-JavaScript; trang thai dung la
+  `unverifiable_js`, khong phai `verified` hoac `lost`.
+- Dinh huong an toan la 40-80 link/citation chat luong trong 6-12 thang, khong
+  dung 200 backlink dofollow lam KPI.
+- Claim citation, kiem tra bio va outreach la phan viec cua chu doanh
+  nghiep/marketing; khong tu dong tao backlink.
