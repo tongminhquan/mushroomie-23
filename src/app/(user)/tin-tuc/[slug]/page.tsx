@@ -15,7 +15,7 @@ import { sanitizeHtml } from '@/lib/sanitize'
 import { toAbsoluteUrl } from '@/lib/url'
 import {
   inspectImageForRender,
-  resolveArticleImagesForRender,
+  resolveResponsiveArticleImagesForRender,
   resolveImageUrlForRender,
 } from '@/lib/server-image'
 import { safeJsonLd } from '@/lib/security'
@@ -187,7 +187,7 @@ export default async function PostDetailPage({
     resolveImageUrlForRender(post.og_image || post.featured_image || DEFAULT_OG_IMAGE, 'post').then(
       toAbsoluteUrl,
     ),
-    resolveArticleImagesForRender(sanitizeHtml(post.content || ''), 'post'),
+    resolveResponsiveArticleImagesForRender(sanitizeHtml(post.content || ''), 'post'),
   ])
 
   const jsonLd = generateJsonLd(post, structuredImageUrl)

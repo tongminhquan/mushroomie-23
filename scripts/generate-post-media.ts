@@ -498,15 +498,19 @@ async function applyPostPlan(plan: PostPlan, generated: GeneratedAsset[]) {
 
     const coverAsset = generated.find((asset) => asset.role === 'cover')
     const generatedSquares = generated.filter((asset) => asset.role === 'square')
-    const squareUrls = [
-      ...plan.existingSquareSources,
-      ...generatedSquares.map((asset) => asset.publicUrl),
+    const squareFigures = [
+      ...plan.existingSquareSources.map((src) => ({ src })),
+      ...generatedSquares.map((asset) => ({
+        src: asset.publicUrl,
+        width: asset.width,
+        height: asset.height,
+      })),
     ].slice(0, 2)
 
-    const figures: ArticleFigure[] = squareUrls.map((url, index) => {
+    const figures: ArticleFigure[] = squareFigures.map((image, index) => {
       const slot = (index === 0 ? 'content-1' : 'content-2') as ArticleFigure['slot']
       const copy = postImageCopy(plan.post, index === 0 ? 1 : 2)
-      return { slot, src: url, alt: copy.alt, caption: copy.caption }
+      return { slot, ...image, alt: copy.alt, caption: copy.caption }
     })
     const content = insertArticleFigures(plan.post.content, figures)
     const metrics = contentMetrics(content)

@@ -3,6 +3,7 @@ import test from 'node:test'
 
 import { geoImageGraph, geoImageObject } from '../src/lib/geo-image-schema'
 import {
+  buildArticleFigureHtml,
   extractImageSources,
   insertArticleFigures,
   type ArticleFigure,
@@ -60,6 +61,18 @@ test('insertArticleFigures is idempotent and escapes metadata', () => {
 
   assert.equal(once, twice)
   assert.match(once, /alt="Charm &quot;đỏ&quot; &lt;mẫu&gt;"/)
+})
+
+test('buildArticleFigureHtml serializes supplied natural dimensions without a fallback size', () => {
+  const html = buildArticleFigureHtml({
+    ...figures[0],
+    width: 1200,
+    height: 675,
+  })
+
+  assert.match(html, /width="1200"/)
+  assert.match(html, /height="675"/)
+  assert.doesNotMatch(html, /width="960"/)
 })
 
 test('geo image schema links media to the public Mushroomie store location', () => {

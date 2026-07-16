@@ -3,6 +3,8 @@ export interface ArticleFigure {
   src: string
   alt: string
   caption: string
+  width?: number
+  height?: number
 }
 
 export function extractImageSources(html?: string | null): string[] {
@@ -29,12 +31,20 @@ function escapeHtml(value: string) {
 }
 
 export function buildArticleFigureHtml(figure: ArticleFigure) {
+  const dimensions = validDimension(figure.width) && validDimension(figure.height)
+    ? ' width="' + figure.width + '" height="' + figure.height + '"'
+    : ''
+
   return [
     '<figure class="mushroomie-article-media" data-mushroomie-media-slot="' + figure.slot + '">',
-    '<img src="' + escapeHtml(figure.src) + '" alt="' + escapeHtml(figure.alt) + '" width="960" height="960" loading="lazy" decoding="async">',
+    '<img src="' + escapeHtml(figure.src) + '" alt="' + escapeHtml(figure.alt) + '"' + dimensions + ' loading="lazy" decoding="async">',
     '<figcaption>' + escapeHtml(figure.caption) + '</figcaption>',
     '</figure>',
   ].join('')
+}
+
+function validDimension(value: number | undefined) {
+  return Boolean(value && Number.isFinite(value) && value > 0)
 }
 
 function closingTagOffsets(html: string, tag: 'h2' | 'p') {
