@@ -43,7 +43,10 @@ test('product detail resolves exact slugs before canonical fallback and permanen
 
   assert.match(source, /getProductSlugLookupCandidates/)
   assert.match(source, /for \(const candidate of candidates\)/)
-  assert.match(source, /permanentRedirect\(`\/san-pham\/\$\{productRaw\.slug\}`\)/)
+  assert.match(
+    source,
+    /permanentRedirect\(`\/san-pham\/\$\{encodeURIComponent\(productRaw\.slug\)\}`\)/,
+  )
   assert.match(source, /canonical:\s*toAbsoluteUrl\(`\/san-pham\/\$\{product\.slug\}`\)/)
   assert.doesNotMatch(source, /node:fs|backups[\\/]logs|product-slug-normalization-/)
 })

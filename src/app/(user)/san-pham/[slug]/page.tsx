@@ -132,7 +132,7 @@ export default async function ProductDetailPage({
   }
 
   if (decodeProductSlug(slug) !== productRaw.slug) {
-    permanentRedirect(`/san-pham/${productRaw.slug}`)
+    permanentRedirect(`/san-pham/${encodeURIComponent(productRaw.slug)}`)
   }
 
   const product = {
