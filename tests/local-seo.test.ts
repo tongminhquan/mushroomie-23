@@ -29,6 +29,21 @@ test('BRAND dùng đúng NAP và tọa độ đã được xác minh', () => {
   assert.ok(BRAND.mapUrl.includes(coordinatePair))
   assert.ok(BRAND.mapEmbedUrl.includes(coordinatePair))
   assert.ok(BRAND.mapEmbedUrl.startsWith('https://www.google.com/maps/'))
+  assert.ok(BRAND.directionsUrl.includes(`destination=${coordinatePair}`))
+  assert.deepEqual(BRAND.nearbyLandmarks, [
+    {
+      name: 'Trường Tiểu học Trảng Dài',
+      addressHint: 'đường Nguyễn Thái Học',
+      distanceKm: 2.1,
+      travelTime: 'khoảng 4–7 phút',
+    },
+    {
+      name: 'UBND phường Trảng Dài',
+      addressHint: '462 Bùi Trọng Nghĩa',
+      distanceKm: 2.4,
+      travelTime: 'khoảng 5–8 phút',
+    },
+  ])
 })
 
 test('BRAND tập trung URL và handle social canonical', () => {

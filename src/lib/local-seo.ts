@@ -59,7 +59,22 @@ export const BRAND = {
   shopee: SOCIALS.shopee.url,
   mapUrl: `https://www.google.com/maps?q=${COORDINATE_PAIR}`,
   mapEmbedUrl: `https://www.google.com/maps/?q=${COORDINATE_PAIR}&output=embed`,
+  directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${COORDINATE_PAIR}`,
   geo: VERIFIED_GEO,
+  nearbyLandmarks: [
+    {
+      name: 'Trường Tiểu học Trảng Dài',
+      addressHint: 'đường Nguyễn Thái Học',
+      distanceKm: 2.1,
+      travelTime: 'khoảng 4–7 phút',
+    },
+    {
+      name: 'UBND phường Trảng Dài',
+      addressHint: '462 Bùi Trọng Nghĩa',
+      distanceKm: 2.4,
+      travelTime: 'khoảng 5–8 phút',
+    },
+  ],
   openingHours: {
     opens: '08:00',
     closes: '21:00',

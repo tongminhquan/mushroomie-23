@@ -82,7 +82,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
 
       {/* Thông tin địa phương hiển thị đồng nhất với LocalBusiness schema */}
       <section className="brand-container mt-8" aria-labelledby="local-contact-heading">
-        <div className="grid gap-4 rounded-[18px] border-[1.5px] border-warm-border bg-white p-5 shadow-card sm:grid-cols-3 sm:p-6">
+        <div className="grid gap-5 rounded-[18px] border-[1.5px] border-warm-border bg-white p-5 shadow-card sm:p-6 lg:grid-cols-[1.5fr_0.75fr_0.75fr]">
           <div>
             <h2 id="local-contact-heading" className="flex items-center gap-2 font-heading text-base text-neutral-900">
               <MapPin size={17} className="text-primary" /> {BRAND.name} tại Đồng Nai
@@ -93,8 +93,20 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
             <p className="mt-2 text-sm leading-relaxed text-neutral-600">
               Mở bản đồ và đi theo chỉ dẫn đến đúng ghim tại địa chỉ trên. Vui lòng liên hệ trước khi bạn muốn hẹn nhận trực tiếp.
             </p>
+            <ul className="mt-3 space-y-2 text-sm leading-relaxed text-neutral-600">
+              {BRAND.nearbyLandmarks.map((landmark) => (
+                <li key={landmark.name} className="flex gap-2">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
+                  <span>
+                    Từ <strong className="text-neutral-800">{landmark.name}</strong>
+                    {' '}({landmark.addressHint}) khoảng {landmark.distanceKm} km,
+                    {' '}{landmark.travelTime} tùy giao thông.
+                  </span>
+                </li>
+              ))}
+            </ul>
             <a
-              href={BRAND.mapUrl}
+              href={BRAND.directionsUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-primary hover:underline"
@@ -179,7 +191,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-neutral-600">{deliveryNote(page.area, page.onlineOnly)}</p>
           <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-            Tất cả sản phẩm đều <strong>handmade 100%</strong> và có thể <strong>cá nhân hóa</strong> theo màu sắc, charm, kiểu dáng — đúng tinh thần “{BRAND.slogan}”.
+            Sản phẩm được <strong>làm thủ công</strong>. Nhiều mẫu hỗ trợ <strong>cá nhân hóa</strong> theo màu sắc, charm hoặc kiểu dáng — đúng tinh thần “{BRAND.slogan}”.
           </p>
         </div>
       </section>

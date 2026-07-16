@@ -230,8 +230,20 @@ export default function ContactPage() {
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-600">
                 {BRAND.name} ở {BRAND.formattedAddress}. Trước khi đến, bạn hãy mở bản đồ và đi theo chỉ dẫn đến đúng ghim tại địa chỉ này.
               </p>
+              <ul className="mt-3 grid gap-2 text-sm leading-relaxed text-neutral-600 sm:grid-cols-2">
+                {BRAND.nearbyLandmarks.map((landmark) => (
+                  <li
+                    key={landmark.name}
+                    className="rounded-xl border border-warm-border bg-secondary px-3.5 py-3"
+                  >
+                    Từ <strong className="text-neutral-800">{landmark.name}</strong>
+                    {' '}({landmark.addressHint}) đến điểm hẹn khoảng {landmark.distanceKm} km,
+                    {' '}{landmark.travelTime} tùy tình hình giao thông.
+                  </li>
+                ))}
+              </ul>
               <a
-                href={BRAND.mapUrl}
+                href={BRAND.directionsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-primary hover:underline"

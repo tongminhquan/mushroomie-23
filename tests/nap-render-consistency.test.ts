@@ -28,8 +28,13 @@ test('mọi điểm hiển thị NAP dùng BRAND thay vì bản sao hardcode', (
 })
 
 test('contact và Footer dùng map/social canonical từ BRAND', () => {
+  assert.match(source.contact, /<iframe/)
   assert.match(source.contact, /src=\{BRAND\.mapEmbedUrl\}/)
-  assert.match(source.contact, /href=\{BRAND\.mapUrl\}/)
+  assert.match(source.contact, /loading="lazy"/)
+  assert.match(source.contact, /href=\{BRAND\.directionsUrl\}/)
+  assert.match(source.contact, /BRAND\.nearbyLandmarks\.map/)
+  assert.match(source.landing, /href=\{BRAND\.directionsUrl\}/)
+  assert.match(source.landing, /BRAND\.nearbyLandmarks\.map/)
   assert.doesNotMatch(source.contact, /10\.9955388|106\.8820431/)
 
   for (const platform of ['facebook', 'instagram', 'tiktok', 'shopee']) {
@@ -38,4 +43,9 @@ test('contact và Footer dùng map/social canonical từ BRAND', () => {
   }
 
   assert.doesNotMatch(source.footer, /https:\/\/www\.tiktok\.com\/@mushr00mie(?:["'])/)
+})
+
+test('landing page không hứa mọi sản phẩm đều hỗ trợ cá nhân hóa', () => {
+  assert.doesNotMatch(source.landing, /Tất cả sản phẩm đều[\s\S]*có thể <strong>cá nhân hóa<\/strong>/)
+  assert.match(source.landing, /Nhiều mẫu hỗ trợ <strong>cá nhân hóa<\/strong>/)
 })
