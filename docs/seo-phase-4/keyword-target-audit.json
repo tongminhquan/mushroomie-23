@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-16T20:57:39.741Z",
+  "generatedAt": "2026-07-16T21:04:47.442Z",
   "summary": {
     "keywordCount": 30,
     "ownerCount": 9,
     "missingOwnerCount": 0,
-    "duplicateFocusKeywordCount": 1,
+    "duplicateFocusKeywordCount": 0,
     "malformedPostSlugCount": 1,
     "priorityPostCount": 10
   },
@@ -41,8 +41,8 @@
         {
           "id": 3,
           "slug": "vong-tay-handmade",
-          "title": "bài viết",
-          "focusKeyword": "vòng tay handmade"
+          "title": "Cách chọn vòng tay handmade theo phong cách riêng",
+          "focusKeyword": "cách chọn vòng tay handmade theo phong cách"
         }
       ],
       "status": "mapped"
@@ -106,16 +106,10 @@
           "id": 39,
           "slug": "vong-tay-handmade-nu",
           "title": "Vòng tay handmade nữ – Cẩm nang chọn mẫu phù hợp",
-          "focusKeyword": "vòng tay handmade nữ"
-        },
-        {
-          "id": 4,
-          "slug": "https://mushroomie.io.vn/vong-tay-handmade-nu/",
-          "title": "vòng tay handmade nữ",
-          "focusKeyword": "vòng tay handmade nữ"
+          "focusKeyword": "cách chọn vòng tay handmade nữ"
         }
       ],
-      "status": "duplicate"
+      "status": "mapped"
     },
     {
       "index": 5,
@@ -176,7 +170,7 @@
           "id": 22,
           "slug": "vong-tay-hat-cuom",
           "title": "Vòng tay hạt cườm – Cẩm nang chọn mẫu phù hợp",
-          "focusKeyword": "vòng tay hạt cườm"
+          "focusKeyword": "cách chọn vòng tay hạt cườm"
         }
       ],
       "status": "mapped"
@@ -202,7 +196,7 @@
           "id": 41,
           "slug": "vong-tay-charm",
           "title": "Vòng tay charm – Cẩm nang chọn mẫu phù hợp",
-          "focusKeyword": "vòng tay charm"
+          "focusKeyword": "cách phối vòng tay charm"
         }
       ],
       "status": "mapped"
@@ -361,7 +355,7 @@
           "id": 18,
           "slug": "phu-kien-handmade",
           "title": "Phụ kiện handmade mang cảm xúc giản dị cho phong cách Gen Z",
-          "focusKeyword": "phụ kiện handmade"
+          "focusKeyword": "cách chọn phụ kiện handmade"
         }
       ],
       "status": "mapped"
@@ -387,7 +381,7 @@
           "id": 21,
           "slug": "shop-phu-kien-handmade",
           "title": "Shop phụ kiện handmade – Cách chọn và đặt hàng an toàn",
-          "focusKeyword": "shop phụ kiện handmade"
+          "focusKeyword": "cách chọn shop phụ kiện handmade uy tín"
         }
       ],
       "status": "mapped"
@@ -413,7 +407,7 @@
           "id": 17,
           "slug": "trang-suc-handmade",
           "title": "Trang sức handmade – Cẩm nang chọn mẫu phù hợp",
-          "focusKeyword": "trang sức handmade"
+          "focusKeyword": "cách phối trang sức handmade"
         }
       ],
       "status": "mapped"
@@ -477,7 +471,7 @@
           "id": 36,
           "slug": "moc-khoa-handmade",
           "title": "Móc khóa handmade – Cẩm nang chọn mẫu phù hợp",
-          "focusKeyword": "móc khóa handmade"
+          "focusKeyword": "cách chọn móc khóa handmade"
         }
       ],
       "status": "mapped"
@@ -638,8 +632,15 @@
         "description": "Tham khảo cách chọn vòng tay tình bạn và quà cá nhân hóa cho bạn thân."
       },
       "ownerReachable": true,
-      "currentTargets": [],
-      "status": "owner-only"
+      "currentTargets": [
+        {
+          "id": 61,
+          "slug": "vong-tay-best-friend-handmade",
+          "title": "Vòng tay best friend handmade – Cẩm nang chọn mẫu phù hợp",
+          "focusKeyword": "quà sinh nhật cho bạn thân"
+        }
+      ],
+      "status": "mapped"
     },
     {
       "index": 30,
@@ -657,25 +658,18 @@
         "description": "Tìm ý tưởng quà tặng giàu cảm xúc và có dấu ấn riêng cho người thương."
       },
       "ownerReachable": true,
-      "currentTargets": [],
-      "status": "owner-only"
-    }
-  ],
-  "duplicateFocusKeywords": [
-    {
-      "keyword": "vòng tay handmade nữ",
-      "posts": [
+      "currentTargets": [
         {
-          "id": 4,
-          "slug": "https://mushroomie.io.vn/vong-tay-handmade-nu/"
-        },
-        {
-          "id": 39,
-          "slug": "vong-tay-handmade-nu"
+          "id": 74,
+          "slug": "qua-handmade-tang-nguoi-yeu",
+          "title": "Quà handmade tặng người yêu – Gợi ý chọn quà có ý nghĩa",
+          "focusKeyword": "quà handmade cho người yêu"
         }
-      ]
+      ],
+      "status": "mapped"
     }
   ],
+  "duplicateFocusKeywords": [],
   "malformedPostSlugs": [
     {
       "id": 4,
@@ -701,56 +695,56 @@
       "id": 18,
       "slug": "phu-kien-handmade",
       "title": "Phụ kiện handmade mang cảm xúc giản dị cho phong cách Gen Z",
-      "focusKeyword": "phụ kiện handmade",
+      "focusKeyword": "cách chọn phụ kiện handmade",
       "wordCount": 704
     },
     {
       "id": 21,
       "slug": "shop-phu-kien-handmade",
       "title": "Shop phụ kiện handmade – Cách chọn và đặt hàng an toàn",
-      "focusKeyword": "shop phụ kiện handmade",
+      "focusKeyword": "cách chọn shop phụ kiện handmade uy tín",
       "wordCount": 708
     },
     {
       "id": 22,
       "slug": "vong-tay-hat-cuom",
       "title": "Vòng tay hạt cườm – Cẩm nang chọn mẫu phù hợp",
-      "focusKeyword": "vòng tay hạt cườm",
+      "focusKeyword": "cách chọn vòng tay hạt cườm",
       "wordCount": 711
     },
     {
       "id": 36,
       "slug": "moc-khoa-handmade",
       "title": "Móc khóa handmade – Cẩm nang chọn mẫu phù hợp",
-      "focusKeyword": "móc khóa handmade",
+      "focusKeyword": "cách chọn móc khóa handmade",
       "wordCount": 913
     },
     {
       "id": 39,
       "slug": "vong-tay-handmade-nu",
       "title": "Vòng tay handmade nữ – Cẩm nang chọn mẫu phù hợp",
-      "focusKeyword": "vòng tay handmade nữ",
+      "focusKeyword": "cách chọn vòng tay handmade nữ",
       "wordCount": 920
     },
     {
       "id": 41,
       "slug": "vong-tay-charm",
       "title": "Vòng tay charm – Cẩm nang chọn mẫu phù hợp",
-      "focusKeyword": "vòng tay charm",
+      "focusKeyword": "cách phối vòng tay charm",
       "wordCount": 908
     },
     {
       "id": 61,
       "slug": "vong-tay-best-friend-handmade",
       "title": "Vòng tay best friend handmade – Cẩm nang chọn mẫu phù hợp",
-      "focusKeyword": "vòng tay best friend handmade",
+      "focusKeyword": "quà sinh nhật cho bạn thân",
       "wordCount": 888
     },
     {
       "id": 74,
       "slug": "qua-handmade-tang-nguoi-yeu",
       "title": "Quà handmade tặng người yêu – Gợi ý chọn quà có ý nghĩa",
-      "focusKeyword": "quà handmade tặng người yêu",
+      "focusKeyword": "quà handmade cho người yêu",
       "wordCount": 894
     }
   ]

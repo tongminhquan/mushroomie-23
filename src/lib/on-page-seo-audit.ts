@@ -122,6 +122,25 @@ function normalizeComparableUrl(value: string, siteUrl: string): string | null {
   }
 }
 
+function isIntentionalPostConsolidation(
+  canonical: string | null,
+  expectedCanonical: string | null,
+  robotsIndex: boolean | null | undefined,
+  siteUrl: string,
+) {
+  if (robotsIndex !== false || !canonical || !expectedCanonical || canonical === expectedCanonical) {
+    return false
+  }
+
+  try {
+    const canonicalUrl = new URL(canonical)
+    const siteOrigin = new URL(siteUrl).origin
+    return canonicalUrl.origin === siteOrigin && canonicalUrl.pathname.startsWith('/tin-tuc/')
+  } catch {
+    return false
+  }
+}
+
 function getAttribute(element: DefaultTreeAdapterTypes.Element, name: string) {
   return element.attrs.find((attribute) => attribute.name === name)?.value ?? null
 }
@@ -311,14 +330,20 @@ export function auditPostOnPageSeo(
 
   const canonical = normalizeComparableUrl(post.canonical_url || url, baseUrl)
   const expectedCanonical = normalizeComparableUrl(url, baseUrl)
-  if (!canonical || canonical !== expectedCanonical) {
+  const intentionalConsolidation = isIntentionalPostConsolidation(
+    canonical,
+    expectedCanonical,
+    post.robots_index,
+    baseUrl,
+  )
+  if ((!canonical || canonical !== expectedCanonical) && !intentionalConsolidation) {
     issues.push({
       code: 'canonical_mismatch',
       severity: 'error',
       message: `Canonical must resolve to ${url}.`,
     })
   }
-  if (post.robots_index === false) {
+  if (post.robots_index === false && !intentionalConsolidation) {
     issues.push({
       code: 'robots_noindex',
       severity: 'error',

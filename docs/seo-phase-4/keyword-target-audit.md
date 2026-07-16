@@ -1,13 +1,13 @@
 # Mushroomie SEO Phase 4 - Keyword Target Audit
 
-Generated: 2026-07-16T20:57:39.741Z
+Generated: 2026-07-16T21:04:47.442Z
 
 ## Summary
 
 - Keywords: 30
 - Canonical owner URLs: 9
 - Missing owners: 0
-- Duplicate focus-keyword groups: 1
+- Duplicate focus-keyword groups: 0
 - Malformed post slugs: 1
 - Priority content briefs: 10
 
@@ -18,7 +18,7 @@ Generated: 2026-07-16T20:57:39.741Z
 | 1 | vòng tay handmade | /san-pham?category=vong-tay | 200/reachable | mapped |
 | 2 | vòng tay | /san-pham?category=vong-tay | 200/reachable | owner-only |
 | 3 | vòng tay nữ | /san-pham?category=vong-tay | 200/reachable | owner-only |
-| 4 | vòng tay handmade nữ | /san-pham?category=vong-tay | 200/reachable | duplicate |
+| 4 | vòng tay handmade nữ | /san-pham?category=vong-tay | 200/reachable | mapped |
 | 5 | vòng tay custom | /san-pham?category=vong-tay | 200/reachable | owner-only |
 | 6 | vòng tay theo yêu cầu | /san-pham?category=vong-tay | 200/reachable | owner-only |
 | 7 | vòng tay hạt cườm | /san-pham?category=vong-tay | 200/reachable | mapped |
@@ -43,12 +43,12 @@ Generated: 2026-07-16T20:57:39.741Z
 | 26 | vòng cổ handmade | /san-pham?category=vong-co | 200/reachable | owner-only |
 | 27 | dây chuyền handmade | /san-pham?category=vong-co | 200/reachable | owner-only |
 | 28 | quà tặng handmade | /tin-tuc/qua-tang-handmade | 200/reachable | mapped |
-| 29 | quà sinh nhật cho bạn thân | /tin-tuc/vong-tay-best-friend-handmade | 200/reachable | owner-only |
-| 30 | quà handmade cho người yêu | /tin-tuc/qua-handmade-tang-nguoi-yeu | 200/reachable | owner-only |
+| 29 | quà sinh nhật cho bạn thân | /tin-tuc/vong-tay-best-friend-handmade | 200/reachable | mapped |
+| 30 | quà handmade cho người yêu | /tin-tuc/qua-handmade-tang-nguoi-yeu | 200/reachable | mapped |
 
 ## Duplicate Focus Keywords
 
-- **vòng tay handmade nữ**: 4 (https://mushroomie.io.vn/vong-tay-handmade-nu/), 39 (vong-tay-handmade-nu)
+- None detected.
 
 ## Malformed Post Slugs
 

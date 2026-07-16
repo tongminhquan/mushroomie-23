@@ -80,6 +80,32 @@ test('accepts a post with a self canonical and two relevant internal links', () 
   assert.equal(codes.has('internal_commercial_links'), false)
 })
 
+test('accepts an intentional noindex consolidation to another internal article', () => {
+  const result = auditPostOnPageSeo({
+    id: 4,
+    title: 'Legacy duplicate article',
+    slug: 'https://mushroomie.io.vn/vong-tay-handmade-nu/',
+    excerpt: null,
+    content: [
+      '<h2>Materials</h2>',
+      '<img src="/uploads/one.webp" alt="Red beaded bracelet on a cream tray">',
+      '<a href="/san-pham/red-bracelet">Red bracelet</a>',
+      '<a href="/san-pham?category=vong-tay">Bracelet category</a>',
+    ].join(''),
+    featured_image: '/uploads/cover.webp',
+    featured_image_alt: 'Red bracelet collection',
+    seo_title: 'A'.repeat(54),
+    meta_description: 'M'.repeat(150),
+    canonical_url: 'https://mushroomie.io.vn/tin-tuc/vong-tay-handmade-nu',
+    robots_index: false,
+    robots_follow: true,
+  }, siteUrl)
+
+  const codes = issueCodes(result.issues)
+  assert.equal(codes.has('canonical_mismatch'), false)
+  assert.equal(codes.has('robots_noindex'), false)
+})
+
 test('reports duplicate effective titles and descriptions across pages', () => {
   const post = {
     title: 'Post',
