@@ -25,6 +25,7 @@
     "seo:local-phase-2": "tsx scripts/seed-local-seo-phase-2.ts",
     "seo:audit:on-page": "tsx scripts/audit-on-page-seo.ts",
     "seo:audit:phase-4": "tsx scripts/audit-seo-phase-4.ts",
+    "seo:audit:phase-6": "tsx scripts/audit-seo-phase-6.ts",
     "seo:phase-4": "tsx scripts/apply-seo-phase-4.ts",
     "seo:phase-4:apply": "tsx scripts/apply-seo-phase-4.ts --apply",
     "products:normalize-slugs": "tsx scripts/normalize-product-slugs.ts",

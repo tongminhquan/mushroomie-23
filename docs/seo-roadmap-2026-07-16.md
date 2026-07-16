@@ -24,7 +24,7 @@ impression, click va vi tri trung binh phai lay tu Google Search Console.
 | P2 | Audit 23 local landing bang GSC | Tranh doorway page va cannibalization | Cho du lieu GSC |
 | P2 | Lam day 10 bai trong tam | Tang E-E-A-T va gia tri tim kiem | Can noi dung/anh that |
 | P3 | Citation va outreach hop le | Xay authority khong spam | Tracker/baseline xong; marketing thuc hien |
-| P3 | Theo doi 30 tu khoa, CWV, index, Local Pack | Do tac dong thay vi doan | Can GSC/GA4/GBP |
+| P3 | Theo doi 30 tu khoa, CWV, index, Local Pack | Do tac dong thay vi doan | Public baseline xong; cho GSC/GA4/GBP |
 
 ## Quyen so huu tu khoa
 
@@ -121,3 +121,22 @@ Thu thap hang tuan trong 12 tuan dau:
   dung 200 backlink dofollow lam KPI.
 - Claim citation, kiem tra bio va outreach la phan viec cua chu doanh
   nghiep/marketing; khong tu dong tao backlink.
+
+## Phase 6 do luong
+
+- Audit script: `npm run seo:audit:phase-6`.
+- Measurement baseline: `docs/seo-phase-6/measurement-baseline.md`.
+- Keyword baseline: `docs/seo-phase-6/keyword-baseline.csv`.
+- Weekly scorecard: `docs/seo-phase-6/weekly-scorecard.csv`.
+- Readiness evidence: `docs/seo-phase-6/measurement-readiness.json`.
+- Da xac minh production bundle co GA4 `G-R95TLDCP0W`, Google Ads
+  `AW-18206718336` va GTM `GTM-K55B6RVG`.
+- GTM container khong chua truc tiep GA4/Ads ID tren; chua thay dau hieu hai
+  nguon cung gui page view.
+- Sitemap public co 123 URL, robots.txt tro dung sitemap va DNS TXT co mot token
+  `google-site-verification`.
+- GSC Search Analytics, submitted sitemap status, URL Inspection, GA4 reports,
+  CrUX field data va GBP Performance van la `pending_authenticated_data`.
+- Baseline thu hang truoc cac Phase 1-5 khong the tai tao neu khong co lich su
+  GSC/SERP. File Phase 6 bat dau baseline co kiem chung tu ngay 2026-07-17 va
+  khong dien so lieu gia.
