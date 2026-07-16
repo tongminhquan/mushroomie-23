@@ -156,9 +156,9 @@ export function deliveryNote(area: LocalArea, onlineOnly?: boolean): string {
     return `Mushroomie đặt tại Đồng Nai và nhận đơn online giao đến ${area === 'TP.HCM' ? 'TP.HCM' : area} qua các đơn vị vận chuyển. Bạn chọn mẫu, chốt màu và charm qua website hoặc nhắn tin, Mushroomie làm thủ công rồi gửi đi.`
   }
   if (area === 'Trảng Dài') {
-    return 'Mushroomie ở ngay khu vực Trảng Dài, Thành phố Đồng Nai — bạn có thể hẹn nhận trực tiếp hoặc chọn giao hàng linh hoạt trong khu vực, đồng thời Mushroomie giao online đến TP.HCM.'
+    return 'Mushroomie ở ngay khu vực Trảng Dài, tỉnh Đồng Nai — bạn có thể hẹn nhận trực tiếp hoặc chọn giao hàng linh hoạt trong khu vực, đồng thời Mushroomie giao online đến TP.HCM.'
   }
-  return `Mushroomie ở khu vực Trảng Dài, ${area === 'Đồng Nai' ? 'Thành phố Đồng Nai' : area} và hỗ trợ nhận đơn trực tiếp lẫn giao hàng linh hoạt trong ${area}, đồng thời giao online đến TP.HCM.`
+  return `Mushroomie ở khu vực Trảng Dài, ${area === 'Đồng Nai' ? 'tỉnh Đồng Nai' : area} và hỗ trợ nhận đơn trực tiếp lẫn giao hàng linh hoạt trong ${area}, đồng thời giao online đến TP.HCM.`
 }
 
 /**
@@ -411,7 +411,7 @@ export const LOCAL_PAGES: LocalPage[] = [
       'Mushroomie làm phụ kiện handmade ngay tại Trảng Dài, Đồng Nai: vòng tay, móc khóa, charm và quà tặng custom, tiện đặt và nhận hàng gần bạn.',
     h1: 'Phụ kiện handmade Trảng Dài – ngay tại khu của bạn',
     intro:
-      'Mushroomie có xưởng nhỏ ngay tại Trảng Dài, Thành phố Đồng Nai, chuyên phụ kiện handmade cá nhân hóa: vòng tay, móc khóa, charm và quà tặng. Ở gần nên bạn đặt, chốt mẫu và nhận hàng đều nhanh gọn — mỗi món đều có thể chọn màu và charm theo gu riêng.',
+      'Mushroomie có xưởng nhỏ ngay tại Trảng Dài, tỉnh Đồng Nai, chuyên phụ kiện handmade cá nhân hóa: vòng tay, móc khóa, charm và quà tặng. Ở gần nên bạn đặt, chốt mẫu và nhận hàng đều nhanh gọn — mỗi món đều có thể chọn màu và charm theo gu riêng.',
     highlights: [
       { emoji: '📍', title: 'Ngay tại Trảng Dài', body: 'Xưởng đặt tại Hẻm 2, tổ 11, Phường Trảng Dài — thuận tiện cho khách quanh khu vực.' },
       { emoji: '🎨', title: 'Custom theo gu', body: 'Chọn màu, charm, size và kiểu dáng để phụ kiện mang đúng dấu ấn của bạn.' },
@@ -689,7 +689,7 @@ export function getLocalFaqs(page: LocalPage): LocalFaq[] {
   const product = productLabel(page.group)
   const locationAnswer = page.onlineOnly
     ? `Mushroomie không có cửa hàng tại ${page.area}. Sản phẩm được làm thủ công tại Trảng Dài, Đồng Nai và nhận đơn online giao đến ${page.area}.`
-    : 'Mushroomie hoạt động tại Hẻm 2, tổ 11, Phường Trảng Dài, Thành phố Đồng Nai. Nếu muốn nhận trực tiếp, bạn nên liên hệ trước để Mushroomie xác nhận thời gian.'
+    : 'Mushroomie hoạt động tại Hẻm 2, tổ 11, Phường Trảng Dài, tỉnh Đồng Nai. Nếu muốn nhận trực tiếp, bạn nên liên hệ trước để Mushroomie xác nhận thời gian.'
 
   return [
     {
