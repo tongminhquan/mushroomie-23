@@ -9,6 +9,7 @@ import { auth } from '@/lib/auth'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import PostCard from '@/components/blog/PostCard'
 import PostAdminAction from '@/components/blog/PostAdminAction'
+import PostKeywordOwnerLink from '@/components/blog/PostKeywordOwnerLink'
 import SafeImage from '@/components/ui/SafeImage'
 import { formatDate } from '@/lib/utils'
 import { sanitizeHtml } from '@/lib/sanitize'
@@ -367,6 +368,11 @@ export default async function PostDetailPage({
           <div
             className="prose prose-neutral max-w-none prose-headings:font-heading prose-headings:text-neutral-900 prose-p:leading-8 prose-p:text-neutral-700 prose-a:text-primary hover:prose-a:text-primary-dark prose-strong:text-accent-kraft prose-img:my-8 prose-img:rounded-[22px]"
             dangerouslySetInnerHTML={{ __html: articleHtml }}
+          />
+
+          <PostKeywordOwnerLink
+            slug={post.slug}
+            focusKeyword={post.focus_keyword}
           />
 
           {recommendedProducts.length >= 2 && (
