@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import type { Prisma } from '@prisma/client'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { cache } from 'react'
 import { CheckCircle2, MessageCircleHeart, PackageCheck, Star, Truck } from 'lucide-react'
 import AddToCartButton from '@/components/product/AddToCartButton'
@@ -19,6 +19,12 @@ import { safeJsonLd } from '@/lib/security'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { toAbsoluteUrl } from '@/lib/url'
 import { geoImageGraph } from '@/lib/geo-image-schema'
+import { buildProductMetadataText } from '@/lib/product-metadata'
+import { inspectImageForRender } from '@/lib/server-image'
+import {
+  decodeProductSlug,
+  getProductSlugLookupCandidates,
+} from '@/lib/product-slug'
 
 const SITE_NAME = 'Mushroomie'
 
@@ -32,19 +38,22 @@ type RelatedProductItem = Omit<RelatedProductRecord, 'price' | 'sale_price'> & {
 }
 
 const getProductBySlug = cache(async (slug: string) => {
-  const decodedSlug = decodeURIComponent(slug)
+  const candidates = getProductSlugLookupCandidates(slug)
 
-  return prisma.product.findFirst({
-    where: {
-      OR: [{ slug: decodedSlug }, { slug }],
-    },
-    include: {
-      category: true,
-      images: { orderBy: { sort_order: 'asc' } },
-      options: true,
-      reviews: { where: { status: 'approved' }, take: 20, orderBy: { created_at: 'desc' } },
-    },
-  })
+  for (const candidate of candidates) {
+    const product = await prisma.product.findUnique({
+      where: { slug: candidate },
+      include: {
+        category: true,
+        images: { orderBy: { sort_order: 'asc' } },
+        options: true,
+        reviews: { where: { status: 'approved' }, take: 20, orderBy: { created_at: 'desc' } },
+      },
+    })
+    if (product) return product
+  }
+
+  return null
 })
 
 export async function generateStaticParams() {
@@ -73,25 +82,28 @@ export async function generateMetadata({
     return { title: 'Sản phẩm không tồn tại', robots: { index: false, follow: true } }
   }
 
-  const description =
-    product.short_description || `Mua ${product.name} handmade cá nhân hóa tại Mushroomie.`
-  const imageUrl = getPublicImageUrl(product.featured_image, 'product')
-  const absoluteImageUrl = toAbsoluteUrl(imageUrl || getPublicImageUrl(null, 'product'))
+  const { title, description } = buildProductMetadataText(product.name, {
+    sku: product.sku,
+    isCustomizable: product.is_customizable,
+  })
+  const image = await inspectImageForRender(product.featured_image, 'product')
+  const absoluteImageUrl = toAbsoluteUrl(image.renderSrc)
 
   return {
-    title: product.name,
+    title: { absolute: title },
     description,
     alternates: { canonical: toAbsoluteUrl(`/san-pham/${product.slug}`) },
     openGraph: {
-      title: `${product.name} | ${SITE_NAME}`,
+      title,
       description,
       url: toAbsoluteUrl(`/san-pham/${product.slug}`),
       siteName: SITE_NAME,
       images: [
         {
           url: absoluteImageUrl,
-          width: 800,
-          height: 1067,
+          ...(image.width && image.height
+            ? { width: image.width, height: image.height }
+            : {}),
           alt: product.name,
         },
       ],
@@ -100,7 +112,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${product.name} | ${SITE_NAME}`,
+      title,
       description,
       images: [absoluteImageUrl],
     },
@@ -117,6 +129,10 @@ export default async function ProductDetailPage({
 
   if (!productRaw) {
     notFound()
+  }
+
+  if (decodeProductSlug(slug) !== productRaw.slug) {
+    permanentRedirect(`/san-pham/${productRaw.slug}`)
   }
 
   const product = {

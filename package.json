@@ -22,7 +22,10 @@
     "media:convert-webp:apply": "node scripts/optimize-uploads-webp.js --apply",
     "posts:normalize-images": "ts-node --compiler-options {\"module\":\"CommonJS\"} scripts/normalize-post-image-urls.ts",
     "posts:generate-media": "tsx scripts/generate-post-media.ts",
-    "seo:local-phase-2": "tsx scripts/seed-local-seo-phase-2.ts"
+    "seo:local-phase-2": "tsx scripts/seed-local-seo-phase-2.ts",
+    "seo:audit:on-page": "tsx scripts/audit-on-page-seo.ts",
+    "products:normalize-slugs": "tsx scripts/normalize-product-slugs.ts",
+    "products:normalize-slugs:apply": "tsx scripts/normalize-product-slugs.ts --apply"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
@@ -59,6 +62,7 @@
     "next": "16.2.10",
     "next-auth": "^5.0.0-beta.31",
     "nodemailer": "^9.0.3",
+    "parse5": "^8.0.1",
     "prisma": "^5.22.0",
     "react": "19.2.4",
     "react-cropper": "^2.3.3",

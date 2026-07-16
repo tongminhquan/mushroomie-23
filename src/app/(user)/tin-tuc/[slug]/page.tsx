@@ -3,7 +3,7 @@ import type { Post, Prisma } from '@prisma/client'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
-import { CalendarDays, Clock3 } from 'lucide-react'
+import { ArrowUpRight, CalendarDays, Clock3 } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import Breadcrumb from '@/components/layout/Breadcrumb'
@@ -16,16 +16,21 @@ import { toAbsoluteUrl } from '@/lib/url'
 import {
   inspectImageForRender,
   resolveResponsiveArticleImagesForRender,
-  resolveImageUrlForRender,
 } from '@/lib/server-image'
 import { safeJsonLd } from '@/lib/security'
 import { isSquareSeoArticleImage } from '@/lib/post-normalization'
 import { extractImageSources } from '@/lib/post-media'
 import { geoImageGraph, geoImageObject } from '@/lib/geo-image-schema'
+import {
+  resolvePostMetadataDescription,
+  resolvePostMetadataTitle,
+} from '@/lib/post-metadata'
+import { rankProductsForPost } from '@/lib/post-product-recommendations'
+import { DEFAULT_SOCIAL_IMAGE } from '@/lib/seo-assets'
 
 const SITE_URL = 'https://mushroomie.io.vn'
 const SITE_NAME = 'Mushroomie'
-const DEFAULT_OG_IMAGE = `${SITE_URL}/logo.webp`
+const DEFAULT_OG_IMAGE = DEFAULT_SOCIAL_IMAGE.path
 
 const getPublishedPostBySlug = cache(async (slug: string) => {
   return prisma.post.findFirst({
@@ -63,22 +68,24 @@ export async function generateMetadata({
   }
 
   const postUrl = `${SITE_URL}/tin-tuc/${post.slug}`
-  const ogImage = toAbsoluteUrl(
-    await resolveImageUrlForRender(
-      post.og_image || post.featured_image || DEFAULT_OG_IMAGE,
-      'post',
-    ),
+  const description = resolvePostMetadataDescription(
+    post.title,
+    post.meta_description,
+    post.excerpt,
   )
-  const twitterImage = toAbsoluteUrl(
-    await resolveImageUrlForRender(
+  const [ogImageState, twitterImageState] = await Promise.all([
+    inspectImageForRender(post.og_image || post.featured_image || DEFAULT_OG_IMAGE, 'post'),
+    inspectImageForRender(
       post.twitter_image || post.og_image || post.featured_image || DEFAULT_OG_IMAGE,
       'post',
     ),
-  )
+  ])
+  const ogImage = toAbsoluteUrl(ogImageState.renderSrc)
+  const twitterImage = toAbsoluteUrl(twitterImageState.renderSrc)
 
   return {
-    title: post.seo_title || `${post.title} | ${SITE_NAME}`,
-    description: post.meta_description || post.excerpt || '',
+    title: { absolute: resolvePostMetadataTitle(post.title, post.seo_title) },
+    description,
     alternates: {
       canonical: post.canonical_url || postUrl,
     },
@@ -88,24 +95,35 @@ export async function generateMetadata({
     },
     openGraph: {
       title: post.og_title || post.seo_title || post.title,
-      description: post.og_description || post.meta_description || post.excerpt || '',
+      description: post.og_description || description,
       url: postUrl,
       type: 'article',
       siteName: SITE_NAME,
-      images: ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : [],
+      images: ogImage
+        ? [{
+            url: ogImage,
+            ...(ogImageState.width && ogImageState.height
+              ? { width: ogImageState.width, height: ogImageState.height }
+              : {}),
+          }]
+        : [],
       publishedTime: post.published_at?.toISOString(),
       modifiedTime: post.updated_at?.toISOString(),
     },
     twitter: {
       card: 'summary_large_image',
       title: post.twitter_title || post.og_title || post.seo_title || post.title,
-      description: post.twitter_description || post.og_description || post.meta_description || '',
+      description: post.twitter_description || post.og_description || description,
       images: twitterImage ? [twitterImage] : [],
     },
   }
 }
 
-function generateJsonLd(post: Post, imageUrl: string) {
+function generateJsonLd(
+  post: Post,
+  imageUrl: string,
+  imageDimensions?: { width: number; height: number },
+) {
   const schemaType = post.schema_type || 'BlogPosting'
   const postUrl = `${SITE_URL}/tin-tuc/${post.slug}`
 
@@ -115,13 +133,16 @@ function generateJsonLd(post: Post, imageUrl: string) {
       ? schemaType
       : 'BlogPosting',
     headline: post.seo_title || post.title,
-    description: post.meta_description || post.excerpt || '',
+    description: resolvePostMetadataDescription(
+      post.title,
+      post.meta_description,
+      post.excerpt,
+    ),
     image: geoImageObject(imageUrl, {
       name: post.title + ' - ảnh bìa bài viết',
       caption: post.featured_image_caption || post.title,
       description: post.featured_image_description || post.meta_description,
-      width: 1200,
-      height: 675,
+      ...imageDimensions,
     }),
     url: postUrl,
     author: {
@@ -174,7 +195,7 @@ export default async function PostDetailPage({
     ? { category_id: post.category_id, status: 'published', id: { not: post.id } }
     : { status: 'published', id: { not: post.id } }
 
-  const [relatedPosts, coverImage, structuredImageUrl, articleHtml] = await Promise.all([
+  const [relatedPosts, productCandidates, coverImage, structuredImage, articleHtml] = await Promise.all([
     prisma.post
       .findMany({
         where: relatedWhere,
@@ -183,14 +204,32 @@ export default async function PostDetailPage({
         orderBy: { published_at: 'desc' },
       })
       .catch(() => []),
+    prisma.product
+      .findMany({
+        where: { status: 'active' },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          short_description: true,
+          is_featured: true,
+          stock: true,
+          category: { select: { name: true, slug: true } },
+        },
+        orderBy: [{ is_featured: 'desc' }, { updated_at: 'desc' }],
+        take: 40,
+      })
+      .catch(() => []),
     inspectImageForRender(post.featured_image, 'post'),
-    resolveImageUrlForRender(post.og_image || post.featured_image || DEFAULT_OG_IMAGE, 'post').then(
-      toAbsoluteUrl,
-    ),
+    inspectImageForRender(post.og_image || post.featured_image || DEFAULT_OG_IMAGE, 'post'),
     resolveResponsiveArticleImagesForRender(sanitizeHtml(post.content || ''), 'post'),
   ])
 
-  const jsonLd = generateJsonLd(post, structuredImageUrl)
+  const structuredImageUrl = toAbsoluteUrl(structuredImage.renderSrc)
+  const imageDimensions = structuredImage.width && structuredImage.height
+    ? { width: structuredImage.width, height: structuredImage.height }
+    : undefined
+  const jsonLd = generateJsonLd(post, structuredImageUrl, imageDimensions)
   const articleGeoImages = geoImageGraph([
     {
       url: structuredImageUrl,
@@ -203,6 +242,15 @@ export default async function PostDetailPage({
       caption: (post.focus_keyword || post.title) + ' tại Mushroomie Handmade, Đồng Nai.',
     })),
   ])
+  const recommendedProducts = rankProductsForPost(
+    {
+      title: post.title,
+      focusKeyword: post.focus_keyword,
+      secondaryKeywords: post.secondary_keywords,
+    },
+    productCandidates,
+    2,
+  )
   const usesSquareSeoCover = isSquareSeoArticleImage(coverImage.renderSrc)
 
   return (
@@ -320,6 +368,49 @@ export default async function PostDetailPage({
             className="prose prose-neutral max-w-none prose-headings:font-heading prose-headings:text-neutral-900 prose-p:leading-8 prose-p:text-neutral-700 prose-a:text-primary hover:prose-a:text-primary-dark prose-strong:text-accent-kraft prose-img:my-8 prose-img:rounded-[22px]"
             dangerouslySetInnerHTML={{ __html: articleHtml }}
           />
+
+          {recommendedProducts.length >= 2 && (
+            <section className="mt-10 border-t border-warm-border pt-8" aria-labelledby="post-product-suggestions">
+              <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-primary">
+                Gợi ý từ Mushroomie
+              </p>
+              <h2 id="post-product-suggestions" className="mt-2 font-heading text-2xl text-neutral-900">
+                Sản phẩm hợp với chủ đề này
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-neutral-600">
+                Hai thiết kế được chọn theo nội dung bạn đang đọc, ưu tiên sản phẩm còn hàng và cùng nhóm phụ kiện.
+              </p>
+
+              <ul className="mt-5 divide-y divide-warm-border border-y border-warm-border">
+                {recommendedProducts.map((product) => (
+                  <li key={product.id}>
+                    <Link
+                      href={`/san-pham/${product.slug}`}
+                      className="group flex min-h-16 items-center justify-between gap-4 py-4 text-neutral-900 transition-colors hover:text-primary"
+                    >
+                      <span>
+                        <span className="block font-semibold">{product.name}</span>
+                        {product.category?.name && (
+                          <span className="mt-1 block text-xs text-neutral-500">
+                            {product.category.name}
+                          </span>
+                        )}
+                      </span>
+                      <ArrowUpRight size={18} className="shrink-0" aria-hidden />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href="/san-pham"
+                className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-primary hover:text-primary-dark"
+              >
+                Xem toàn bộ sản phẩm
+                <ArrowUpRight size={17} aria-hidden />
+              </Link>
+            </section>
+          )}
         </article>
       </div>
 

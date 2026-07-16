@@ -28,6 +28,7 @@ test('BRAND dùng đúng NAP và tọa độ đã được xác minh', () => {
   const coordinatePair = `${BRAND.geo.latitude},${BRAND.geo.longitude}`
   assert.ok(BRAND.mapUrl.includes(coordinatePair))
   assert.ok(BRAND.mapEmbedUrl.includes(coordinatePair))
+  assert.ok(BRAND.mapEmbedUrl.startsWith('https://www.google.com/maps/'))
 })
 
 test('BRAND tập trung URL và handle social canonical', () => {
@@ -53,6 +54,10 @@ test('BRAND tập trung URL và handle social canonical', () => {
   assert.ok(BRAND.sameAs.includes(BRAND.socials.instagram.url))
   assert.ok(BRAND.sameAs.includes(BRAND.socials.tiktok.url))
   assert.ok(BRAND.sameAs.includes(BRAND.socials.shopee.url))
+  assert.equal(
+    BRAND.socialImage,
+    'https://mushroomie.io.vn/uploads/1002a915-1479-49e8-b3c2-b04a21eef81f.webp',
+  )
 })
 
 test('local SEO chỉ xuất bản các landing đã có route', () => {

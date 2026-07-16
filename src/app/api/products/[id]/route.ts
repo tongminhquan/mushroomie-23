@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
-import { generateSlug } from '@/lib/utils'
+import { normalizeProductSlugInput } from '@/lib/product-slug'
 import { logAdminAction } from '@/lib/admin-logger'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { z } from 'zod'
@@ -56,7 +56,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
     const body = parsed.data
-    if (body.name && !body.slug) body.slug = generateSlug(body.name)
+    if (body.slug !== undefined) {
+      const slug = normalizeProductSlugInput(body.slug, undefined)
+      if (!slug) {
+        return NextResponse.json({ error: 'Invalid product slug' }, { status: 400 })
+      }
+      body.slug = slug
+    }
     
     const { images, ...productData } = body
     productData.description = productData.description ? sanitizeHtml(productData.description) : productData.description
@@ -84,7 +90,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     })
     
     return NextResponse.json(product)
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === 'P2002') {
+      return NextResponse.json({ error: 'Slug hoặc SKU đã tồn tại' }, { status: 409 })
+    }
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

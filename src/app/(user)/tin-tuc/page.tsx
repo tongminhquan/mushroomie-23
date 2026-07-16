@@ -7,6 +7,7 @@ import Breadcrumb from '@/components/layout/Breadcrumb'
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 import BrandContainer from '@/components/ui/BrandContainer'
 import EmptyState from '@/components/ui/EmptyState'
+import { DEFAULT_SOCIAL_IMAGE } from '@/lib/seo-assets'
 
 type ParamValue = string | string[] | undefined
 
@@ -52,7 +53,14 @@ export async function generateMetadata({
       siteName: 'Mushroomie',
       title: `${title} | Mushroomie`,
       description,
-      images: [{ url: 'https://mushroomie.io.vn/logo.webp', width: 500, height: 500, alt: 'Mushroomie handmade' }],
+      images: [
+        {
+          url: `https://mushroomie.io.vn${DEFAULT_SOCIAL_IMAGE.path}`,
+          width: DEFAULT_SOCIAL_IMAGE.width,
+          height: DEFAULT_SOCIAL_IMAGE.height,
+          alt: DEFAULT_SOCIAL_IMAGE.alt,
+        },
+      ],
     },
   }
 }

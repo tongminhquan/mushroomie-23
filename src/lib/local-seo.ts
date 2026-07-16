@@ -1,3 +1,5 @@
+import { DEFAULT_SOCIAL_IMAGE } from '@/lib/seo-assets'
+
 /**
  * Gói Local SEO cho Mushroomie — bản đồ từ khóa địa phương (Đồng Nai, Biên Hòa,
  * Trảng Dài, TP.HCM) chuyển thành dữ liệu trang landing + schema dùng chung.
@@ -56,13 +58,14 @@ export const BRAND = {
   sameAs: Object.values(SOCIALS).map((social) => social.url),
   shopee: SOCIALS.shopee.url,
   mapUrl: `https://www.google.com/maps?q=${COORDINATE_PAIR}`,
-  mapEmbedUrl: `https://www.google.com/maps?q=${COORDINATE_PAIR}&output=embed`,
+  mapEmbedUrl: `https://www.google.com/maps/?q=${COORDINATE_PAIR}&output=embed`,
   geo: VERIFIED_GEO,
   openingHours: {
     opens: '08:00',
     closes: '21:00',
   },
   logo: `${SITE_URL}/logo.webp`,
+  socialImage: `${SITE_URL}${DEFAULT_SOCIAL_IMAGE.path}`,
 } as const
 
 export type LocalArea = 'Đồng Nai' | 'Biên Hòa' | 'Trảng Dài' | 'TP.HCM'
@@ -727,7 +730,7 @@ export function localBusinessSchema() {
     slogan: BRAND.slogan,
     url: SITE_URL,
     logo: BRAND.logo,
-    image: BRAND.logo,
+    image: BRAND.socialImage,
     telephone: BRAND.phoneE164,
     email: BRAND.email,
     priceRange: '₫₫',

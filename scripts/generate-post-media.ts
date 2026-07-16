@@ -1,19 +1,27 @@
 import 'dotenv/config'
 
+import { execFile } from 'node:child_process'
 import { createHash, randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { promisify } from 'node:util'
 
 import type { Post } from '@prisma/client'
 import { PrismaClient } from '@prisma/client'
 import sharp from 'sharp'
 
 import {
+  createArticleFigures,
   extractImageSources,
   insertArticleFigures,
-  type ArticleFigure,
+  normalizeArticleFigures,
+  planArticleMediaNormalization,
+  postNeedsArticleMediaWork,
+  type ArticleMediaSource,
 } from '../src/lib/post-media'
+import { normalizeGeneratedPostImageAlt } from '../src/lib/image-alt'
 
+const execFileAsync = promisify(execFile)
 const prisma = new PrismaClient()
 const projectRoot = process.cwd()
 const uploadsRoot = path.join(projectRoot, 'public', 'uploads')
@@ -78,10 +86,13 @@ interface PostPlan {
   post: PostRecord
   cover: ImageInspection
   coverNeeded: boolean
-  reusableSquareCover: string | null
-  existingSquareSources: string[]
+  reusableSquareCover: ArticleMediaSource | null
+  existingSquareSources: ArticleMediaSource[]
   squareImagesNeeded: number
   generatedCount: number
+  normalizationNeeded: boolean
+  oldFigureCount: number
+  newFigureCount: number
 }
 
 function parseNumberFlag(name: string, fallback: number) {
@@ -391,31 +402,46 @@ async function buildPostPlan(post: PostRecord): Promise<PostPlan> {
   const cover = await inspectImage(post.featured_image)
   const coverNeeded = !cover.exists || !ratioMatches(cover.ratio, 16 / 9)
   const contentSources = extractImageSources(post.content)
-  const existingSquareSources: string[] = []
+  const existingSquareSources: ArticleMediaSource[] = []
 
   for (const source of contentSources) {
     const inspected = await inspectImage(source)
     if (inspected.exists && ratioMatches(inspected.ratio, 1)) {
       const normalized = normalizeUploadUrl(source)
-      if (normalized) existingSquareSources.push(normalized)
+      if (normalized && inspected.width && inspected.height) {
+        existingSquareSources.push({
+          src: normalized,
+          width: inspected.width,
+          height: inspected.height,
+        })
+      }
     }
   }
 
-  const reusableSquareCover = coverNeeded && cover.exists && ratioMatches(cover.ratio, 1)
-    ? cover.src
+  const reusableSquareCover = coverNeeded
+    && cover.exists
+    && ratioMatches(cover.ratio, 1)
+    && cover.src
+    && cover.width
+    && cover.height
+    ? { src: cover.src, width: cover.width, height: cover.height }
     : null
-  const availableSquares = new Set(existingSquareSources)
-  if (reusableSquareCover) availableSquares.add(reusableSquareCover)
+  const availableSquares = new Map(
+    existingSquareSources.map((source) => [source.src, source]),
+  )
+  if (reusableSquareCover) availableSquares.set(reusableSquareCover.src, reusableSquareCover)
   const squareImagesNeeded = Math.max(0, 2 - availableSquares.size)
+  const normalization = planArticleMediaNormalization(post.slug, post.content)
 
   return {
     post,
     cover,
     coverNeeded,
     reusableSquareCover,
-    existingSquareSources: [...availableSquares],
+    existingSquareSources: [...availableSquares.values()],
     squareImagesNeeded,
     generatedCount: Number(coverNeeded) + squareImagesNeeded,
+    ...normalization,
   }
 }
 
@@ -423,12 +449,16 @@ function postImageCopy(post: PostRecord, slot: 1 | 2) {
   const keyword = (post.focus_keyword || post.title).trim()
   if (slot === 1) {
     return {
-      alt: keyword + ' - phụ kiện handmade cá nhân hóa Mushroomie',
+      alt: normalizeGeneratedPostImageAlt(
+        keyword + ' - phụ kiện handmade cá nhân hóa Mushroomie',
+      ),
       caption: keyword + ' được phối thủ công tại Mushroomie, Đồng Nai.',
     }
   }
   return {
-    alt: keyword + ' - gợi ý phối phụ kiện handmade Mushroomie',
+    alt: normalizeGeneratedPostImageAlt(
+      keyword + ' - gợi ý phối phụ kiện handmade Mushroomie',
+    ),
     caption: 'Gợi ý phối ' + keyword + ' theo màu sắc và phong cách riêng.',
   }
 }
@@ -498,21 +528,21 @@ async function applyPostPlan(plan: PostPlan, generated: GeneratedAsset[]) {
 
     const coverAsset = generated.find((asset) => asset.role === 'cover')
     const generatedSquares = generated.filter((asset) => asset.role === 'square')
-    const squareFigures = [
-      ...plan.existingSquareSources.map((src) => ({ src })),
+    const squareMedia: ArticleMediaSource[] = [
+      ...plan.existingSquareSources,
       ...generatedSquares.map((asset) => ({
         src: asset.publicUrl,
         width: asset.width,
         height: asset.height,
       })),
     ].slice(0, 2)
-
-    const figures: ArticleFigure[] = squareFigures.map((image, index) => {
-      const slot = (index === 0 ? 'content-1' : 'content-2') as ArticleFigure['slot']
-      const copy = postImageCopy(plan.post, index === 0 ? 1 : 2)
-      return { slot, ...image, alt: copy.alt, caption: copy.caption }
-    })
-    const content = insertArticleFigures(plan.post.content, figures)
+    const figures = createArticleFigures(squareMedia, [
+      postImageCopy(plan.post, 1),
+      postImageCopy(plan.post, 2),
+    ])
+    const content = plan.normalizationNeeded
+      ? normalizeArticleFigures(plan.post.content, figures).html
+      : insertArticleFigures(plan.post.content, figures)
     const metrics = contentMetrics(content)
     const featuredImage = coverAsset?.publicUrl || normalizeUploadUrl(plan.post.featured_image)
     if (!featuredImage) throw new Error('Post has no usable featured image after generation.')
@@ -557,7 +587,52 @@ async function applyPostPlan(plan: PostPlan, generated: GeneratedAsset[]) {
   }
 }
 
+async function listDatabaseBackups() {
+  const databaseBackupDirectory = path.join(backupsRoot, 'db')
+
+  try {
+    const entries = await fs.readdir(databaseBackupDirectory, { withFileTypes: true })
+    return new Set(
+      entries
+        .filter((entry) => entry.isFile() && entry.name.endsWith('.sql.gz'))
+        .map((entry) => entry.name),
+    )
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return new Set<string>()
+    throw error
+  }
+}
+
+async function prepareApplyMode() {
+  if (process.platform !== 'linux') {
+    throw new Error('Apply mode is restricted to the Linux production host.')
+  }
+
+  const backupScript = path.join(projectRoot, 'scripts', 'backup-production.sh')
+  const backupsBefore = await listDatabaseBackups()
+  await execFileAsync(backupScript, [], { cwd: projectRoot })
+
+  const newBackup = [...await listDatabaseBackups()]
+    .find((fileName) => !backupsBefore.has(fileName))
+  if (!newBackup) {
+    throw new Error(
+      'Backup completed without a new database dump; no post media or database records were changed.',
+    )
+  }
+
+  const databaseBackup = path.join(backupsRoot, 'db', newBackup)
+  const backupStats = await fs.stat(databaseBackup)
+  if (backupStats.size === 0) {
+    throw new Error(`Database backup is empty: ${databaseBackup}`)
+  }
+
+  await execFileAsync('gzip', ['-t', databaseBackup], { cwd: projectRoot })
+  return databaseBackup
+}
+
 async function main() {
+  if (applyMode) await prepareApplyMode()
+
   await fs.mkdir(uploadsRoot, { recursive: true })
   await fs.mkdir(path.join(backupsRoot, 'logs'), { recursive: true })
 
@@ -587,7 +662,9 @@ async function main() {
   const plans: PostPlan[] = []
   for (const post of posts) {
     const plan = await buildPostPlan(post)
-    if (plan.generatedCount > 0) plans.push(plan)
+    if (postNeedsArticleMediaWork(plan.generatedCount, plan.normalizationNeeded)) {
+      plans.push(plan)
+    }
   }
 
   const selectedPlans = plans.slice(0, Math.min(limit, plans.length))
@@ -600,6 +677,7 @@ async function main() {
     coverImagesToGenerate: selectedPlans.filter((plan) => plan.coverNeeded).length,
     squareImagesToGenerate: selectedPlans.reduce((sum, plan) => sum + plan.squareImagesNeeded, 0),
     totalImagesToGenerate: selectedPlans.reduce((sum, plan) => sum + plan.generatedCount, 0),
+    postsToNormalize: selectedPlans.filter((plan) => plan.normalizationNeeded).length,
     plans: selectedPlans.map((plan) => ({
       id: plan.post.id,
       slug: plan.post.slug,
@@ -611,6 +689,9 @@ async function main() {
       existingSquareSources: plan.existingSquareSources,
       squareImagesNeeded: plan.squareImagesNeeded,
       generatedCount: plan.generatedCount,
+      normalizationNeeded: plan.normalizationNeeded,
+      oldFigureCount: plan.oldFigureCount,
+      newFigureCount: plan.newFigureCount,
     })),
   }
 
@@ -620,8 +701,12 @@ async function main() {
 
   if (!applyMode && previewCount === 0) return
 
-  const sourceAssets = await loadSourceAssets()
-  if (sourceAssets.length < 2) {
+  const workPlans = previewCount > 0
+    ? selectedPlans.slice(0, previewCount)
+    : selectedPlans
+  const needsGeneratedAssets = workPlans.some((plan) => plan.generatedCount > 0)
+  const sourceAssets = needsGeneratedAssets ? await loadSourceAssets() : []
+  if (needsGeneratedAssets && sourceAssets.length < 2) {
     throw new Error('Not enough readable local product images to generate article media.')
   }
 
@@ -630,9 +715,6 @@ async function main() {
     : path.join(backupsRoot, 'generated-post-media', runId)
   await fs.mkdir(stageRoot, { recursive: true })
 
-  const workPlans = previewCount > 0
-    ? selectedPlans.slice(0, previewCount)
-    : selectedPlans
   const applyLog: Array<Record<string, unknown>> = []
 
   for (const [index, plan] of workPlans.entries()) {
@@ -644,6 +726,9 @@ async function main() {
       postId: plan.post.id,
       slug: plan.post.slug,
       oldFeaturedImage: plan.post.featured_image,
+      normalizationNeeded: plan.normalizationNeeded,
+      oldFigureCount: plan.oldFigureCount,
+      newFigureCount: plan.newFigureCount,
       generated: generated.map((asset) => ({
         role: asset.role,
         slot: asset.slot,

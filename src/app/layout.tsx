@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
+import { DEFAULT_SOCIAL_IMAGE } from '@/lib/seo-assets'
 import './globals.css'
 
 const montserrat = localFont({
@@ -48,13 +49,20 @@ export const metadata: Metadata = {
     siteName: 'Mushroomie',
     title: 'Mushroomie — Phụ kiện Handmade Cá nhân hóa',
     description: 'Phụ kiện handmade cá nhân hóa dành cho giới trẻ',
-    images: [{ url: '/logo.webp', width: 500, height: 500, alt: 'Mushroomie Handmade' }],
+    images: [
+      {
+        url: DEFAULT_SOCIAL_IMAGE.path,
+        width: DEFAULT_SOCIAL_IMAGE.width,
+        height: DEFAULT_SOCIAL_IMAGE.height,
+        alt: DEFAULT_SOCIAL_IMAGE.alt,
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Mushroomie — Phụ kiện Handmade Cá nhân hóa',
     description: 'Phụ kiện handmade cá nhân hóa dành cho giới trẻ',
-    images: ['/logo.webp'],
+    images: [DEFAULT_SOCIAL_IMAGE.path],
   },
 }
 

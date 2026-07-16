@@ -1,14 +1,24 @@
-import { access, readFile } from 'node:fs/promises'
+import { access } from 'node:fs/promises'
 import path from 'node:path'
-import sharp from 'sharp'
 import { getImageProps } from 'next/image'
+import { parseFragment, serialize, type DefaultTreeAdapterTypes } from 'parse5'
+import sharp from 'sharp'
 import { getImageFallback, normalizeImageUrl, type PublicImageKind } from '@/lib/image-url'
+import { normalizeGeneratedPostImageAlt } from '@/lib/image-alt'
 
 const UPLOAD_PREFIX = '/uploads/'
 const PUBLIC_ROOT = path.join(process.cwd(), 'public')
 const UPLOAD_ROOT = path.join(PUBLIC_ROOT, 'uploads')
-const ARTICLE_IMAGE_TAG_PATTERN = /<img\b[^>]*>/gi
 const ARTICLE_IMAGE_SIZES = '(max-width: 767px) calc(100vw - 2.5rem), 480px'
+const RENDERED_IMAGE_ATTRIBUTES = [
+  'src',
+  'srcset',
+  'sizes',
+  'width',
+  'height',
+  'loading',
+  'decoding',
+]
 
 export interface ImageRenderState {
   exists: boolean
@@ -88,30 +98,31 @@ export async function resolveResponsiveArticleImagesForRender(
 ) {
   if (!html) return ''
 
+  const fragment = parseFragment(html)
+  const images = collectImageElements(fragment)
   const sources = new Set<string>()
-  for (const tag of html.matchAll(ARTICLE_IMAGE_TAG_PATTERN)) {
-    const source = getImageAttribute(tag[0], 'src')?.trim()
+  for (const image of images) {
+    const source = getElementAttribute(image, 'src')?.trim()
     if (source) sources.add(source)
   }
 
   if (sources.size === 0) return html
 
   const replacements = new Map<string, ImageRenderState>()
-  await Promise.all(
-    Array.from(sources).map(async (source) => {
-      replacements.set(source, await inspectImageForRender(source, kind, options))
-    }),
-  )
+  for (const source of sources) {
+    replacements.set(source, await inspectImageForRender(source, kind, options))
+  }
 
-  return html.replace(ARTICLE_IMAGE_TAG_PATTERN, (tag) => {
-    const source = getImageAttribute(tag, 'src')?.trim()
-    if (!source) return tag
-
+  for (const element of images) {
+    const source = getElementAttribute(element, 'src')?.trim()
+    if (!source) continue
     const image = replacements.get(source)
-    if (!image) return tag
+    if (!image) continue
 
-    return buildResponsiveArticleImageTag(tag, image)
-  })
+    applyResponsiveArticleImageAttributes(element, image)
+  }
+
+  return serialize(fragment)
 }
 
 export const resolveArticleImagesForRender = resolveResponsiveArticleImagesForRender
@@ -127,7 +138,7 @@ async function fileExists(targetPath: string) {
 
 async function readImageDimensions(targetPath: string): Promise<Pick<ImageRenderState, 'width' | 'height'> | undefined> {
   try {
-    const metadata = await sharp(await readFile(targetPath), { failOn: 'none' }).metadata()
+    const metadata = await sharp(targetPath, { failOn: 'none' }).metadata()
     if (!metadata.width || !metadata.height) return undefined
 
     return {
@@ -147,26 +158,23 @@ function isSafeUploadFilename(filename: string) {
     && filename !== '..'
 }
 
-function buildResponsiveArticleImageTag(tag: string, image: ImageRenderState) {
-  const cleaned = removeImageAttributes(tag, [
-    'src',
-    'srcset',
-    'sizes',
-    'width',
-    'height',
-    'loading',
-    'decoding',
-  ])
+function applyResponsiveArticleImageAttributes(
+  element: DefaultTreeAdapterTypes.Element,
+  image: ImageRenderState,
+) {
+  removeElementAttributes(element, RENDERED_IMAGE_ATTRIBUTES)
+  const alt = normalizeGeneratedPostImageAlt(getElementAttribute(element, 'alt') || '')
+  setElementAttribute(element, 'alt', alt)
 
   if (!image.width || !image.height || !image.isUpload || !image.exists) {
-    return appendImageAttributes(cleaned, [
+    appendElementAttributes(element, [
       ['src', image.renderSrc],
       ['loading', 'lazy'],
       ['decoding', 'async'],
     ])
+    return
   }
 
-  const alt = getImageAttribute(tag, 'alt') || ''
   const { props } = getImageProps({
     src: image.renderSrc,
     alt,
@@ -178,7 +186,7 @@ function buildResponsiveArticleImageTag(tag: string, image: ImageRenderState) {
     overrideSrc: image.renderSrc,
   })
 
-  return appendImageAttributes(cleaned, [
+  appendElementAttributes(element, [
     ['src', props.src],
     ['srcset', props.srcSet],
     ['sizes', props.sizes],
@@ -189,47 +197,52 @@ function buildResponsiveArticleImageTag(tag: string, image: ImageRenderState) {
   ])
 }
 
-function getImageAttribute(tag: string, name: string) {
-  const pattern = new RegExp(
-    "\\s" + escapeRegExp(name) + "\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s\"'=<>`]+))",
-    'i',
-  )
-  const match = tag.match(pattern)
-  return match?.[1] ?? match?.[2] ?? match?.[3]
+function collectImageElements(root: DefaultTreeAdapterTypes.ParentNode) {
+  const images: DefaultTreeAdapterTypes.Element[] = []
+
+  function visit(node: DefaultTreeAdapterTypes.ParentNode) {
+    for (const child of node.childNodes) {
+      if (!('tagName' in child)) continue
+      if (child.tagName === 'img') images.push(child)
+      visit(child)
+    }
+  }
+
+  visit(root)
+  return images
 }
 
-function removeImageAttributes(tag: string, names: string[]) {
-  return names.reduce((result, name) => (
-    result.replace(
-      new RegExp(
-        "\\s" + escapeRegExp(name) + "\\s*=\\s*(?:\"[^\"]*\"|'[^']*'|[^\\s\"'=<>`]+)",
-        'gi',
-      ),
-      '',
-    )
-  ), tag)
+function getElementAttribute(element: DefaultTreeAdapterTypes.Element, name: string) {
+  return element.attrs.find((attribute) => attribute.name === name)?.value
 }
 
-function appendImageAttributes(
-  tag: string,
+function setElementAttribute(
+  element: DefaultTreeAdapterTypes.Element,
+  name: string,
+  value: string,
+) {
+  const attribute = element.attrs.find((candidate) => candidate.name === name)
+  if (attribute) {
+    attribute.value = value
+    return
+  }
+
+  element.attrs.push({ name, value })
+}
+
+function removeElementAttributes(
+  element: DefaultTreeAdapterTypes.Element,
+  names: string[],
+) {
+  const removed = new Set(names)
+  element.attrs = element.attrs.filter((attribute) => !removed.has(attribute.name))
+}
+
+function appendElementAttributes(
+  element: DefaultTreeAdapterTypes.Element,
   attributes: Array<[string, string | number | undefined]>,
 ) {
-  const closing = tag.endsWith('/>') ? '/>' : '>'
-  const serialized = attributes
-    .filter(([, value]) => value !== undefined)
-    .map(([name, value]) => ` ${name}="${escapeHtmlAttribute(String(value))}"`)
-    .join('')
-  return tag.slice(0, -closing.length) + serialized + closing
-}
-
-function escapeHtmlAttribute(value: string) {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('"', '&quot;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-}
-
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  for (const [name, value] of attributes) {
+    if (value !== undefined) element.attrs.push({ name, value: String(value) })
+  }
 }

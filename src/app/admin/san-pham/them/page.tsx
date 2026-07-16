@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import MultiImageUploader from '@/components/admin/MultiImageUploader'
 import SingleImageUploader from '@/components/admin/SingleImageUploader'
+import { generateSlug } from '@/lib/utils'
 
 export default function AddProductPage() {
   const router = useRouter()
@@ -13,6 +14,7 @@ export default function AddProductPage() {
   const [error, setError] = useState('')
   const [categories, setCategories] = useState<{ id: number, name: string }[]>([])
   const [statuses, setStatuses] = useState<{ slug: string, name: string }[]>([])
+  const [slugEdited, setSlugEdited] = useState(false)
 
   const [form, setForm] = useState({
     name: '',
@@ -45,6 +47,19 @@ export default function AddProductPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
+    if (name === 'name') {
+      setForm(prev => ({
+        ...prev,
+        name: value,
+        slug: slugEdited ? prev.slug : generateSlug(value),
+      }))
+      return
+    }
+    if (name === 'slug') {
+      setSlugEdited(Boolean(value))
+      setForm(prev => ({ ...prev, slug: generateSlug(value) }))
+      return
+    }
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked
       setForm(prev => ({ ...prev, [name]: checked }))
@@ -61,6 +76,7 @@ export default function AddProductPage() {
     try {
       const payload = {
         ...form,
+        slug: generateSlug(form.slug || form.name),
         price: Number(form.price),
         sale_price: form.sale_price ? Number(form.sale_price) : undefined,
         stock: Number(form.stock),
@@ -121,6 +137,9 @@ export default function AddProductPage() {
               <input name="slug" value={form.slug} onChange={handleChange}
                 placeholder="De-trong-de-tu-dong-tao"
                 className="w-full px-4 py-2.5 border-[1.5px] border-[#e2d3c8] rounded-lg focus:border-primary outline-none transition-colors" />
+              <p className="mt-1.5 truncate font-mono text-xs text-neutral-400">
+                {`/san-pham/${form.slug}/`}
+              </p>
             </div>
           </div>
 

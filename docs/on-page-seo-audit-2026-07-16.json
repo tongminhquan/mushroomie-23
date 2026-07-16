@@ -1,0 +1,2827 @@
+{
+  "generatedAt": "2026-07-16T04:45:44.829Z",
+  "siteUrl": "https://mushroomie.io.vn",
+  "summary": {
+    "postsScanned": 65,
+    "productsScanned": 21,
+    "errors": 2,
+    "warnings": 216,
+    "pagesWithIssues": 86,
+    "duplicateTitleGroups": 1,
+    "duplicateMetaGroups": 1
+  },
+  "posts": [
+    {
+      "kind": "post",
+      "id": 1,
+      "slug": "cach-lam-vong-tay-handmade-don-gian",
+      "url": "https://mushroomie.io.vn/tin-tuc/cach-lam-vong-tay-handmade-don-gian",
+      "effectiveTitle": "Cách làm vòng tay handmade tại nhà | Mushroomie",
+      "effectiveDescription": "Hướng dẫn làm vòng tay handmade đơn giản tại nhà cho người mới bắt đầu.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 47 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 71 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 0 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 47,
+        "metaLength": 71,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "post",
+      "id": 2,
+      "slug": "xu-huong-phu-kien-handmade-2024",
+      "url": "https://mushroomie.io.vn/tin-tuc/xu-huong-phu-kien-handmade-2024",
+      "effectiveTitle": "Xu hướng phụ kiện handmade 2024 | Mushroomie",
+      "effectiveDescription": "Khám phá những xu hướng phụ kiện handmade hot nhất 2024.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 44 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 56 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 0 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 44,
+        "metaLength": 56,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "post",
+      "id": 3,
+      "slug": "vong-tay-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-handmade",
+      "effectiveTitle": "Vòng Tay Handmade Mushroomie – Phụ Kiện Nhỏ Tạo Phong Cách Riêng",
+      "effectiveDescription": "Khám phá vòng tay handmade Mushroomie được phối từ hạt, charm và màu sắc riêng, phù hợp cho Gen Z yêu thích phụ kiện cá nhân hóa.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 64 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 129 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 0 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 64,
+        "metaLength": 129,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 3,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "post",
+      "id": 4,
+      "slug": "https://mushroomie.io.vn/vong-tay-handmade-nu/",
+      "url": "https://mushroomie.io.vn/tin-tuc/https://mushroomie.io.vn/vong-tay-handmade-nu/",
+      "effectiveTitle": "Vòng Tay Handmade Nữ Dễ Thương, Cá Tính Và Dễ Phối Đồ",
+      "effectiveDescription": "Khám phá bộ sưu tập vòng tay handmade nữ xinh xắn với nhiều kiểu đáng yêu, phù hợp cho các bạn học sinh, sinh viên và những ai yêu thích phong cách nhẹ nhàng.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 0 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 53,
+        "metaLength": 158,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 3,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "post",
+      "id": 7,
+      "slug": "cach-chon-vong-tay-handmade-o-dong-nai",
+      "url": "https://mushroomie.io.vn/tin-tuc/cach-chon-vong-tay-handmade-o-dong-nai",
+      "effectiveTitle": "Cách chọn vòng tay handmade ở Đồng Nai phù hợp phong cách riêng",
+      "effectiveDescription": "Cách chọn vòng tay handmade ở Đồng Nai theo màu da, size cổ tay, chất liệu và phong cách. Gợi ý dễ áp dụng từ Mushroomie.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 63 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 121 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 63,
+        "metaLength": 121,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 8,
+      "slug": "dia-chi-mua-vong-tay-custom-dong-nai",
+      "url": "https://mushroomie.io.vn/tin-tuc/dia-chi-mua-vong-tay-custom-dong-nai",
+      "effectiveTitle": "Địa chỉ mua vòng tay custom Đồng Nai: cần kiểm tra điều gì?",
+      "effectiveDescription": "Tìm địa chỉ mua vòng tay custom Đồng Nai? Đây là checklist kiểm tra mẫu thật, size, quy trình chốt thiết kế và chính sách hỗ trợ.",
+      "issues": [
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 129 characters; target 140-160."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 0 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 59,
+        "metaLength": 129,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "post",
+      "id": 9,
+      "slug": "goi-y-qua-tang-handmade-dong-nai",
+      "url": "https://mushroomie.io.vn/tin-tuc/goi-y-qua-tang-handmade-dong-nai",
+      "effectiveTitle": "Gợi ý quà tặng handmade Đồng Nai cho sinh nhật và dịp đặc biệt",
+      "effectiveDescription": "Gợi ý quà tặng handmade Đồng Nai cho sinh nhật, kỷ niệm và dịp đặc biệt: vòng tay, móc khóa, charm và set quà custom theo người nhận.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 62 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 133 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 0 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 62,
+        "metaLength": 133,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "post",
+      "id": 17,
+      "slug": "trang-suc-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/trang-suc-handmade",
+      "effectiveTitle": "Trang sức handmade – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Khám phá trang sức handmade Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 46 characters; target 50-60."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 46,
+        "metaLength": 143,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 18,
+      "slug": "phu-kien-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/phu-kien-handmade",
+      "effectiveTitle": "Phụ kiện handmade mang cảm xúc giản dị cho phong cách Gen Z",
+      "effectiveDescription": "Khám phá phụ kiện handmade Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 59,
+        "metaLength": 142,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 19,
+      "slug": "day-chuyen-hat-cuom",
+      "url": "https://mushroomie.io.vn/tin-tuc/day-chuyen-hat-cuom",
+      "effectiveTitle": "Dây chuyền hạt cườm mang cảm xúc giản dị cho phong cách Gen Z",
+      "effectiveDescription": "Khám phá dây chuyền hạt cườm Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 61 characters; target 50-60."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 61,
+        "metaLength": 144,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 20,
+      "slug": "vong-co-hat-cuom",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-co-hat-cuom",
+      "effectiveTitle": "Vòng cổ hạt cườm mang cảm xúc giản dị cho phong cách Gen Z",
+      "effectiveDescription": "Khám phá vòng cổ hạt cườm Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 58,
+        "metaLength": 141,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 21,
+      "slug": "shop-phu-kien-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/shop-phu-kien-handmade",
+      "effectiveTitle": "Shop phụ kiện handmade – Cách chọn và đặt hàng an toàn",
+      "effectiveDescription": "Khám phá shop phụ kiện handmade Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 54,
+        "metaLength": 147,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 22,
+      "slug": "vong-tay-hat-cuom",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-hat-cuom",
+      "effectiveTitle": "Vòng tay hạt cườm – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Khám phá vòng tay hạt cườm Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 45 characters; target 50-60."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 45,
+        "metaLength": 142,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 23,
+      "slug": "phu-kien-handmade-nu",
+      "url": "https://mushroomie.io.vn/tin-tuc/phu-kien-handmade-nu",
+      "effectiveTitle": "Phụ kiện handmade nữ – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Khám phá phụ kiện handmade nữ Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 48 characters; target 50-60."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 48,
+        "metaLength": 145,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 24,
+      "slug": "phu-kien-handmade-ca-nhan-hoa",
+      "url": "https://mushroomie.io.vn/tin-tuc/phu-kien-handmade-ca-nhan-hoa",
+      "effectiveTitle": "Phụ kiện handmade cá nhân hóa – Cách chọn chi tiết theo gu riêng",
+      "effectiveDescription": "Khám phá phụ kiện handmade cá nhân hóa Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 64 characters; target 50-60."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 64,
+        "metaLength": 154,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 25,
+      "slug": "phu-kien-handmade-phoi-do",
+      "url": "https://mushroomie.io.vn/tin-tuc/phu-kien-handmade-phoi-do",
+      "effectiveTitle": "Phụ kiện handmade phối đồ – Cách phối màu hài hòa",
+      "effectiveDescription": "Khám phá phụ kiện handmade phối đồ Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 49 characters; target 50-60."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 49,
+        "metaLength": 150,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 26,
+      "slug": "day-chuyen-handmade-de-thuong",
+      "url": "https://mushroomie.io.vn/tin-tuc/day-chuyen-handmade-de-thuong",
+      "effectiveTitle": "Dây chuyền handmade dễ thương – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Khám phá dây chuyền handmade dễ thương Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 57,
+        "metaLength": 154,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 27,
+      "slug": "vi-sao-nen-chon-phu-kien-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/vi-sao-nen-chon-phu-kien-handmade",
+      "effectiveTitle": "Vì sao nên chọn phụ kiện handmade…",
+      "effectiveDescription": "Khám phá vì sao nên chọn phụ kiện handmade Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 34 characters; target 50-60."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 34,
+        "metaLength": 158,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 28,
+      "slug": "vong-tay-handmade-mau-hong",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-handmade-mau-hong",
+      "effectiveTitle": "Vòng tay handmade màu hồng – Cách phối màu hài hòa",
+      "effectiveDescription": "Khám phá vòng tay handmade màu hồng Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 50,
+        "metaLength": 151,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 29,
+      "slug": "vong-tay-hat-pastel",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-hat-pastel",
+      "effectiveTitle": "Vòng tay hạt pastel – Cách phối màu hài hòa",
+      "effectiveDescription": "Khám phá vòng tay hạt pastel Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 43 characters; target 50-60."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 43,
+        "metaLength": 144,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 30,
+      "slug": "vong-tay-handmade-cho-hoc-sinh",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-handmade-cho-hoc-sinh",
+      "effectiveTitle": "Vòng tay handmade cho học sinh – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Khám phá vòng tay handmade cho học sinh Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 58,
+        "metaLength": 155,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 31,
+      "slug": "vong-tay-handmade-tone-bien",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-handmade-tone-bien",
+      "effectiveTitle": "Vòng tay handmade tone biển – Cách phối màu hài hòa",
+      "effectiveDescription": "Khám phá vòng tay handmade tone biển Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 51,
+        "metaLength": 152,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 32,
+      "slug": "phu-kien-ca-nhan-hoa",
+      "url": "https://mushroomie.io.vn/tin-tuc/phu-kien-ca-nhan-hoa",
+      "effectiveTitle": "Phụ kiện cá nhân hóa – Cách chọn chi tiết theo gu riêng",
+      "effectiveDescription": "Khám phá phụ kiện cá nhân hóa Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 55,
+        "metaLength": 145,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 33,
+      "slug": "vong-co-handmade-de-thuong",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-co-handmade-de-thuong",
+      "effectiveTitle": "Vòng cổ handmade dễ thương – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Khám phá vòng cổ handmade dễ thương Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 54,
+        "metaLength": 151,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 34,
+      "slug": "phu-kien-handmade-tone-xanh",
+      "url": "https://mushroomie.io.vn/tin-tuc/phu-kien-handmade-tone-xanh",
+      "effectiveTitle": "Phụ kiện handmade tone xanh – Cách phối màu hài hòa",
+      "effectiveDescription": "Khám phá phụ kiện handmade tone xanh Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 51,
+        "metaLength": 152,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 35,
+      "slug": "vong-tay-hat-nhieu-mau",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-hat-nhieu-mau",
+      "effectiveTitle": "Vòng tay hạt nhiều màu – Cách phối màu hài hòa",
+      "effectiveDescription": "Khám phá vòng tay hạt nhiều màu Mushroomie với tinh thần handmade, cá nhân hóa và cảm xúc, phù hợp người trẻ thích phụ kiện nhỏ xinh không đại trà.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 46 characters; target 50-60."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 46,
+        "metaLength": 147,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 36,
+      "slug": "moc-khoa-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/moc-khoa-handmade",
+      "effectiveTitle": "Móc khóa handmade – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Tìm hiểu móc khóa handmade Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 45 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 136 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 45,
+        "metaLength": 136,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 37,
+      "slug": "vong-co-handmade-nu",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-co-handmade-nu",
+      "effectiveTitle": "Vòng cổ handmade nữ – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Tìm hiểu vòng cổ handmade nữ Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 47 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 138 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 47,
+        "metaLength": 138,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 38,
+      "slug": "moc-khoa-handmade-de-thuong",
+      "url": "https://mushroomie.io.vn/tin-tuc/moc-khoa-handmade-de-thuong",
+      "effectiveTitle": "Móc khóa handmade dễ thương – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Tìm hiểu móc khóa handmade dễ thương Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 55,
+        "metaLength": 146,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 39,
+      "slug": "vong-tay-handmade-nu",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-handmade-nu",
+      "effectiveTitle": "Vòng tay handmade nữ – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Tìm hiểu vòng tay handmade nữ Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 48 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 139 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 48,
+        "metaLength": 139,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 40,
+      "slug": "vong-tay-handmade-nu-ca-tinh",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-handmade-nu-ca-tinh",
+      "effectiveTitle": "Vòng tay handmade nữ cá tính – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Tìm hiểu vòng tay handmade nữ cá tính Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 56,
+        "metaLength": 147,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 41,
+      "slug": "vong-tay-charm",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-charm",
+      "effectiveTitle": "Vòng tay charm – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Tìm hiểu vòng tay charm Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 42 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 133 characters; target 140-160."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 42,
+        "metaLength": 133,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 42,
+      "slug": "combo-moc-khoa-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/combo-moc-khoa-handmade",
+      "effectiveTitle": "Combo móc khóa handmade – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Tìm hiểu combo móc khóa handmade Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 51,
+        "metaLength": 142,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 43,
+      "slug": "moc-khoa-handmade-cho-dien-thoai",
+      "url": "https://mushroomie.io.vn/tin-tuc/moc-khoa-handmade-cho-dien-thoai",
+      "effectiveTitle": "Móc khóa handmade cho điện thoại – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Tìm hiểu móc khóa handmade cho điện thoại Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 60,
+        "metaLength": 151,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 44,
+      "slug": "vong-tay-custom-theo-ten",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-custom-theo-ten",
+      "effectiveTitle": "Vòng tay custom theo tên – Cách chọn chi tiết theo gu riêng",
+      "effectiveDescription": "Tìm hiểu vòng tay custom theo tên Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 59,
+        "metaLength": 143,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 45,
+      "slug": "moc-khoa-hat-cuom",
+      "url": "https://mushroomie.io.vn/tin-tuc/moc-khoa-hat-cuom",
+      "effectiveTitle": "Móc khóa hạt cườm – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Tìm hiểu móc khóa hạt cườm Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 45 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 136 characters; target 140-160."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 45,
+        "metaLength": 136,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 46,
+      "slug": "phu-kien-lam-vong-tay-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/phu-kien-lam-vong-tay-handmade",
+      "effectiveTitle": "Phụ kiện làm vòng tay handmade – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Tìm hiểu phụ kiện làm vòng tay handmade Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 58,
+        "metaLength": 149,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 47,
+      "slug": "moc-khoa-dien-thoai-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/moc-khoa-dien-thoai-handmade",
+      "effectiveTitle": "Móc khóa điện thoại handmade – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Tìm hiểu móc khóa điện thoại handmade Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 56,
+        "metaLength": 147,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 48,
+      "slug": "moc-khoa-handmade-ca-nhan-hoa",
+      "url": "https://mushroomie.io.vn/tin-tuc/moc-khoa-handmade-ca-nhan-hoa",
+      "effectiveTitle": "Móc khóa handmade cá nhân hóa – Cách chọn chi tiết theo gu riêng",
+      "effectiveDescription": "Tìm hiểu móc khóa handmade cá nhân hóa Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 64 characters; target 50-60."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 64,
+        "metaLength": 148,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 49,
+      "slug": "phu-kien-custom",
+      "url": "https://mushroomie.io.vn/tin-tuc/phu-kien-custom",
+      "effectiveTitle": "Phụ kiện custom – Cách chọn chi tiết theo gu riêng",
+      "effectiveDescription": "Tìm hiểu phụ kiện custom Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 134 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 50,
+        "metaLength": 134,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 50,
+      "slug": "day-chuyen-handmade-nu",
+      "url": "https://mushroomie.io.vn/tin-tuc/day-chuyen-handmade-nu",
+      "effectiveTitle": "Dây chuyền handmade nữ – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Tìm hiểu dây chuyền handmade nữ Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 50,
+        "metaLength": 141,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 51,
+      "slug": "charm-moc-khoa",
+      "url": "https://mushroomie.io.vn/tin-tuc/charm-moc-khoa",
+      "effectiveTitle": "Charm móc khóa – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Tìm hiểu charm móc khóa Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 42 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 133 characters; target 140-160."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 42,
+        "metaLength": 133,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 52,
+      "slug": "vong-tay-charm-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-charm-handmade",
+      "effectiveTitle": "Vòng tay charm handmade – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Tìm hiểu vòng tay charm handmade Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 51,
+        "metaLength": 142,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 53,
+      "slug": "charm-ten-rieng",
+      "url": "https://mushroomie.io.vn/tin-tuc/charm-ten-rieng",
+      "effectiveTitle": "Charm tên riêng – Cách chọn chi tiết theo gu riêng",
+      "effectiveDescription": "Tìm hiểu charm tên riêng Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 134 characters; target 140-160."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 50,
+        "metaLength": 134,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 54,
+      "slug": "moc-khoa-dien-thoai-custom",
+      "url": "https://mushroomie.io.vn/tin-tuc/moc-khoa-dien-thoai-custom",
+      "effectiveTitle": "Móc khóa điện thoại custom – Cách chọn chi tiết theo gu riêng",
+      "effectiveDescription": "Tìm hiểu móc khóa điện thoại custom Mushroomie được làm thủ công, phối màu và charm theo gu riêng, giúp mỗi sản phẩm mang dấu ấn cá nhân rõ ràng.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 61 characters; target 50-60."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 61,
+        "metaLength": 145,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 55,
+      "slug": "qua-tang-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/qua-tang-handmade",
+      "effectiveTitle": "Quà tặng handmade Mushroomie làm quà tặng nhỏ nhưng nhiều ý nghĩa",
+      "effectiveDescription": "Gợi ý quà tặng handmade Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 65 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 128 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 65,
+        "metaLength": 128,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 56,
+      "slug": "mua-vong-tay-charm",
+      "url": "https://mushroomie.io.vn/tin-tuc/mua-vong-tay-charm",
+      "effectiveTitle": "Gợi ý mua vòng tay charm cá nhân hóa để trao gửi sự chân thành",
+      "effectiveDescription": "Gợi ý mua vòng tay charm Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 62 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 129 characters; target 140-160."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 62,
+        "metaLength": 129,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 57,
+      "slug": "qua-tang-sinh-nhat-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/qua-tang-sinh-nhat-handmade",
+      "effectiveTitle": "Quà tặng sinh nhật handmade – Gợi ý chọn quà có ý nghĩa",
+      "effectiveDescription": "Gợi ý quà tặng sinh nhật handmade Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 138 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 55,
+        "metaLength": 138,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 58,
+      "slug": "shop-phu-kien-handmade-tphcm",
+      "url": "https://mushroomie.io.vn/tin-tuc/shop-phu-kien-handmade-tphcm",
+      "effectiveTitle": "Shop phụ kiện handmade tphcm – Cách chọn và đặt hàng an toàn",
+      "effectiveDescription": "Gợi ý shop phụ kiện handmade tphcm Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 139 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 60,
+        "metaLength": 139,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 59,
+      "slug": "vong-tay-doi-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-doi-handmade",
+      "effectiveTitle": "Vòng tay đôi handmade – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Gợi ý vòng tay đôi handmade Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 49 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 132 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 49,
+        "metaLength": 132,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 60,
+      "slug": "shop-phu-kien-handmade-online",
+      "url": "https://mushroomie.io.vn/tin-tuc/shop-phu-kien-handmade-online",
+      "effectiveTitle": "Shop phụ kiện handmade online – Cách chọn và đặt hàng an toàn",
+      "effectiveDescription": "Gợi ý shop phụ kiện handmade online Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 61 characters; target 50-60."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 61,
+        "metaLength": 140,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 61,
+      "slug": "vong-tay-best-friend-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-best-friend-handmade",
+      "effectiveTitle": "Vòng tay best friend handmade – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Gợi ý vòng tay best friend handmade Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 57,
+        "metaLength": 140,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 62,
+      "slug": "moc-khoa-handmade-cap-doi",
+      "url": "https://mushroomie.io.vn/tin-tuc/moc-khoa-handmade-cap-doi",
+      "effectiveTitle": "Móc khóa handmade cặp đôi – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Gợi ý móc khóa handmade cặp đôi Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 136 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 53,
+        "metaLength": 136,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 63,
+      "slug": "qua-tang-handmade-duoi-100k",
+      "url": "https://mushroomie.io.vn/tin-tuc/qua-tang-handmade-duoi-100k",
+      "effectiveTitle": "Quà tặng handmade dưới 100k – Gợi ý chọn quà có ý nghĩa",
+      "effectiveDescription": "Gợi ý quà tặng handmade dưới 100k Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 138 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 55,
+        "metaLength": 138,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 64,
+      "slug": "qua-tang-handmade-cho-sinh-vien",
+      "url": "https://mushroomie.io.vn/tin-tuc/qua-tang-handmade-cho-sinh-vien",
+      "effectiveTitle": "Quà tặng handmade cho sinh viên – Gợi ý chọn quà có ý nghĩa",
+      "effectiveDescription": "Gợi ý quà tặng handmade cho sinh viên Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 59,
+        "metaLength": 142,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 65,
+      "slug": "moc-khoa-best-friend-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/moc-khoa-best-friend-handmade",
+      "effectiveTitle": "Móc khóa best friend handmade – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Gợi ý móc khóa best friend handmade Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 57,
+        "metaLength": 140,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 66,
+      "slug": "mua-vong-tay-custom",
+      "url": "https://mushroomie.io.vn/tin-tuc/mua-vong-tay-custom",
+      "effectiveTitle": "Gợi ý mua vòng tay custom cá nhân hóa để trao gửi sự chân thành",
+      "effectiveDescription": "Gợi ý mua vòng tay custom Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 63 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 130 characters; target 140-160."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 63,
+        "metaLength": 130,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 67,
+      "slug": "dat-moc-khoa-handmade-online",
+      "url": "https://mushroomie.io.vn/tin-tuc/dat-moc-khoa-handmade-online",
+      "effectiveTitle": "Đặt móc khóa handmade online – Cách chọn và đặt hàng an toàn",
+      "effectiveDescription": "Gợi ý đặt móc khóa handmade online Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 139 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 60,
+        "metaLength": 139,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 68,
+      "slug": "mua-phu-kien-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/mua-phu-kien-handmade",
+      "effectiveTitle": "Mua phụ kiện handmade – Cách chọn và đặt hàng an toàn",
+      "effectiveDescription": "Gợi ý mua phụ kiện handmade Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 132 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 53,
+        "metaLength": 132,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 69,
+      "slug": "vong-tay-doi-custom",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-doi-custom",
+      "effectiveTitle": "Vòng tay đôi custom – Cách chọn chi tiết theo gu riêng",
+      "effectiveDescription": "Gợi ý vòng tay đôi custom Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 130 characters; target 140-160."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 54,
+        "metaLength": 130,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 70,
+      "slug": "vong-tay-handmade-tang-ban-than",
+      "url": "https://mushroomie.io.vn/tin-tuc/vong-tay-handmade-tang-ban-than",
+      "effectiveTitle": "Vòng tay handmade tặng bạn thân – Gợi ý chọn quà có ý nghĩa",
+      "effectiveDescription": "Gợi ý vòng tay handmade tặng bạn thân Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 59,
+        "metaLength": 142,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 71,
+      "slug": "combo-vong-tay-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/combo-vong-tay-handmade",
+      "effectiveTitle": "Combo vòng tay handmade – Cẩm nang chọn mẫu phù hợp",
+      "effectiveDescription": "Gợi ý combo vòng tay handmade Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 134 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 51,
+        "metaLength": 134,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 72,
+      "slug": "qua-sinh-nhat-handmade-cho-nu",
+      "url": "https://mushroomie.io.vn/tin-tuc/qua-sinh-nhat-handmade-cho-nu",
+      "effectiveTitle": "Quà sinh nhật handmade cho nữ – Gợi ý chọn quà có ý nghĩa",
+      "effectiveDescription": "Gợi ý quà sinh nhật handmade cho nữ Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 57,
+        "metaLength": 140,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 73,
+      "slug": "set-qua-handmade",
+      "url": "https://mushroomie.io.vn/tin-tuc/set-qua-handmade",
+      "effectiveTitle": "Set quà handmade – Gợi ý chọn quà có ý nghĩa",
+      "effectiveDescription": "Gợi ý set quà handmade Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 44 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 127 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 44,
+        "metaLength": 127,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    },
+    {
+      "kind": "post",
+      "id": 74,
+      "slug": "qua-handmade-tang-nguoi-yeu",
+      "url": "https://mushroomie.io.vn/tin-tuc/qua-handmade-tang-nguoi-yeu",
+      "effectiveTitle": "Quà handmade tặng người yêu – Gợi ý chọn quà có ý nghĩa",
+      "effectiveDescription": "Gợi ý quà handmade tặng người yêu Mushroomie làm quà tặng cá nhân hóa, nhỏ xinh và giàu cảm xúc cho bạn bè, người yêu hoặc chính bản thân.",
+      "issues": [
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 138 characters; target 140-160."
+        },
+        {
+          "code": "image_alt_stuffed",
+          "severity": "warning",
+          "message": "2 image alt value(s) look repetitive or keyword stuffed."
+        },
+        {
+          "code": "internal_commercial_links",
+          "severity": "warning",
+          "message": "Post links to 1 unique product/catalog target(s); target at least 2."
+        }
+      ],
+      "metrics": {
+        "titleLength": 55,
+        "metaLength": 138,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 2,
+        "missingAltCount": 0,
+        "stuffedAltCount": 2,
+        "internalCommercialLinkCount": 1
+      }
+    }
+  ],
+  "products": [
+    {
+      "kind": "product",
+      "id": 1,
+      "slug": "vong-tay-charm-nam-cute",
+      "url": "https://mushroomie.io.vn/san-pham/vong-tay-charm-nam-cute",
+      "effectiveTitle": "Vòng hoa xanh | Mushroomie",
+      "effectiveDescription": "Vòng tay handmade với charm nấm dễ thương, có thể cá nhân hóa màu sắc theo yêu cầu.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 26 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 83 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 26,
+        "metaLength": 83,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 2,
+      "slug": "vong-tay-hat-da-tu-nhien",
+      "url": "https://mushroomie.io.vn/san-pham/vong-tay-hat-da-tu-nhien",
+      "effectiveTitle": "Vòng tay mix hạt cườm pastel tone xanh | Mushroomie",
+      "effectiveDescription": "Vòng tay từ hạt đá tự nhiên, mang năng lượng tích cực và may mắn.",
+      "issues": [
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 65 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 51,
+        "metaLength": 65,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 4,
+      "slug": "Vòng-tay-quả-táo",
+      "url": "https://mushroomie.io.vn/san-pham/Vòng-tay-quả-táo",
+      "effectiveTitle": "Vòng tay quả táo | Mushroomie",
+      "effectiveDescription": "Charm chữ cái handmade, tùy chỉnh chữ theo tên hoặc từ ngữ yêu thích.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 29 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 69 characters; target 140-160."
+        },
+        {
+          "code": "slug_not_normalized",
+          "severity": "error",
+          "message": "Product slug must be lowercase ASCII with hyphen separators."
+        }
+      ],
+      "metrics": {
+        "titleLength": 29,
+        "metaLength": 69,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 5,
+      "slug": "vòng-vỏ-sò",
+      "url": "https://mushroomie.io.vn/san-pham/vòng-vỏ-sò",
+      "effectiveTitle": "Vòng vỏ sò | Mushroomie",
+      "effectiveDescription": "Bộ đôi vòng tay couple, tượng trưng cho tình yêu và sự kết nối. Có thể khắc tên đôi.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 23 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 84 characters; target 140-160."
+        },
+        {
+          "code": "slug_not_normalized",
+          "severity": "error",
+          "message": "Product slug must be lowercase ASCII with hyphen separators."
+        }
+      ],
+      "metrics": {
+        "titleLength": 23,
+        "metaLength": 84,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 8,
+      "slug": "vong-xanh",
+      "url": "https://mushroomie.io.vn/san-pham/vong-xanh",
+      "effectiveTitle": "Vòng xanh | Mushroomie",
+      "effectiveDescription": "Vòng tay ngọc trai nhân tạo sang trọng, phù hợp với nhiều phong cách.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 22 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 69 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 22,
+        "metaLength": 69,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 9,
+      "slug": "vong-sao-bien",
+      "url": "https://mushroomie.io.vn/san-pham/vong-sao-bien",
+      "effectiveTitle": "Vòng sao biển | Mushroomie",
+      "effectiveDescription": "vòng cặp nhóm người yêu bạn thân. Vòng handmade 100%",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 26 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 52 characters; target 140-160."
+        },
+        {
+          "code": "duplicate_meta",
+          "severity": "warning",
+          "message": "Meta description is duplicated across 2 pages."
+        }
+      ],
+      "metrics": {
+        "titleLength": 26,
+        "metaLength": 52,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 15,
+      "slug": "vong-hoa-hong",
+      "url": "https://mushroomie.io.vn/san-pham/vong-hoa-hong",
+      "effectiveTitle": "Vòng hoa hồng | Mushroomie",
+      "effectiveDescription": "Vòng cặp nhóm người yêu bạn thân. Vòng handmade 100%",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 26 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 52 characters; target 140-160."
+        },
+        {
+          "code": "duplicate_title",
+          "severity": "warning",
+          "message": "SEO title is duplicated across 2 pages."
+        },
+        {
+          "code": "duplicate_meta",
+          "severity": "warning",
+          "message": "Meta description is duplicated across 2 pages."
+        }
+      ],
+      "metrics": {
+        "titleLength": 26,
+        "metaLength": 52,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 16,
+      "slug": "vong-hong-ngot",
+      "url": "https://mushroomie.io.vn/san-pham/vong-hong-ngot",
+      "effectiveTitle": "Vòng hồng ngọt | Mushroomie",
+      "effectiveDescription": "Mua Vòng hồng ngọt handmade ca nhan hoa tai Mushroomie.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 27 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 55 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 27,
+        "metaLength": 55,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 36,
+      "slug": "moc-khoa-chuong-gio",
+      "url": "https://mushroomie.io.vn/san-pham/moc-khoa-chuong-gio",
+      "effectiveTitle": "Móc khóa chuông gió | Mushroomie",
+      "effectiveDescription": "Mua Móc khóa chuông gió  handmade ca nhan hoa tai Mushroomie.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 32 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 61 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 32,
+        "metaLength": 61,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 37,
+      "slug": "moc-khoa-banh-dango-anh-dao",
+      "url": "https://mushroomie.io.vn/san-pham/moc-khoa-banh-dango-anh-dao",
+      "effectiveTitle": "Móc khoá handmade bánh dango anh đào | Mushroomie",
+      "effectiveDescription": "Mua Móc khoá handmade bánh dango anh đào handmade ca nhan hoa tai Mushroomie.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 49 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 77 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 49,
+        "metaLength": 77,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 38,
+      "slug": "moc-khoa-hop-kim",
+      "url": "https://mushroomie.io.vn/san-pham/moc-khoa-hop-kim",
+      "effectiveTitle": "Móc khóa hợp kim | Mushroomie",
+      "effectiveDescription": "Mua Móc khóa hợp kim  handmade ca nhan hoa tai Mushroomie.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 29 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 58 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 29,
+        "metaLength": 58,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 39,
+      "slug": "moc-khoa-keo-may",
+      "url": "https://mushroomie.io.vn/san-pham/moc-khoa-keo-may",
+      "effectiveTitle": "Móc khóa kẹo mây | Mushroomie",
+      "effectiveDescription": "Mua Móc khóa kẹo mây handmade ca nhan hoa tai Mushroomie.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 29 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 57 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 29,
+        "metaLength": 57,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 40,
+      "slug": "moc-khoa-dien-thoai-song-xanh",
+      "url": "https://mushroomie.io.vn/san-pham/moc-khoa-dien-thoai-song-xanh",
+      "effectiveTitle": "Móc khóa điện thoại Sóng Xanh | Mushroomie",
+      "effectiveDescription": "Mua Móc khóa điện thoại Sóng Xanh  handmade ca nhan hoa tai Mushroomie.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 42 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 71 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 42,
+        "metaLength": 71,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 41,
+      "slug": "vong-tet-sac-mau",
+      "url": "https://mushroomie.io.vn/san-pham/vong-tet-sac-mau",
+      "effectiveTitle": "Vòng tết sắc màu | Mushroomie",
+      "effectiveDescription": "Mua Vòng tết sắc màu handmade ca nhan hoa tai Mushroomie.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 29 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 57 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 29,
+        "metaLength": 57,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 49,
+      "slug": "vong-hoa-xanh-hong",
+      "url": "https://mushroomie.io.vn/san-pham/vong-hoa-xanh-hong",
+      "effectiveTitle": "Vòng hoa xành hông | Mushroomie",
+      "effectiveDescription": "Mua Vòng hoa xành hông handmade ca nhan hoa tai Mushroomie.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 31 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 59 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 31,
+        "metaLength": 59,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 50,
+      "slug": "day-bien-sao-xanh",
+      "url": "https://mushroomie.io.vn/san-pham/day-bien-sao-xanh",
+      "effectiveTitle": "Dây biên sao xanh | Mushroomie",
+      "effectiveDescription": "Mua Dây biên sao xanh  handmade ca nhan hoa tai Mushroomie.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 30 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 59 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 30,
+        "metaLength": 59,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 62,
+      "slug": "day-bo-bien-nho",
+      "url": "https://mushroomie.io.vn/san-pham/day-bo-bien-nho",
+      "effectiveTitle": "Dây bờ biển nhỏ | Mushroomie",
+      "effectiveDescription": "Mua Dây bờ biển nhỏ handmade ca nhan hoa tai Mushroomie.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 28 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 56 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 28,
+        "metaLength": 56,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 64,
+      "slug": "vong-hoa-hong-ma",
+      "url": "https://mushroomie.io.vn/san-pham/vong-hoa-hong-ma",
+      "effectiveTitle": "Vòng hoa hồng | Mushroomie",
+      "effectiveDescription": "Mua Vòng hoa hồng handmade ca nhan hoa tai Mushroomie.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 26 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 54 characters; target 140-160."
+        },
+        {
+          "code": "duplicate_title",
+          "severity": "warning",
+          "message": "SEO title is duplicated across 2 pages."
+        }
+      ],
+      "metrics": {
+        "titleLength": 26,
+        "metaLength": 54,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 65,
+      "slug": "vong-pha-le-trang",
+      "url": "https://mushroomie.io.vn/san-pham/vong-pha-le-trang",
+      "effectiveTitle": "Vòng pha lê trắng | Mushroomie",
+      "effectiveDescription": "Mua Vòng pha lê trắng handmade ca nhan hoa tai Mushroomie.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 30 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 58 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 30,
+        "metaLength": 58,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 66,
+      "slug": "day-deo-nu-hoa-nho",
+      "url": "https://mushroomie.io.vn/san-pham/day-deo-nu-hoa-nho",
+      "effectiveTitle": "Dây đeo nụ hoa nhỏ | Mushroomie",
+      "effectiveDescription": "Mua Dây đeo nụ hoa nhỏ handmade ca nhan hoa tai Mushroomie.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 31 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 59 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 31,
+        "metaLength": 59,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    },
+    {
+      "kind": "product",
+      "id": 67,
+      "slug": "day-chuyen-pha-le",
+      "url": "https://mushroomie.io.vn/san-pham/day-chuyen-pha-le",
+      "effectiveTitle": "Dây chuyền pha lê | Mushroomie",
+      "effectiveDescription": "✨ Charm điện thoại handmade phong cách Hàn Quốc ✨\n\nCharm được làm từ dây dù nylon bền chắc kết hợp các hạt acrylic trong suốt, charm hình nơ, hoa, bướm và pha lê trang trí, tạo nên vẻ ngoài đáng yêu và lấp lánh. Sản phẩm phù hợp để trang trí điện thoại, túi xách hoặc làm quà tặng cho người thân, bạn bè.",
+      "issues": [
+        {
+          "code": "title_length",
+          "severity": "warning",
+          "message": "SEO title has 30 characters; target 50-60."
+        },
+        {
+          "code": "meta_length",
+          "severity": "warning",
+          "message": "Meta description has 304 characters; target 140-160."
+        }
+      ],
+      "metrics": {
+        "titleLength": 30,
+        "metaLength": 304,
+        "h1Count": 0,
+        "headingJumpCount": 0,
+        "imageCount": 0,
+        "missingAltCount": 0,
+        "stuffedAltCount": 0,
+        "internalCommercialLinkCount": 0
+      }
+    }
+  ]
+}

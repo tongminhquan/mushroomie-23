@@ -1,3 +1,5 @@
+import { parseFragment, serialize, type DefaultTreeAdapterTypes } from 'parse5'
+
 export interface ArticleFigure {
   slot: 'content-1' | 'content-2'
   src: string
@@ -7,19 +9,102 @@ export interface ArticleFigure {
   height?: number
 }
 
+export interface ArticleMediaSource {
+  src: string
+  width: number
+  height: number
+}
+
+export interface ArticleFigureCopy {
+  alt: string
+  caption: string
+}
+
+export interface ArticleMediaNormalizationPlan {
+  normalizationNeeded: boolean
+  oldFigureCount: number
+  newFigureCount: number
+}
+
+const ARTICLE_MEDIA_NORMALIZATION_SLUGS = new Set(['vong-tay-handmade'])
+
 export function extractImageSources(html?: string | null): string[] {
   if (!html) return []
 
   const sources: string[] = []
-  const imagePattern = /<img\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>/gi
-  let match: RegExpExecArray | null
-
-  while ((match = imagePattern.exec(html)) !== null) {
-    const source = match[1].trim()
+  for (const image of collectElementsByTagName(parseFragment(html), 'img')) {
+    const source = getElementAttribute(image, 'src')?.trim()
     if (source) sources.push(source)
   }
 
   return [...new Set(sources)]
+}
+
+export function createArticleFigures(
+  media: ArticleMediaSource[],
+  copies: ArticleFigureCopy[],
+): ArticleFigure[] {
+  return media.slice(0, 2).map((image, index) => ({
+    slot: index === 0 ? 'content-1' : 'content-2',
+    src: image.src,
+    width: image.width,
+    height: image.height,
+    alt: copies[index]?.alt || '',
+    caption: copies[index]?.caption || '',
+  }))
+}
+
+export function planArticleMediaNormalization(
+  slug: string,
+  html?: string | null,
+): ArticleMediaNormalizationPlan {
+  const figures = collectElementsByTagName(parseFragment(html || ''), 'figure')
+    .filter(isManagedArticleFigure)
+  const slots = figures.map((figure) => getElementAttribute(figure, 'data-mushroomie-media-slot'))
+  const hasExpectedSlots = figures.length === 2
+    && slots.includes('content-1')
+    && slots.includes('content-2')
+  const normalizationNeeded = ARTICLE_MEDIA_NORMALIZATION_SLUGS.has(slug) && !hasExpectedSlots
+
+  return {
+    normalizationNeeded,
+    oldFigureCount: figures.length,
+    newFigureCount: normalizationNeeded ? 2 : figures.length,
+  }
+}
+
+export function postNeedsArticleMediaWork(
+  generatedCount: number,
+  normalizationNeeded: boolean,
+) {
+  return generatedCount > 0 || normalizationNeeded
+}
+
+export function normalizeArticleFigures(
+  html: string | null | undefined,
+  figures: ArticleFigure[],
+) {
+  const fragment = parseFragment(html || '')
+  const existingFigures = collectElementsByTagName(fragment, 'figure')
+    .filter(isManagedArticleFigure)
+
+  for (const figure of existingFigures) {
+    const parent = figure.parentNode
+    if (!parent) continue
+    const index = parent.childNodes.indexOf(figure)
+    if (index >= 0) parent.childNodes.splice(index, 1)
+  }
+
+  const normalizedHtml = insertArticleFigures(serialize(fragment), figures.slice(0, 2))
+  const newFigureCount = collectElementsByTagName(parseFragment(normalizedHtml), 'figure')
+    .filter(isManagedArticleFigure)
+    .length
+
+  return {
+    html: normalizedHtml,
+    oldFigureCount: existingFigures.length,
+    newFigureCount,
+  }
 }
 
 function escapeHtml(value: string) {
@@ -45,6 +130,33 @@ export function buildArticleFigureHtml(figure: ArticleFigure) {
 
 function validDimension(value: number | undefined) {
   return Boolean(value && Number.isFinite(value) && value > 0)
+}
+
+function collectElementsByTagName(
+  root: DefaultTreeAdapterTypes.ParentNode,
+  tagName: string,
+) {
+  const elements: DefaultTreeAdapterTypes.Element[] = []
+
+  function visit(node: DefaultTreeAdapterTypes.ParentNode) {
+    for (const child of node.childNodes) {
+      if (!('tagName' in child)) continue
+      if (child.tagName === tagName) elements.push(child)
+      visit(child)
+    }
+  }
+
+  visit(root)
+  return elements
+}
+
+function getElementAttribute(element: DefaultTreeAdapterTypes.Element, name: string) {
+  return element.attrs.find((attribute) => attribute.name === name)?.value
+}
+
+function isManagedArticleFigure(figure: DefaultTreeAdapterTypes.Element) {
+  return Boolean(getElementAttribute(figure, 'data-mushroomie-media-slot'))
+    || collectElementsByTagName(figure, 'img').length > 0
 }
 
 function closingTagOffsets(html: string, tag: 'h2' | 'p') {

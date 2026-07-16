@@ -17,6 +17,7 @@ import {
 import { safeJsonLd } from '@/lib/security'
 import { getPublicImageUrl } from '@/lib/utils'
 import { toAbsoluteUrl } from '@/lib/url'
+import { DEFAULT_SOCIAL_IMAGE } from '@/lib/seo-assets'
 
 type ParamValue = string | string[] | undefined
 
@@ -77,13 +78,20 @@ export async function generateMetadata({
       siteName: 'Mushroomie',
       title: `${catalogSeo.title} | Mushroomie`,
       description: catalogSeo.description,
-      images: [{ url: `${SITE_URL}/logo.webp`, width: 500, height: 500, alt: 'Phụ kiện handmade Mushroomie' }],
+      images: [
+        {
+          url: `${SITE_URL}${DEFAULT_SOCIAL_IMAGE.path}`,
+          width: DEFAULT_SOCIAL_IMAGE.width,
+          height: DEFAULT_SOCIAL_IMAGE.height,
+          alt: DEFAULT_SOCIAL_IMAGE.alt,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${catalogSeo.title} | Mushroomie`,
       description: catalogSeo.description,
-      images: [`${SITE_URL}/logo.webp`],
+      images: [`${SITE_URL}${DEFAULT_SOCIAL_IMAGE.path}`],
     },
   }
 }

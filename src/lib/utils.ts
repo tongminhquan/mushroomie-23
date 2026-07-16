@@ -4,6 +4,8 @@ import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { normalizeImageUrl, type PublicImageKind } from '@/lib/image-url'
 
+export { generateSlug } from '@/lib/product-slug'
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -16,18 +18,6 @@ export function formatPrice(price: number | string): string {
 export function formatDate(date: Date | string): string {
   const value = typeof date === 'string' ? new Date(date) : date
   return format(value, 'dd/MM/yyyy HH:mm', { locale: vi })
-}
-
-export function generateSlug(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[đĐ]/g, 'd')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
 }
 
 export function generateOrderCode(): string {

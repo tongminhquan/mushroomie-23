@@ -6,18 +6,7 @@ import Link from 'next/link'
 import Button from '@/components/ui/Button'
 import MultiImageUploader from '@/components/admin/MultiImageUploader'
 import SingleImageUploader from '@/components/admin/SingleImageUploader'
-
-function generateSlug(text: string) {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/đ/g, 'd')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-}
+import { generateSlug } from '@/lib/utils'
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
@@ -100,7 +89,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
-    if (name === 'slug') setSlugEdited(true)
+    if (name === 'slug') {
+      setSlugEdited(Boolean(value))
+      setForm(prev => ({ ...prev, slug: generateSlug(value) }))
+      return
+    }
 
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked
@@ -121,6 +114,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     try {
       const payload = {
         ...form,
+        slug: generateSlug(form.slug || form.name),
         price: Number(form.price),
         sale_price: form.sale_price ? Number(form.sale_price) : null,
         stock: Number(form.stock),

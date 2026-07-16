@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { z } from 'zod'
-import { generateSlug } from '@/lib/utils'
+import { normalizeProductSlugInput } from '@/lib/product-slug'
 import { logAdminAction } from '@/lib/admin-logger'
 import { sanitizeHtml } from '@/lib/sanitize'
 
@@ -83,7 +83,11 @@ export async function POST(request: NextRequest) {
 
     const { images, description, short_description, ...productData } = parsed.data
 
-    const slug = productData.slug || generateSlug(productData.name)
+    const slug = normalizeProductSlugInput(productData.slug, productData.name)
+    if (!slug) {
+      return NextResponse.json({ error: 'Invalid product slug' }, { status: 400 })
+    }
+
     const product = await prisma.product.create({
       data: { 
         ...productData, 
