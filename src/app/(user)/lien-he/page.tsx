@@ -1,15 +1,13 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import { MapPin, Navigation } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 import SafeEmail from '@/components/ui/SafeEmail'
 import { BRAND } from '@/lib/local-seo'
 
 const LINE = '#f0e0d6' // warm hairline từ Claude Design
-
-// Định dạng SĐT hiển thị: 0947192590 -> 0947 192 590
-const PHONE_DISPLAY = BRAND.phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
 
 // Liên kết Local SEO trong thân trang liên hệ (nội bộ, anchor tự nhiên)
 const LOCAL_LINKS = [
@@ -20,16 +18,16 @@ const LOCAL_LINKS = [
 ]
 
 const socials = [
-  { name: 'Facebook', handle: 'fb.com/mushr00mie', href: 'https://www.facebook.com/mushr00mie', emoji: '📘', chip: '#e7f0ff' },
-  { name: 'Instagram', handle: '@mushr00mie._', href: 'https://www.instagram.com/mushr00mie._/', emoji: '📸', chip: '#ffe7f3' },
-  { name: 'TikTok', handle: '@mushr00mie._', href: 'https://www.tiktok.com/@mushr00mie._', emoji: '🎵', chip: '#eaeaea' },
-  { name: 'Shopee', handle: 'Mushroomie', href: 'https://shopee.vn/shop/475544379', emoji: '🛒', chip: '#ffeede' },
+  { name: 'Facebook', ...BRAND.socials.facebook, emoji: '📘', chip: '#e7f0ff' },
+  { name: 'Instagram', ...BRAND.socials.instagram, emoji: '📸', chip: '#ffe7f3' },
+  { name: 'TikTok', ...BRAND.socials.tiktok, emoji: '🎵', chip: '#eaeaea' },
+  { name: 'Shopee', ...BRAND.socials.shopee, emoji: '🛒', chip: '#ffeede' },
 ]
 
 const infoItems = [
-  { emoji: '📍', chip: '#ffd6d6', label: 'Địa chỉ', value: <>Hẻm 2 tổ 11, Phường Trảng Dài, Thành phố Đồng Nai</> },
-  { emoji: '✉️', chip: '#ffe7a3', label: 'Email', value: <SafeEmail email="cskh@mushroomie.io.vn" /> },
-  { emoji: '☎️', chip: '#ffece6', label: 'Hotline / Zalo', value: <a href={`tel:${BRAND.phoneE164}`} className="hover:text-primary">{PHONE_DISPLAY}</a> },
+  { emoji: '📍', chip: '#ffd6d6', label: 'Địa chỉ', value: <>{BRAND.formattedAddress}</> },
+  { emoji: '✉️', chip: '#ffe7a3', label: 'Email', value: <SafeEmail email={BRAND.email} /> },
+  { emoji: '☎️', chip: '#ffece6', label: 'Hotline / Zalo', value: <a href={`tel:${BRAND.phoneE164}`} className="hover:text-primary">{BRAND.phoneDisplay}</a> },
 ]
 
 export default function ContactPage() {
@@ -72,18 +70,18 @@ export default function ContactPage() {
           <span className="inline-block text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-3">Liên hệ</span>
           <h1 className="font-heading text-3xl md:text-[44px] leading-tight text-neutral-900 mb-3">Ghé Nhà Nấm nhỏ ♡</h1>
           <p className="m-0 mx-auto max-w-md text-[15px] leading-relaxed text-neutral-500">
-            Có câu hỏi, muốn custom đặc biệt hay chỉ muốn nói &ldquo;hi&rdquo;? Nhắn cho chúng mình nhé! Mushroomie ở{' '}
-            <strong className="text-neutral-700">Trảng Dài, Thành phố Đồng Nai</strong> (gần Biên Hòa) và giao online đến TP.HCM.
+            Có câu hỏi, muốn custom đặc biệt hay chỉ muốn nói &ldquo;hi&rdquo;? Nhắn cho chúng mình nhé! {BRAND.name} ở{' '}
+            <strong className="text-neutral-700">{BRAND.formattedAddress}</strong> và giao online đến TP.HCM.
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
             <a
               href={`tel:${BRAND.phoneE164}`}
               className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-card transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
             >
-              📞 Gọi {PHONE_DISPLAY}
+              📞 Gọi {BRAND.phoneDisplay}
             </a>
             <a
-              href="https://www.facebook.com/mushr00mie"
+              href={BRAND.socials.facebook.url}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-primary bg-white px-5 py-2.5 text-sm font-bold text-primary transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
@@ -91,7 +89,7 @@ export default function ContactPage() {
               💬 Nhắn tin tư vấn
             </a>
             <a
-              href={BRAND.shopee}
+              href={BRAND.socials.shopee.url}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-warm-border bg-white px-5 py-2.5 text-sm font-bold text-neutral-700 transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
@@ -108,10 +106,10 @@ export default function ContactPage() {
           {socials.map((s) => (
             <a
               key={s.name}
-              href={s.href}
+              href={s.url}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`${s.name} của Mushroomie`}
+              aria-label={`${s.name} của ${BRAND.name}`}
               className="hover-lift block text-center bg-white rounded-[20px] p-5 border-[1.5px] shadow-card"
               style={{ borderColor: LINE }}
             >
@@ -138,11 +136,11 @@ export default function ContactPage() {
               <div className="flex flex-col items-center justify-center text-center py-10">
                 <div className="text-5xl mb-4" aria-hidden>✅</div>
                 <h2 className="font-heading text-xl mb-2 text-neutral-900">Đã gửi thành công!</h2>
-                <p className="text-neutral-500 text-sm">Mushroomie sẽ phản hồi bạn trong vòng 24h. Cảm ơn đã liên hệ ♡</p>
+                <p className="text-neutral-500 text-sm">{BRAND.name} sẽ phản hồi bạn trong vòng 24h. Cảm ơn đã liên hệ ♡</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <h2 className="font-heading text-xl mb-1 text-neutral-900">Gửi lời nhắn cho Mushroomie</h2>
+                <h2 className="font-heading text-xl mb-1 text-neutral-900">Gửi lời nhắn cho {BRAND.name}</h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label htmlFor="ct-name" className="block text-xs font-semibold mb-1.5 text-neutral-700">Họ tên</label>
@@ -208,7 +206,7 @@ export default function ContactPage() {
 
             <div className="rounded-[18px] p-4 bg-primary-light">
               <h3 className="font-heading text-primary mb-1.5">🎨 Tự thiết kế phụ kiện?</h3>
-              <p className="text-sm text-neutral-600 leading-relaxed">Cho mình biết ý tưởng của bạn — Mushroomie tư vấn miễn phí và giúp bạn tạo chiếc phụ kiện độc nhất vô nhị.</p>
+              <p className="text-sm text-neutral-600 leading-relaxed">Cho mình biết ý tưởng của bạn — {BRAND.name} tư vấn miễn phí và giúp bạn tạo chiếc phụ kiện độc nhất vô nhị.</p>
             </div>
 
             <div className="flex items-center gap-3 rounded-[18px] p-4 bg-secondary border-[1.5px] border-dashed border-[#d9b89e]">
@@ -225,9 +223,25 @@ export default function ContactPage() {
       <section className="max-w-5xl mx-auto px-4 sm:px-6 mt-6">
         <AnimateOnScroll animation="fade-up">
           <div className="bg-white rounded-[20px] p-2 border-[1.5px] shadow-card overflow-hidden" style={{ borderColor: LINE }}>
+            <div className="p-4 sm:p-5">
+              <h2 className="flex items-center gap-2 font-heading text-xl text-neutral-900">
+                <MapPin size={20} className="text-primary" /> Đường đến {BRAND.name}
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-600">
+                {BRAND.name} ở {BRAND.formattedAddress}. Trước khi đến, bạn hãy mở bản đồ và đi theo chỉ dẫn đến đúng ghim tại địa chỉ này.
+              </p>
+              <a
+                href={BRAND.mapUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-primary hover:underline"
+              >
+                <Navigation size={17} /> Mở chỉ đường trên Google Maps
+              </a>
+            </div>
             <iframe
-              title="Bản đồ Mushroomie"
-              src="https://www.google.com/maps/embed?pb=!1m13!1m8!1m3!1d979.143346171457!2d106.8820431!3d10.9955388!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTDCsDU5JzQ2LjgiTiAxMDbCsDUyJzU2LjMiRQ!5e0!3m2!1svi!2s!4v1780065547238!5m2!1svi!2s"
+              title={`Bản đồ ${BRAND.name}`}
+              src={BRAND.mapEmbedUrl}
               width="100%"
               height="420"
               style={{ border: 0, borderRadius: '0.75rem' }}
@@ -243,9 +257,9 @@ export default function ContactPage() {
       <section className="max-w-5xl mx-auto px-4 sm:px-6 mt-6">
         <AnimateOnScroll animation="fade-up">
           <div className="rounded-[20px] bg-white p-6 border-[1.5px] shadow-card" style={{ borderColor: LINE }}>
-            <h2 className="font-heading text-xl text-neutral-900">Mushroomie phục vụ khu vực nào?</h2>
+            <h2 className="font-heading text-xl text-neutral-900">{BRAND.name} phục vụ khu vực nào?</h2>
             <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-              Mushroomie làm phụ kiện handmade cá nhân hóa tại <strong>Trảng Dài, Thành phố Đồng Nai</strong>, thuận tiện cho khách ở{' '}
+              {BRAND.name} làm phụ kiện handmade cá nhân hóa tại <strong>{BRAND.formattedAddress}</strong>, phục vụ khách ở{' '}
               <strong>Biên Hòa</strong> và các khu vực lân cận, đồng thời nhận đặt online giao đến <strong>TP.HCM</strong>. Bạn có thể
               đặt vòng tay, móc khóa, charm và quà tặng custom theo màu sắc, kiểu dáng và cá tính riêng.
             </p>

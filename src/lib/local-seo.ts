@@ -8,6 +8,33 @@
 
 export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://mushroomie.io.vn'
 
+const PHONE = '0947192590'
+const STREET_ADDRESS = 'Hẻm 2, tổ 11, phường Trảng Dài'
+const ADDRESS_REGION = 'Đồng Nai'
+const VERIFIED_GEO = {
+  latitude: 10.996333,
+  longitude: 106.882306,
+} as const
+const COORDINATE_PAIR = `${VERIFIED_GEO.latitude},${VERIFIED_GEO.longitude}`
+const SOCIALS = {
+  facebook: {
+    url: 'https://www.facebook.com/mushr00mie',
+    handle: 'fb.com/mushr00mie',
+  },
+  instagram: {
+    url: 'https://www.instagram.com/mushr00mie._/',
+    handle: '@mushr00mie._',
+  },
+  tiktok: {
+    url: 'https://www.tiktok.com/@mushr00mie._',
+    handle: '@mushr00mie._',
+  },
+  shopee: {
+    url: 'https://shopee.vn/shop/475544379',
+    handle: 'Mushroomie',
+  },
+} as const
+
 /** Thông tin NAP nhất quán (dùng cho schema + trang liên hệ + footer) */
 export const BRAND = {
   name: 'Mushroomie',
@@ -15,26 +42,22 @@ export const BRAND = {
   slogan: 'Từ từng hạt nhỏ, tạo phong cách riêng',
   description:
     'Thương hiệu phụ kiện handmade cá nhân hóa cho giới trẻ: vòng tay, móc khóa, charm, dây chuyền và quà tặng custom theo màu sắc, kiểu dáng và cá tính riêng.',
-  phone: '0947192590',
+  phone: PHONE,
+  phoneDisplay: PHONE.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3'),
   phoneE164: '+84947192590',
   email: 'cskh@mushroomie.io.vn',
-  streetAddress: 'Hẻm 2, tổ 11, Phường Trảng Dài',
-  addressLocality: 'Thành phố Đồng Nai',
-  addressRegion: 'Đồng Nai',
+  streetAddress: STREET_ADDRESS,
+  addressLocality: 'Trảng Dài',
+  addressRegion: ADDRESS_REGION,
   addressCountry: 'VN',
+  formattedAddress: `${STREET_ADDRESS}, tỉnh ${ADDRESS_REGION}`,
   areaServed: ['Đồng Nai', 'Biên Hòa', 'Trảng Dài', 'TP. Hồ Chí Minh'],
-  sameAs: [
-    'https://www.facebook.com/mushr00mie',
-    'https://www.instagram.com/mushr00mie._/',
-    'https://www.tiktok.com/@mushr00mie._',
-    'https://shopee.vn/shop/475544379',
-  ],
-  shopee: 'https://shopee.vn/shop/475544379',
-  mapUrl: 'https://www.google.com/maps?q=10.996333,106.882306',
-  geo: {
-    latitude: 10.996333,
-    longitude: 106.882306,
-  },
+  socials: SOCIALS,
+  sameAs: Object.values(SOCIALS).map((social) => social.url),
+  shopee: SOCIALS.shopee.url,
+  mapUrl: `https://www.google.com/maps?q=${COORDINATE_PAIR}`,
+  mapEmbedUrl: `https://www.google.com/maps?q=${COORDINATE_PAIR}&output=embed`,
+  geo: VERIFIED_GEO,
   openingHours: {
     opens: '08:00',
     closes: '21:00',
@@ -771,7 +794,7 @@ export function localServiceSchema(page: LocalPage) {
     name: page.h1,
     serviceType: page.serviceType,
     description: page.metaDescription,
-    areaServed: { '@type': 'Place', name: page.area },
+    areaServed: { '@type': 'Place', name: page.area === 'TP.HCM' ? 'TP. Hồ Chí Minh' : page.area },
     provider: { '@id': `${SITE_URL}/#localbusiness` },
     url: `${SITE_URL}/${page.slug}`,
   }

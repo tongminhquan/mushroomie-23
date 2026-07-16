@@ -15,7 +15,7 @@ export default function Footer({ categories }: { categories: Array<{ id: number;
               <SafeImage
                 src="/logo.webp"
                 fallbackSrc="/logo.webp"
-                alt="Mushroomie"
+                alt={BRAND.name}
                 fill
                 sizes="144px"
                 className="object-contain object-left"
@@ -48,7 +48,7 @@ export default function Footer({ categories }: { categories: Array<{ id: number;
           </div>
 
           <div>
-            <h2 className="mb-4 text-sm font-extrabold text-white">Mushroomie</h2>
+            <h2 className="mb-4 text-sm font-extrabold text-white">{BRAND.name}</h2>
             <ul className="space-y-3 text-sm text-white/60">
               <li><Link href="/gioi-thieu" className="hover:text-white">Câu chuyện thương hiệu</Link></li>
               <li><Link href="/tin-tuc" className="hover:text-white">Tin tức</Link></li>
@@ -74,15 +74,15 @@ export default function Footer({ categories }: { categories: Array<{ id: number;
             <ul className="space-y-4 text-sm leading-6 text-white/60">
               <li className="flex gap-3">
                 <MapPin size={17} className="mt-1 shrink-0 text-coral" />
-                {BRAND.streetAddress}, {BRAND.addressLocality}
+                {BRAND.formattedAddress}
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={17} className="shrink-0 text-coral" />
-                <a href="tel:+84947192590" className="hover:text-white">0947 192 590</a>
+                <a href={`tel:${BRAND.phoneE164}`} className="hover:text-white">{BRAND.phoneDisplay}</a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={17} className="shrink-0 text-coral" />
-                <SafeEmail email="cskh@mushroomie.io.vn" className="hover:text-white" />
+                <SafeEmail email={BRAND.email} className="hover:text-white" />
               </li>
               <li className="flex items-center gap-3">
                 <Globe size={17} className="shrink-0 text-coral" />
@@ -93,12 +93,12 @@ export default function Footer({ categories }: { categories: Array<{ id: number;
         </div>
 
         <div className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-white/65 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Mushroomie. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {BRAND.name}. All rights reserved.</p>
           <div className="flex flex-wrap gap-5">
-            <a href="https://www.facebook.com/mushr00mie" target="_blank" rel="noopener noreferrer" className="hover:text-white">Facebook</a>
-            <a href="https://www.instagram.com/mushr00mie._/" target="_blank" rel="noopener noreferrer" className="hover:text-white">Instagram</a>
-            <a href="https://www.tiktok.com/@mushr00mie" target="_blank" rel="noopener noreferrer" className="hover:text-white">TikTok</a>
-            <a href="https://shopee.vn/shop/475544379" target="_blank" rel="noopener noreferrer" className="hover:text-white">Shopee</a>
+            <a href={BRAND.socials.facebook.url} target="_blank" rel="noopener noreferrer" className="hover:text-white">Facebook</a>
+            <a href={BRAND.socials.instagram.url} target="_blank" rel="noopener noreferrer" className="hover:text-white">Instagram</a>
+            <a href={BRAND.socials.tiktok.url} target="_blank" rel="noopener noreferrer" className="hover:text-white">TikTok</a>
+            <a href={BRAND.socials.shopee.url} target="_blank" rel="noopener noreferrer" className="hover:text-white">Shopee</a>
           </div>
         </div>
       </div>

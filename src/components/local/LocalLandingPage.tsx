@@ -85,10 +85,13 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
         <div className="grid gap-4 rounded-[18px] border-[1.5px] border-warm-border bg-white p-5 shadow-card sm:grid-cols-3 sm:p-6">
           <div>
             <h2 id="local-contact-heading" className="flex items-center gap-2 font-heading text-base text-neutral-900">
-              <MapPin size={17} className="text-primary" /> Mushroomie tại Đồng Nai
+              <MapPin size={17} className="text-primary" /> {BRAND.name} tại Đồng Nai
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-              {BRAND.streetAddress}, {BRAND.addressLocality}
+              {BRAND.formattedAddress}
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+              Mở bản đồ và đi theo chỉ dẫn đến đúng ghim tại địa chỉ trên. Vui lòng liên hệ trước khi bạn muốn hẹn nhận trực tiếp.
             </p>
             <a
               href={BRAND.mapUrl}
@@ -115,7 +118,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
               href={`tel:${BRAND.phoneE164}`}
               className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-neutral-700 hover:text-primary"
             >
-              0947 192 590
+              {BRAND.phoneDisplay}
             </a>
             <p className="text-xs leading-relaxed text-neutral-500">Nên liên hệ trước nếu bạn muốn hẹn nhận trực tiếp.</p>
           </div>
@@ -141,7 +144,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
           Đặt phụ kiện handmade theo yêu cầu như thế nào?
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-600">
-          Ba bước gọn để Mushroomie hiểu đúng ý tưởng, xác nhận chi phí và hoàn thiện sản phẩm trước khi giao đến {page.area}.
+          Ba bước gọn để {BRAND.name} hiểu đúng ý tưởng, xác nhận chi phí và hoàn thiện sản phẩm trước khi giao đến {page.area}.
         </p>
         <ol className="mt-4 grid gap-4 sm:grid-cols-3">
           <li className="rounded-[18px] border-[1.5px] border-warm-border bg-white p-5 shadow-card">
@@ -149,7 +152,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
               <Send size={18} />
             </span>
             <h3 className="mt-3 font-heading text-base text-neutral-900">1. Gửi ý tưởng</h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-neutral-600">Cho Mushroomie biết màu, charm, size, dịp tặng và khoảng ngân sách bạn mong muốn.</p>
+            <p className="mt-1.5 text-sm leading-relaxed text-neutral-600">Cho {BRAND.name} biết màu, charm, size, dịp tặng và khoảng ngân sách bạn mong muốn.</p>
           </li>
           <li className="rounded-[18px] border-[1.5px] border-warm-border bg-white p-5 shadow-card">
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fff3cf] text-[#9b6500]" aria-hidden>
@@ -163,7 +166,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
               <PackageCheck size={18} />
             </span>
             <h3 className="mt-3 font-heading text-base text-neutral-900">3. Làm và giao sản phẩm</h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-neutral-600">Mushroomie làm thủ công, kiểm tra chi tiết rồi hẹn nhận hoặc gửi qua đơn vị vận chuyển.</p>
+            <p className="mt-1.5 text-sm leading-relaxed text-neutral-600">{BRAND.name} làm thủ công, kiểm tra chi tiết rồi hẹn nhận hoặc gửi qua đơn vị vận chuyển.</p>
           </li>
         </ol>
       </section>
@@ -183,7 +186,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
 
       {/* Internal links: sản phẩm + custom + liên hệ */}
       <section className="brand-container mt-8">
-        <h2 className="font-heading text-lg text-neutral-900">Xem thêm tại Mushroomie</h2>
+        <h2 className="font-heading text-lg text-neutral-900">Xem thêm tại {BRAND.name}</h2>
         <div className="mt-3 flex flex-wrap gap-2.5">
           {page.productLinks.map((l) => (
             <Link
@@ -238,7 +241,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
         <div className="rounded-[24px] bg-[linear-gradient(120deg,#e41d1d,#ff6b6b)] p-7 text-center text-white shadow-strong sm:p-9">
           <h2 className="font-heading text-xl md:text-2xl">Sẵn sàng tạo phụ kiện của riêng bạn?</h2>
           <p className="mx-auto mt-2 max-w-xl text-sm text-white/90">
-            Nhắn Mushroomie để được tư vấn phối màu, charm và kiểu dáng — hoặc đặt vòng custom theo gu riêng của bạn.
+            Nhắn {BRAND.name} để được tư vấn phối màu, charm và kiểu dáng — hoặc đặt vòng custom theo gu riêng của bạn.
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <Link href="/lien-he" className="rounded-full bg-white px-6 py-3 text-sm font-bold text-primary transition-transform hover:-translate-y-0.5 motion-reduce:transform-none">
