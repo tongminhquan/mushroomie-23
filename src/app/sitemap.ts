@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next'
 import { prisma } from '@/lib/prisma'
 import { LOCAL_SEO_LAST_MODIFIED, PUBLISHED_LOCAL_PAGES } from '@/lib/local-seo'
 import { isCatalogCategory } from '@/lib/catalog-seo'
+import { shouldIncludePostInSitemap } from '@/lib/sitemap-post-inclusion'
 
 // Regenerate the sitemap at most once an hour (ISR) so newly published posts /
 // products and slug fixes appear without needing a full redeploy. The query is
@@ -23,7 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: baseUrl, changeFrequency: 'daily', priority: 1 },
     { url: `${baseUrl}/san-pham`, changeFrequency: 'daily', priority: 0.9 },
     { url: `${baseUrl}/tin-tuc`, changeFrequency: 'weekly', priority: 0.8 },
-    // /cau-chuyen 307-redirects to /gioi-thieu, so the canonical /gioi-thieu (below)
+    // /cau-chuyen permanently redirects to /gioi-thieu, so the canonical /gioi-thieu (below)
     // is the sitemap entry — listing the alias would put a redirect URL in the sitemap.
     { url: `${baseUrl}/gioi-thieu`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/lien-he`, changeFrequency: 'monthly', priority: 0.6 },
@@ -50,7 +51,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const [productList, postList, categoryList] = await Promise.all([
       prisma.product.findMany({ where: { status: 'active' }, select: { slug: true, updated_at: true } }),
-      prisma.post.findMany({ where: { status: 'published' }, select: { slug: true, updated_at: true } }),
+      prisma.post.findMany({
+        where: { status: 'published' },
+        select: { slug: true, updated_at: true, robots_index: true, canonical_url: true },
+      }),
       prisma.category.findMany({
         where: { type: 'product' },
         select: { slug: true, updated_at: true },
@@ -64,12 +68,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     }))
 
-    posts = postList.filter((p) => isValidSlug(p.slug)).map((p) => ({
-      url: `${baseUrl}/tin-tuc/${p.slug}`,
-      lastModified: p.updated_at,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    }))
+    posts = postList
+      .filter((p) => isValidSlug(p.slug) && shouldIncludePostInSitemap({
+        slug: p.slug,
+        robotsIndex: p.robots_index,
+        canonicalUrl: p.canonical_url,
+      }))
+      .map((p) => ({
+        url: `${baseUrl}/tin-tuc/${p.slug}`,
+        lastModified: p.updated_at,
+        changeFrequency: 'monthly' as const,
+        priority: 0.8,
+      }))
 
     categories = categoryList.filter((c) => isValidSlug(c.slug) && isCatalogCategory(c.slug)).map((c) => ({
       url: `${baseUrl}/san-pham?category=${encodeURIComponent(c.slug)}`,
@@ -77,7 +87,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     }))
-  } catch {}
+  } catch (error) {
+    console.error({
+      event: 'sitemap_database_query_failed',
+      errorType: error instanceof Error ? error.name : 'UnknownError',
+    })
+  }
 
   return [...staticPages, ...localPages, ...categories, ...products, ...posts]
 }
