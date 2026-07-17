@@ -122,6 +122,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       ipAddress: request.headers.get('x-forwarded-for') || undefined
     })
 
+    revalidateProduct(deleted.slug)
+
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
