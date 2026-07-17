@@ -56,6 +56,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
     const body = parsed.data
+    const existing = await prisma.product.findUnique({
+      where: { id: Number(id) },
+      select: { slug: true },
+    })
     if (body.slug !== undefined) {
       const slug = normalizeProductSlugInput(body.slug, undefined)
       if (!slug) {
