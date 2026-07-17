@@ -126,7 +126,16 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                       <span className="text-neutral-400">—</span>
                     )}
                   </td>
-                  <td className="py-3 px-4 font-bold text-primary">{formatPrice(Number(product.price))}</td>
+                  <td className="py-3 px-4">
+                    {product.sale_price ? (
+                      <div className="flex flex-col">
+                        <span className="font-bold text-primary">{formatPrice(Number(product.sale_price))}</span>
+                        <span className="text-xs text-neutral-400 line-through">{formatPrice(Number(product.price))}</span>
+                      </div>
+                    ) : (
+                      <span className="font-bold text-primary">{formatPrice(Number(product.price))}</span>
+                    )}
+                  </td>
                   <td className="py-3 px-4">
                     <span className={product.stock <= 5 ? 'text-red-600 font-bold' : 'text-neutral-700 font-semibold'}>{product.stock}</span>
                   </td>
