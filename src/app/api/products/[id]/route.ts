@@ -93,7 +93,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       details: { id: product.id, name: product.name },
       ipAddress: request.headers.get('x-forwarded-for') || undefined
     })
-    
+
+    revalidateProduct(existing?.slug, product.slug)
+
     return NextResponse.json(product)
   } catch (error: any) {
     if (error?.code === 'P2002') {
