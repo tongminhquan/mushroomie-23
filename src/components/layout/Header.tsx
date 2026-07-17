@@ -121,6 +121,8 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
             <div className="relative mx-auto max-w-xl">
               <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" size={18} />
               <input
+                id="product-search-desktop"
+                name="search"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 aria-label="Tìm sản phẩm"
