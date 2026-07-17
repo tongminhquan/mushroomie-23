@@ -47,6 +47,9 @@ function readParam(value: ParamValue) {
   return Array.isArray(value) ? value[0] : value
 }
 
+/** Lưới an toàn cho các thay đổi không đi qua /api/products (sửa thẳng DB, seed, import). */
+export const revalidate = 3600
+
 export async function generateMetadata({
   searchParams,
 }: {
