@@ -216,9 +216,12 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
           <form id="mobile-product-search" onSubmit={submitSearch} className="brand-container pb-3 md:hidden">
             <div className="flex gap-2">
               <input
+                id="product-search-mobile"
+                name="search"
                 autoFocus
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
+                aria-label="Tìm sản phẩm"
                 placeholder="Tìm sản phẩm..."
                 className="h-11 flex-1 rounded-xl border border-neutral-200 px-4 text-sm outline-none focus:border-primary"
               />
