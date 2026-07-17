@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { normalizeProductSlugInput } from '@/lib/product-slug'
 import { logAdminAction } from '@/lib/admin-logger'
 import { sanitizeHtml } from '@/lib/sanitize'
+import { revalidateProduct } from '@/lib/product-revalidate'
 
 const productSchema = z.object({
   name: z.string().min(1),
