@@ -28,6 +28,9 @@ import {
 
 const SITE_NAME = 'Mushroomie'
 
+/** Lưới an toàn cho các thay đổi không đi qua /api/products (sửa thẳng DB, seed, import). */
+export const revalidate = 3600
+
 type RelatedProductRecord = Prisma.ProductGetPayload<{
   include: { category: true; images: true }
 }>
