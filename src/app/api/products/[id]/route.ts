@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { normalizeProductSlugInput } from '@/lib/product-slug'
 import { logAdminAction } from '@/lib/admin-logger'
 import { sanitizeHtml } from '@/lib/sanitize'
+import { revalidateProduct } from '@/lib/product-revalidate'
 import { z } from 'zod'
 
 const productUpdateSchema = z.object({
