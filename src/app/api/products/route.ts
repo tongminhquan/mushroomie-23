@@ -112,6 +112,8 @@ export async function POST(request: NextRequest) {
       ipAddress: request.headers.get('x-forwarded-for') || undefined
     })
 
+    revalidateProduct(product.slug)
+
     return NextResponse.json(product, { status: 201 })
   } catch (error: any) {
     if (error?.code === 'P2002') {
