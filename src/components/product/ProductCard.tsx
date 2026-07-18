@@ -11,6 +11,7 @@ import { useVoucherStore } from '@/store/voucher'
 import { useSession } from 'next-auth/react'
 import { formatPrice, getPublicImageUrl } from '@/lib/utils'
 import { trackAnalyticsEvent } from '@/lib/analytics'
+import { resolveDisplayPrice } from '@/lib/product-price'
 
 interface ProductCardProps {
   product: {
@@ -46,8 +47,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const imageUrl = getPublicImageUrl(product.featured_image || product.images?.[0]?.image_url, 'product')
   const isOutOfStock = product.stock !== undefined && product.stock <= 0
-  const hasSale = Boolean(product.sale_price && product.sale_price < product.price)
-  const displayPrice = hasSale ? product.sale_price! : product.price
+  const { price: displayPrice, originalPrice, isOnSale: hasSale } = resolveDisplayPrice(
+    product.price,
+    product.sale_price,
+  )
 
   useEffect(() => {
     if (session?.user) {
@@ -139,7 +142,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
           {product.is_customizable && <BrandBadge tone="yellow">Cá nhân hóa</BrandBadge>}
           {!product.is_customizable && !isOutOfStock && <BrandBadge tone="pink">Handmade</BrandBadge>}
-          {hasSale && <BrandBadge tone="red">-{Math.round((1 - product.sale_price! / product.price) * 100)}%</BrandBadge>}
+          {hasSale && <BrandBadge tone="red">-{Math.round((1 - displayPrice / product.price) * 100)}%</BrandBadge>}
           {isOutOfStock && <BrandBadge tone="neutral">Hết hàng</BrandBadge>}
         </div>
       </Link>
@@ -167,7 +170,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               </span>
             </div>
           )}
-          <PriceText price={displayPrice} originalPrice={hasSale ? product.price : null} />
+          <PriceText price={displayPrice} originalPrice={originalPrice} />
           <button
             onClick={handleAddToCart}
             disabled={isOutOfStock}

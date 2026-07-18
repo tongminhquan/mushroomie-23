@@ -21,6 +21,7 @@ import { toAbsoluteUrl } from '@/lib/url'
 import { geoImageGraph } from '@/lib/geo-image-schema'
 import { buildProductMetadataText } from '@/lib/product-metadata'
 import { inspectImageForRender } from '@/lib/server-image'
+import { resolveDisplayPrice } from '@/lib/product-price'
 import {
   decodeProductSlug,
   getProductSlugLookupCandidates,
@@ -169,9 +170,10 @@ export default async function ProductDetailPage({
   const galleryImages = allImages.length > 0 ? allImages : [getPublicImageUrl(null, 'product')]
 
   const price = Number(product.price)
-  const salePrice = product.sale_price ? Number(product.sale_price) : null
-  const displayPrice = salePrice || price
-  const isOnSale = Boolean(salePrice && salePrice < price)
+  const { price: displayPrice, originalPrice, isOnSale } = resolveDisplayPrice(
+    price,
+    product.sale_price === null ? null : Number(product.sale_price),
+  )
   const reviewCount = product.reviews.length
   const reviewAverage = reviewCount
     ? Number(
@@ -291,7 +293,7 @@ export default async function ProductDetailPage({
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <PriceText
                 price={displayPrice}
-                originalPrice={isOnSale ? price : null}
+                originalPrice={originalPrice}
                 className="[&_strong]:text-3xl md:[&_strong]:text-4xl [&_span]:text-sm"
               />
 

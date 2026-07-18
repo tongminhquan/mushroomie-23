@@ -1,28 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
-import { z } from 'zod'
 import { normalizeProductSlugInput } from '@/lib/product-slug'
 import { logAdminAction } from '@/lib/admin-logger'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { revalidateProduct } from '@/lib/product-revalidate'
-
-const productSchema = z.object({
-  name: z.string().min(1),
-  slug: z.string().optional(),
-  short_description: z.string().optional(),
-  description: z.string().optional(),
-  price: z.number().positive(),
-  sale_price: z.number().positive().optional().nullable(),
-  sku: z.string().optional().nullable(),
-  stock: z.number().int().min(0).default(0),
-  status: z.enum(['active', 'inactive', 'draft']).default('active'),
-  is_customizable: z.boolean().default(false),
-  is_featured: z.boolean().default(false),
-  featured_image: z.string().optional().nullable(),
-  category_id: z.number().optional().nullable(),
-  images: z.array(z.string()).optional(),
-})
+import { productCreateSchema } from '@/lib/product-validation'
 
 export async function GET(request: NextRequest) {
   try {
@@ -77,7 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const parsed = productSchema.safeParse(body)
+    const parsed = productCreateSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }

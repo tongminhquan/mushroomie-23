@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button'
 import { useCartStore } from '@/store/cart'
 import { getPublicImageUrl } from '@/lib/utils'
 import { trackAnalyticsEvent } from '@/lib/analytics'
+import { resolveDisplayPrice } from '@/lib/product-price'
 
 interface ProductOption {
   id: number
@@ -36,7 +37,7 @@ export default function AddToCartButton({ product }: Props) {
   const [customNote, setCustomNote] = useState('')
   const [added, setAdded] = useState(false)
 
-  const displayPrice = Number(product.sale_price || product.price)
+  const { price: displayPrice } = resolveDisplayPrice(product.price, product.sale_price)
   const imageUrl = getPublicImageUrl(product.featured_image, 'product')
   const isOutOfStock = product.stock <= 0
 

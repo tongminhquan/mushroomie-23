@@ -5,24 +5,7 @@ import { normalizeProductSlugInput } from '@/lib/product-slug'
 import { logAdminAction } from '@/lib/admin-logger'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { revalidateProduct } from '@/lib/product-revalidate'
-import { z } from 'zod'
-
-const productUpdateSchema = z.object({
-  name: z.string().min(1).max(200).optional(),
-  slug: z.string().max(200).optional(),
-  short_description: z.string().max(2000).optional().nullable(),
-  description: z.string().max(200_000).optional().nullable(),
-  price: z.number().positive().optional(),
-  sale_price: z.number().positive().optional().nullable(),
-  sku: z.string().max(100).optional().nullable(),
-  stock: z.number().int().min(0).max(1_000_000).optional(),
-  status: z.enum(['active', 'inactive', 'draft']).optional(),
-  is_customizable: z.boolean().optional(),
-  is_featured: z.boolean().optional(),
-  featured_image: z.string().max(2000).optional().nullable(),
-  category_id: z.number().int().positive().optional().nullable(),
-  images: z.array(z.string().max(2000)).max(50).optional(),
-}).strict()
+import { createProductUpdateSchema } from '@/lib/product-validation'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -52,15 +35,20 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const { id } = await params
-    const parsed = productUpdateSchema.safeParse(await request.json())
+    const existing = await prisma.product.findUnique({
+      where: { id: Number(id) },
+      select: { slug: true, price: true, sale_price: true },
+    })
+    if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+    const parsed = createProductUpdateSchema({
+      price: Number(existing.price),
+      sale_price: existing.sale_price === null ? null : Number(existing.sale_price),
+    }).safeParse(await request.json())
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
     const body = parsed.data
-    const existing = await prisma.product.findUnique({
-      where: { id: Number(id) },
-      select: { slug: true },
-    })
     if (body.slug !== undefined) {
       const slug = normalizeProductSlugInput(body.slug, undefined)
       if (!slug) {
@@ -94,7 +82,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       ipAddress: request.headers.get('x-forwarded-for') || undefined
     })
 
-    revalidateProduct(existing?.slug, product.slug)
+    revalidateProduct(existing.slug, product.slug)
 
     return NextResponse.json(product)
   } catch (error: any) {

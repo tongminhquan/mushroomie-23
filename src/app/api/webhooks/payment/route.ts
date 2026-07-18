@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     }).catch(async (err) => {
       // Nếu event_id đã tồn tại (duplicate webhook), trả 200 ngay
       if (err?.code === 'P2002') {
-        console.log('[WEBHOOK] Duplicate event, ignoring')
+        console.info('[WEBHOOK] Duplicate event, ignoring')
         return null
       }
       throw err
@@ -207,7 +207,7 @@ export async function POST(request: Request) {
       })
     })
 
-    console.log(`[WEBHOOK] ✅ Payment PAID: ${payment.order.order_code} | ${verifyResult.transactionCode}`)
+    console.info(`[WEBHOOK] Payment PAID: ${payment.order.order_code} | ${verifyResult.transactionCode}`)
 
     // ─── STEP 8: Gửi email (fire & forget) ───────────────────────
     sendOrderEmail(payment.order_id, 'payment_success').catch((err) =>

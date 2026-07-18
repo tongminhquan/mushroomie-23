@@ -50,7 +50,7 @@ export async function sendPasswordResetEmail(email: string, resetUrl: string): P
       subject: 'Yêu Cầu Khôi Phục Mật Khẩu - Mushroomie',
       html,
     })
-    console.log(`[EMAIL] Sent password reset email to ${email}`)
+    console.info('[EMAIL] Sent password reset email')
   } catch (error) {
     console.error(`[EMAIL] Failed to send password reset email to ${email}:`, error)
     throw new Error('Không thể gửi email khôi phục mật khẩu')

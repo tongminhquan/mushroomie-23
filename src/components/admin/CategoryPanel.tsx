@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { Plus, X, ChevronDown, ChevronUp, Check } from 'lucide-react'
+import { Plus, Check } from 'lucide-react'
 
 interface Category {
   id: number
@@ -33,12 +33,15 @@ export default function CategoryPanel({ selectedIds, onChange }: CategoryPanelPr
   const [parentId, setParentId] = useState('')
   const [isAdding, setIsAdding] = useState(false)
   const [tab, setTab] = useState<'all' | 'most_used'>('all')
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null)
 
   const fetchCategories = () => {
     fetch('/api/categories?type=post')
       .then(r => r.json())
       .then(d => setCategories(d.categories || []))
-      .catch(() => {})
+      .catch((error) => {
+        console.error('Không thể tải danh mục:', error)
+      })
   }
 
   useEffect(() => { fetchCategories() }, [])
@@ -74,9 +77,17 @@ export default function CategoryPanel({ selectedIds, onChange }: CategoryPanelPr
         setNewSlug('')
         setParentId('')
         setShowAdd(false)
+      } else {
+        setFeedbackMessage('Không thể thêm danh mục mới. Vui lòng thử lại.')
+        window.setTimeout(() => setFeedbackMessage(null), 5000)
       }
-    } catch {}
-    setIsAdding(false)
+    } catch (error) {
+      console.error('Không thể thêm danh mục:', error)
+      setFeedbackMessage('Không thể thêm danh mục mới. Vui lòng thử lại.')
+      window.setTimeout(() => setFeedbackMessage(null), 5000)
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   // Sort by most used (simulated by id desc for demo)
@@ -89,6 +100,15 @@ export default function CategoryPanel({ selectedIds, onChange }: CategoryPanelPr
       <div className="px-4 py-3 border-b border-neutral-100 bg-[#fdfaf7] flex items-center justify-between">
         <span className="font-semibold text-sm text-neutral-800">Danh mục</span>
       </div>
+
+      {feedbackMessage && (
+        <p
+          role="alert"
+          className="mx-3 mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700"
+        >
+          {feedbackMessage}
+        </p>
+      )}
 
       {/* Tabs */}
       <div className="flex border-b border-neutral-100 text-xs font-medium">

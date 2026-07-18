@@ -27,7 +27,7 @@ export async function publishDuePosts(): Promise<number> {
       data: { status: 'published' },
     })
     if (result.count > 0) {
-      console.log(`[scheduled-publisher] Đã tự động xuất bản ${result.count} bài viết`)
+      console.info(`[scheduled-publisher] Đã tự động xuất bản ${result.count} bài viết`)
     }
     return result.count
   } catch (error) {
@@ -41,7 +41,7 @@ async function runMaintenance() {
   await publishDuePosts()
   try {
     const released = await releaseExpiredOrderReservations()
-    if (released > 0) console.log(`[inventory] Released ${released} expired order reservations`)
+    if (released > 0) console.info(`[inventory] Released ${released} expired order reservations`)
   } catch (error) {
     console.error('[inventory] Failed to release expired order reservations:', error)
   }
@@ -58,5 +58,5 @@ export function startScheduledPublisher() {
   timer.unref?.()
   globalStore.__mushroomieScheduledPublisher = timer
 
-  console.log('[scheduled-publisher] Đã khởi động job xuất bản theo lịch (60s/tick)')
+  console.info('[scheduled-publisher] Đã khởi động job xuất bản theo lịch (60s/tick)')
 }

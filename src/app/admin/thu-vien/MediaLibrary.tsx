@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Trash2, Copy, Check, Upload, RefreshCw, FolderOpen, Edit3, X, Save, Sliders, Image as ImageIcon, FileType } from 'lucide-react'
+import { Trash2, Copy, Check, Upload, RefreshCw, FolderOpen, Edit3, X, Save, Sliders, FileType } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import Cropper from 'react-cropper'
 import 'cropperjs/dist/cropper.css'
@@ -200,7 +200,7 @@ export default function MediaLibrary() {
               <div className="aspect-square relative bg-neutral-100 flex items-center justify-center p-2">
                 <img 
                   src={`${image.url}?v=${image.id}`} 
-                  alt={image.filename}
+                  alt={`Ảnh trong thư viện: ${image.filename}`}
                   className="max-w-full max-h-full object-contain rounded-lg shadow-sm"
                   loading="lazy"
                 />
@@ -254,7 +254,7 @@ export default function MediaLibrary() {
               ) : (
                 <img 
                   src={`${selectedImage.url}?v=${selectedImage.id}`} 
-                  alt={selectedImage.filename} 
+                  alt={`Xem trước ảnh: ${selectedImage.filename}`}
                   className="max-w-full max-h-[60vh] object-contain rounded-lg shadow-sm"
                 />
               )}

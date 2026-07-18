@@ -21,12 +21,11 @@ export async function POST(request: NextRequest) {
     
     // Honeypot check: If bot fills this invisible field, we silently "accept" it
     if (parsed.data.website) {
-      console.log('Spam detected via honeypot', parsed.data.email)
       return NextResponse.json({ success: true, id: -1 }, { status: 201 })
     }
 
-    const { website, ...dataToSave } = parsed.data
-    const contact = await prisma.contact.create({ data: dataToSave })
+    const { name, email, phone, message } = parsed.data
+    const contact = await prisma.contact.create({ data: { name, email, phone, message } })
     return NextResponse.json({ success: true, id: contact.id }, { status: 201 })
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })

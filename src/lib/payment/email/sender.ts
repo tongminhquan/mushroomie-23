@@ -75,7 +75,7 @@ export async function sendOrderEmail(
       data: { status: 'SENT', sent_at: new Date() },
     })
 
-    console.log(`[EMAIL] Sent ${templateKey} to ${order.customer_email}`)
+    console.info(`[EMAIL] Sent ${templateKey} for order ${orderId}`)
   } catch (error) {
     console.error(`[EMAIL] Failed to send ${templateKey}:`, error)
     await prisma.emailLog.update({

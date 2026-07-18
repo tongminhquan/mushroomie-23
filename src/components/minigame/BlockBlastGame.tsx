@@ -10,7 +10,6 @@ import {
 } from '@/lib/minigame/block-blast'
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
-const DEBUG_DRAG = false // Set true to log drag coordinates to console
 const BOARD_SIZE = 8
 const ROWS = BOARD_SIZE
 const COLS = BOARD_SIZE
@@ -258,16 +257,6 @@ export default function BlockBlastGame({
     const col = Math.round((vx - gridOriginX) / stride)
     const row = Math.round((vy - gridOriginY) / stride)
 
-    if (DEBUG_DRAG) {
-      console.log('[overlayToCell]', {
-        vx: vx.toFixed(1), vy: vy.toFixed(1),
-        gridOriginX: gridOriginX.toFixed(1), gridOriginY: gridOriginY.toFixed(1),
-        stride, row, col,
-        cellSize: csRef.current,
-        rectLeft: rect.left.toFixed(1), rectTop: rect.top.toFixed(1),
-      })
-    }
-
     return { row, col }
   }, [])
 
@@ -286,16 +275,6 @@ export default function BlockBlastGame({
     el.style.transform  = `translate3d(${vx}px,${vy}px,0) scale(${OVERLAY_SCALE})`
     el.style.visibility = 'visible'
     el.style.opacity    = '1'
-
-    if (DEBUG_DRAG) {
-      console.log('[moveOverlay]', {
-        clientX, clientY,
-        grabOffsetX: drag.grabOffsetX.toFixed(1),
-        grabOffsetY: drag.grabOffsetY.toFixed(1),
-        fixedLift: drag.fixedLift.toFixed(1),
-        vx: vx.toFixed(1), vy: vy.toFixed(1),
-      })
-    }
 
     return { vx, vy }
   }, [getVisualPos])
@@ -437,17 +416,6 @@ export default function BlockBlastGame({
     // ── Fixed lift: piece floats above the finger/cursor ──
     const fixedLift = isTouch ? cellSize * 1.5 : cellSize * 0.5
 
-    if (DEBUG_DRAG) {
-      console.log('[startDrag]', {
-        clientX: e.clientX, clientY: e.clientY,
-        pieceRect: { left: pieceRect.left.toFixed(1), top: pieceRect.top.toFixed(1), w: pieceRect.width.toFixed(1), h: pieceRect.height.toFixed(1) },
-        percentX: percentX.toFixed(3), percentY: percentY.toFixed(3),
-        grabOffsetX: grabOffsetX.toFixed(1), grabOffsetY: grabOffsetY.toFixed(1),
-        overlayW, overlayH, fixedLift,
-        isTouch,
-      })
-    }
-
     playSound('move', 0, soundEnabledRef.current)
 
     dragging.current = { idx, piece, isTouch, grabOffsetX, grabOffsetY, fixedLift }
@@ -517,17 +485,6 @@ export default function BlockBlastGame({
 
     const { row, col } = overlayToCell(vx, vy)
     const ok = canPlace(boardRef.current, drag.piece.matrix, row, col)
-
-    if (DEBUG_DRAG) {
-      console.log('[endDrag]', {
-        clientX: e.clientX, clientY: e.clientY,
-        grabOffsetX: drag.grabOffsetX, grabOffsetY: drag.grabOffsetY,
-        fixedLift: drag.fixedLift,
-        vx: vx.toFixed(1), vy: vy.toFixed(1),
-        row, col, ok,
-        piece: drag.piece.id, idx: drag.idx,
-      })
-    }
 
     if (ok) {
       placePiece(drag.piece, drag.idx, row, col)

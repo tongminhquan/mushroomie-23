@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
       data: { status: 'published' },
     })
 
-    console.log(`[cron/publish-scheduled] Đã xuất bản ${result.count} bài:`, due.map((p) => p.id).join(','))
+    console.info(`[cron/publish-scheduled] Đã xuất bản ${result.count} bài:`, due.map((p) => p.id).join(','))
     return NextResponse.json({ success: true, publishedCount: result.count, postIds: due.map((p) => p.id) })
   } catch (error) {
     console.error('[cron/publish-scheduled] Lỗi:', error)

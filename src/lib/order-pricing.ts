@@ -1,4 +1,5 @@
 import type { OrderInput } from '@/lib/order-schema'
+import { resolveDisplayPrice } from '@/lib/product-price'
 
 type OrderItemInput = OrderInput['items'][number]
 
@@ -50,9 +51,7 @@ export function buildAuthoritativeOrderItems(
 
     const regularPrice = Number(product.price)
     const salePrice = product.sale_price === null ? null : Number(product.sale_price)
-    const unitPrice = salePrice !== null && salePrice > 0 && salePrice < regularPrice
-      ? salePrice
-      : regularPrice
+    const { price: unitPrice } = resolveDisplayPrice(regularPrice, salePrice)
 
     return {
       ...item,
