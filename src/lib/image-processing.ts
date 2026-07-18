@@ -181,6 +181,13 @@ async function assertSafeImage(buffer: Buffer, declaredMime?: string) {
   if (!metadata.format || !allowedSharpFormats.has(metadata.format)) {
     throw new Error('Unsupported image format')
   }
+
+  const pixels = (metadata.width || 0) * (metadata.height || 0)
+  if (pixels > MAX_INPUT_PIXELS) {
+    throw new Error(
+      `Ảnh ${Math.round(pixels / 1e6)}MP vượt giới hạn ${MAX_INPUT_PIXELS / 1e6}MP — hãy thu nhỏ ảnh hoặc chụp ở độ phân giải thấp hơn rồi tải lại`,
+    )
+  }
 }
 
 function sniffImageMime(buffer: Buffer): string | null {
