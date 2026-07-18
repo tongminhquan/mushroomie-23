@@ -35,8 +35,11 @@ const WEBP_QUALITY_STEPS = [WEBP_QUALITY, 80, 74, 68, 62, 56] as const
 const WEBP_WIDTH_SCALES = [1, 0.85, 0.7, 0.55, 0.4] as const
 const BANNER_VARIANT_WIDTHS = [750, 1280] as const
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024
-const MAX_INPUT_PIXELS = 40_000_000
-const sharpInputOptions = { failOn: 'warning' as const, animated: false, limitInputPixels: MAX_INPUT_PIXELS }
+// 120MP để nhận ảnh điện thoại 48/50/108MP; RAM vẫn thấp vì mọi purpose đều
+// resize xuống ≤1920px nên JPEG được decode qua shrink-on-load, không decode full.
+const MAX_INPUT_PIXELS = 120_000_000
+// failOn 'error' vẫn chặn ảnh hỏng/cụt nhưng không chết vì warning vặt của ảnh điện thoại.
+const sharpInputOptions = { failOn: 'error' as const, animated: false, limitInputPixels: MAX_INPUT_PIXELS }
 
 const maxWidthByPurpose: Record<UploadImagePurpose, number> = {
   banner: 1920,
