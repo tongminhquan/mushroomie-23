@@ -177,7 +177,9 @@ async function assertSafeImage(buffer: Buffer, declaredMime?: string) {
     throw new Error('Invalid image signature')
   }
 
-  const metadata = await sharp(buffer, sharpInputOptions).metadata()
+  // metadata() chỉ đọc header nên tắt limitInputPixels ở đây để check pixel bên dưới
+  // kịp báo lỗi tiếng Việt rõ ràng; decode thật vẫn bị sharpInputOptions chặn.
+  const metadata = await sharp(buffer, { ...sharpInputOptions, limitInputPixels: false }).metadata()
   if (!metadata.format || !allowedSharpFormats.has(metadata.format)) {
     throw new Error('Unsupported image format')
   }
