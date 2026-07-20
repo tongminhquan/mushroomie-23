@@ -42,9 +42,13 @@ UNNECESSARY_ENGLISH = (
     "footer",
 )
 
+WEBSITE_PATTERN = re.compile(r"\bwebsite\b", re.IGNORECASE)
+INDEX_PATTERN = re.compile(r"(?<!speed\s)\bindex\b", re.IGNORECASE)
+
 TERM_RULES: tuple[tuple[str, re.Pattern[str]], ...] = (
-    ("website_case", re.compile(r"\bwebsite\b")),
     ("duplicate_google_search_console", re.compile(r"Google\s+Google\s+Search\s+Console")),
+    ("index_language", INDEX_PATTERN),
+    ("indexing_language", re.compile(r"\bindexing\b", re.IGNORECASE)),
     (
         "seo_onpage_case",
         re.compile(r"\bseo\s+onpage\b", re.IGNORECASE),
@@ -113,11 +117,18 @@ def _find_phrase_matches(records: Iterable[TextRecord]) -> list[Finding]:
 def _find_term_inconsistencies(records: Iterable[TextRecord]) -> list[Finding]:
     findings: list[Finding] = []
     for record in records:
+        for match in WEBSITE_PATTERN.finditer(record.text):
+            # “website” is a valid common noun; “Website” is the established
+            # name of Mushroomie's owned channel. Only mixed/all-caps forms
+            # are inconsistent and should be corrected.
+            if match.group(0) not in {"website", "Website"}:
+                findings.append(
+                    Finding("terminology", record.location, "website_case", record.text)
+                )
+                break
         for marker, pattern in TERM_RULES:
             for match in pattern.finditer(record.text):
                 value = match.group(0)
-                if marker == "website_case" and value == "Website":
-                    continue
                 if marker == "seo_onpage_case" and value == "SEO Onpage":
                     continue
                 if marker == "pagespeed_insights_case" and value == "PageSpeed Insights":
@@ -133,9 +144,11 @@ def _find_repetition(records: Iterable[TextRecord]) -> list[Finding]:
     findings: list[Finding] = []
     lowered_records = [(record, record.text.casefold()) for record in records]
     for marker in REPETITION_MARKERS:
-        locations = [record for record, text in lowered_records if marker in text]
-        if len(locations) > 2:
-            for record in locations:
+        for record, text in lowered_records:
+            # Keep the threshold local to a paragraph/cell. This detects an
+            # actual repeated construction while allowing the same connector
+            # to appear purposefully in distant parts of the document.
+            if text.count(marker) >= 3:
                 findings.append(Finding("repetition", record.location, marker, record.text))
     return findings
 

@@ -189,12 +189,18 @@ TABLE_CELL_REWRITES: dict[str, str] = {
         "Cỡ chữ thân bài tối thiểu khoảng 16 px trên thiết bị di động",
     "Website, số điện thoại, email và các kênh phải thống nhất với footer và báo cáo.":
         "Website, số điện thoại, email và các kênh phải thống nhất với chân trang và báo cáo.",
-    "Ưu tiên website liên quan":
-        "Ưu tiên Website liên quan",
-    "Hành vi website":
-        "Hành vi Website",
     "Google Google Search Console":
         "Google Search Console",
     "Bài xuất bản, bài index, click nút kêu gọi hành động, internal link":
         "Bài xuất bản, bài đã lập chỉ mục, lượt nhấp nút kêu gọi hành động, liên kết nội bộ",
+    "Ngắn, không dấu, chứa từ khóa chính; tránh thay đổi sau khi đã index; nếu thay đổi phải 301 redirect.":
+        "Ngắn, không dấu, chứa từ khóa chính; tránh thay đổi sau khi đã được lập chỉ mục; nếu thay đổi phải chuyển hướng 301.",
+    "Lưu ảnh minh chứng điểm SEO và trạng thái index":
+        "Lưu ảnh minh chứng điểm SEO và trạng thái lập chỉ mục",
+    "Theo dõi impression, click, CTR, vị trí, thời gian tương tác, nút kêu gọi hành động click và conversion.":
+        "Theo dõi impression, click, CTR, vị trí, thời gian tương tác, lượt nhấp nút kêu gọi hành động và conversion.",
+    "Indexing":
+        "Lập chỉ mục",
+    "Impression, click, CTR, vị trí, trang index":
+        "Impression, click, CTR, vị trí, trang đã lập chỉ mục",
 }
