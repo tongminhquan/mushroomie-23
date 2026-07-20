@@ -228,8 +228,14 @@ class DocumentInvariants(unittest.TestCase):
                 "forbidden": ("nhóm cần xây dựng quy chuẩn",),
             },
             103: {
-                "required": ("việc đánh giá cần đi sâu",),
-                "forbidden": ("nhóm phân tích từng nhóm tài nguyên",),
+                "required": (
+                    "việc đánh giá cần đi sâu",
+                    "chỉ được ghi nhận khi có ảnh chụp",
+                ),
+                "forbidden": (
+                    "nhóm phân tích từng nhóm tài nguyên",
+                    "chỉ nên được ghi nhận",
+                ),
             },
             109: {
                 "required": ("Nhóm thực hiện báo cáo trực tiếp",),
