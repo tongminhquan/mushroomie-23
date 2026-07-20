@@ -24,7 +24,7 @@ PARAGRAPH_REWRITES: dict[str, str] = {
     "Các thẻ danh mục được xem là điểm trung gian giữa trang chủ và danh sách sản phẩm. Do đó, ảnh đại diện đồng bộ, tên gọi ngắn gọn, nút 'Khám phá' và mô tả bám sát ý định tìm kiếm là các yếu tố cần được chuẩn hóa để nâng cao khả năng điều hướng.":
         "Các thẻ danh mục giữ vai trò kết nối trang chủ với danh sách sản phẩm. Để nâng cao khả năng điều hướng, nhóm cần chuẩn hóa ảnh đại diện, sử dụng tên gọi ngắn gọn, duy trì nút 'Khám phá' và xây dựng mô tả phù hợp với ý định tìm kiếm.",
     "Dưới góc độ khả năng tìm kiếm, mỗi danh mục cần có đường dẫn riêng, tiêu đề trang, mô tả meta và phần giới thiệu ngắn gọn. Việc liên kết đến bài viết và trang danh mục Hộp quà khi phù hợp giúp tăng cường liên kết nội bộ và hỗ trợ hiệu quả SEO.":
-        "Xét về khả năng tìm kiếm, mỗi danh mục cần có đường dẫn riêng, tiêu đề trang, mô tả meta và phần giới thiệu ngắn gọn. Bên cạnh đó, liên kết đến bài viết và trang danh mục Hộp quà phù hợp sẽ tăng cường liên kết nội bộ và hỗ trợ hiệu quả SEO.",
+        "Xét về khả năng tìm kiếm, mỗi danh mục cần có đường dẫn riêng, tiêu đề trang, mô tả meta và phần giới thiệu ngắn gọn. Liên kết đến bài viết và trang danh mục Hộp quà phù hợp sẽ tăng cường liên kết nội bộ và hỗ trợ hiệu quả SEO.",
     "Trang danh sách sản phẩm cần được đánh giá theo khả năng hỗ trợ người dùng duyệt nhóm và so sánh nhanh giữa các mẫu. Mỗi thẻ sản phẩm cần thể hiện ảnh thực tế, nhãn nhận diện, tên, giá, tình trạng còn hàng và nút xem chi tiết. Đối với nhóm hộp quà, cách trình bày theo dịp tặng có ý nghĩa trong việc giảm thời gian lựa chọn và làm rõ ngữ cảnh sử dụng.":
         "Trang danh sách sản phẩm cần được xem xét dựa trên khả năng hỗ trợ người dùng duyệt danh mục và so sánh các mẫu. Theo đó, mỗi thẻ sản phẩm cần thể hiện ảnh thực tế, nhãn nhận diện, tên, giá, tình trạng còn hàng và nút xem chi tiết. Riêng với nhóm hộp quà, cách sắp xếp theo dịp tặng có thể rút ngắn thời gian lựa chọn và làm rõ ngữ cảnh sử dụng.",
     "Độ minh bạch trong hiển thị giá cần được rà soát thông qua mức giảm giá và giá gạch ngang, nhằm bảo đảm thông tin dễ hiểu và không tạo cảm nhận thiếu nhất quán với giá trị thủ công của thương hiệu.":
@@ -66,7 +66,7 @@ PARAGRAPH_REWRITES: dict[str, str] = {
     "Chân trang tập hợp nhóm danh mục sản phẩm, câu chuyện thương hiệu, tin tức, voucher, mini game, chính sách giao hàng - đổi trả, bảo mật, điều khoản dịch vụ và thông tin liên hệ. Xét theo tiêu chí tin cậy, việc công khai địa chỉ, số điện thoại, email, tên miền và các kênh mạng xã hội tạo cơ sở để khách hàng kiểm chứng thông tin và tiếp tục tương tác sau khi rời trang.":
         "Chân trang tập hợp danh mục sản phẩm, câu chuyện thương hiệu, tin tức, voucher, mini game, chính sách giao hàng - đổi trả, bảo mật, điều khoản dịch vụ và thông tin liên hệ. Qua đánh giá tiêu chí tin cậy, việc công khai địa chỉ, số điện thoại, email, tên miền và các kênh mạng xã hội giúp khách hàng kiểm chứng thông tin và duy trì tương tác sau khi rời trang.",
     "Chân trang tập hợp các liên kết đến danh mục, câu chuyện thương hiệu, tin tức, voucher, mini game, liên hệ, chính sách giao hàng - đổi trả, bảo mật và điều khoản dịch vụ. Đồng thời, việc xây dựng các trang địa phương như 'Phụ kiện handmade Đồng Nai' và 'Hộp quà handmade Biên Hòa' hỗ trợ định hướng tiếp cận người dùng tại khu vực triển khai.":
-        "Về cấu trúc liên kết, chân trang điều hướng đến danh mục, câu chuyện thương hiệu, tin tức, voucher, mini game, liên hệ, chính sách giao hàng - đổi trả, bảo mật và điều khoản dịch vụ. Bên cạnh đó, các trang địa phương như 'Phụ kiện handmade Đồng Nai' và 'Hộp quà handmade Biên Hòa' hỗ trợ tiếp cận người dùng tại khu vực triển khai.",
+        "Về cấu trúc liên kết, chân trang điều hướng đến danh mục, câu chuyện thương hiệu, tin tức, voucher, mini game, liên hệ, chính sách giao hàng - đổi trả, bảo mật và điều khoản dịch vụ. Các trang địa phương như 'Phụ kiện handmade Đồng Nai' và 'Hộp quà handmade Biên Hòa' hỗ trợ tiếp cận người dùng tại khu vực triển khai.",
     "Tính nhất quán của thông tin liên hệ, số điện thoại, email và địa chỉ giữa website, Facebook, Instagram, TikTok, Shopee và báo cáo là yêu cầu cần thiết để củng cố độ tin cậy của thương hiệu.":
         "Nhóm cần bảo đảm thông tin liên hệ, số điện thoại, email và địa chỉ được trình bày nhất quán trên Website, Facebook, Instagram, TikTok, Shopee và báo cáo. Sự đồng bộ này là cơ sở củng cố độ tin cậy của thương hiệu.",
     "Trong trường hợp thương hiệu có điểm nhận hàng hoặc địa chỉ phục vụ khách hàng thực tế, Hồ sơ doanh nghiệp trên Google và bản đồ là các hạng mục cần được bổ sung để tăng khả năng kiểm chứng thông tin địa phương.":
@@ -90,7 +90,7 @@ PARAGRAPH_REWRITES: dict[str, str] = {
     "Ở phương diện hạ tầng, bộ nhớ đệm, nén và CDN cần được xem xét theo điều kiện triển khai thực tế. Đồng thời, việc sử dụng tỷ lệ ảnh phù hợp với khung hiển thị góp phần giảm dung lượng tải ở giai đoạn đầu.":
         "Ở phương diện hạ tầng, nhóm cần xem xét bộ nhớ đệm, nén và CDN theo điều kiện triển khai thực tế. Đồng thời, việc sử dụng tỷ lệ ảnh phù hợp với khung hiển thị góp phần giảm dung lượng tải ở giai đoạn đầu.",
     "Mức độ phức tạp của DOM và các component lặp trên trang chủ cần được theo dõi định kỳ, vì đây là các yếu tố có thể ảnh hưởng đến tốc độ hiển thị và khả năng duy trì hiệu suất.":
-        "Bên cạnh đó, nhóm cần theo dõi định kỳ mức độ phức tạp của DOM và các thành phần lặp trên trang chủ. Đây là những yếu tố có thể ảnh hưởng đến tốc độ hiển thị và khả năng duy trì hiệu suất.",
+        "Nhóm cần theo dõi định kỳ mức độ phức tạp của DOM và các thành phần lặp trên trang chủ. Đây là những yếu tố có thể ảnh hưởng đến tốc độ hiển thị và khả năng duy trì hiệu suất.",
     "Ở lần đo lúc 12:41 ngày 19/07/2026, phiên bản di động ghi nhận FCP khoảng 1,5 giây, LCP khoảng 2,0 giây, TBT khoảng 120 mili giây và CLS bằng 0. Lần đo cập nhật lúc 14:06:58 ghi nhận TBT 160 mili giây, cho thấy chỉ số có thể dao động theo điều kiện đo và trạng thái tài nguyên; vì vậy, kết quả cần được theo dõi theo chuỗi thời gian thay vì diễn giải từ một lần kiểm tra đơn lẻ.":
         "Tại lần đo lúc 12:41 ngày 19/07/2026, phiên bản di động ghi nhận FCP khoảng 1,5 giây, LCP khoảng 2,0 giây, TBT khoảng 120 mili giây và CLS bằng 0. Ở lần đo cập nhật lúc 14:06:58, TBT được ghi nhận ở mức 160 mili giây, cho thấy chỉ số có thể dao động theo điều kiện đo và trạng thái tài nguyên. Vì vậy, nhóm cần theo dõi kết quả theo chuỗi thời gian thay vì kết luận từ một lần kiểm tra đơn lẻ.",
     "Trên thiết bị di động, việc giảm ảnh và tài nguyên tải ban đầu, đồng thời ưu tiên nội dung, ảnh sản phẩm thực tế và nút liên hệ tại khu vực phía trên màn hình, là hướng tối ưu cần được duy trì.":
@@ -177,4 +177,24 @@ TABLE_CELL_REWRITES: dict[str, str] = {
         "Chính sách cache không phù hợp có thể làm tăng chi phí tải lại tài nguyên.",
     "Cấu trúc lồng nhau hoặc component lặp quá nhiều có thể tác động đến hiển thị và tương tác.":
         "Cấu trúc lồng nhau hoặc thành phần lặp với số lượng lớn có thể ảnh hưởng đến khả năng hiển thị và tương tác.",
+    "liên kết nội bộ về danh mục, sản phẩm liên quan, bài viết; external link chỉ đến nguồn uy tín khi cần.":
+        "Liên kết nội bộ về danh mục, sản phẩm liên quan, bài viết; liên kết ngoài chỉ đến nguồn uy tín khi cần.",
+    "Có ít nhất 2-3 internal link phù hợp":
+        "Có ít nhất 2-3 liên kết nội bộ phù hợp",
+    "Mỗi đoạn 2-4 câu, dễ đọc trên mobile":
+        "Mỗi đoạn 2-4 câu, dễ đọc trên thiết bị di động",
+    "Kiểm tra giao diện mobile và tốc độ tải":
+        "Kiểm tra giao diện thiết bị di động và tốc độ tải",
+    "Cỡ chữ thân bài tối thiểu khoảng 16 px trên mobile":
+        "Cỡ chữ thân bài tối thiểu khoảng 16 px trên thiết bị di động",
+    "Website, số điện thoại, email và các kênh phải thống nhất với footer và báo cáo.":
+        "Website, số điện thoại, email và các kênh phải thống nhất với chân trang và báo cáo.",
+    "Ưu tiên website liên quan":
+        "Ưu tiên Website liên quan",
+    "Hành vi website":
+        "Hành vi Website",
+    "Google Google Search Console":
+        "Google Search Console",
+    "Bài xuất bản, bài index, click nút kêu gọi hành động, internal link":
+        "Bài xuất bản, bài đã lập chỉ mục, lượt nhấp nút kêu gọi hành động, liên kết nội bộ",
 }

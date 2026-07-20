@@ -107,7 +107,7 @@ class DocumentInvariants(unittest.TestCase):
 
     def test_rewrite_scope_and_application(self):
         self.assertEqual(len(PARAGRAPH_REWRITES), 66)
-        self.assertEqual(len(TABLE_CELL_REWRITES), 19)
+        self.assertEqual(len(TABLE_CELL_REWRITES), 29)
         before_text = document_text(self.before)
         after_text = document_text(self.after)
 
