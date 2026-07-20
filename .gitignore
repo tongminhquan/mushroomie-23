@@ -60,3 +60,4 @@ backups/
 *.tar.gz
 *.sql
 *.dump
+.worktrees/
