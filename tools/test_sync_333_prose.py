@@ -204,3 +204,71 @@ class DocumentInvariants(unittest.TestCase):
             with self.subTest(source_prefix=source_prefix):
                 self.assertEqual(len(matching_values), 1)
                 self.assertIn(required_phrase, matching_values[0])
+
+    def test_high_risk_semantic_modality_is_preserved(self):
+        paragraph_guards = {
+            6: {
+                "required": ("bố cục cần ưu tiên",),
+                "forbidden": ("nhóm ưu tiên ảnh sản phẩm",),
+            },
+            29: {
+                "required": ("Trang chi tiết sản phẩm cần được đánh giá",),
+                "forbidden": ("Nhóm đánh giá trang chi tiết",),
+            },
+            62: {
+                "required": (
+                    "thẻ sản phẩm nên hiển thị",
+                    "nút kêu gọi hành động cần có",
+                    "nội dung không được tràn ngang",
+                ),
+                "forbidden": ("thẻ sản phẩm hiển thị theo",),
+            },
+            68: {
+                "required": ("nhóm xây dựng quy chuẩn đăng sản phẩm",),
+                "forbidden": ("nhóm cần xây dựng quy chuẩn",),
+            },
+            103: {
+                "required": ("việc đánh giá cần đi sâu",),
+                "forbidden": ("nhóm phân tích từng nhóm tài nguyên",),
+            },
+            109: {
+                "required": ("Nhóm thực hiện báo cáo trực tiếp",),
+                "forbidden": ("Nhóm cần thực hiện báo cáo",),
+            },
+            143: {
+                "required": ("Minh chứng nên được lưu theo tên từ khóa",),
+                "forbidden": ("Việc lưu minh chứng theo tên từ khóa giúp",),
+            },
+            148: {
+                "required": ("Nhóm triển khai liên kết ngược",),
+                "forbidden": ("Nhóm cần triển khai liên kết ngược",),
+            },
+            155: {
+                "required": ("quảng cáo tìm kiếm Google được xem là công cụ có thể",),
+                "forbidden": (
+                    "nhóm sử dụng quảng cáo tìm kiếm Google",
+                    "Các truy vấn có ý định mua hộp quà hoặc quà tặng handmade được dẫn",
+                ),
+            },
+            164: {
+                "required": ("nhóm đối chiếu", "Nhóm cũng rà soát Website"),
+                "forbidden": ("nhóm cần đối chiếu",),
+            },
+        }
+        for index, guard in paragraph_guards.items():
+            text = self.after.paragraphs[index].text
+            for required in guard["required"]:
+                with self.subTest(paragraph=index, required=required):
+                    self.assertIn(required, text)
+            for forbidden in guard["forbidden"]:
+                with self.subTest(paragraph=index, forbidden=forbidden):
+                    self.assertNotIn(forbidden, text)
+
+        negative_source = next(
+            source
+            for source in TABLE_CELL_REWRITES
+            if source.startswith("Không bổ sung JavaScript")
+        )
+        negative_rewrite = TABLE_CELL_REWRITES[negative_source]
+        self.assertIn("nếu không cần thiết", negative_rewrite)
+        self.assertNotIn("nếu cần thiết", negative_rewrite)
