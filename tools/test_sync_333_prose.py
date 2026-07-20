@@ -5,21 +5,8 @@ import unittest
 
 from docx import Document
 
-try:
-    from tools.sync_333_prose_to_asm import OUTPUT_DOCX, SOURCE_DOCX
-except ModuleNotFoundError as error:
-    if error.name != "tools.sync_333_prose_to_asm":
-        raise
-    # Task 3 will provide the sync module. Keep this test runnable in Task 2
-    # so its RED state is caused by the intentionally absent output document.
-    SOURCE_DOCX = (
-        r"C:\Users\Admin\OneDrive\Tài liệu\mushroomie\artifacts"
-        r"\Muc_3.3.3_Kenh_Website_Mushroomie_Khong_Landing_Page_SEO_Thuc_Te.docx"
-    )
-    OUTPUT_DOCX = (
-        r"C:\Users\Admin\OneDrive\Tài liệu\mushroomie\artifacts"
-        r"\Muc_3.3.3_Kenh_Website_Mushroomie_Dong_Bo_Van_Phong_ASM.docx"
-    )
+from tools.asm_333_rewrites import PARAGRAPH_REWRITES, TABLE_CELL_REWRITES
+from tools.sync_333_prose_to_asm import OUTPUT_PATH, SOURCE_PATH
 
 
 def all_paragraphs(document):
@@ -36,14 +23,33 @@ def document_text(document):
 
 class DocumentInvariants(unittest.TestCase):
     def setUp(self):
-        self.before = Document(SOURCE_DOCX)
-        self.after = Document(OUTPUT_DOCX)
+        self.before = Document(SOURCE_PATH)
+        self.after = Document(OUTPUT_PATH)
 
     def test_structure_is_preserved(self):
+        self.assertEqual(len(self.before.paragraphs), len(self.after.paragraphs))
         self.assertEqual(len(self.before.inline_shapes), 28)
         self.assertEqual(len(self.after.inline_shapes), 28)
         self.assertEqual(len(self.before.tables), 12)
         self.assertEqual(len(self.after.tables), 12)
+        self.assertEqual(
+            [(len(table.rows), len(table.columns)) for table in self.before.tables],
+            [(len(table.rows), len(table.columns)) for table in self.after.tables],
+        )
+
+    def test_headings_and_captions_are_preserved(self):
+        protected_styles = {
+            "Heading 2",
+            "Heading 3",
+            "Mushroomie Figure Caption",
+            "Mushroomie Table Caption",
+        }
+        protected_text = lambda document: [
+            paragraph.text
+            for paragraph in document.paragraphs
+            if paragraph.style.name in protected_styles
+        ]
+        self.assertEqual(protected_text(self.before), protected_text(self.after))
 
     def test_numeric_evidence_is_preserved(self):
         get_numbers = lambda document: re.findall(
@@ -84,3 +90,17 @@ class DocumentInvariants(unittest.TestCase):
             [keyword_table.cell(index, 0).text.strip() for index in range(1, 31)],
             [str(index) for index in range(1, 31)],
         )
+
+    def test_rewrite_scope_and_application(self):
+        self.assertGreaterEqual(len(PARAGRAPH_REWRITES), 30)
+        before_text = document_text(self.before)
+        after_text = document_text(self.after)
+
+        for old_text, new_text in PARAGRAPH_REWRITES.items():
+            self.assertIn(old_text, before_text)
+            self.assertNotIn(old_text, after_text)
+            self.assertIn(new_text, after_text)
+        for old_text, new_text in TABLE_CELL_REWRITES.items():
+            self.assertIn(old_text, before_text)
+            self.assertNotIn(old_text, after_text)
+            self.assertIn(new_text, after_text)
