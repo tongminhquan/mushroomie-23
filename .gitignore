@@ -61,3 +61,4 @@ backups/
 *.sql
 *.dump
 .worktrees/
+.superpowers/
