@@ -1,7 +1,9 @@
 """Regression checks for the edited section 3.3.3 Word document."""
 
+import hashlib
 import re
 import unittest
+import zipfile
 
 from docx import Document
 
@@ -19,6 +21,15 @@ def all_paragraphs(document):
 
 def document_text(document):
     return "\n".join(paragraph.text for paragraph in all_paragraphs(document))
+
+
+def media_hashes(path):
+    with zipfile.ZipFile(path) as package:
+        return {
+            name: hashlib.sha256(package.read(name)).hexdigest()
+            for name in package.namelist()
+            if name.startswith("word/media/")
+        }
 
 
 class DocumentInvariants(unittest.TestCase):
@@ -50,6 +61,9 @@ class DocumentInvariants(unittest.TestCase):
             if paragraph.style.name in protected_styles
         ]
         self.assertEqual(protected_text(self.before), protected_text(self.after))
+
+    def test_embedded_media_names_and_hashes_are_preserved(self):
+        self.assertEqual(media_hashes(SOURCE_PATH), media_hashes(OUTPUT_PATH))
 
     def test_numeric_evidence_is_preserved(self):
         get_numbers = lambda document: re.findall(
@@ -92,7 +106,8 @@ class DocumentInvariants(unittest.TestCase):
         )
 
     def test_rewrite_scope_and_application(self):
-        self.assertGreaterEqual(len(PARAGRAPH_REWRITES), 30)
+        self.assertEqual(len(PARAGRAPH_REWRITES), 66)
+        self.assertEqual(len(TABLE_CELL_REWRITES), 17)
         before_text = document_text(self.before)
         after_text = document_text(self.after)
 
@@ -104,3 +119,55 @@ class DocumentInvariants(unittest.TestCase):
             self.assertIn(old_text, before_text)
             self.assertNotIn(old_text, after_text)
             self.assertIn(new_text, after_text)
+
+    def test_only_mapped_text_is_changed(self):
+        changed_paragraphs = []
+        matched_paragraphs = []
+        for index, (before, after) in enumerate(
+            zip(self.before.paragraphs, self.after.paragraphs)
+        ):
+            expected = PARAGRAPH_REWRITES.get(before.text, before.text)
+            with self.subTest(paragraph=index):
+                self.assertEqual(after.text, expected)
+            if before.text in PARAGRAPH_REWRITES:
+                matched_paragraphs.append(before.text)
+            if before.text != after.text:
+                changed_paragraphs.append(index)
+
+        changed_cells = []
+        matched_cells = []
+        for table_index, (before_table, after_table) in enumerate(
+            zip(self.before.tables, self.after.tables)
+        ):
+            for row_index, (before_row, after_row) in enumerate(
+                zip(before_table.rows, after_table.rows)
+            ):
+                for cell_index, (before_cell, after_cell) in enumerate(
+                    zip(before_row.cells, after_row.cells)
+                ):
+                    self.assertEqual(
+                        len(before_cell.paragraphs), len(after_cell.paragraphs)
+                    )
+                    for paragraph_index, (before, after) in enumerate(
+                        zip(before_cell.paragraphs, after_cell.paragraphs)
+                    ):
+                        expected = TABLE_CELL_REWRITES.get(before.text, before.text)
+                        coordinate = (
+                            table_index,
+                            row_index,
+                            cell_index,
+                            paragraph_index,
+                        )
+                        with self.subTest(table_cell=coordinate):
+                            self.assertEqual(after.text, expected)
+                        if before.text in TABLE_CELL_REWRITES:
+                            matched_cells.append(before.text)
+                        if before.text != after.text:
+                            changed_cells.append(coordinate)
+
+        self.assertEqual(len(changed_paragraphs), 66)
+        self.assertEqual(set(matched_paragraphs), set(PARAGRAPH_REWRITES))
+        self.assertEqual(len(matched_paragraphs), len(PARAGRAPH_REWRITES))
+        self.assertEqual(len(changed_cells), 17)
+        self.assertEqual(set(matched_cells), set(TABLE_CELL_REWRITES))
+        self.assertEqual(len(matched_cells), len(TABLE_CELL_REWRITES))
