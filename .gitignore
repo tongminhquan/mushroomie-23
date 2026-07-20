@@ -62,3 +62,4 @@ backups/
 *.dump
 .worktrees/
 .superpowers/
+__pycache__/
