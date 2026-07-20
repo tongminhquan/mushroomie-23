@@ -27,7 +27,7 @@ test_structure_is_preserved ... ERROR
 docx.opc.exceptions.PackageNotFoundError: Package not found at
 'C:\Users\Admin\OneDrive\Tài liệu\mushroomie\artifacts\Muc_3.3.3_Kenh_Website_Mushroomie_Dong_Bo_Van_Phong_ASM.docx'
 
-Ran 4 tests in 0.091s
+Ran 4 tests in 0.104s
 FAILED (errors=4)
 ```
 
@@ -41,6 +41,8 @@ absolute artifact paths.
 - Exact source/output counts: 28 inline images and 12 tables.
 - Numeric evidence, collected from main-document paragraphs and every table
   cell paragraph, must match exactly.
+- First-line indentation is likewise prohibited in main-document and table-cell
+  paragraphs.
 - The exact lists of four campaign stages, eleven activities, and URLs must be
   retained. The source URL list is asserted as `https://mushroomie.io.vn/`.
 - Output must not contain "landing page", must not use a first-line indent,
@@ -59,12 +61,14 @@ absolute artifact paths.
   module itself is absent; missing imports raised inside it are re-raised.
 - Source assertions confirm four stages and eleven activities before comparing
   their exact heading lists with the output.
+- The no-first-line-indent rule now iterates through `all_paragraphs`, covering
+  table-cell content rather than only the document body.
 - The tests use only `python-docx`, already available in the prescribed runtime.
 
 ## Commit
 
-`test: strengthen section 3.3.3 document invariants` (this report and the
-test revision are committed together.)
+`test: cover table paragraphs in section 3.3.3 invariants` (this report and
+the test revision are committed together.)
 
 ## Concerns / handoff
 

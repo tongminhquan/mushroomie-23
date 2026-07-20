@@ -76,7 +76,7 @@ class DocumentInvariants(unittest.TestCase):
         self.assertTrue(
             all(
                 paragraph.paragraph_format.first_line_indent in (None, 0)
-                for paragraph in self.after.paragraphs
+                for paragraph in all_paragraphs(self.after)
             )
         )
         keyword_table = self.after.tables[6]
