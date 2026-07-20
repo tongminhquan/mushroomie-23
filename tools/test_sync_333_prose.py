@@ -107,7 +107,7 @@ class DocumentInvariants(unittest.TestCase):
 
     def test_rewrite_scope_and_application(self):
         self.assertEqual(len(PARAGRAPH_REWRITES), 66)
-        self.assertEqual(len(TABLE_CELL_REWRITES), 17)
+        self.assertEqual(len(TABLE_CELL_REWRITES), 19)
         before_text = document_text(self.before)
         after_text = document_text(self.after)
 
@@ -165,9 +165,42 @@ class DocumentInvariants(unittest.TestCase):
                         if before.text != after.text:
                             changed_cells.append(coordinate)
 
-        self.assertEqual(len(changed_paragraphs), 66)
+        self.assertEqual(len(changed_paragraphs), len(PARAGRAPH_REWRITES))
         self.assertEqual(set(matched_paragraphs), set(PARAGRAPH_REWRITES))
         self.assertEqual(len(matched_paragraphs), len(PARAGRAPH_REWRITES))
-        self.assertEqual(len(changed_cells), 17)
+        self.assertEqual(len(changed_cells), len(TABLE_CELL_REWRITES))
         self.assertEqual(set(matched_cells), set(TABLE_CELL_REWRITES))
         self.assertEqual(len(matched_cells), len(TABLE_CELL_REWRITES))
+
+    def test_modality_markers_are_preserved_in_rewrites(self):
+        modality_markers = ("cần", "nên", "có thể", "góp phần", "nếu")
+        for old_text, new_text in (
+            PARAGRAPH_REWRITES | TABLE_CELL_REWRITES
+        ).items():
+            for marker in modality_markers:
+                if marker in old_text.lower():
+                    with self.subTest(marker=marker, source=old_text[:80]):
+                        self.assertIn(marker, new_text.lower())
+
+        guarded_phrases = {
+            "Từ góc độ nhận diện thương hiệu": "bố cục cần ưu tiên",
+            "Trang chi tiết sản phẩm cần được đánh giá":
+                "Trang chi tiết sản phẩm cần được đánh giá",
+            "Đánh giá trải nghiệm di động":
+                "thẻ sản phẩm nên hiển thị",
+            "Bên cạnh điểm tổng quan": "việc đánh giá cần đi sâu",
+            "Trong giai đoạn chạy quảng cáo":
+                "quảng cáo tìm kiếm Google được xem là công cụ có thể",
+            "Việc tối giản số trường bắt buộc": "góp phần hạn chế",
+            "Để bảo đảm khả năng kiểm chứng":
+                "Minh chứng nên được lưu theo tên từ khóa",
+        }
+        for source_prefix, required_phrase in guarded_phrases.items():
+            matching_values = [
+                new_text
+                for old_text, new_text in PARAGRAPH_REWRITES.items()
+                if old_text.startswith(source_prefix)
+            ]
+            with self.subTest(source_prefix=source_prefix):
+                self.assertEqual(len(matching_values), 1)
+                self.assertIn(required_phrase, matching_values[0])
