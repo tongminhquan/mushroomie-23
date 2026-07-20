@@ -2,8 +2,8 @@
 
 ## Scope
 
-Created `tools/test_sync_333_prose.py`, a `unittest` regression suite for the
-section 3.3.3 source/output DOCX pair. Until Task 3 creates
+Created and revised `tools/test_sync_333_prose.py`, a `unittest` regression
+suite for the section 3.3.3 source/output DOCX pair. Until Task 3 creates
 `tools/sync_333_prose_to_asm.py`, the test falls back to the agreed absolute
 source and output paths under `C:\Users\Admin\OneDrive\Tài liệu\mushroomie\artifacts`.
 
@@ -19,6 +19,7 @@ $env:PYTHONIOENCODING='utf-8'
 Output summary:
 
 ```text
+test_campaign_plan_and_urls_are_preserved ... ERROR
 test_numeric_evidence_is_preserved ... ERROR
 test_required_rules ... ERROR
 test_structure_is_preserved ... ERROR
@@ -26,8 +27,8 @@ test_structure_is_preserved ... ERROR
 docx.opc.exceptions.PackageNotFoundError: Package not found at
 'C:\Users\Admin\OneDrive\Tài liệu\mushroomie\artifacts\Muc_3.3.3_Kenh_Website_Mushroomie_Dong_Bo_Van_Phong_ASM.docx'
 
-Ran 3 tests in 0.104s
-FAILED (errors=3)
+Ran 4 tests in 0.091s
+FAILED (errors=4)
 ```
 
 This is the expected RED outcome: the source document loads successfully, but
@@ -38,7 +39,10 @@ absolute artifact paths.
 ## Invariants covered
 
 - Exact source/output counts: 28 inline images and 12 tables.
-- Paragraph-level numeric evidence in source and output must match exactly.
+- Numeric evidence, collected from main-document paragraphs and every table
+  cell paragraph, must match exactly.
+- The exact lists of four campaign stages, eleven activities, and URLs must be
+  retained. The source URL list is asserted as `https://mushroomie.io.vn/`.
 - Output must not contain "landing page", must not use a first-line indent,
   and table index 6 must retain sequential labels 1 through 30.
 
@@ -50,17 +54,21 @@ absolute artifact paths.
 ## Self-review
 
 - Confirmed the source has 28 inline images, 12 tables, and 31 rows in table 6.
-- Fallback is limited to `ModuleNotFoundError`; other import errors remain
-  visible rather than being masked.
+- Imports use `tools.sync_333_prose_to_asm`, so they work from the repository
+  root with the required unittest command. Fallback occurs only when that
+  module itself is absent; missing imports raised inside it are re-raised.
+- Source assertions confirm four stages and eleven activities before comparing
+  their exact heading lists with the output.
 - The tests use only `python-docx`, already available in the prescribed runtime.
 
 ## Commit
 
-`test: add section 3.3.3 document invariants` (this report and the test are
-committed together.)
+`test: strengthen section 3.3.3 document invariants` (this report and the
+test revision are committed together.)
 
 ## Concerns / handoff
 
 - Tests are intentionally RED until Task 3 writes the target DOCX.
-- Task 3 should replace the temporary fallback with its actual sync-module
-  import while keeping the constants and output location unchanged.
+- Task 3 supplies the `tools.sync_333_prose_to_asm` module; the controlled
+  fallback can then be removed while keeping its constants and output location
+  unchanged.
