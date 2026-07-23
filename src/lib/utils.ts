@@ -1,14 +1,6 @@
-import { format } from 'date-fns'
-import { vi } from 'date-fns/locale'
-import { type ClassValue, clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
 import { normalizeImageUrl, type PublicImageKind } from '@/lib/image-url'
 
 export { generateSlug } from '@/lib/product-slug'
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
 
 export function formatPrice(price: number | string): string {
   const num = typeof price === 'string' ? parseFloat(price) : price
@@ -17,7 +9,14 @@ export function formatPrice(price: number | string): string {
 
 export function formatDate(date: Date | string): string {
   const value = typeof date === 'string' ? new Date(date) : date
-  return format(value, 'dd/MM/yyyy HH:mm', { locale: vi })
+  if (Number.isNaN(value.getTime())) throw new RangeError('Invalid time value')
+
+  const day = String(value.getDate()).padStart(2, '0')
+  const month = String(value.getMonth() + 1).padStart(2, '0')
+  const hours = String(value.getHours()).padStart(2, '0')
+  const minutes = String(value.getMinutes()).padStart(2, '0')
+
+  return `${day}/${month}/${value.getFullYear()} ${hours}:${minutes}`
 }
 
 export function generateOrderCode(): string {

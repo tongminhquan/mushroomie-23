@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/cn'
 
 /**
  * Bộ UI dùng chung cho admin Mushroomie — tông handmade ấm áp:

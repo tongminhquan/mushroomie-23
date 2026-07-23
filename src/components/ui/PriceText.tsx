@@ -1,5 +1,5 @@
 import { formatPrice } from '@/lib/utils'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/cn'
 
 export default function PriceText({
   price,

@@ -33,7 +33,7 @@ try {
       await sharp(sourcePath)
         .rotate()
         .resize({ width, fit: 'inside', withoutEnlargement: true })
-        .webp({ quality: 85, effort: 5 })
+        .webp({ quality: 75, effort: 5 })
         .toFile(outputPath)
     }
   }

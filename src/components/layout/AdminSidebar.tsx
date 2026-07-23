@@ -29,7 +29,7 @@ import {
   Users,
   X,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/cn'
 
 interface AdminNavItem {
   href: string

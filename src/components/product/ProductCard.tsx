@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Check, ShoppingBag } from 'lucide-react'
-import BrandBadge from '@/components/ui/BrandBadge'
-import PriceText from '@/components/ui/PriceText'
 import SafeImage from '@/components/ui/SafeImage'
 import { useCartStore } from '@/store/cart'
 import { useVoucherStore } from '@/store/voucher'
@@ -140,10 +138,26 @@ export default function ProductCard({ product }: ProductCardProps) {
           className="object-contain p-3 transition-transform duration-500 ease-out group-hover:scale-[1.035]"
         />
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
-          {product.is_customizable && <BrandBadge tone="yellow">Cá nhân hóa</BrandBadge>}
-          {!product.is_customizable && !isOutOfStock && <BrandBadge tone="pink">Handmade</BrandBadge>}
-          {hasSale && <BrandBadge tone="red">-{Math.round((1 - displayPrice / product.price) * 100)}%</BrandBadge>}
-          {isOutOfStock && <BrandBadge tone="neutral">Hết hàng</BrandBadge>}
+          {product.is_customizable && (
+            <span className="inline-flex min-h-7 items-center rounded-lg bg-yellow px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-text">
+              Cá nhân hóa
+            </span>
+          )}
+          {!product.is_customizable && !isOutOfStock && (
+            <span className="inline-flex min-h-7 items-center rounded-lg bg-pink px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-text">
+              Handmade
+            </span>
+          )}
+          {hasSale && (
+            <span className="inline-flex min-h-7 items-center rounded-lg bg-primary px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-white">
+              -{Math.round((1 - displayPrice / product.price) * 100)}%
+            </span>
+          )}
+          {isOutOfStock && (
+            <span className="inline-flex min-h-7 items-center rounded-lg border border-neutral-200 bg-white px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-text">
+              Hết hàng
+            </span>
+          )}
         </div>
       </Link>
 
@@ -170,7 +184,12 @@ export default function ProductCard({ product }: ProductCardProps) {
               </span>
             </div>
           )}
-          <PriceText price={displayPrice} originalPrice={originalPrice} />
+          <div className="flex flex-wrap items-baseline gap-2 tabular-nums">
+            <strong className="text-xl text-primary">{formatPrice(displayPrice)}</strong>
+            {originalPrice && originalPrice > displayPrice && (
+              <span className="text-xs text-neutral-500 line-through">{formatPrice(originalPrice)}</span>
+            )}
+          </div>
           <button
             onClick={handleAddToCart}
             disabled={isOutOfStock}

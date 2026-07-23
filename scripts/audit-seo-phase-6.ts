@@ -13,7 +13,6 @@ import {
 } from '../src/lib/seo-phase-6'
 
 const SITE_URL = 'https://mushroomie.io.vn'
-const GOOGLE_TAG_MANAGER_ID = 'GTM-K55B6RVG'
 const projectRoot = process.cwd()
 const csvPath = path.join(projectRoot, 'mushroomie_30_tu_khoa_seo.csv')
 const outputRoot = path.join(projectRoot, 'docs', 'seo-phase-6')
@@ -121,10 +120,10 @@ Generated: ${input.generatedAt}
 
 ## Bằng chứng đã xác minh công khai
 
-- Production JavaScript bundle chứa GA4 \`${GOOGLE_ANALYTICS_ID}\`, Google Ads
-  \`${GOOGLE_ADS_ID}\` và GTM \`${GOOGLE_TAG_MANAGER_ID}\`.
-- GTM container công khai không chứa trực tiếp GA4/Ads ID nói trên; cấu hình
-  hiện tại chưa cho thấy hai nguồn cùng gửi page view.
+- Production JavaScript bundle chứa GA4 \`${GOOGLE_ANALYTICS_ID}\` và Google Ads
+  \`${GOOGLE_ADS_ID}\` trên cùng một Google tag.
+- Clarity được nạp trực tiếp sau tương tác hoặc sau thời gian chờ; không còn nạp
+  thêm một GTM container chỉ để khởi tạo Clarity.
 - \`https://mushroomie.io.vn/sitemap.xml\` truy cập được và robots.txt trỏ tới
   sitemap này.
 - DNS TXT có token \`google-site-verification\`. Token này không chứng minh phiên
@@ -189,17 +188,13 @@ async function main() {
     throw new Error(`Expected 30 keyword rows, received ${keywordRows.length}`)
   }
 
-  const [homepage, sitemap, robots, health, verificationTokens, gtmResponse] = await Promise.all([
+  const [homepage, sitemap, robots, health, verificationTokens] = await Promise.all([
     fetchText('/'),
     fetchText('/sitemap.xml'),
     fetchText('/robots.txt'),
     fetchText('/api/health'),
     resolveGoogleVerificationTokens(),
-    fetch(`https://www.googletagmanager.com/gtm.js?id=${GOOGLE_TAG_MANAGER_ID}`),
   ])
-  if (!gtmResponse.ok) {
-    throw new Error(`GTM container returned HTTP ${gtmResponse.status}`)
-  }
 
   const scriptSources = extractNextScriptSources(homepage.body)
   const scriptBodies = await Promise.all(
@@ -212,7 +207,6 @@ async function main() {
     }),
   )
   const productionJavaScript = scriptBodies.join('\n')
-  const gtmJavaScript = await gtmResponse.text()
   const sitemapUrlCount = (sitemap.body.match(/<loc>/g) || []).length
   const keywordBaseline = buildSeoPhase6KeywordBaseline(keywordRows, date)
   const ownerCount = new Set(keywordBaseline.map((row) => row.ownerUrl)).size
@@ -230,12 +224,8 @@ async function main() {
     tags: {
       googleAnalyticsId: GOOGLE_ANALYTICS_ID,
       googleAdsId: GOOGLE_ADS_ID,
-      googleTagManagerId: GOOGLE_TAG_MANAGER_ID,
       productionBundleHasGa4: productionJavaScript.includes(GOOGLE_ANALYTICS_ID),
       productionBundleHasGoogleAds: productionJavaScript.includes(GOOGLE_ADS_ID),
-      productionBundleHasGtm: productionJavaScript.includes(GOOGLE_TAG_MANAGER_ID),
-      gtmContainerHasDirectGa4Id: gtmJavaScript.includes(GOOGLE_ANALYTICS_ID),
-      gtmContainerHasDirectGoogleAdsId: gtmJavaScript.includes(GOOGLE_ADS_ID),
     },
     searchConsole: {
       dnsVerificationTokenPresent: verificationTokens.length > 0,

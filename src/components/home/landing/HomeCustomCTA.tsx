@@ -1,5 +1,3 @@
-'use client'
-
 import Link from 'next/link'
 import { ArrowRight, MessageCircle } from 'lucide-react'
 import BrandSticker from './BrandSticker'

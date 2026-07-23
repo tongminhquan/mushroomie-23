@@ -37,8 +37,8 @@ export default function HomeCategoryShowcase({ categories }: { categories: HomeC
                   <CategoryIcon
                     iconSrc={category.icon || category.image_url}
                     name={category.name}
-                    size="lg"
-                    imageClassName="h-24 w-24 max-h-24 max-w-24 transition-transform duration-300 group-hover:scale-105"
+                    size="xl"
+                    imageClassName="max-h-24 max-w-24 transition-transform duration-300 group-hover:scale-105"
                     fallbackClassName="text-primary transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
