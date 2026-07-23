@@ -46,3 +46,14 @@ test('content security policy allows Google Ads measurement endpoints', async ()
     assert.match(policy, new RegExp(origin.replaceAll('.', '\\.')))
   }
 })
+
+test('content security policy blocks the redundant Cloudflare Browser Insights beacon', async () => {
+  assert.equal(typeof nextConfig.headers, 'function')
+
+  const headers = await nextConfig.headers!()
+  const globalHeaders = headers.find((entry) => entry.source === '/(.*)')
+  const policy = globalHeaders?.headers.find((header) => header.key === 'Content-Security-Policy')?.value
+
+  assert.ok(policy)
+  assert.doesNotMatch(policy, /cloudflareinsights\.com/)
+})
