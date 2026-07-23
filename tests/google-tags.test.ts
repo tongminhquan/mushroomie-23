@@ -57,15 +57,3 @@ test('content security policy blocks the redundant Cloudflare Browser Insights b
   assert.ok(policy)
   assert.doesNotMatch(policy, /cloudflareinsights\.com/)
 })
-
-test('homepage prevents Cloudflare from injecting Browser Insights', async () => {
-  assert.equal(typeof nextConfig.headers, 'function')
-
-  const headers = await nextConfig.headers!()
-  const homepageHeaders = headers.find((entry) => entry.source === '/')
-  const cacheControl = homepageHeaders?.headers.find((header) => header.key === 'Cache-Control')?.value
-
-  assert.ok(cacheControl)
-  assert.match(cacheControl, /(?:^|,\s*)no-transform(?:,|$)/)
-  assert.match(cacheControl, /s-maxage=3600/)
-})
