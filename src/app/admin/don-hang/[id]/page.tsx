@@ -86,6 +86,27 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
                   <div className="font-semibold text-[#8a6410] mt-0.5">{order.note}</div>
                 </div>
               )}
+              {order.gift_wrap && (
+                <div className="col-span-2 rounded-lg bg-primary-light border-[1.5px] border-primary/30 px-3 py-2.5">
+                  <div className="text-primary text-[11px] font-semibold uppercase tracking-wide">
+                    🎁 Đơn này cần gói quà
+                  </div>
+                  {order.gift_message ? (
+                    <>
+                      <div className="text-primary text-[11px] font-semibold uppercase tracking-wide mt-2">
+                        ✍️ Chép tay lời nhắn sau lên thiệp
+                      </div>
+                      <div className="mt-1 whitespace-pre-wrap rounded-md border border-primary/20 bg-white px-3 py-2 text-sm font-semibold leading-6 text-neutral-900">
+                        {order.gift_message}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="mt-0.5 text-sm font-semibold text-primary">
+                      Khách không để lại lời nhắn — chỉ cần gói quà.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
