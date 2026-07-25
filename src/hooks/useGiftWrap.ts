@@ -36,7 +36,7 @@ function parseGiftWrapSnapshot(value: unknown): GiftWrapSnapshot {
  * Theo dõi giá gói quà theo thời gian thực (poll 5s khi tab đang hiển thị),
  * để admin đổi giá là khách thấy ngay thay vì chỉ phát hiện lúc đặt hàng.
  */
-export function useGiftWrap() {
+export function useGiftWrap({ poll = true }: { poll?: boolean } = {}) {
   const [snapshot, setSnapshot] = useState<GiftWrapSnapshot>({
     enabled: true,
     fee: DEFAULT_GIFT_WRAP_FEE,
