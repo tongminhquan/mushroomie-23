@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { shippingFeeValueSchema } from '@/lib/shipping-fee'
+import { giftMessageSchema, giftWrapFeeValueSchema } from '@/lib/gift-wrap'
 
 export const orderSchema = z.object({
   customer_name: z.string().trim().min(1).max(120),
