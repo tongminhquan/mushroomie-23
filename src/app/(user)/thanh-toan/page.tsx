@@ -415,6 +415,12 @@ export default function CheckoutPage() {
                     <span className="text-neutral-500">Phí vận chuyển</span>
                     <span>{formatPrice(shippingFee)}</span>
                   </div>
+                  {giftWrap && giftWrapReady && giftWrapEnabled && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-neutral-500">Gói quà {giftMessage.trim() ? '+ thư tay' : ''}</span>
+                      <span>{giftWrapFee === 0 ? 'Miễn phí' : formatPrice(giftWrapFee)}</span>
+                    </div>
+                  )}
                   {session?.user && (
                     <div className="rounded-xl border border-primary/15 bg-primary-light/40 p-3">
                       <div className="mb-2 flex items-center justify-between gap-2">
