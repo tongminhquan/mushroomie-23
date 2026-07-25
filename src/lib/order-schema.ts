@@ -18,6 +18,10 @@ export const orderSchema = z.object({
   payment_method: z.enum(['bank_transfer', 'cod']).default('bank_transfer'),
   user_voucher_id: z.string().optional().nullable(),
   expected_shipping_fee: shippingFeeValueSchema.optional(),
+  // Gói quà: server tự lấy giá từ settings, client chỉ gửi mức nó đang hiển thị để đối chiếu.
+  gift_wrap: z.boolean().optional().default(false),
+  gift_message: giftMessageSchema.optional(),
+  expected_gift_wrap_fee: giftWrapFeeValueSchema.optional(),
 })
 
 export type OrderInput = z.infer<typeof orderSchema>
