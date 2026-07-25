@@ -15,6 +15,9 @@ import ShippingFeeNotice from '@/components/checkout/ShippingFeeNotice'
 import { trackAnalyticsEvent, trackAnalyticsEventOnce } from '@/lib/analytics'
 import { GOOGLE_ADS_PURCHASE_SEND_TO } from '@/lib/google-tags'
 import { useShippingFee } from '@/hooks/useShippingFee'
+import { useGiftWrap } from '@/hooks/useGiftWrap'
+import GiftWrapOption from '@/components/product/GiftWrapOption'
+import { resolveGiftWrapFee } from '@/lib/gift-wrap'
 
 interface CheckoutUser {
   name?: string | null
