@@ -63,6 +63,9 @@ export async function POST(request: NextRequest) {
       payment_method,
       user_voucher_id,
       expected_shipping_fee,
+      gift_wrap,
+      gift_message,
+      expected_gift_wrap_fee,
       ...orderData
     } = parsed.data
 
