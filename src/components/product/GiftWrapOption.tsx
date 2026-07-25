@@ -24,11 +24,12 @@ export default function GiftWrapOption({ showMessageField = false, className = '
   const setGiftMessage = useCartStore((state) => state.setGiftMessage)
   const { enabled, fee, isReady } = useGiftWrap()
 
-  // Shop tắt dịch vụ thì ẩn hẳn, đồng thời gỡ lựa chọn cũ để tổng tiền không lệch.
-  if (isReady && !enabled) {
-    if (giftWrap) setGiftWrap(false)
-    return null
-  }
+  // Shop tắt dịch vụ giữa chừng: gỡ lựa chọn cũ để tổng tiền không lệch.
+  useEffect(() => {
+    if (isReady && !enabled && giftWrap) setGiftWrap(false)
+  }, [isReady, enabled, giftWrap, setGiftWrap])
+
+  if (isReady && !enabled) return null
 
   const feeLabel = !isReady ? '...' : fee === 0 ? 'Miễn phí' : `+${formatPrice(fee)}`
 
