@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 
+const GENERAL_SETTING_KEYS = ['brand_name', 'hotline', 'support_email'] as const
+const generalSettingKeySet = new Set<string>(GENERAL_SETTING_KEYS)
+
 const maskAccount = (acc: string) => {
   if (!acc) return ''
   if (acc.length <= 4) return '***' + acc
@@ -23,7 +26,9 @@ export async function GET() {
     }
 
     // Lấy thông tin từ bảng Settings
-    const settingsList = await prisma.setting.findMany()
+    const settingsList = await prisma.setting.findMany({
+      where: { key: { in: [...GENERAL_SETTING_KEYS] } },
+    })
     const settings = settingsList.reduce((acc, curr) => {
       acc[curr.key] = curr.value
       return acc
@@ -51,14 +56,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { settings } = await req.json()
+    const body = await req.json().catch(() => null)
+    const settings = body?.settings
     
-    if (!settings || typeof settings !== 'object') {
+    if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
     }
 
+    const entries = Object.entries(settings)
+    if (entries.some(([key]) => !generalSettingKeySet.has(key))) {
+      return NextResponse.json({ error: 'Unsupported setting key' }, { status: 400 })
+    }
+    if (entries.some(([, value]) => typeof value !== 'string' || value.length > 500)) {
+      return NextResponse.json({ error: 'Invalid setting value' }, { status: 400 })
+    }
+
     // Upsert từng setting
-    const operations = Object.entries(settings).map(([key, value]) => {
+    const operations = entries.map(([key, value]) => {
       return prisma.setting.upsert({
         where: { key },
         update: { value: String(value) },

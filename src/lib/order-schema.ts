@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { shippingFeeValueSchema } from '@/lib/shipping-fee'
 
 export const orderSchema = z.object({
   customer_name: z.string().trim().min(1).max(120),
@@ -16,6 +17,7 @@ export const orderSchema = z.object({
   })).min(1).max(50),
   payment_method: z.enum(['bank_transfer', 'cod']).default('bank_transfer'),
   user_voucher_id: z.string().optional().nullable(),
+  expected_shipping_fee: shippingFeeValueSchema.optional(),
 })
 
 export type OrderInput = z.infer<typeof orderSchema>

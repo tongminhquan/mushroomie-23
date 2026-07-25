@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { getShippingFeeSnapshot } from '@/lib/shipping-fee-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const subtotal = Math.max(0, Number(searchParams.get('subtotal') || 0))
-    const estimatedShippingFee = subtotal >= 500000 ? 0 : 30000
+    const { shippingFee } = await getShippingFeeSnapshot()
     const now = new Date()
 
     const userVouchers = await prisma.userVoucher.findMany({
@@ -42,12 +43,12 @@ export async function GET(request: NextRequest) {
         } else if (template.discountType === 'FIXED') {
           discountAmount = Number(template.discountValue)
         } else if (template.discountType === 'FREE_SHIPPING') {
-          discountAmount = estimatedShippingFee
+          discountAmount = shippingFee
         }
       }
 
       discountAmount = template.discountType === 'FREE_SHIPPING'
-        ? Math.min(estimatedShippingFee, discountAmount)
+        ? Math.min(shippingFee, discountAmount)
         : Math.min(subtotal, discountAmount)
 
       return {

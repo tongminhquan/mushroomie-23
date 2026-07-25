@@ -7,9 +7,18 @@ import Button from '@/components/ui/Button'
 import { formatPrice, getPublicImageUrl } from '@/lib/utils'
 import { useCartStore } from '@/store/cart'
 import CheckoutStepper from '@/components/checkout/CheckoutStepper'
+import ShippingFeeNotice from '@/components/checkout/ShippingFeeNotice'
+import { useShippingFee } from '@/hooks/useShippingFee'
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotalPrice } = useCartStore()
+  const {
+    shippingFee,
+    notice: shippingFeeNotice,
+    dismissNotice: dismissShippingFeeNotice,
+  } = useShippingFee()
+  const subtotal = getTotalPrice()
+  const estimatedTotal = subtotal + shippingFee
 
   return (
     <div className="min-h-screen bg-secondary py-8 md:py-12">
@@ -122,14 +131,30 @@ export default function CartPage() {
                 <PackageCheck size={20} className="text-primary" />
                 <h2 className="font-heading text-xl text-text">Tóm tắt đơn hàng</h2>
               </div>
+              {shippingFeeNotice && (
+                <div className="mb-4">
+                  <ShippingFeeNotice
+                    notice={shippingFeeNotice}
+                    onDismiss={dismissShippingFeeNotice}
+                  />
+                </div>
+              )}
               <div className="space-y-3 border-t border-dashed pt-4" style={{ borderColor: '#e2d3c8' }}>
                 <div className="flex justify-between text-sm">
                   <span className="text-neutral-500">Số sản phẩm</span>
                   <span className="font-bold">{items.reduce((sum, item) => sum + item.quantity, 0)}</span>
                 </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-neutral-500">Tạm tính</span>
+                  <span className="font-semibold">{formatPrice(subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-neutral-500">Phí vận chuyển dự kiến</span>
+                  <span className="font-semibold">{formatPrice(shippingFee)}</span>
+                </div>
                 <div className="flex items-baseline justify-between border-t border-dashed pt-3 text-sm" style={{ borderColor: '#e2d3c8' }}>
-                  <span className="font-bold text-text">Tạm tính</span>
-                  <span className="font-heading text-2xl text-primary">{formatPrice(getTotalPrice())}</span>
+                  <span className="font-bold text-text">Tổng dự kiến</span>
+                  <span className="font-heading text-2xl text-primary">{formatPrice(estimatedTotal)}</span>
                 </div>
               </div>
               <Link href="/thanh-toan" className="mt-5 block">

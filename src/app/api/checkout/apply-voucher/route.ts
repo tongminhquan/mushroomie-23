@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { getShippingFeeSnapshot } from '@/lib/shipping-fee-server'
 
 const applyVoucherSchema = z.object({
   userVoucherId: z.string(),
@@ -36,6 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     const template = userVoucher.voucher
+    const { shippingFee } = await getShippingFeeSnapshot()
     if (template.minOrderValue && parsed.data.subtotal < Number(template.minOrderValue)) {
       return NextResponse.json({ error: `Đơn hàng tối thiểu ${Number(template.minOrderValue).toLocaleString('vi-VN')} đ` }, { status: 400 })
     }
@@ -48,14 +50,21 @@ export async function POST(request: NextRequest) {
       }
     } else if (template.discountType === 'FIXED') {
       discountAmount = Number(template.discountValue)
+    } else if (template.discountType === 'FREE_SHIPPING') {
+      discountAmount = shippingFee
     }
 
-    discountAmount = Math.min(parsed.data.subtotal, discountAmount)
+    discountAmount = template.discountType === 'FREE_SHIPPING'
+      ? Math.min(shippingFee, discountAmount)
+      : Math.min(parsed.data.subtotal, discountAmount)
 
     return NextResponse.json({
       voucher: {
         id: userVoucher.id, // we return userVoucherId
         code: template.code,
+        title: template.title,
+        discountType: template.discountType,
+        discountValue: Number(template.discountValue),
         discountAmount,
         expiresAt: userVoucher.expiresAt,
       },

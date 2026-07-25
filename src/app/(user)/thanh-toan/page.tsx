@@ -11,8 +11,10 @@ import { Landmark, PackageCheck, ShieldCheck } from 'lucide-react'
 import FormInput from '@/components/ui/FormInput'
 import Textarea from '@/components/ui/Textarea'
 import CheckoutStepper from '@/components/checkout/CheckoutStepper'
+import ShippingFeeNotice from '@/components/checkout/ShippingFeeNotice'
 import { trackAnalyticsEvent, trackAnalyticsEventOnce } from '@/lib/analytics'
 import { GOOGLE_ADS_PURCHASE_SEND_TO } from '@/lib/google-tags'
+import { useShippingFee } from '@/hooks/useShippingFee'
 
 interface CheckoutUser {
   name?: string | null
@@ -55,6 +57,14 @@ export default function CheckoutPage() {
   const [manualLoading, setManualLoading] = useState(false)
   const [manualMessage, setManualMessage] = useState({ text: '', type: '' })
   const beginCheckoutTracked = useRef(false)
+  const {
+    shippingFee,
+    updatedAt: shippingFeeUpdatedAt,
+    isReady: shippingFeeReady,
+    notice: shippingFeeNotice,
+    dismissNotice: dismissShippingFeeNotice,
+    acceptServerFee,
+  } = useShippingFee()
 
   const user = session?.user as CheckoutUser | undefined
   const [form, setForm] = useState({
@@ -79,10 +89,9 @@ export default function CheckoutPage() {
   }, [user])
 
   const subtotal = getTotalPrice()
-  const shippingFee = 30000
   const voucherDiscount = selectedVoucher ? Math.min(subtotal, selectedVoucher.discountAmount) : 0
   const shippingDiscount = selectedVoucher?.discountType === 'FREE_SHIPPING'
-    ? Math.min(shippingFee, selectedVoucher.discountAmount)
+    ? shippingFee
     : 0
   const itemDiscount = selectedVoucher?.discountType === 'FREE_SHIPPING' ? 0 : voucherDiscount
   const total = Math.max(0, subtotal - itemDiscount) + Math.max(0, shippingFee - shippingDiscount)
@@ -122,11 +131,14 @@ export default function CheckoutPage() {
         })
         if (!response.ok) return
         const data = await response.json()
-        const items = data.items ?? []
-        setAvailableVouchers(items)
-        if (!voucherDismissed && !selectedVoucher && data.best) {
-          setSelectedVoucher(data.best)
-        }
+        const voucherItems: AvailableVoucher[] = Array.isArray(data.items) ? data.items : []
+        setAvailableVouchers(voucherItems)
+        setSelectedVoucher((current) => {
+          if (current) {
+            return voucherItems.find((voucher) => voucher.id === current.id) ?? null
+          }
+          return !voucherDismissed && data.best ? data.best : null
+        })
       } catch (error) {
         if (error instanceof Error && error.name !== 'AbortError') console.error(error)
       } finally {
@@ -136,7 +148,7 @@ export default function CheckoutPage() {
 
     void loadVouchers()
     return () => controller.abort()
-  }, [session?.user, subtotal, selectedVoucher, voucherDismissed])
+  }, [session?.user, subtotal, shippingFeeUpdatedAt, voucherDismissed])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -192,7 +204,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
-          shipping_fee: shippingFee,
+          expected_shipping_fee: shippingFee,
           payment_method: paymentMethod,
           user_voucher_id: selectedVoucher?.id ?? null,
           items: items.map((item) => ({
@@ -206,11 +218,20 @@ export default function CheckoutPage() {
         }),
       })
 
-      if (!orderRes.ok) {
-        const data = await orderRes.json().catch(() => null)
-        throw new Error(typeof data?.error === 'string' ? data.error : 'Tạo đơn hàng thất bại')
+      const orderData = await orderRes.json().catch(() => null)
+      if (
+        orderRes.status === 409 &&
+        orderData?.code === 'SHIPPING_FEE_CHANGED' &&
+        typeof orderData.shippingFee === 'number'
+      ) {
+        acceptServerFee(orderData.shippingFee)
+        setError(orderData.message || 'Phí vận chuyển vừa được cập nhật. Vui lòng kiểm tra lại tổng tiền.')
+        return
       }
-      const { orderId, orderCode, accessToken } = await orderRes.json()
+      if (!orderRes.ok) {
+        throw new Error(typeof orderData?.error === 'string' ? orderData.error : 'Tạo đơn hàng thất bại')
+      }
+      const { orderId, orderCode, accessToken } = orderData
 
       // Chuyển đổi "Lượt mua hàng" của Google Ads (kiểu Nhấp chuột — đo lúc khách bấm
       // đặt hàng). Bắn sau khi đơn đã tạo xong nên vẫn gửi được mã đơn và tổng tiền
@@ -346,6 +367,14 @@ export default function CheckoutPage() {
                     </div>
                   ))}
                 </div>
+                {shippingFeeNotice && (
+                  <div className="mb-4">
+                    <ShippingFeeNotice
+                      notice={shippingFeeNotice}
+                      onDismiss={dismissShippingFeeNotice}
+                    />
+                  </div>
+                )}
                 <div className="border-t border-neutral-100 pt-3 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-neutral-500">Tạm tính</span>
@@ -450,8 +479,14 @@ export default function CheckoutPage() {
                     <span className="text-primary text-lg">{formatPrice(total)}</span>
                   </div>
                 </div>
-                <Button type="submit" isLoading={isLoading} className="w-full mt-4" size="lg">
-                  Đặt hàng và thanh toán
+                <Button
+                  type="submit"
+                  isLoading={isLoading}
+                  disabled={!shippingFeeReady || isLoading}
+                  className="w-full mt-4"
+                  size="lg"
+                >
+                  {shippingFeeReady ? 'Đặt hàng và thanh toán' : 'Đang cập nhật phí vận chuyển...'}
                 </Button>
                 <p className="text-xs text-neutral-500 text-center mt-3">
                   {paymentMethod === 'bank_transfer' ? 'Bạn sẽ được chuyển đến trang QR code để thanh toán' : 'Đơn hàng sẽ được đóng gói và giao đến bạn'}

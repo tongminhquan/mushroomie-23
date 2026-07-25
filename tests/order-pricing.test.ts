@@ -12,6 +12,7 @@ const validOrder = {
   customer_email: 'buyer@example.com',
   customer_phone: '0947192590',
   shipping_address: '123 Duong Dong Khoi, Bien Hoa',
+  expected_shipping_fee: 30_000,
   items: [{ product_id: 1, quantity: 2, price_snapshot: 1 }],
 }
 

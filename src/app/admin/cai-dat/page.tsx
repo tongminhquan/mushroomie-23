@@ -1,12 +1,29 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Button from '@/components/ui/Button'
-import { AlertCircle, CreditCard, Mail, Globe, Save, Loader2 } from 'lucide-react'
+import { AlertCircle, CreditCard, Mail, Globe, Save, Loader2, Truck } from 'lucide-react'
+import ShippingFeeSettings from '@/components/admin/ShippingFeeSettings'
+
+interface GeneralSettings {
+  brand_name: string
+  hotline: string
+  support_email: string
+}
+
+interface SettingsResponse {
+  settings?: Partial<GeneralSettings>
+  env?: {
+    bank_name?: string
+    bank_account?: string
+    email_provider?: string
+    email_sender?: string
+  }
+}
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('payment')
 
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<SettingsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [webhookUrl, setWebhookUrl] = useState('')
@@ -20,10 +37,21 @@ export default function SettingsPage() {
     setWebhookUrl(window.location.origin + '/api/webhooks/payment')
     fetch('/api/admin/settings')
       .then(res => res.json())
-      .then(res => {
+      .then((res: SettingsResponse) => {
         setData(res)
         if (res.settings && Object.keys(res.settings).length > 0) {
-          setSettings(prev => ({ ...prev, ...res.settings }))
+          const generalSettings = res.settings
+          setSettings((previous) => ({
+            brand_name: typeof generalSettings.brand_name === 'string'
+              ? generalSettings.brand_name
+              : previous.brand_name,
+            hotline: typeof generalSettings.hotline === 'string'
+              ? generalSettings.hotline
+              : previous.hotline,
+            support_email: typeof generalSettings.support_email === 'string'
+              ? generalSettings.support_email
+              : previous.support_email,
+          }))
         }
         setLoading(false)
       })
@@ -43,7 +71,7 @@ export default function SettingsPage() {
       })
       if (res.ok) alert('Đã lưu thành công!')
       else alert('Lỗi khi lưu cài đặt!')
-    } catch (err) {
+    } catch {
       alert('Đã xảy ra lỗi!')
     } finally {
       setSaving(false)
@@ -68,6 +96,7 @@ export default function SettingsPage() {
         <div className="w-full md:w-64 flex-shrink-0 space-y-1.5">
           <button
             onClick={() => setActiveTab('payment')}
+            aria-pressed={activeTab === 'payment'}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold border-[1.5px] ${
               activeTab === 'payment'
                 ? 'bg-primary text-white border-primary shadow-card'
@@ -78,6 +107,7 @@ export default function SettingsPage() {
           </button>
           <button
             onClick={() => setActiveTab('email')}
+            aria-pressed={activeTab === 'email'}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold border-[1.5px] ${
               activeTab === 'email'
                 ? 'bg-primary text-white border-primary shadow-card'
@@ -88,6 +118,7 @@ export default function SettingsPage() {
           </button>
           <button
             onClick={() => setActiveTab('general')}
+            aria-pressed={activeTab === 'general'}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold border-[1.5px] ${
               activeTab === 'general'
                 ? 'bg-primary text-white border-primary shadow-card'
@@ -95,6 +126,17 @@ export default function SettingsPage() {
             }`}
           >
             <Globe size={18} /> Thông tin Website
+          </button>
+          <button
+            onClick={() => setActiveTab('shipping')}
+            aria-pressed={activeTab === 'shipping'}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold border-[1.5px] ${
+              activeTab === 'shipping'
+                ? 'bg-primary text-white border-primary shadow-card'
+                : 'bg-white text-neutral-600 border-[#f0e0d6] hover:border-primary hover:text-primary'
+            }`}
+          >
+            <Truck size={18} /> Vận chuyển
           </button>
         </div>
 
@@ -203,6 +245,8 @@ export default function SettingsPage() {
                 </div>
               </div>
             )}
+
+            {activeTab === 'shipping' && <ShippingFeeSettings />}
 
           </div>
         </div>

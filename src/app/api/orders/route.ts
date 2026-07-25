@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import type { Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { generateOrderCode } from '@/lib/utils'
@@ -11,6 +11,17 @@ import {
   calculateOrderTotal,
   calculateVoucherDiscount,
 } from '@/lib/order-pricing'
+import {
+  createShippingFeeConflict,
+  type ShippingFeeConflict,
+} from '@/lib/shipping-fee'
+import { getShippingFeeSnapshot } from '@/lib/shipping-fee-server'
+
+class ShippingFeeChangedError extends Error {
+  constructor(readonly conflict: ShippingFeeConflict) {
+    super(conflict.code)
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,7 +37,13 @@ export async function POST(request: NextRequest) {
 
     const session = await auth()
     const userId = session?.user?.id ? Number(session.user.id) : null
-    const { items, payment_method, user_voucher_id, ...orderData } = parsed.data
+    const {
+      items,
+      payment_method,
+      user_voucher_id,
+      expected_shipping_fee,
+      ...orderData
+    } = parsed.data
 
     const productIds = [...new Set(items.map((item) => item.product_id))]
     const products = await prisma.product.findMany({
@@ -44,10 +61,13 @@ export async function POST(request: NextRequest) {
       result.set(item.product_id, (result.get(item.product_id) || 0) + item.quantity)
       return result
     }, new Map<number, number>())
-    const shippingFee = 30_000
     const orderCode = generateOrderCode()
 
     const order = await prisma.$transaction(async (tx) => {
+      const { shippingFee } = await getShippingFeeSnapshot(tx)
+      const shippingConflict = createShippingFeeConflict(expected_shipping_fee, shippingFee)
+      if (shippingConflict) throw new ShippingFeeChangedError(shippingConflict)
+
       for (const [productId, quantity] of reservedQuantities) {
         const reserved = await tx.product.updateMany({
           where: { id: productId, status: 'active', stock: { gte: quantity } },
@@ -148,6 +168,8 @@ export async function POST(request: NextRequest) {
       })
 
       return createdOrder
+    }, {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
     })
 
     return NextResponse.json({
@@ -156,6 +178,9 @@ export async function POST(request: NextRequest) {
       accessToken: createOrderAccessToken(order.id, order.order_code),
     }, { status: 201 })
   } catch (error) {
+    if (error instanceof ShippingFeeChangedError) {
+      return NextResponse.json(error.conflict, { status: 409 })
+    }
     if (error instanceof Error && error.message === 'LOGIN_REQUIRED_FOR_VOUCHER') {
       return NextResponse.json({ error: 'Login required for voucher' }, { status: 401 })
     }
