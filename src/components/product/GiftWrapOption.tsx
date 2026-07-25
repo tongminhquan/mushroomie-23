@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { Gift, PenLine } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { useGiftWrap } from '@/hooks/useGiftWrap'
