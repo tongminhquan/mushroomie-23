@@ -79,6 +79,12 @@ export function useGiftWrap({ poll = true }: { poll?: boolean } = {}) {
     const controller = new AbortController()
     void refresh(controller.signal).catch(() => setIsReady(true))
 
+    // Trang sản phẩm chỉ cần giá lúc mở trang (poll=false) — tránh mọi khách xem
+    // hàng đều gọi API 5 giây/lần. Chỉ trang thanh toán mới cần theo dõi liên tục.
+    if (!poll) {
+      return () => controller.abort()
+    }
+
     const interval = window.setInterval(() => {
       if (document.visibilityState === 'visible') {
         void refresh(controller.signal).catch(() => undefined)
@@ -96,7 +102,7 @@ export function useGiftWrap({ poll = true }: { poll?: boolean } = {}) {
       window.clearInterval(interval)
       document.removeEventListener('visibilitychange', onVisibilityChange)
     }
-  }, [refresh])
+  }, [refresh, poll])
 
   /** Nhận mức phí server trả về khi đơn bị từ chối vì giá vừa đổi. */
   const acceptServerFee = useCallback((fee: number) => {
