@@ -38,6 +38,8 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
       isOpen: false,
+      giftWrap: false,
+      giftMessage: '',
 
       addItem: (item) => {
         const id = `${item.productId}-${JSON.stringify(item.selectedOptions)}-${Date.now()}`
