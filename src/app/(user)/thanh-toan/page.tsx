@@ -331,6 +331,12 @@ export default function CheckoutPage() {
                 </div>
               </section>
 
+              {/* Gift wrap + handwritten letter */}
+              <section className="rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-5 shadow-card md:p-7">
+                <h2 className="mb-4 font-heading text-xl text-text">Gói quà &amp; thư tay</h2>
+                <GiftWrapOption showMessageField />
+              </section>
+
               {/* Payment method */}
               <section className="rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-5 shadow-card md:p-7">
                 <h2 className="mb-4 font-heading text-xl text-text">Phương thức thanh toán</h2>
