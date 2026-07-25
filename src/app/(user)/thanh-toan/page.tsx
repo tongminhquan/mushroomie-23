@@ -47,6 +47,8 @@ function formatVoucherDiscountLabel(voucher: AvailableVoucher) {
 
 export default function CheckoutPage() {
   const { items, getTotalPrice, clearCart } = useCartStore()
+  const giftWrap = useCartStore((state) => state.giftWrap)
+  const giftMessage = useCartStore((state) => state.giftMessage)
   const { data: session } = useSession()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
