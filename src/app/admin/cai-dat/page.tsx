@@ -1,8 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Button from '@/components/ui/Button'
-import { AlertCircle, CreditCard, Mail, Globe, Save, Loader2, Truck } from 'lucide-react'
+import { AlertCircle, CreditCard, Mail, Globe, Save, Loader2, Truck, Gift } from 'lucide-react'
 import ShippingFeeSettings from '@/components/admin/ShippingFeeSettings'
+import GiftWrapSettings from '@/components/admin/GiftWrapSettings'
 
 interface GeneralSettings {
   brand_name: string
