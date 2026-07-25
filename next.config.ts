@@ -6,6 +6,12 @@ const analyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })
 
+const isDevelopment = process.env.NODE_ENV === 'development'
+const serverActionOrigins = isDevelopment
+  ? ['localhost:3000', 'mushroomie.io.vn', '*.mushroomie.io.vn']
+  : ['mushroomie.io.vn', '*.mushroomie.io.vn']
+const developmentEvalSource = isDevelopment ? " 'unsafe-eval'" : ''
+
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || '.next',
   output: 'standalone',
@@ -34,7 +40,7 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', 'date-fns'],
     inlineCss: true,
-    serverActions: { allowedOrigins: ['localhost:3000', 'mushroomie.io.vn', '*.mushroomie.io.vn'] },
+    serverActions: { allowedOrigins: serverActionOrigins },
   },
   async redirects() {
     return [
@@ -88,7 +94,7 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://www.google.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.clarity.ms https://scripts.clarity.ms https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/",
+              `script-src 'self'${developmentEvalSource} 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://www.google.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.clarity.ms https://scripts.clarity.ms https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/`,
               "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://www.google.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.clarity.ms https://scripts.clarity.ms https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https:",

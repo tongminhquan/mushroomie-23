@@ -18,7 +18,7 @@ const maskEmail = (email: string) => {
 export async function GET() {
   try {
     const session = await auth()
-    if (!session || !['super_admin', 'admin', 'viewer'].includes((session.user as any).role)) {
+    if (!session || !['super_admin', 'admin', 'viewer'].includes(session.user.role as string)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -38,16 +38,16 @@ export async function GET() {
     }
 
     return NextResponse.json({ settings, env })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Lỗi khi lấy Settings:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
 
 export async function POST(req: Request) {
   try {
     const session = await auth()
-    if (!session || !['super_admin', 'admin'].includes((session.user as any).role)) {
+    if (!session || !['super_admin', 'admin'].includes(session.user.role as string)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -69,8 +69,8 @@ export async function POST(req: Request) {
     await prisma.$transaction(operations)
 
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Lỗi khi lưu Settings:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

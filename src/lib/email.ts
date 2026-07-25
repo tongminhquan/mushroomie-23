@@ -1,10 +1,12 @@
 import nodemailer from 'nodemailer'
+import { MAIL_TRANSPORT_SECURITY } from './mail-security'
 
 export function createTransporter() {
   const provider = process.env.EMAIL_PROVIDER || 'smtp'
 
   if (provider === 'resend') {
     return nodemailer.createTransport({
+      ...MAIL_TRANSPORT_SECURITY,
       host: 'smtp.resend.com',
       port: 465,
       secure: true,
@@ -16,6 +18,7 @@ export function createTransporter() {
   }
 
   return nodemailer.createTransport({
+    ...MAIL_TRANSPORT_SECURITY,
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: Number(process.env.SMTP_PORT) || 587,
     secure: Number(process.env.SMTP_PORT) === 465,

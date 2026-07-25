@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { parseAllowedQrUrl, readResponseBodyWithLimit } from '@/lib/qr-proxy'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -9,13 +10,9 @@ export async function GET(request: NextRequest) {
 
   let target: URL
   try {
-    target = new URL(url)
+    target = parseAllowedQrUrl(url)
   } catch {
     return new NextResponse('Invalid URL', { status: 400 })
-  }
-
-  if (target.protocol !== 'https:' || target.hostname !== 'img.vietqr.io') {
-    return new NextResponse('Unsupported QR host', { status: 400 })
   }
 
   const controller = new AbortController()
@@ -24,20 +21,28 @@ export async function GET(request: NextRequest) {
   try {
     const res = await fetch(target.toString(), {
       signal: controller.signal,
+      redirect: 'manual',
       headers: {
         Accept: 'image/png,image/*',
         'User-Agent': 'Mozilla/5.0 Mushroomie QR Proxy',
       },
     })
 
+    if (res.status >= 300 && res.status < 400) {
+      throw new Error('QR provider redirect rejected')
+    }
     if (!res.ok) throw new Error(`Failed to fetch QR: ${res.status}`)
     const contentType = res.headers.get('content-type') || 'image/png'
     if (!contentType.startsWith('image/')) {
       throw new Error(`QR provider returned ${contentType}`)
     }
 
-    const buffer = await res.arrayBuffer()
-    return new NextResponse(buffer, {
+    const buffer = await readResponseBodyWithLimit(res)
+    const body = buffer.buffer.slice(
+      buffer.byteOffset,
+      buffer.byteOffset + buffer.byteLength,
+    ) as ArrayBuffer
+    return new NextResponse(body, {
       headers: {
         'Content-Type': contentType,
         'Cache-Control': 'public, max-age=300, stale-while-revalidate=300',

@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma'
 import { normalizeUploadPurpose, optimizeUploadImage, type CropData } from '@/lib/image-processing'
 
 import { requireAdmin } from '@/lib/auth'
+import { getUploadErrorDetails } from '@/lib/upload-errors'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -46,9 +47,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Process image error:', error)
-    const message = error instanceof Error ? error.message : 'Process failed'
-    return NextResponse.json({ error: message }, { status: 500 })
+    const details = getUploadErrorDetails(error)
+    if (details.status === 500) console.error('Process image error:', error)
+    return NextResponse.json(
+      { error: details.status === 500 ? 'Process failed' : details.message },
+      { status: details.status },
+    )
   }
 }
 

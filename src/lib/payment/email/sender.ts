@@ -2,12 +2,14 @@ import nodemailer from 'nodemailer'
 import { prisma } from '@/lib/prisma'
 import { EmailTemplateKey, EMAIL_SUBJECTS } from '@/types'
 import { renderPaymentSuccessEmail, renderOrderStatusEmail } from './templates'
+import { MAIL_TRANSPORT_SECURITY } from '@/lib/mail-security'
 
 function createTransporter() {
   const provider = process.env.EMAIL_PROVIDER || 'smtp'
 
   if (provider === 'resend') {
     return nodemailer.createTransport({
+      ...MAIL_TRANSPORT_SECURITY,
       host: 'smtp.resend.com',
       port: 465,
       secure: true,
@@ -19,6 +21,7 @@ function createTransporter() {
   }
 
   return nodemailer.createTransport({
+    ...MAIL_TRANSPORT_SECURITY,
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: Number(process.env.SMTP_PORT) || 587,
     secure: Number(process.env.SMTP_PORT) === 465,

@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { checkRateLimit } from '@/lib/security'
 import bcrypt from 'bcryptjs'
+import {
+  getPasswordResetLookupTokens,
+  isValidPasswordResetToken,
+} from '@/lib/password-reset-token'
 
 export async function POST(req: Request) {
   try {
@@ -16,21 +20,30 @@ export async function POST(req: Request) {
 
     const { token, password } = await req.json()
 
+    if (!isValidPasswordResetToken(token)) {
+      return NextResponse.json(
+        { message: 'Đường dẫn không hợp lệ hoặc đã hết hạn.' },
+        { status: 400 },
+      )
+    }
+
     if (!token || !password) {
       return NextResponse.json({ message: 'Thiếu thông tin bắt buộc.' }, { status: 400 })
     }
 
-    if (typeof password !== 'string' || password.length < 8) {
+    if (typeof password !== 'string' || password.length < 8 || password.length > 128) {
       return NextResponse.json({ message: 'Mật khẩu phải có ít nhất 8 ký tự.' }, { status: 400 })
     }
 
+    const lookupTokens = getPasswordResetLookupTokens(token)
     const user = await prisma.user.findFirst({
       where: {
-        reset_token: token,
+        reset_token: { in: lookupTokens },
         reset_token_expires: {
           gt: new Date(), // Phải chưa hết hạn
         },
       },
+      select: { id: true },
     })
 
     if (!user) {
@@ -38,12 +51,16 @@ export async function POST(req: Request) {
     }
 
     // Mã hóa mật khẩu mới
-    const salt = await bcrypt.genSalt(10)
+    const salt = await bcrypt.genSalt(12)
     const hashedPassword = await bcrypt.hash(password, salt)
 
     // Cập nhật user và xóa token
-    await prisma.user.update({
-      where: { id: user.id },
+    const consumed = await prisma.user.updateMany({
+      where: {
+        id: user.id,
+        reset_token: { in: lookupTokens },
+        reset_token_expires: { gt: new Date() },
+      },
       data: {
         password_hash: hashedPassword,
         is_email_verified: true,
@@ -51,6 +68,13 @@ export async function POST(req: Request) {
         reset_token_expires: null,
       },
     })
+
+    if (consumed.count !== 1) {
+      return NextResponse.json(
+        { message: 'Đường dẫn không hợp lệ hoặc đã hết hạn.' },
+        { status: 400 },
+      )
+    }
 
     return NextResponse.json({ message: 'Đổi mật khẩu thành công.' }, { status: 200 })
   } catch (error) {

@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendPasswordResetEmail } from '@/lib/email'
 import { checkRateLimit } from '@/lib/security'
-import crypto from 'crypto'
+import {
+  createPasswordResetToken,
+  hashPasswordResetToken,
+} from '@/lib/password-reset-token'
 
 export async function POST(req: Request) {
   try {
@@ -32,13 +35,13 @@ export async function POST(req: Request) {
     }
 
     // Sinh token ngẫu nhiên
-    const resetToken = crypto.randomBytes(32).toString('hex')
+    const resetToken = createPasswordResetToken()
     const resetTokenExpires = new Date(Date.now() + 3600000) // Hết hạn sau 1 giờ
 
     await prisma.user.update({
       where: { email },
       data: {
-        reset_token: resetToken,
+        reset_token: hashPasswordResetToken(resetToken),
         reset_token_expires: resetTokenExpires,
       },
     })

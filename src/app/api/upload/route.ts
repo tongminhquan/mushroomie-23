@@ -1,10 +1,11 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { readdir, stat, unlink } from 'fs/promises'
 import { join } from 'path'
 import fs from 'fs'
 import { normalizeUploadPurpose, optimizeUploadImage } from '@/lib/image-processing'
 import { requireAdmin } from '@/lib/auth'
 import { rateLimiter } from '@/lib/rate-limit'
+import { getUploadErrorDetails } from '@/lib/upload-errors'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -42,20 +43,19 @@ export async function GET() {
     
     return NextResponse.json(images)
   } catch (error) {
-    console.error('Error reading upload dir:', error)
-    return NextResponse.json([])
+    const details = getUploadErrorDetails(error)
+    if (details.status === 500) console.error('Error reading upload dir:', error)
+    return NextResponse.json({ error: details.message }, { status: details.status })
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const req = request as any
-    if (await rateLimiter.isLimited(req, 30, 60000, 'upload_post')) {
-      return rateLimiter.getLimitResponse()
-    }
-    
     await requireAdmin()
 
+    if (await rateLimiter.isLimited(request, 30, 60000, 'upload_post')) {
+      return rateLimiter.getLimitResponse()
+    }
     const data = await request.formData()
     const file: File | null = data.get('file') as unknown as File
     const purpose = normalizeUploadPurpose(data.get('purpose'))
@@ -76,21 +76,19 @@ export async function POST(request: Request) {
 
     return NextResponse.json(optimized)
   } catch (error) {
-    console.error('Upload error:', error)
-    const message = error instanceof Error ? error.message : 'Upload failed'
-    return NextResponse.json({ error: message }, { status: 500 })
+    const details = getUploadErrorDetails(error)
+    if (details.status === 500) console.error('Upload error:', error)
+    return NextResponse.json({ error: details.message }, { status: details.status })
   }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
   try {
-    const req = request as any
-    if (await rateLimiter.isLimited(req, 10, 60000, 'upload_del')) {
-      return rateLimiter.getLimitResponse()
-    }
-
     await requireAdmin()
 
+    if (await rateLimiter.isLimited(request, 10, 60000, 'upload_del')) {
+      return rateLimiter.getLimitResponse()
+    }
     const url = new URL(request.url)
     const filename = url.searchParams.get('filename')
     
@@ -111,7 +109,11 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Delete error:', error)
-    return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
+    const details = getUploadErrorDetails(error)
+    if (details.status === 500) console.error('Delete error:', error)
+    return NextResponse.json(
+      { error: details.status === 500 ? 'Delete failed' : details.message },
+      { status: details.status },
+    )
   }
 }
