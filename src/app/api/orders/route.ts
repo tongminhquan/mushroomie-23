@@ -229,6 +229,12 @@ export async function POST(request: NextRequest) {
     if (error instanceof ShippingFeeChangedError) {
       return NextResponse.json(error.conflict, { status: 409 })
     }
+    if (error instanceof GiftWrapChangedError) {
+      return NextResponse.json(error.conflict, { status: 409 })
+    }
+    if (error instanceof GiftWrapUnavailableError) {
+      return NextResponse.json(error.conflict, { status: 409 })
+    }
     if (error instanceof Error && error.message === 'LOGIN_REQUIRED_FOR_VOUCHER') {
       return NextResponse.json({ error: 'Login required for voucher' }, { status: 401 })
     }
