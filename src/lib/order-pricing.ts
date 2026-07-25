@@ -96,8 +96,12 @@ export function calculateOrderTotal(
   shippingFee: number,
   itemDiscountAmount: number,
   shippingDiscountAmount: number,
+  /** Phí gói quà là dịch vụ nên KHÔNG bị voucher giảm — cộng sau cùng. */
+  giftWrapFee = 0,
 ) {
-  return Math.max(0, subtotal - itemDiscountAmount) + Math.max(0, shippingFee - shippingDiscountAmount)
+  return Math.max(0, subtotal - itemDiscountAmount)
+    + Math.max(0, shippingFee - shippingDiscountAmount)
+    + Math.max(0, giftWrapFee)
 }
 
 function parseAllowedOptionValues(value: string | null): string[] {
