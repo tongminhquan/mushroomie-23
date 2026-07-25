@@ -15,10 +15,16 @@ export interface CartItem {
 interface CartState {
   items: CartItem[]
   isOpen: boolean
+  /** Gói quà tính một lần cho cả đơn nên là state cấp giỏ hàng, không nằm trong từng item. */
+  giftWrap: boolean
+  /** Nội dung thư tay (miễn phí, đi kèm gói quà). */
+  giftMessage: string
   addItem: (item: Omit<CartItem, 'id'>) => void
   removeItem: (id: string) => void
   updateQuantity: (id: string, quantity: number) => void
   updateNote: (id: string, note: string) => void
+  setGiftWrap: (giftWrap: boolean) => void
+  setGiftMessage: (message: string) => void
   clearCart: () => void
   toggleCart: () => void
   openCart: () => void
