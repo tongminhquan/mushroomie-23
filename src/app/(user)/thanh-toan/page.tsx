@@ -105,7 +105,11 @@ export default function CheckoutPage() {
     ? shippingFee
     : 0
   const itemDiscount = selectedVoucher?.discountType === 'FREE_SHIPPING' ? 0 : voucherDiscount
-  const total = Math.max(0, subtotal - itemDiscount) + Math.max(0, shippingFee - shippingDiscount)
+  // Phí gói quà tính một lần cho cả đơn và không bị voucher giảm (khớp server).
+  const giftWrapFee = resolveGiftWrapFee(giftWrap, { enabled: giftWrapEnabled, fee: giftWrapUnitFee })
+  const total = Math.max(0, subtotal - itemDiscount)
+    + Math.max(0, shippingFee - shippingDiscount)
+    + giftWrapFee
 
   useEffect(() => {
     if (beginCheckoutTracked.current || items.length === 0 || subtotal <= 0) return
