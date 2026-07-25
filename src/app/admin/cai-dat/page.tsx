@@ -260,6 +260,8 @@ export default function SettingsPage() {
 
             {activeTab === 'shipping' && <ShippingFeeSettings />}
 
+            {activeTab === 'gift-wrap' && <GiftWrapSettings />}
+
           </div>
         </div>
       </div>
