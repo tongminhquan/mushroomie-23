@@ -118,6 +118,14 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
                 <span className="text-neutral-500">Phí vận chuyển</span>
                 <span className="text-neutral-900">{formatPrice(Number(order.shipping_fee))}</span>
               </div>
+              {order.gift_wrap && (
+                <div className="flex justify-between">
+                  <span className="text-neutral-500">🎁 Gói quà</span>
+                  <span className="text-neutral-900">
+                    {Number(order.gift_wrap_fee) === 0 ? 'Miễn phí' : formatPrice(Number(order.gift_wrap_fee))}
+                  </span>
+                </div>
+              )}
               {Number(order.voucher_discount_amount) > 0 && (
                 <div className="flex justify-between text-primary">
                   <span>Voucher {order.voucher_code ? `(${order.voucher_code})` : ''}</span>
