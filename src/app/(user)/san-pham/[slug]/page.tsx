@@ -340,6 +340,9 @@ export default async function ProductDetailPage({
               <AddToCartButton product={product} />
             </div>
 
+            {/* Gói quà áp dụng cho mọi sản phẩm; phí tính một lần cho cả đơn hàng. */}
+            <GiftWrapOption className="mt-4" />
+
             <div className="mt-4 flex items-start gap-3 rounded-[20px] border border-dashed border-[#d9b89e] bg-secondary p-4">
               <PackageCheck size={20} className="mt-0.5 shrink-0 text-primary" />
               <p className="m-0 text-[13px] leading-relaxed text-neutral-600">
