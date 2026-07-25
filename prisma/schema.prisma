@@ -328,6 +328,10 @@ model Order {
   voucher_id       String?
   voucher_code     String?
   voucher_discount_amount  Decimal @db.Decimal(12, 2) @default(0)
+  // Gói quà: tính một lần cho cả đơn, đã gồm viết thư tay miễn phí.
+  gift_wrap        Boolean   @default(false)
+  gift_wrap_fee    Decimal   @db.Decimal(12, 2) @default(0)
+  gift_message     String?   @db.Text
   total            Decimal   @db.Decimal(12, 2)
   payment_method   String    @default("bank_transfer")
   payment_status   String    @default("PENDING") // PENDING | PAID | FAILED | REFUNDED
