@@ -16,9 +16,30 @@ import {
   type ShippingFeeConflict,
 } from '@/lib/shipping-fee'
 import { getShippingFeeSnapshot } from '@/lib/shipping-fee-server'
+import {
+  createGiftWrapFeeConflict,
+  createGiftWrapUnavailable,
+  normalizeGiftMessage,
+  resolveGiftWrapFee,
+  type GiftWrapConflict,
+  type GiftWrapUnavailable,
+} from '@/lib/gift-wrap'
+import { getGiftWrapSnapshot } from '@/lib/gift-wrap-server'
 
 class ShippingFeeChangedError extends Error {
   constructor(readonly conflict: ShippingFeeConflict) {
+    super(conflict.code)
+  }
+}
+
+class GiftWrapChangedError extends Error {
+  constructor(readonly conflict: GiftWrapConflict) {
+    super(conflict.code)
+  }
+}
+
+class GiftWrapUnavailableError extends Error {
+  constructor(readonly conflict: GiftWrapUnavailable) {
     super(conflict.code)
   }
 }
