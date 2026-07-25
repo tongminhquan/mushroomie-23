@@ -70,6 +70,12 @@ export default function CheckoutPage() {
     dismissNotice: dismissShippingFeeNotice,
     acceptServerFee,
   } = useShippingFee()
+  const {
+    enabled: giftWrapEnabled,
+    fee: giftWrapUnitFee,
+    isReady: giftWrapReady,
+    acceptServerFee: acceptServerGiftWrapFee,
+  } = useGiftWrap()
 
   const user = session?.user as CheckoutUser | undefined
   const [form, setForm] = useState({
