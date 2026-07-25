@@ -146,7 +146,13 @@ export async function POST(request: NextRequest) {
         voucherDiscountAmount = discounts.voucherDiscountAmount
       }
 
-      const total = calculateOrderTotal(subtotal, shippingFee, itemDiscountAmount, shippingDiscountAmount)
+      const total = calculateOrderTotal(
+        subtotal,
+        shippingFee,
+        itemDiscountAmount,
+        shippingDiscountAmount,
+        giftWrapFee,
+      )
       const orderStatus = payment_method === 'cod' ? 'PROCESSING' : 'PENDING_PAYMENT'
 
       const createdOrder = await tx.order.create({
