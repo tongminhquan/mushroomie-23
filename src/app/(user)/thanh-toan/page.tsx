@@ -246,6 +246,19 @@ export default function CheckoutPage() {
         setError(orderData.message || 'Phí vận chuyển vừa được cập nhật. Vui lòng kiểm tra lại tổng tiền.')
         return
       }
+      if (
+        orderRes.status === 409 &&
+        orderData?.code === 'GIFT_WRAP_FEE_CHANGED' &&
+        typeof orderData.giftWrapFee === 'number'
+      ) {
+        acceptServerGiftWrapFee(orderData.giftWrapFee)
+        setError(orderData.message || 'Phí gói quà vừa được cập nhật. Vui lòng kiểm tra lại tổng tiền.')
+        return
+      }
+      if (orderRes.status === 409 && orderData?.code === 'GIFT_WRAP_UNAVAILABLE') {
+        setError(orderData.message || 'Dịch vụ gói quà tạm ngừng. Vui lòng bỏ chọn gói quà để tiếp tục.')
+        return
+      }
       if (!orderRes.ok) {
         throw new Error(typeof orderData?.error === 'string' ? orderData.error : 'Tạo đơn hàng thất bại')
       }
