@@ -138,6 +138,17 @@ export default function SettingsPage() {
           >
             <Truck size={18} /> Vận chuyển
           </button>
+          <button
+            onClick={() => setActiveTab('gift-wrap')}
+            aria-pressed={activeTab === 'gift-wrap'}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold border-[1.5px] ${
+              activeTab === 'gift-wrap'
+                ? 'bg-primary text-white border-primary shadow-card'
+                : 'bg-white text-neutral-600 border-[#f0e0d6] hover:border-primary hover:text-primary'
+            }`}
+          >
+            <Gift size={18} /> Gói quà
+          </button>
         </div>
 
         {/* Content */}
