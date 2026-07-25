@@ -92,6 +92,21 @@ export async function POST(request: NextRequest) {
       const shippingConflict = createShippingFeeConflict(expected_shipping_fee, shippingFee)
       if (shippingConflict) throw new ShippingFeeChangedError(shippingConflict)
 
+      // Phí gói quà lấy từ settings trong cùng transaction — không tin số client gửi lên.
+      const giftWrapSnapshot = await getGiftWrapSnapshot(tx)
+      const giftWrapUnavailable = createGiftWrapUnavailable(gift_wrap, giftWrapSnapshot)
+      if (giftWrapUnavailable) throw new GiftWrapUnavailableError(giftWrapUnavailable)
+
+      const giftWrapConflict = createGiftWrapFeeConflict(
+        gift_wrap,
+        expected_gift_wrap_fee,
+        giftWrapSnapshot.fee,
+      )
+      if (giftWrapConflict) throw new GiftWrapChangedError(giftWrapConflict)
+
+      const giftWrapFee = resolveGiftWrapFee(gift_wrap, giftWrapSnapshot)
+      const giftMessage = gift_wrap ? normalizeGiftMessage(gift_message) : null
+
       for (const [productId, quantity] of reservedQuantities) {
         const reserved = await tx.product.updateMany({
           where: { id: productId, status: 'active', stock: { gte: quantity } },
