@@ -220,6 +220,9 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           ...form,
           expected_shipping_fee: shippingFee,
+          gift_wrap: giftWrap,
+          gift_message: giftWrap ? giftMessage : undefined,
+          expected_gift_wrap_fee: giftWrapUnitFee,
           payment_method: paymentMethod,
           user_voucher_id: selectedVoucher?.id ?? null,
           items: items.map((item) => ({
