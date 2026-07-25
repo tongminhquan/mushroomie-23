@@ -77,7 +77,13 @@ export const useCartStore = create<CartState>()(
           items: state.items.map((i) => (i.id === id ? { ...i, customNote: note } : i)),
         })),
 
-      clearCart: () => set({ items: [] }),
+      setGiftWrap: (giftWrap) =>
+        // Bỏ gói quà thì xoá luôn thư tay để không gửi kèm nội dung thừa.
+        set(giftWrap ? { giftWrap: true } : { giftWrap: false, giftMessage: '' }),
+
+      setGiftMessage: (message) => set({ giftMessage: message }),
+
+      clearCart: () => set({ items: [], giftWrap: false, giftMessage: '' }),
 
       toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
       openCart: () => set({ isOpen: true }),
