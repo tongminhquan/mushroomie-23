@@ -22,7 +22,9 @@ export default function GiftWrapOption({ showMessageField = false, className = '
   const giftMessage = useCartStore((state) => state.giftMessage)
   const setGiftWrap = useCartStore((state) => state.setGiftWrap)
   const setGiftMessage = useCartStore((state) => state.setGiftMessage)
-  const { enabled, fee, isReady } = useGiftWrap()
+  // Chỉ trang thanh toán (có ô thư tay) cần theo dõi giá liên tục; trang sản phẩm
+  // lấy giá một lần để không tạo tải API từ mọi lượt xem hàng.
+  const { enabled, fee, isReady } = useGiftWrap({ poll: showMessageField })
 
   // Shop tắt dịch vụ giữa chừng: gỡ lựa chọn cũ để tổng tiền không lệch.
   useEffect(() => {
