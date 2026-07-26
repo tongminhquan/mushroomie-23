@@ -152,7 +152,7 @@ Expected visual checks:
 - Palette stays within the six approved brand colors.
 - The recognizable Mushroomie pixel mushroom and wordmark are present.
 - No unrelated logo, real price, voucher, promotion, watermark, broken-image icon or obvious pseudo-text block is visible.
-- The five required phrases are either correct or small enough that no incorrect prominent copy distracts from the design.
+- The six required phrases are either correct or small enough that no incorrect prominent copy distracts from the design.
 
 - [ ] **Step 2: Select or correct exactly one failing visual group**
 
