@@ -5,11 +5,26 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { formatPrice, getPublicImageUrl } from '@/lib/utils'
 import Button from '@/components/ui/Button'
+import { GiftWrapOptionContent } from '@/components/product/GiftWrapOption'
+import { useGiftWrap } from '@/hooks/useGiftWrap'
 
 export default function CartDrawer() {
-  const { items, isOpen, closeCart, removeItem, updateQuantity, getTotalPrice } = useCartStore()
+  const isOpen = useCartStore((state) => state.isOpen)
 
   if (!isOpen) return null
+
+  return <CartDrawerContent />
+}
+
+function CartDrawerContent() {
+  const { items, giftWrap, closeCart, removeItem, updateQuantity, getTotalPrice } = useCartStore()
+  const {
+    enabled: giftWrapEnabled,
+    fee: giftWrapUnitFee,
+    isReady: isGiftWrapReady,
+  } = useGiftWrap()
+  const giftWrapFee = giftWrap && giftWrapEnabled ? giftWrapUnitFee : 0
+  const estimatedTotal = getTotalPrice() + giftWrapFee
 
   return (
     <>
@@ -69,9 +84,26 @@ export default function CartDrawer() {
 
         {items.length > 0 && (
           <div className="space-y-3 border-t border-neutral-200 bg-white p-5">
+            <GiftWrapOptionContent
+              embedded
+              compact
+              enabled={giftWrapEnabled}
+              fee={giftWrapUnitFee}
+              isReady={isGiftWrapReady}
+            />
             <div className="flex items-center justify-between">
               <span className="text-neutral-500">Tạm tính</span>
               <span className="font-bold text-lg text-neutral-900">{formatPrice(getTotalPrice())}</span>
+            </div>
+            {giftWrap && giftWrapEnabled && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-neutral-500">Gói quà &amp; thư tay</span>
+                <span className="font-semibold text-neutral-900">{formatPrice(giftWrapFee)}</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between border-t border-dashed border-neutral-200 pt-3">
+              <span className="font-bold text-neutral-900">Tổng trước vận chuyển</span>
+              <span className="font-heading text-xl text-primary">{formatPrice(estimatedTotal)}</span>
             </div>
             <Link href="/thanh-toan" onClick={closeCart}>
               <Button className="w-full" size="lg">Tiến hành thanh toán</Button>

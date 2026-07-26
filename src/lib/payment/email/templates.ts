@@ -45,10 +45,42 @@ function formatMoney(amount: number | string | any): string {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(amount))
 }
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;')
+}
+
+interface GiftWrapEmailOrder {
+  gift_wrap?: boolean
+  gift_wrap_fee?: number | string | null
+  gift_message?: string | null
+}
+
+export function renderGiftWrapDetails(order: GiftWrapEmailOrder): string {
+  if (!order.gift_wrap) return ''
+
+  const message = typeof order.gift_message === 'string'
+    ? order.gift_message.trim()
+    : ''
+
+  return `
+    <div class="info-box" style="background:#fff7f2;border:1px solid #f2c5b9">
+      <div class="info-row">
+        <span>Gói quà &amp; thư tay</span>
+        <strong>${Number(order.gift_wrap_fee) === 0 ? 'Miễn phí' : formatMoney(order.gift_wrap_fee)}</strong>
+      </div>
+      ${message ? `<p style="font-size:13px;line-height:1.6;color:#4b5563;margin-top:10px"><strong>Lời nhắn:</strong> ${escapeHtml(message)}</p>` : ''}
+    </div>`
+}
+
 export function renderPaymentSuccessEmail(order: any): string {
   const itemsHtml = order.items.map((item: any) => `
     <div class="product-item">
-      <div class="name">${item.product_name} x${item.quantity}</div>
+      <div class="name">${escapeHtml(item.product_name)} x${item.quantity}</div>
       <div>${formatMoney(item.total_price)}</div>
     </div>`).join('')
 
@@ -59,7 +91,7 @@ export function renderPaymentSuccessEmail(order: any): string {
     </div>
     <div class="body">
       <span class="badge">✅ Thanh toán thành công</span>
-      <h2>Xin chào ${order.customer_name}!</h2>
+      <h2>Xin chào ${escapeHtml(order.customer_name)}!</h2>
       <p style="font-size:14px;color:#6B7280;margin-bottom:16px">Mushroomie đã nhận được thanh toán của bạn. Chúng mình sẽ bắt đầu làm sản phẩm ngay nha! 💛</p>
       <div class="info-box">
         <div class="info-row"><span>Mã đơn hàng</span><strong>#${order.order_code}</strong></div>
@@ -68,9 +100,11 @@ export function renderPaymentSuccessEmail(order: any): string {
       </div>
       <h3 style="margin:16px 0 8px;font-size:16px">Sản phẩm đã đặt</h3>
       ${itemsHtml}
+      ${renderGiftWrapDetails(order)}
       <div class="info-box" style="margin-top:12px">
         <div class="info-row"><span>Tạm tính</span><span>${formatMoney(order.subtotal)}</span></div>
         <div class="info-row"><span>Phí vận chuyển</span><span>${formatMoney(order.shipping_fee)}</span></div>
+        ${order.gift_wrap ? `<div class="info-row"><span>Phí gói quà</span><span>${formatMoney(order.gift_wrap_fee)}</span></div>` : ''}
         <div class="info-row"><span>Tổng cộng</span><span>${formatMoney(order.total)}</span></div>
       </div>
       <a href="${getOrderDetailUrl(order)}" class="btn">Xem chi tiết đơn hàng →</a>
@@ -97,12 +131,13 @@ export function renderOrderStatusEmail(order: any, templateKey: EmailTemplateKey
     </div>
     <div class="body">
       <span class="badge">${msg.emoji} ${msg.title}</span>
-      <h2>Xin chào ${order.customer_name}!</h2>
+      <h2>Xin chào ${escapeHtml(order.customer_name)}!</h2>
       <p style="font-size:14px;color:#6B7280;margin-bottom:16px">${msg.body}</p>
       <div class="info-box">
         <div class="info-row"><span>Mã đơn hàng</span><strong>#${order.order_code}</strong></div>
         <div class="info-row"><span>Trạng thái</span><span>${ORDER_STATUS_LABELS[order.order_status as keyof typeof ORDER_STATUS_LABELS] || order.order_status}</span></div>
       </div>
+      ${renderGiftWrapDetails(order)}
       <a href="${getOrderDetailUrl(order)}" class="btn">Theo dõi đơn hàng →</a>
     </div>
     <div class="footer">Mushroomie — Phụ kiện Handmade Cá nhân hóa 🍄</div>

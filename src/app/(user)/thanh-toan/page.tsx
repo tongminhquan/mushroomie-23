@@ -16,7 +16,8 @@ import { trackAnalyticsEvent, trackAnalyticsEventOnce } from '@/lib/analytics'
 import { GOOGLE_ADS_PURCHASE_SEND_TO } from '@/lib/google-tags'
 import { useShippingFee } from '@/hooks/useShippingFee'
 import { useGiftWrap } from '@/hooks/useGiftWrap'
-import GiftWrapOption from '@/components/product/GiftWrapOption'
+import { GiftWrapOptionContent } from '@/components/product/GiftWrapOption'
+import GiftWrapFeeNotice from '@/components/checkout/GiftWrapFeeNotice'
 import { resolveGiftWrapFee } from '@/lib/gift-wrap'
 
 interface CheckoutUser {
@@ -74,6 +75,8 @@ export default function CheckoutPage() {
     enabled: giftWrapEnabled,
     fee: giftWrapUnitFee,
     isReady: giftWrapReady,
+    notice: giftWrapNotice,
+    dismissNotice: dismissGiftWrapNotice,
     acceptServerFee: acceptServerGiftWrapFee,
   } = useGiftWrap()
 
@@ -334,7 +337,21 @@ export default function CheckoutPage() {
               {/* Gift wrap + handwritten letter */}
               <section className="rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-5 shadow-card md:p-7">
                 <h2 className="mb-4 font-heading text-xl text-text">Gói quà &amp; thư tay</h2>
-                <GiftWrapOption showMessageField />
+                {giftWrapNotice && (
+                  <div className="mb-4">
+                    <GiftWrapFeeNotice
+                      notice={giftWrapNotice}
+                      onDismiss={dismissGiftWrapNotice}
+                    />
+                  </div>
+                )}
+                <GiftWrapOptionContent
+                  showMessageField
+                  embedded
+                  enabled={giftWrapEnabled}
+                  fee={giftWrapUnitFee}
+                  isReady={giftWrapReady}
+                />
               </section>
 
               {/* Payment method */}

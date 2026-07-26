@@ -1,5 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import {
   DEFAULT_GIFT_WRAP_FEE,
   MAX_GIFT_MESSAGE_LENGTH,
@@ -11,6 +13,7 @@ import {
   resolveGiftWrapFee,
 } from '../src/lib/gift-wrap'
 import { calculateOrderTotal } from '../src/lib/order-pricing'
+import { renderGiftWrapDetails } from '../src/lib/payment/email/templates'
 
 test('chỉ thu phí gói quà khi khách chọn VÀ dịch vụ đang mở', () => {
   const snapshot = { enabled: true, fee: 15_000 }
@@ -86,4 +89,65 @@ test('thư tay: cắt khoảng trắng, rỗng thành null, giới hạn độ d
   assert.equal(normalizeGiftMessage(undefined), null)
   assert.equal(normalizeGiftMessage(123), null)
   assert.equal(normalizeGiftMessage('a'.repeat(900))?.length, MAX_GIFT_MESSAGE_LENGTH)
+})
+
+const source = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
+
+test('trang giỏ hàng và cart drawer cùng cho phép chọn gói quà và tính phí vào tổng dự kiến', () => {
+  const cartPage = source('src/app/(user)/gio-hang/page.tsx')
+  const cartDrawer = source('src/components/cart/CartDrawer.tsx')
+
+  for (const cartSurface of [cartPage, cartDrawer]) {
+    assert.match(cartSurface, /GiftWrapOption/)
+    assert.match(cartSurface, /useGiftWrap/)
+    assert.match(cartSurface, /giftWrapFee/)
+  }
+
+  assert.match(cartPage, /estimatedTotal\s*=\s*subtotal\s*\+\s*shippingFee\s*\+\s*giftWrapFee/)
+  assert.match(cartDrawer, /estimatedTotal\s*=\s*getTotalPrice\(\)\s*\+\s*giftWrapFee/)
+})
+
+test('gói quà dùng id truy cập duy nhất khi nhiều bề mặt cùng được render', () => {
+  const option = source('src/components/product/GiftWrapOption.tsx')
+
+  assert.match(option, /useId/)
+  assert.doesNotMatch(option, /aria-describedby="gift-wrap-desc"/)
+  assert.doesNotMatch(option, /id="gift-message"/)
+})
+
+test('khách hàng nhìn thấy gói quà và thư tay trong chi tiết đơn lẫn email xác nhận', () => {
+  const customerOrder = source('src/app/(user)/tai-khoan/don-hang/[code]/page.tsx')
+  const emailTemplate = source('src/lib/payment/email/templates.ts')
+
+  for (const confirmationSurface of [customerOrder, emailTemplate]) {
+    assert.match(confirmationSurface, /gift_wrap/)
+    assert.match(confirmationSurface, /gift_wrap_fee/)
+    assert.match(confirmationSurface, /gift_message/)
+  }
+
+  assert.match(emailTemplate, /escapeHtml/)
+})
+
+test('email gói quà escape nội dung thư tay do khách nhập', () => {
+  const html = renderGiftWrapDetails({
+    gift_wrap: true,
+    gift_wrap_fee: 15_000,
+    gift_message: '<img src=x onerror=alert(1)>',
+  })
+
+  assert.doesNotMatch(html, /<img/)
+  assert.match(html, /&lt;img src=x onerror=alert\(1\)&gt;/)
+})
+
+test('deploy tạo Prisma Client trước typecheck và chỉ đồng bộ DB sau tests', () => {
+  const deploy = source('deploy.sh')
+  const generateIndex = deploy.indexOf('npm exec prisma generate')
+  const typecheckIndex = deploy.indexOf('npm run typecheck')
+  const testIndex = deploy.indexOf('npm test')
+  const dbPushIndex = deploy.indexOf('npm exec prisma db push')
+
+  assert.ok(generateIndex > -1)
+  assert.ok(generateIndex < typecheckIndex)
+  assert.ok(typecheckIndex < testIndex)
+  assert.ok(testIndex < dbPushIndex)
 })

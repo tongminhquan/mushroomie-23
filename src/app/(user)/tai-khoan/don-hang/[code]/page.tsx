@@ -9,6 +9,7 @@ import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 import ReviewOrderModal from '@/components/account/ReviewOrderModal'
 import type { Metadata } from 'next'
 import { verifyOrderAccessToken } from '@/lib/order-access'
+import { Gift, PenLine } from 'lucide-react'
 
 export const metadata: Metadata = { title: 'Chi tiết đơn hàng | Mushroomie' }
 
@@ -148,6 +149,36 @@ export default async function OrderDetailsPage({ params, searchParams }: { param
                 )}
               </div>
             </AnimateOnScroll>
+
+            {order.gift_wrap && (
+              <AnimateOnScroll animation="fade-up" className="rounded-2xl border border-[#f2c5b9] bg-[#fffaf7] p-6 shadow-card">
+                <div className="flex items-center justify-between gap-4">
+                  <h2 className="flex items-center gap-2 font-heading text-lg font-bold text-neutral-900">
+                    <Gift size={19} className="text-primary" aria-hidden />
+                    Gói quà tặng
+                  </h2>
+                  <span className="font-bold text-primary">
+                    {Number(order.gift_wrap_fee) === 0
+                      ? 'Miễn phí'
+                      : formatPrice(Number(order.gift_wrap_fee))}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-neutral-600">
+                  Đơn hàng được đóng gói quà handmade kèm nơ và thiệp viết tay.
+                </p>
+                {order.gift_message && (
+                  <div className="mt-4 rounded-xl border border-[#f0e0d6] bg-white p-4">
+                    <p className="flex items-center gap-2 text-xs font-bold uppercase text-neutral-500">
+                      <PenLine size={15} className="text-primary" aria-hidden />
+                      Lời nhắn thư tay
+                    </p>
+                    <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-neutral-800">
+                      {order.gift_message}
+                    </p>
+                  </div>
+                )}
+              </AnimateOnScroll>
+            )}
           </div>
 
           <div className="space-y-6">
@@ -162,6 +193,16 @@ export default async function OrderDetailsPage({ params, searchParams }: { param
                   <span className="text-neutral-500">Phí vận chuyển</span>
                   <span>{formatPrice(Number(order.shipping_fee))}</span>
                 </div>
+                {order.gift_wrap && (
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">Gói quà &amp; thư tay</span>
+                    <span>
+                      {Number(order.gift_wrap_fee) === 0
+                        ? 'Miễn phí'
+                        : formatPrice(Number(order.gift_wrap_fee))}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between border-t border-neutral-100 pt-3 font-bold text-base">
                   <span>Tổng tiền</span>
                   <span className="text-primary text-xl">{formatPrice(Number(order.total))}</span>

@@ -9,16 +9,27 @@ import { useCartStore } from '@/store/cart'
 import CheckoutStepper from '@/components/checkout/CheckoutStepper'
 import ShippingFeeNotice from '@/components/checkout/ShippingFeeNotice'
 import { useShippingFee } from '@/hooks/useShippingFee'
+import { GiftWrapOptionContent } from '@/components/product/GiftWrapOption'
+import GiftWrapFeeNotice from '@/components/checkout/GiftWrapFeeNotice'
+import { useGiftWrap } from '@/hooks/useGiftWrap'
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, getTotalPrice } = useCartStore()
+  const { items, giftWrap, removeItem, updateQuantity, getTotalPrice } = useCartStore()
   const {
     shippingFee,
     notice: shippingFeeNotice,
     dismissNotice: dismissShippingFeeNotice,
   } = useShippingFee()
+  const {
+    enabled: giftWrapEnabled,
+    fee: giftWrapUnitFee,
+    isReady: isGiftWrapReady,
+    notice: giftWrapNotice,
+    dismissNotice: dismissGiftWrapNotice,
+  } = useGiftWrap()
   const subtotal = getTotalPrice()
-  const estimatedTotal = subtotal + shippingFee
+  const giftWrapFee = giftWrap && giftWrapEnabled ? giftWrapUnitFee : 0
+  const estimatedTotal = subtotal + shippingFee + giftWrapFee
 
   return (
     <div className="min-h-screen bg-secondary py-8 md:py-12">
@@ -121,6 +132,14 @@ export default function CartPage() {
                   </li>
                 ))}
               </ul>
+              <div className="mt-6 border-t border-dashed pt-5" style={{ borderColor: '#e2d3c8' }}>
+                <GiftWrapOptionContent
+                  embedded
+                  enabled={giftWrapEnabled}
+                  fee={giftWrapUnitFee}
+                  isReady={isGiftWrapReady}
+                />
+              </div>
             </section>
 
             <aside
@@ -139,6 +158,14 @@ export default function CartPage() {
                   />
                 </div>
               )}
+              {giftWrapNotice && (
+                <div className="mb-4">
+                  <GiftWrapFeeNotice
+                    notice={giftWrapNotice}
+                    onDismiss={dismissGiftWrapNotice}
+                  />
+                </div>
+              )}
               <div className="space-y-3 border-t border-dashed pt-4" style={{ borderColor: '#e2d3c8' }}>
                 <div className="flex justify-between text-sm">
                   <span className="text-neutral-500">Số sản phẩm</span>
@@ -152,6 +179,12 @@ export default function CartPage() {
                   <span className="text-neutral-500">Phí vận chuyển dự kiến</span>
                   <span className="font-semibold">{formatPrice(shippingFee)}</span>
                 </div>
+                {giftWrap && giftWrapEnabled && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-neutral-500">Gói quà &amp; thư tay</span>
+                    <span className="font-semibold">{formatPrice(giftWrapFee)}</span>
+                  </div>
+                )}
                 <div className="flex items-baseline justify-between border-t border-dashed pt-3 text-sm" style={{ borderColor: '#e2d3c8' }}>
                   <span className="font-bold text-text">Tổng dự kiến</span>
                   <span className="font-heading text-2xl text-primary">{formatPrice(estimatedTotal)}</span>
