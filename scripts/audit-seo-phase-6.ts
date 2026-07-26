@@ -4,7 +4,11 @@ import { promises as dns } from 'node:dns'
 import fs from 'node:fs'
 import path from 'node:path'
 import { parseCsv } from '../src/lib/bulk-import'
-import { GOOGLE_ADS_ID, GOOGLE_ANALYTICS_ID } from '../src/lib/google-tags'
+import {
+  GOOGLE_ADS_ID,
+  GOOGLE_ANALYTICS_ID,
+  GOOGLE_TAG_MANAGER_ID,
+} from '../src/lib/google-tags'
 import type { SeoPhase4KeywordRow } from '../src/lib/seo-phase-4'
 import {
   buildSeoPhase6KeywordBaseline,
@@ -120,10 +124,10 @@ Generated: ${input.generatedAt}
 
 ## Bằng chứng đã xác minh công khai
 
-- Production JavaScript bundle chứa GA4 \`${GOOGLE_ANALYTICS_ID}\` và Google Ads
-  \`${GOOGLE_ADS_ID}\` trên cùng một Google tag.
-- Clarity được nạp trực tiếp sau tương tác hoặc sau thời gian chờ; không còn nạp
-  thêm một GTM container chỉ để khởi tạo Clarity.
+- Production JavaScript bundle chứa GTM \`${GOOGLE_TAG_MANAGER_ID}\`; container
+  quản lý GA4 \`${GOOGLE_ANALYTICS_ID}\`, Google Ads \`${GOOGLE_ADS_ID}\` và Clarity.
+- Website chỉ nạp một GTM container; không nạp thêm gtag.js hoặc Clarity trực tiếp,
+  tránh ghi nhận trùng page view và conversion.
 - \`https://mushroomie.io.vn/sitemap.xml\` truy cập được và robots.txt trỏ tới
   sitemap này.
 - DNS TXT có token \`google-site-verification\`. Token này không chứng minh phiên
@@ -222,8 +226,10 @@ async function main() {
       health: health.check,
     },
     tags: {
+      googleTagManagerId: GOOGLE_TAG_MANAGER_ID,
       googleAnalyticsId: GOOGLE_ANALYTICS_ID,
       googleAdsId: GOOGLE_ADS_ID,
+      productionBundleHasGtm: productionJavaScript.includes(GOOGLE_TAG_MANAGER_ID),
       productionBundleHasGa4: productionJavaScript.includes(GOOGLE_ANALYTICS_ID),
       productionBundleHasGoogleAds: productionJavaScript.includes(GOOGLE_ADS_ID),
     },

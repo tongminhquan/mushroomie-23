@@ -6,20 +6,18 @@ import {
   GOOGLE_ADS_PURCHASE_LABEL,
   GOOGLE_ADS_PURCHASE_SEND_TO,
   GOOGLE_ANALYTICS_ID,
-  configureGoogleTags,
+  GOOGLE_TAG_MANAGER_ID,
+  createGoogleTagManagerBootstrap,
 } from '../src/lib/google-tags'
 
-test('Google tag configures GA4 and Google Ads from one shared data layer', () => {
-  const calls: unknown[][] = []
-  const initializedAt = new Date('2026-07-14T00:00:00.000Z')
+test('Google Tag Manager is the single loader for GA4 and Google Ads', () => {
+  const startedAt = Date.parse('2026-07-14T00:00:00.000Z')
 
-  configureGoogleTags((...args) => calls.push(args), initializedAt)
-
-  assert.deepEqual(calls, [
-    ['js', initializedAt],
-    ['config', GOOGLE_ANALYTICS_ID],
-    ['config', GOOGLE_ADS_ID],
-  ])
+  assert.deepEqual(createGoogleTagManagerBootstrap(startedAt), {
+    'gtm.start': startedAt,
+    event: 'gtm.js',
+  })
+  assert.equal(GOOGLE_TAG_MANAGER_ID, 'GTM-K55B6RVG')
   assert.equal(GOOGLE_ANALYTICS_ID, 'G-R95TLDCP0W')
   assert.equal(GOOGLE_ADS_ID, 'AW-18206718336')
 })

@@ -9,9 +9,10 @@ const publicLayoutSource = readFileSync(
   'utf8',
 )
 
-test('public layout loads Clarity directly without the redundant GTM container', () => {
-  assert.match(publicLayoutSource, /<ClarityInit\s*\/>/)
-  assert.doesNotMatch(publicLayoutSource, /GtmInit/)
+test('public layout uses GTM as the single analytics and marketing tag loader', () => {
+  assert.match(publicLayoutSource, /<GoogleTagManagerInit\s*\/>/)
+  assert.doesNotMatch(publicLayoutSource, /<ClarityInit\s*\/>/)
+  assert.doesNotMatch(publicLayoutSource, /<GoogleAnalyticsInit\s*\/>/)
 })
 
 test('third-party fallback waits for the minimum delay before requesting idle time', () => {

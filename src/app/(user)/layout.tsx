@@ -1,8 +1,7 @@
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import MobileBottomNav from '@/components/layout/MobileBottomNav'
-import ClarityInit from '@/components/analytics/ClarityInit'
-import GoogleAnalyticsInit from '@/components/analytics/GoogleAnalyticsInit'
+import GoogleTagManagerInit from '@/components/analytics/GoogleTagManagerInit'
 import DeferredPublicWidgets from '@/components/layout/DeferredPublicWidgets'
 import PublicProviders from '@/components/layout/PublicProviders'
 import { prisma } from '@/lib/prisma'
@@ -27,8 +26,7 @@ export default async function UserLayout({ children }: { children: React.ReactNo
         <Footer categories={categories.slice(0, 5)} />
         <MobileBottomNav />
         <DeferredPublicWidgets />
-        <ClarityInit />
-        <GoogleAnalyticsInit />
+        <GoogleTagManagerInit />
     </PublicProviders>
   )
 }
