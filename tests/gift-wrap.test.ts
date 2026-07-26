@@ -105,6 +105,8 @@ test('trang giỏ hàng và cart drawer cùng cho phép chọn gói quà và tí
 
   assert.match(cartPage, /estimatedTotal\s*=\s*subtotal\s*\+\s*shippingFee\s*\+\s*giftWrapFee/)
   assert.match(cartDrawer, /estimatedTotal\s*=\s*getTotalPrice\(\)\s*\+\s*giftWrapFee/)
+  assert.match(cartPage, /className="grid min-w-0 gap-6/)
+  assert.equal((cartPage.match(/className="min-w-0[^"]*rounded-\[22px\][^"]*"/g) ?? []).length, 2)
 })
 
 test('gói quà dùng id truy cập duy nhất khi nhiều bề mặt cùng được render', () => {

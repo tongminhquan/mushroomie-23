@@ -54,9 +54,9 @@ export default function CartPage() {
             </Link>
           </section>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+          <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
             <section
-              className="rounded-[22px] border-[1.5px] bg-white p-5 shadow-card md:p-6"
+              className="min-w-0 rounded-[22px] border-[1.5px] bg-white p-5 shadow-card md:p-6"
               style={{ borderColor: '#f0e0d6' }}
             >
               <div className="mb-4 flex items-center gap-2">
@@ -143,7 +143,7 @@ export default function CartPage() {
             </section>
 
             <aside
-              className="h-fit rounded-[22px] border-[1.5px] bg-white p-5 shadow-card"
+              className="min-w-0 h-fit rounded-[22px] border-[1.5px] bg-white p-5 shadow-card"
               style={{ borderColor: '#f0e0d6' }}
             >
               <div className="mb-4 flex items-center gap-2">
