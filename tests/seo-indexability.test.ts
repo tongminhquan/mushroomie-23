@@ -35,6 +35,23 @@ test('canonical host redirects are permanent and preserve the requested path', a
   })
 })
 
+test('legacy Search Console 404 URLs permanently redirect to canonical pages', async () => {
+  assert.equal(typeof nextConfig.redirects, 'function')
+
+  const redirects = await nextConfig.redirects!()
+
+  assert.ok(redirects.some((redirect) => (
+    redirect.source === '/category/chua-phan-loai'
+    && redirect.destination === '/tin-tuc'
+    && redirect.permanent === true
+  )))
+  assert.ok(redirects.some((redirect) => (
+    redirect.source === '/tin-tuc/https\\:/mushroomie.io.vn/vong-tay-handmade-nu'
+    && redirect.destination === '/tin-tuc/vong-tay-handmade-nu'
+    && redirect.permanent === true
+  )))
+})
+
 test('utility pages expose noindex metadata to crawlers', () => {
   for (const metadata of [accountMetadata, cartMetadata, checkoutMetadata]) {
     assert.equal(metadata.robots && typeof metadata.robots === 'object' && metadata.robots.index, false)

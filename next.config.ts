@@ -45,6 +45,16 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: '/category/chua-phan-loai',
+        destination: '/tin-tuc',
+        permanent: true,
+      },
+      {
+        source: '/tin-tuc/https\\:/mushroomie.io.vn/vong-tay-handmade-nu',
+        destination: '/tin-tuc/vong-tay-handmade-nu',
+        permanent: true,
+      },
+      {
         source: '/:path*',
         has: [{ type: 'host', value: 'www.mushroomie.io.vn' }],
         destination: 'https://mushroomie.io.vn/:path*',
