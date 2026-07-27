@@ -197,11 +197,13 @@ export default async function PostDetailPage({
     : { status: 'published', id: { not: post.id } }
 
   const [relatedPosts, productCandidates, coverImage, structuredImage, articleHtml] = await Promise.all([
+    // Lấy pool rộng rồi mới chọn 6 bài — xem pickRelatedPosts() để biết vì sao không
+    // dùng thẳng "6 bài mới nhất".
     prisma.post
       .findMany({
         where: relatedWhere,
         include: { category: true },
-        take: 3,
+        take: 60,
         orderBy: { published_at: 'desc' },
       })
       .catch(() => []),
