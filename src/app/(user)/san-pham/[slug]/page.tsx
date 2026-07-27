@@ -20,6 +20,7 @@ import { safeJsonLd } from '@/lib/security'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { toAbsoluteUrl } from '@/lib/url'
 import { geoImageGraph } from '@/lib/geo-image-schema'
+import { brandEntityRef } from '@/lib/local-seo'
 import {
   merchantReturnPolicySchema,
   offerShippingDetailsSchema,
