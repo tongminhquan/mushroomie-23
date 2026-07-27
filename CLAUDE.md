@@ -12,7 +12,7 @@ Mushroomie là website thương mại điện tử B2C bán phụ kiện handmad
 
 Production:
 - Domain: https://mushroomie.io.vn
-- Server: VM này (localhost) — deploy bằng `bash /var/www/mushroomie/deploy.sh`. IP cũ 103.173.226.86 đã ngừng dùng.
+- Server: 103.77.242.153 — deploy bằng `bash /var/www/mushroomie/deploy.sh`. IP cũ 103.173.226.86 đã ngừng dùng.
 - Path: /var/www/mushroomie
 - Runtime: PM2 (standalone mode)
 - PM2 process: mushroomie_pm2

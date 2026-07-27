@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { sendOrderEmail } from '@/lib/payment/email/sender'
 import { EmailTemplateKey } from '@/types'
 import { logAdminAction } from '@/lib/admin-logger'
+import { resolveOrderDeletionPolicy } from '@/lib/order-deletion'
 import { verifyOrderAccessToken } from '@/lib/order-access'
 import { checkRateLimit } from '@/lib/security'
 import { z } from 'zod'
@@ -194,13 +195,14 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
  *
  * Đây là thao tác không hoàn tác được trên hồ sơ kinh doanh, nên có mấy ràng buộc:
  *
- * 1. `Payment` là quan hệ DUY NHẤT trỏ tới Order mà không khai báo `onDelete`, tức
+ * 1. `Payment` trỏ tới Order mà không khai báo `onDelete`, tức
  *    mặc định `Restrict`. `prisma.order.delete()` sẽ ném lỗi khoá ngoại với bất kỳ đơn
- *    nào từng qua thanh toán, nên phải xoá bản ghi Payment trong cùng transaction.
+ *    nào có bản ghi thanh toán, nên phải xoá Payment trong cùng transaction. Webhook audit
+ *    được giữ lại và chỉ gỡ `payment_id`.
  *    (OrderItem và OrderStatusHistory có Cascade; EmailLog và UserVoucher là SetNull.)
  *
- * 2. Nếu đơn đang giữ tồn kho (`inventory_reserved_at`), phải cộng trả số lượng về
- *    sản phẩm — xoá thẳng sẽ làm kho hụt vĩnh viễn mà không ai biết.
+ * 2. Chỉ đơn chưa giao còn giữ tồn kho mới được cộng trả số lượng. Đơn đã thanh toán,
+ *    đang giao hoặc hoàn tất bị chặn xoá vĩnh viễn.
  *
  * 3. Voucher đã dùng cho đơn được trả lại trạng thái AVAILABLE, giống hệt luồng huỷ đơn
  *    trong cancelOrderAndReleaseInventory().
@@ -242,6 +244,20 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: 'Không tìm thấy đơn hàng' }, { status: 404 })
     }
 
+    const deletionPolicy = resolveOrderDeletionPolicy({
+      paymentStatus: order.payment_status,
+      orderStatus: order.order_status,
+      inventoryReserved: Boolean(order.inventory_reserved_at),
+    })
+    if (!deletionPolicy.canDelete) {
+      return NextResponse.json({ error: deletionPolicy.reason }, { status: 409 })
+    }
+
+    const adminUserId = Number((session.user as { id?: string | number }).id)
+    if (!Number.isInteger(adminUserId) || adminUserId <= 0) {
+      return NextResponse.json({ error: 'Phiên quản trị không hợp lệ' }, { status: 401 })
+    }
+
     // Ảnh chụp trước khi xoá — sau transaction thì không còn gì để đọc.
     const snapshot = {
       order_code: order.order_code,
@@ -258,12 +274,22 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
         price_snapshot: item.price_snapshot.toString(),
         total_price: item.total_price.toString(),
       })),
-      restored_stock: Boolean(order.inventory_reserved_at),
+      restored_stock: deletionPolicy.shouldRestoreInventory,
     }
 
     await prisma.$transaction(async (tx) => {
+      // Audit và thao tác xoá phải cùng thành công hoặc cùng rollback.
+      await tx.adminLog.create({
+        data: {
+          user_id: adminUserId,
+          action: 'DELETE',
+          entity: 'ORDER',
+          details: JSON.stringify(snapshot),
+        },
+      })
+
       // Trả tồn kho nếu đơn đang giữ chỗ.
-      if (order.inventory_reserved_at) {
+      if (deletionPolicy.shouldRestoreInventory) {
         for (const item of order.items) {
           if (!item.product_id) continue
           await tx.product.update({
@@ -281,17 +307,15 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
       // Payment không Cascade — phải xoá tay, nếu không khoá ngoại chặn.
       if (order.payment) {
+        // Giữ webhook làm chứng từ đối soát, chỉ gỡ liên kết tới payment sắp xoá.
+        await tx.paymentWebhookEvent.updateMany({
+          where: { payment_id: order.payment.id },
+          data: { payment_id: null },
+        })
         await tx.payment.delete({ where: { order_id: orderId } })
       }
 
       await tx.order.delete({ where: { id: orderId } })
-    })
-
-    await logAdminAction({
-      userId: Number((session.user as { id?: string | number }).id),
-      action: 'DELETE',
-      entity: 'ORDER',
-      details: snapshot,
     })
 
     return NextResponse.json({ success: true, order_code: order.order_code })

@@ -12,6 +12,8 @@ const payloadSchema = z.object({
   rating: z.number().int().min(1).max(5),
 })
 
+class ReviewAlreadySubmittedError extends Error {}
+
 /**
  * Nhận đánh giá từ link trong email, không cần đăng nhập.
  *
@@ -59,10 +61,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Không tìm thấy sản phẩm trong đơn hàng' }, { status: 400 })
     }
 
-    // Ghi review và đánh dấu đơn trong cùng transaction — tránh trường hợp double-submit
-    // tạo hai bộ review cho cùng một đơn.
-    await prisma.$transaction([
-      prisma.review.createMany({
+    // Claim đơn bằng UPDATE có điều kiện. Hai request đồng thời không thể cùng
+    // chuyển is_reviewed từ false sang true, nên chỉ một request được tạo review.
+    await prisma.$transaction(async (tx) => {
+      const claim = await tx.order.updateMany({
+        where: { id: order.id, is_reviewed: false },
+        data: { is_reviewed: true },
+      })
+      if (claim.count !== 1) {
+        throw new ReviewAlreadySubmittedError()
+      }
+
+      await tx.review.createMany({
         data: productIds.map((productId) => ({
           name: order.customer_name,
           content: parsed.data.content,
@@ -70,12 +80,14 @@ export async function POST(request: NextRequest) {
           product_id: productId,
           status: 'pending',
         })),
-      }),
-      prisma.order.update({ where: { id: order.id }, data: { is_reviewed: true } }),
-    ])
+      })
+    })
 
     return NextResponse.json({ success: true, message: 'Cảm ơn bạn đã đánh giá!' }, { status: 201 })
   } catch (error) {
+    if (error instanceof ReviewAlreadySubmittedError) {
+      return NextResponse.json({ error: 'Đơn hàng này đã được đánh giá' }, { status: 409 })
+    }
     console.error('[reviews/from-token] Lỗi:', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }

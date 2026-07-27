@@ -6,11 +6,12 @@ import { useSession } from 'next-auth/react'
 import { Trash2, X, AlertTriangle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { useDrawerTransition } from '@/hooks/useDrawerTransition'
+import { resolveOrderDeletionPolicy } from '@/lib/order-deletion'
 
 interface DeleteOrderButtonProps {
   orderId: number
   orderCode: string
-  /** Dùng để cảnh báo mạnh hơn với đơn đã thu tiền. */
+  /** Trạng thái dùng để ẩn thao tác với hồ sơ tài chính đã chốt. */
   paymentStatus?: string | null
   orderStatus?: string | null
   /**
@@ -29,8 +30,8 @@ interface DeleteOrderButtonProps {
  * người dùng gõ đúng mã đơn thay vì chỉ bấm "Đồng ý" — mã đơn dài và không đoán được,
  * nên không thể bấm nhầm theo quán tính.
  *
- * Đơn đã thu tiền (PAID) hiện thêm cảnh báo riêng: xoá nó làm lệch số liệu doanh thu,
- * và tiền đã nhận thì không tự mất đi theo bản ghi.
+ * Đơn đã thu tiền, hoàn tiền, đang giao hoặc đã hoàn tất không có thao tác xoá.
+ * Các hồ sơ đó phải được giữ để đối soát doanh thu và hỗ trợ khách hàng.
  *
  * Chỉ super_admin thấy nút này. API cũng tự chặn (403) nên đây không phải lớp bảo mật —
  * mục đích là để tài khoản 'admin' không gõ hết mã đơn rồi mới nhận lỗi từ chối.
@@ -52,7 +53,11 @@ export default function DeleteOrderButton({
   const { data: session } = useSession()
   const canDelete = (session?.user as { role?: string } | undefined)?.role === 'super_admin'
 
-  const isPaid = paymentStatus === 'PAID'
+  const deletionPolicy = resolveOrderDeletionPolicy({
+    paymentStatus,
+    orderStatus,
+    inventoryReserved: orderStatus !== 'CANCELLED',
+  })
   const canConfirm = confirmText.trim() === orderCode && !busy
 
   const close = () => {
@@ -88,7 +93,7 @@ export default function DeleteOrderButton({
     }
   }
 
-  if (!canDelete) return null
+  if (!canDelete || !deletionPolicy.canDelete) return null
 
   return (
     <>
@@ -147,16 +152,6 @@ export default function DeleteOrderButton({
               <p className="mt-2 text-sm leading-relaxed text-neutral-600">
                 Tồn kho đơn này đang giữ sẽ được cộng trả về sản phẩm, voucher đã dùng được trả lại ví khách.
               </p>
-            )}
-
-            {isPaid && (
-              <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3">
-                <p className="text-sm font-semibold text-red-700">Đơn này đã thu tiền</p>
-                <p className="mt-1 text-sm leading-relaxed text-red-600">
-                  Xoá sẽ làm lệch số liệu doanh thu, và khoản tiền đã nhận không tự mất đi theo bản ghi. Cân nhắc
-                  chuyển sang trạng thái Đã huỷ thay vì xoá.
-                </p>
-              </div>
             )}
 
             <label htmlFor={`confirm-${orderId}`} className="mt-4 block text-sm font-semibold text-neutral-700">

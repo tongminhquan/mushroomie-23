@@ -43,9 +43,9 @@ export async function GET() {
     '',
     `> ${BRAND.description}`,
     '',
-    `${BRAND.name} (${BRAND.legalName}) là xưởng phụ kiện handmade cá nhân hóa đặt tại `
-      + `${BRAND.formattedAddress}, phục vụ ${BRAND.areaServed.join(', ')}. Mọi sản phẩm đều `
-      + `làm thủ công và có thể custom màu sắc, charm, kích thước theo yêu cầu.`,
+    `${BRAND.name} (${BRAND.legalName}) là xưởng phụ kiện handmade đặt tại `
+      + `${BRAND.formattedAddress}, phục vụ ${BRAND.areaServed.join(', ')}. Sản phẩm được làm thủ công; `
+      + `các sản phẩm có hỗ trợ cá nhân hóa có thể chọn màu sắc, charm hoặc kích thước theo yêu cầu.`,
     '',
     '## Thông tin liên hệ',
     '',

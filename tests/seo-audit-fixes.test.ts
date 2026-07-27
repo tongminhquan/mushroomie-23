@@ -84,6 +84,20 @@ test('the seed script never creates reviews', () => {
   }
 })
 
+test('llms.txt does not claim every product supports customization', () => {
+  const llmsRoute = fs.readFileSync(
+    path.resolve(__dirname, '../src/app/llms.txt/route.ts'),
+    'utf8',
+  )
+
+  assert.doesNotMatch(
+    llmsRoute,
+    /Mọi sản phẩm đều[^.]*có thể custom/i,
+    'llms.txt đang quảng bá sai rằng mọi sản phẩm đều hỗ trợ custom',
+  )
+  assert.match(llmsRoute, /sản phẩm có hỗ trợ cá nhân hóa/i)
+})
+
 test('publisher and seller resolve to the same brand entity as the homepage', () => {
   // Bài viết và sản phẩm trước đây khai Organization riêng lẻ, không @id, không sameAs —
   // Google và các LLM thấy nhiều thực thể rời rạc thay vì một thương hiệu.

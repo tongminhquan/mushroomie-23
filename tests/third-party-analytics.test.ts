@@ -46,7 +46,7 @@ test('third-party fallback waits for the minimum delay before requesting idle ti
   })
 
   try {
-    const cleanup = (deferThirdPartyScript as Function)(
+    const cleanup = deferThirdPartyScript(
       () => {
         loaded = true
       },

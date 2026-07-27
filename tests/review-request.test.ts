@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import path from 'node:path'
 import test from 'node:test'
 
 // getApplicationSecret() yêu cầu tối thiểu 32 ký tự.
@@ -22,6 +24,11 @@ const ORDER = {
   customer_name: 'Nguyễn Văn A',
   customer_email: 'khach@example.com',
 }
+
+const FROM_TOKEN_ROUTE = fs.readFileSync(
+  path.resolve(__dirname, '../src/app/api/reviews/from-token/route.ts'),
+  'utf8',
+)
 
 test('a freshly issued token round-trips back to its order', () => {
   const token = createReviewToken(ORDER.id, ORDER.order_code)
@@ -148,4 +155,15 @@ test('template keys and delay stay stable — changing them would re-send to pas
   assert.equal(REVIEW_REQUEST_TEMPLATE_KEY, 'review_request')
   assert.equal(OPT_OUT_TEMPLATE_KEY, 'review_request_optout')
   assert.equal(REVIEW_REQUEST_DELAY_DAYS, 3)
+})
+
+test('review submission atomically claims an unreviewed order before creating reviews', () => {
+  const transaction = FROM_TOKEN_ROUTE.slice(FROM_TOKEN_ROUTE.indexOf('prisma.$transaction'))
+  const claimIndex = transaction.indexOf('tx.order.updateMany')
+  const createIndex = transaction.indexOf('tx.review.createMany')
+
+  assert.ok(claimIndex >= 0, 'route chưa claim đơn bằng updateMany có điều kiện')
+  assert.ok(createIndex > claimIndex, 'phải claim đơn trước khi tạo review')
+  assert.match(transaction, /is_reviewed: false/)
+  assert.match(transaction, /if \(claim\.count !== 1\)/)
 })

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
 import test from 'node:test'
+import { resolveOrderDeletionPolicy } from '../src/lib/order-deletion'
 
 const ROOT = path.resolve(__dirname, '..')
 const read = (rel: string) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
@@ -27,8 +28,8 @@ test('deleting an order removes its payment row explicitly', () => {
 })
 
 test('deleting an order restores reserved stock', () => {
-  // Đơn đang giữ chỗ mà xoá thẳng sẽ làm kho hụt vĩnh viễn, không ai biết.
-  assert.match(ROUTE, /if \(order\.inventory_reserved_at\)/)
+  // Chỉ policy trung tâm mới được quyết định hoàn kho; không suy diễn trực tiếp từ timestamp.
+  assert.match(ROUTE, /if \(deletionPolicy\.shouldRestoreInventory\)/)
   assert.match(ROUTE, /stock: \{ increment: item\.quantity \}/)
 })
 
@@ -78,7 +79,7 @@ test('the delete button is hidden from non super_admin accounts', () => {
   // Không phải lớp bảo mật (API tự chặn 403), mà để 'admin' không gõ hết mã đơn rồi
   // mới nhận lỗi từ chối.
   assert.match(BUTTON, /role === 'super_admin'/)
-  assert.match(BUTTON, /if \(!canDelete\) return null/)
+  assert.match(BUTTON, /if \(!canDelete \|\| !deletionPolicy\.canDelete\) return null/)
 })
 
 test('the confirm dialog requires typing the order code', () => {
@@ -87,9 +88,51 @@ test('the confirm dialog requires typing the order code', () => {
   assert.match(BUTTON, /disabled=\{!canConfirm\}/)
 })
 
-test('paid orders get an extra warning before deletion', () => {
-  assert.match(BUTTON, /paymentStatus === 'PAID'/)
-  assert.match(BUTTON, /đã thu tiền/)
+test('paid and fulfilled orders are protected from permanent deletion', () => {
+  for (const paymentStatus of ['PAID', 'REFUNDED']) {
+    const policy = resolveOrderDeletionPolicy({
+      paymentStatus,
+      orderStatus: 'PROCESSING',
+      inventoryReserved: true,
+    })
+    assert.equal(policy.canDelete, false)
+    assert.equal(policy.shouldRestoreInventory, false)
+  }
+
+  for (const orderStatus of ['SHIPPING', 'COMPLETED']) {
+    const policy = resolveOrderDeletionPolicy({
+      paymentStatus: 'PENDING',
+      orderStatus,
+      inventoryReserved: true,
+    })
+    assert.equal(policy.canDelete, false)
+    assert.equal(policy.shouldRestoreInventory, false)
+  }
+})
+
+test('only deletable orders with an active reservation restore stock', () => {
+  assert.deepEqual(
+    resolveOrderDeletionPolicy({
+      paymentStatus: 'PENDING',
+      orderStatus: 'PROCESSING',
+      inventoryReserved: true,
+    }),
+    { canDelete: true, shouldRestoreInventory: true, reason: null },
+  )
+
+  assert.equal(
+    resolveOrderDeletionPolicy({
+      paymentStatus: 'FAILED',
+      orderStatus: 'CANCELLED',
+      inventoryReserved: false,
+    }).shouldRestoreInventory,
+    false,
+  )
+})
+
+test('payment webhook audit rows are preserved when a deletable order is removed', () => {
+  assert.match(ROUTE, /tx\.paymentWebhookEvent\.updateMany/)
+  assert.match(ROUTE, /data: \{ payment_id: null \}/)
 })
 
 test('both admin pages expose the delete action', () => {
