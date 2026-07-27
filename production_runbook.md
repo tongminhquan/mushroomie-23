@@ -115,7 +115,44 @@ pm2 flush
 ## 13. Security Headers
 Hệ thống đã bật sẵn `Strict-Transport-Security`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, và `Content-Security-Policy`.
 
-## 14. Các lỗi thường gặp và cách xử lý
+## 14. Cron jobs
+
+Tất cả cron endpoint đều xác thực bằng `Bearer $CRON_SECRET`. Thiếu `CRON_SECRET` trong `.env` → endpoint luôn trả 401, không bao giờ mở public.
+
+| Endpoint | Tần suất đề xuất | Ghi chú |
+|---|---|---|
+| `/api/cron/publish-scheduled-posts` | mỗi 5 phút | Backstop cho job in-process |
+| `/api/cron/review-requests` | mỗi ngày 1 lần | Email xin đánh giá — **tắt mặc định** |
+
+### 14.1. Email xin đánh giá (`/api/cron/review-requests`)
+
+Gửi email mời đánh giá cho đơn `COMPLETED` sau 3 ngày, tối đa 25 email/lần chạy. Mục đích: có review thật để Product schema gắn được `aggregateRating` (sao vàng trên SERP).
+
+**Chạy thử (dry run) — không gửi email, chỉ liệt kê đơn đủ điều kiện:**
+
+```bash
+curl -sS -H "Authorization: Bearer $CRON_SECRET" https://mushroomie.io.vn/api/cron/review-requests
+```
+
+**Bật gửi thật** — thêm vào `.env` rồi `pm2 restart mushroomie_pm2`:
+
+```bash
+REVIEW_REQUEST_EMAILS_ENABLED=true
+```
+
+**Đăng ký crontab (chạy 09:00 hằng ngày):**
+
+```bash
+0 9 * * * curl -sS -H "Authorization: Bearer $CRON_SECRET" https://mushroomie.io.vn/api/cron/review-requests >> /var/log/mushroomie-cron.log 2>&1
+```
+
+An toàn khi chạy lặp: mỗi đơn chỉ gửi một lần (chốt bằng bảng `email_logs`), khách bấm huỷ đăng ký sẽ không nhận email loại này nữa. Kiểm tra kết quả gửi:
+
+```bash
+mysql -e "SELECT status, COUNT(*) FROM email_logs WHERE template_key='review_request' GROUP BY status;" mushroomie
+```
+
+## 15. Các lỗi thường gặp và cách xử lý
 - **Lỗi 502 Bad Gateway:** PM2 đang bị sập hoặc lỗi khi khởi động. Chạy `pm2 logs mushroomie_pm2` để check.
 - **Disk đầy do cache build:** Xóa thư mục `.next/cache` nếu dung lượng lên quá cao: `rm -rf /var/www/mushroomie/.next/cache/*`
 - **Ảnh upload không hiện:** Do thiếu copy `public/uploads` sang `.next/standalone/public/`. Chạy lệnh `cp -r public/uploads .next/standalone/public/` và restart PM2.
