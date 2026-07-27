@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-process.env.NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET || 'test-secret-for-review-tokens'
+// getApplicationSecret() yêu cầu tối thiểu 32 ký tự.
+process.env.NEXTAUTH_SECRET =
+  process.env.NEXTAUTH_SECRET || 'test-secret-for-review-tokens-0123456789'
 
 import {
   OPT_OUT_TEMPLATE_KEY,
