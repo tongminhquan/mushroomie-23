@@ -196,7 +196,7 @@ export default async function PostDetailPage({
     ? { category_id: post.category_id, status: 'published', id: { not: post.id } }
     : { status: 'published', id: { not: post.id } }
 
-  const [relatedPosts, productCandidates, coverImage, structuredImage, articleHtml] = await Promise.all([
+  const [relatedCandidates, productCandidates, coverImage, structuredImage, articleHtml] = await Promise.all([
     // Lấy pool rộng rồi mới chọn 6 bài — xem pickRelatedPosts() để biết vì sao không
     // dùng thẳng "6 bài mới nhất".
     prisma.post
