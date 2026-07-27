@@ -26,6 +26,7 @@ import {
   priceValidUntil,
 } from '@/lib/merchant-schema'
 import { getShippingFeeSnapshot } from '@/lib/shipping-fee-server'
+import { DEFAULT_SHIPPING_FEE } from '@/lib/shipping-fee'
 import { buildProductMetadataText } from '@/lib/product-metadata'
 import { inspectImageForRender } from '@/lib/server-image'
 import { resolveDisplayPrice } from '@/lib/product-price'
