@@ -717,15 +717,15 @@ export function getLocalFaqs(page: LocalPage): LocalFaq[] {
         'Có. Bạn có thể gửi màu sắc, charm, chữ cái, kích thước và phong cách mong muốn. Mushroomie sẽ tư vấn phương án phù hợp rồi xác nhận mẫu và chi phí trước khi làm.',
     },
     {
-      question: `Đặt ${product} handmade mất bao lâu?`,
+      question: `Đặt ${product} handmade tại ${page.area} mất bao lâu?`,
+      // Thời gian = khâu làm hàng (1-3 ngày) + khâu vận chuyển (khác nhau theo khu vực),
+      // nên câu trả lời phải riêng cho từng area thay vì dùng chung một đoạn.
       answer:
-        'Thời gian hoàn thiện phụ thuộc mẫu có sẵn hay thiết kế custom và số lượng chi tiết. Mushroomie sẽ báo thời gian dự kiến trước khi chốt đơn để bạn chủ động cho ngày cần nhận.',
+        `Mushroomie cần 1–3 ngày làm việc để hoàn thiện, lâu hơn nếu là hàng custom nhiều chi tiết. ${delivery.summary}`,
     },
     {
       question: `Mushroomie giao ${product} đến ${page.area} bằng cách nào?`,
-      answer: page.onlineOnly
-        ? `Đơn được gửi từ Đồng Nai đến ${page.area} qua đơn vị vận chuyển. Mã vận đơn và thời gian dự kiến sẽ được thông báo sau khi sản phẩm hoàn thiện.`
-        : `Khách tại ${page.area} có thể chọn giao hàng phù hợp hoặc hẹn nhận trực tiếp sau khi được xác nhận. Đơn ở khu vực khác được gửi qua đơn vị vận chuyển.`,
+      answer: `${delivery.summary} ${delivery.pickup}`,
     },
   ]
 }
