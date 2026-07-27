@@ -188,3 +188,103 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
+
+/**
+ * Xoá vĩnh viễn một đơn hàng.
+ *
+ * Đây là thao tác không hoàn tác được trên hồ sơ kinh doanh, nên có mấy ràng buộc:
+ *
+ * 1. `Payment` là quan hệ DUY NHẤT trỏ tới Order mà không khai báo `onDelete`, tức
+ *    mặc định `Restrict`. `prisma.order.delete()` sẽ ném lỗi khoá ngoại với bất kỳ đơn
+ *    nào từng qua thanh toán, nên phải xoá bản ghi Payment trong cùng transaction.
+ *    (OrderItem và OrderStatusHistory có Cascade; EmailLog và UserVoucher là SetNull.)
+ *
+ * 2. Nếu đơn đang giữ tồn kho (`inventory_reserved_at`), phải cộng trả số lượng về
+ *    sản phẩm — xoá thẳng sẽ làm kho hụt vĩnh viễn mà không ai biết.
+ *
+ * 3. Voucher đã dùng cho đơn được trả lại trạng thái AVAILABLE, giống hệt luồng huỷ đơn
+ *    trong cancelOrderAndReleaseInventory().
+ *
+ * 4. Toàn bộ ảnh chụp đơn được ghi vào admin_logs trước khi xoá, để còn dấu vết đối
+ *    chiếu doanh thu về sau.
+ */
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const session = await auth()
+    const role = (session?.user as { role?: string } | undefined)?.role
+    if (!session || !role || !['super_admin', 'admin'].includes(role)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { id } = await params
+    const orderId = Number(id)
+    if (!Number.isInteger(orderId) || orderId <= 0) {
+      return NextResponse.json({ error: 'Mã đơn không hợp lệ' }, { status: 400 })
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true, payment: true },
+    })
+    if (!order) {
+      return NextResponse.json({ error: 'Không tìm thấy đơn hàng' }, { status: 404 })
+    }
+
+    // Ảnh chụp trước khi xoá — sau transaction thì không còn gì để đọc.
+    const snapshot = {
+      order_code: order.order_code,
+      customer_name: order.customer_name,
+      customer_email: order.customer_email,
+      total: order.total.toString(),
+      payment_status: order.payment_status,
+      order_status: order.order_status,
+      created_at: order.created_at.toISOString(),
+      items: order.items.map((item) => ({
+        product_id: item.product_id,
+        product_name: item.product_name,
+        quantity: item.quantity,
+        price_snapshot: item.price_snapshot.toString(),
+        total_price: item.total_price.toString(),
+      })),
+      restored_stock: Boolean(order.inventory_reserved_at),
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Trả tồn kho nếu đơn đang giữ chỗ.
+      if (order.inventory_reserved_at) {
+        for (const item of order.items) {
+          if (!item.product_id) continue
+          await tx.product.update({
+            where: { id: item.product_id },
+            data: { stock: { increment: item.quantity } },
+          })
+        }
+      }
+
+      // Trả voucher về ví khách.
+      await tx.userVoucher.updateMany({
+        where: { orderId, status: 'USED' },
+        data: { status: 'AVAILABLE', orderId: null, usedAt: null },
+      })
+
+      // Payment không Cascade — phải xoá tay, nếu không khoá ngoại chặn.
+      if (order.payment) {
+        await tx.payment.delete({ where: { order_id: orderId } })
+      }
+
+      await tx.order.delete({ where: { id: orderId } })
+    })
+
+    await logAdminAction({
+      userId: Number((session.user as { id?: string | number }).id),
+      action: 'DELETE',
+      entity: 'ORDER',
+      details: snapshot,
+    })
+
+    return NextResponse.json({ success: true, order_code: order.order_code })
+  } catch (error) {
+    console.error('[ORDER DELETE]', error)
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+  }
+}
