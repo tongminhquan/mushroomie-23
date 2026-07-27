@@ -362,6 +362,30 @@ body {
   transition: opacity var(--m-duration-base) var(--m-ease-out);
 }
 
+/* --- Vào trang: chạy ở mọi route qua src/app/template.tsx ---
+   Chỉ dịch 10px: đủ để cảm nhận trang vừa đổi, không đủ để gây khó chịu khi điều
+   hướng liên tục trong admin. Dùng `both` để giữ trạng thái cuối. */
+@keyframes m-page-enter {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.m-page-enter {
+  animation: m-page-enter 320ms var(--m-ease-out) both;
+}
+
+/* --- Parallax: lớp nền trôi chậm hơn nội dung khi cuộn.
+   GSAP ghi trực tiếp vào transform; khai báo will-change để trình duyệt tách lớp
+   sẵn thay vì tạo layer giữa chừng (nguyên nhân gây giật khung hình đầu). --- */
+.m-parallax {
+  will-change: transform;
+}
+
+/* --- Tiêu đề tách dòng chạy lên. Lớp phủ overflow ẩn phần chữ chưa vào khung. --- */
+.m-line-mask {
+  overflow: hidden;
+  display: block;
+}
+
 /* ========== Animations ========== */
 
 /* Skeleton shimmer */
