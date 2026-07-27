@@ -74,7 +74,9 @@ export default async function BlogPage({
   const categorySlug = readParam(sp.category)
   const pageValue = readParam(sp.page) || '1'
   const page = Math.max(1, parseInt(pageValue, 10) || 1)
-  const limit = 9
+  // 9 bài/trang đẩy 66 bài thành 8 trang phân trang, khiến bài cũ gần như không nhận
+  // được link nội bộ nào. 24 bài/trang rút xuống 3 trang.
+  const limit = 24
   const where: Prisma.PostWhereInput = { status: 'published' }
 
   if (categorySlug) where.category = { slug: categorySlug }
