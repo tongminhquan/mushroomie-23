@@ -16,7 +16,7 @@ export default function HomeLatestPosts({ posts }: { posts: HomePost[] }) {
           title="Chuyện nhỏ, mẹo hay và cảm hứng phối đồ"
           description="Theo dõi những câu chuyện phía sau sản phẩm, cách chọn charm và các ý tưởng quà tặng có dấu ấn riêng."
         />
-        <div className="grid gap-5 md:grid-cols-3">
+        <div data-batch-reveal className="grid gap-5 md:grid-cols-3">
           {posts.slice(0, 3).map((post) => (
             <PostCard key={post.id} post={post} />
           ))}

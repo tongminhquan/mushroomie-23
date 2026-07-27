@@ -29,6 +29,7 @@ import {
 import { brandEntityRef } from '@/lib/local-seo'
 import { rankProductsForPost } from '@/lib/post-product-recommendations'
 import { pickRelatedPosts } from '@/lib/related-posts'
+import ScrollMotion from '@/components/ui/ScrollMotion'
 
 /** 2 hàng x 3 cột trên desktop — gấp đôi link nội bộ toả ra từ mỗi bài. */
 const RELATED_POST_COUNT = 6
@@ -280,6 +281,15 @@ export default async function PostDetailPage({
           <Link href={`/admin/bai-viet/${post.id}`} className="underline ml-2 text-[#ffe7a3]">Sửa bài</Link>
         </div>
       )}
+      <ScrollMotion />
+      {/* Thanh tiến trình đọc: bám theo chiều dài bài, scaleX chạy trên compositor
+          nên không tốn layout. Ẩn với trình đọc màn hình vì đây là trang trí. */}
+      <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[3px]">
+        <div
+          data-scroll-progress="#article-body"
+          className="h-full origin-left scale-x-0 bg-primary"
+        />
+      </div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script
         type="application/ld+json"
@@ -382,7 +392,7 @@ export default async function PostDetailPage({
       </section>
 
       <div className="mx-auto mt-8 max-w-3xl px-4 sm:px-6">
-        <article className="rounded-[28px] border border-warm-border bg-white px-5 py-8 shadow-card sm:px-8 md:px-10">
+        <article id="article-body" className="rounded-[28px] border border-warm-border bg-white px-5 py-8 shadow-card sm:px-8 md:px-10">
           <div
             className="prose prose-neutral max-w-none prose-headings:font-heading prose-headings:text-neutral-900 prose-p:leading-8 prose-p:text-neutral-700 prose-a:text-primary hover:prose-a:text-primary-dark prose-strong:text-accent-kraft prose-img:my-8 prose-img:rounded-[22px]"
             dangerouslySetInnerHTML={{ __html: articleHtml }}

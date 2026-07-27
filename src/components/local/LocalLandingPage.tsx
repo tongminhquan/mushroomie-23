@@ -14,6 +14,7 @@ import {
 } from '@/lib/local-seo'
 import { getAreaDelivery, getAreaNote } from '@/lib/local-area-content'
 import ScrollReveal from '@/components/ui/ScrollReveal'
+import ScrollMotion from '@/components/ui/ScrollMotion'
 
 /**
  * Template landing page Local SEO cho Mushroomie.
@@ -33,6 +34,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
   return (
     <div className="min-h-screen bg-secondary pb-16">
       <ScrollReveal />
+      <ScrollMotion />
       {/* JSON-LD: LocalBusiness + Breadcrumb + Service (self-contained để @id resolve) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(localBusinessSchema()) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbSchema(crumbs)) }} />

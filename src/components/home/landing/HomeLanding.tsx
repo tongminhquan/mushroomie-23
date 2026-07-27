@@ -12,6 +12,7 @@ import HomeTrust from './HomeTrust'
 import HomeFinalCTA from './HomeFinalCTA'
 import HomeMiniGameCTA from './HomeMiniGameCTA'
 import ScrollReveal from '@/components/ui/ScrollReveal'
+import ScrollMotion from '@/components/ui/ScrollMotion'
 import type {
   HomeBanner,
   HomeCategory,
@@ -36,6 +37,7 @@ export default function HomeLanding({
   return (
     <>
       <ScrollReveal />
+      <ScrollMotion />
       {/* Hero và dải danh mục KHÔNG mang data-reveal: cả hai nằm trên màn hình đầu
           tiên, ẩn rồi mới hiện sẽ làm hỏng LCP và tạo cú giật ngay khi mở trang. */}
       <HomeHeroLanding banners={banners} />

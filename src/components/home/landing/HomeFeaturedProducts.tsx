@@ -23,7 +23,7 @@ export default function HomeFeaturedProducts({ products }: { products: HomeProdu
           description="Được yêu thích nhất — thiết kế nổi bật, dễ phối và có thể thêm dấu ấn riêng."
           align="center"
         />
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <div data-batch-reveal className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
           {products.slice(0, 8).map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
