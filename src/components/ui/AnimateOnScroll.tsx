@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef, useState, ReactNode } from 'react'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 interface AnimateOnScrollProps {
   children: ReactNode
