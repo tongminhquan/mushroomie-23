@@ -65,16 +65,25 @@ test('utility pages expose noindex metadata to crawlers', () => {
   }))
 })
 
-test('robots allows the public session resource without exposing other API routes', () => {
+test('robots does not block the public session dependency with a blanket API rule', () => {
   const rules = robots().rules
   const normalizedRules = Array.isArray(rules) ? rules : [rules]
   const wildcardRule = normalizedRules.find((rule) => rule.userAgent === '*')
 
   assert.ok(wildcardRule)
 
-  const allow = Array.isArray(wildcardRule.allow) ? wildcardRule.allow : [wildcardRule.allow]
   const disallow = Array.isArray(wildcardRule.disallow) ? wildcardRule.disallow : [wildcardRule.disallow]
 
-  assert.ok(allow.includes('/api/auth/session'))
-  assert.ok(disallow.includes('/api/'))
+  assert.ok(!disallow.some((path) => typeof path === 'string' && path.startsWith('/api')))
+})
+
+test('API responses use X-Robots-Tag instead of robots.txt for index control', async () => {
+  assert.equal(typeof nextConfig.headers, 'function')
+
+  const headers = await nextConfig.headers!()
+  const apiHeaders = headers.find((entry) => entry.source === '/api/:path*')
+
+  assert.deepEqual(apiHeaders?.headers, [
+    { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
+  ])
 })
