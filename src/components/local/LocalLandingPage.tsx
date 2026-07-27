@@ -190,11 +190,26 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
             <Sparkles size={18} className="text-primary" /> Đặt hàng &amp; giao đến {page.area}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-neutral-600">{deliveryNote(page.area, page.onlineOnly)}</p>
+          <p className="mt-2 text-sm leading-relaxed text-neutral-600">{areaDelivery.summary}</p>
+          <p className="mt-2 text-sm leading-relaxed text-neutral-600">{areaDelivery.pickup}</p>
           <p className="mt-2 text-sm leading-relaxed text-neutral-600">
             Sản phẩm được <strong>làm thủ công</strong>. Nhiều mẫu hỗ trợ <strong>cá nhân hóa</strong> theo màu sắc, charm hoặc kiểu dáng — đúng tinh thần “{BRAND.slogan}”.
           </p>
         </div>
       </section>
+
+      {/* Nội dung riêng của từng khu vực — phần KHÔNG dùng chung giữa các landing page.
+          Xem src/lib/local-area-content.ts để biết vì sao khối này tồn tại. */}
+      {areaNote && (
+        <section className="brand-container mt-8" aria-labelledby="area-note-heading">
+          <div className="rounded-[18px] border-[1.5px] border-warm-border bg-white p-5 sm:p-6">
+            <h2 id="area-note-heading" className="font-heading text-lg text-neutral-900">
+              Điều nên biết khi đặt tại {page.area}
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-neutral-600">{areaNote}</p>
+          </div>
+        </section>
+      )}
 
       {/* Internal links: sản phẩm + custom + liên hệ */}
       <section className="brand-container mt-8">
