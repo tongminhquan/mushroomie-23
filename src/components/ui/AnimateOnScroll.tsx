@@ -21,6 +21,7 @@ export default function AnimateOnScroll({
 }: AnimateOnScrollProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
+  const reduced = useReducedMotion()
 
   useEffect(() => {
     const el = ref.current
