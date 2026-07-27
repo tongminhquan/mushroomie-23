@@ -8,7 +8,9 @@ import {
   REVIEW_REQUEST_DELAY_DAYS,
   REVIEW_REQUEST_TEMPLATE_KEY,
   buildReviewRequestEmail,
+  isDeliverableEmail,
   reviewRequestEmailsEnabled,
+  type MxCache,
 } from '@/lib/review-request'
 
 export const dynamic = 'force-dynamic'
@@ -95,6 +97,7 @@ export async function GET(request: NextRequest) {
         dryRun: true,
         sentCount: 0,
         skippedCount: candidates.length - eligible.length,
+        undeliverableCount: undeliverable.length,
         orderCodes: eligible.map((order) => order.order_code),
         hint: 'Đặt REVIEW_REQUEST_EMAILS_ENABLED=true để bật gửi thật.',
       })
@@ -145,6 +148,7 @@ export async function GET(request: NextRequest) {
       dryRun: false,
       sentCount,
       skippedCount: candidates.length - eligible.length,
+      undeliverableCount: undeliverable.length,
       orderCodes: eligible.map((order) => order.order_code),
     })
   } catch (error) {

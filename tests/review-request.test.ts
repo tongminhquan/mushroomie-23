@@ -11,6 +11,7 @@ import {
   REVIEW_REQUEST_TEMPLATE_KEY,
   buildReviewRequestEmail,
   createReviewToken,
+  isDeliverableEmail,
   reviewRequestEmailsEnabled,
   verifyReviewToken,
 } from '../src/lib/review-request'
