@@ -20,7 +20,7 @@ import { useEffect, useRef } from 'react'
  *    cùng vào khung nhìn trong một khoảng ngắn rồi chạy chung một stagger — mượt hơn và
  *    ít instance hơn hẳn so với 12 trigger rời cho 12 thẻ sản phẩm.
  */
-export default function ScrollMotion() {
+export default function ScrollMotion({ scroller }: { scroller?: string } = {}) {
   const started = useRef(false)
 
   useEffect(() => {
