@@ -114,7 +114,11 @@ test('page transition uses template.tsx and ships no JS', () => {
 })
 
 test('admin motion is functional and shorter than public motion', () => {
-  const admin = CSS.slice(CSS.indexOf('Motion cho trang admin'))
+  // Cắt đúng khối admin: sau nó là khối reduced-motion toàn cục, trong đó có nhắc
+  // .m-parallax — lấy tràn sang sẽ làm phép kiểm "admin không có parallax" báo sai.
+  const adminStart = CSS.indexOf('Motion cho trang admin')
+  const adminEnd = CSS.indexOf('@media (prefers-reduced-motion: reduce)', adminStart)
+  const admin = CSS.slice(adminStart, adminEnd > -1 ? adminEnd : undefined)
 
   // Hàng bảng chỉ mờ dần + dịch nhẹ; không có parallax hay hiệu ứng trang trí.
   assert.match(admin, /@keyframes m-row-in/)
