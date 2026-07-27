@@ -66,6 +66,24 @@ test('about page schema links the story page to the LocalBusiness entity', () =>
   assert.equal(schema.isPartOf['@id'], 'https://mushroomie.io.vn/#website')
 })
 
+test('the seed script never creates reviews', () => {
+  // 6 đánh giá giả từ seed đã lọt lên trang chủ production và hiển thị như lời khách
+  // thật cho tới 2026-07-27. Đánh giá bịa đánh lừa người mua và vi phạm chính sách
+  // structured data của Google — nguồn duy nhất phải là khách thật.
+  const seed = fs.readFileSync(path.resolve(__dirname, '../prisma/seed.ts'), 'utf8')
+
+  assert.doesNotMatch(
+    seed,
+    /prisma\.review\.create|prisma\.review\.createMany|prisma\.review\.upsert/,
+    'seed.ts tạo đánh giá — mọi đánh giá phải đến từ khách thật',
+  )
+
+  // Tên trong bộ seed cũ; nếu thấy lại nghĩa là ai đó khôi phục khối review giả.
+  for (const name of ['Nguyễn Thu Hà', 'Trần Minh Tâm', 'Lê Thị Bình', 'Vũ Đình Nam']) {
+    assert.ok(!seed.includes(name), `seed.ts chứa lại người đánh giá giả: ${name}`)
+  }
+})
+
 test('publisher and seller resolve to the same brand entity as the homepage', () => {
   // Bài viết và sản phẩm trước đây khai Organization riêng lẻ, không @id, không sameAs —
   // Google và các LLM thấy nhiều thực thể rời rạc thay vì một thương hiệu.
