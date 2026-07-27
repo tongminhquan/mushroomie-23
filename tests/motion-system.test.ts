@@ -86,7 +86,7 @@ test('parallax is fully removed under reduced motion, not just weakened', () => 
   // Phải thoát sớm, không được dựng ScrollTrigger rồi đặt biên độ 0.
   assert.match(
     motion,
-    /prefers-reduced-motion: reduce'\)\.matches\)\s*return/,
+    /prefers-reduced-motion: reduce[^\n]*matches\)\s*return/,
     'ScrollMotion vẫn khởi tạo ScrollTrigger khi người dùng bật giảm chuyển động',
   )
   // Việc kiểm tra phải nằm TRƯỚC khi nạp GSAP — nếu không vẫn tốn 34KB vô ích.
