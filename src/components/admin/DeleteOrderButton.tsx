@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Trash2, X, AlertTriangle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { useDrawerTransition } from '@/hooks/useDrawerTransition'
@@ -11,6 +12,11 @@ interface DeleteOrderButtonProps {
   /** Dùng để cảnh báo mạnh hơn với đơn đã thu tiền. */
   paymentStatus?: string | null
   orderStatus?: string | null
+  /**
+   * Danh sách render phía client tự cập nhật state qua callback này. Bỏ trống thì
+   * component gọi router.refresh() — cần cho trang server component như /admin/don-hang,
+   * nơi dữ liệu chỉ tải lại khi server render lại.
+   */
   onDeleted?: (orderId: number) => void
   className?: string
 }
@@ -38,6 +44,7 @@ export default function DeleteOrderButton({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const dialog = useDrawerTransition(open, 200)
+  const router = useRouter()
 
   const isPaid = paymentStatus === 'PAID'
   const canConfirm = confirmText.trim() === orderCode && !busy
@@ -64,9 +71,10 @@ export default function DeleteOrderButton({
         return
       }
 
-      onDeleted?.(orderId)
       setOpen(false)
       setConfirmText('')
+      if (onDeleted) onDeleted(orderId)
+      else router.refresh()
     } catch {
       setError('Không kết nối được máy chủ. Vui lòng thử lại.')
     } finally {

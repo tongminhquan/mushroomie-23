@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { formatPrice, formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import DeleteOrderButton from '@/components/admin/DeleteOrderButton'
 
 export const metadata: Metadata = { title: 'Quản lý đơn hàng | Admin Mushroomie' }
 
@@ -137,8 +138,16 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                     </span>
                   </td>
                   <td className="py-3 px-4 text-neutral-500 text-xs">{formatDate(order.created_at)}</td>
-                  <td className="py-3 px-4 text-right">
-                    <Link href={`/admin/don-hang/${order.id}`} className="text-primary text-xs font-semibold hover:underline">Xem →</Link>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center justify-end gap-1">
+                      <Link href={`/admin/don-hang/${order.id}`} className="text-primary text-xs font-semibold hover:underline">Xem →</Link>
+                      <DeleteOrderButton
+                        orderId={order.id}
+                        orderCode={order.order_code}
+                        paymentStatus={displayPaymentStatus}
+                        orderStatus={displayOrderStatus}
+                      />
+                    </div>
                   </td>
                 </tr>
               )})}

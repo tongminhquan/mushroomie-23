@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { formatPrice } from '@/lib/utils'
+import DeleteOrderButton from '@/components/admin/DeleteOrderButton'
 import { format } from 'date-fns'
 import Link from 'next/link'
 
@@ -67,16 +68,17 @@ export default function AdminPaymentsPage() {
                 <th className="px-6 py-3.5 font-bold text-[11px] uppercase tracking-wide">Trạng thái</th>
                 <th className="px-6 py-3.5 font-bold text-[11px] uppercase tracking-wide">Thời gian tạo</th>
                 <th className="px-6 py-3.5 font-bold text-[11px] uppercase tracking-wide">Nội dung CK</th>
+                <th className="px-6 py-3.5 text-right font-bold text-[11px] uppercase tracking-wide">Thao tác</th>
               </tr>
             </thead>
             <tbody className="m-admin-rows divide-y divide-[#f6ece4] text-neutral-700">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-neutral-500">Đang tải dữ liệu...</td>
+                  <td colSpan={7} className="px-6 py-8 text-center text-neutral-500">Đang tải dữ liệu...</td>
                 </tr>
               ) : payments.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
+                  <td colSpan={7} className="px-6 py-12 text-center">
                     <div className="text-4xl mb-3">📭</div>
                     <p className="text-neutral-500">Không tìm thấy giao dịch nào</p>
                   </td>
@@ -116,6 +118,27 @@ export default function AdminPaymentsPage() {
                       <code className="text-xs bg-[#fbf6f2] text-neutral-600 border-[1.5px] border-[#f0e0d6] px-2 py-1 rounded">
                         {payment.transfer_content}
                       </code>
+                    </td>
+                    <td className="px-6 py-3.5">
+                      <div className="flex justify-end">
+                        {payment.order?.id ? (
+                          <DeleteOrderButton
+                            orderId={payment.order.id}
+                            orderCode={payment.order.order_code}
+                            paymentStatus={payment.order.payment_status}
+                            orderStatus={payment.order.order_status}
+                            // Danh sách này render phía client nên tự lọc khỏi state,
+                            // không cần router.refresh().
+                            onDeleted={(deletedId) =>
+                              setPayments((current) =>
+                                current.filter((item) => item.order?.id !== deletedId),
+                              )
+                            }
+                          />
+                        ) : (
+                          <span className="text-xs text-neutral-300">—</span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

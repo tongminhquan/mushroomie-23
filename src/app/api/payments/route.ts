@@ -118,7 +118,19 @@ export async function GET(request: NextRequest) {
     const [payments, total] = await prisma.$transaction([
       prisma.payment.findMany({
         where,
-        include: { order: { select: { order_code: true, customer_name: true } } },
+        // id + trạng thái cần cho nút xoá đơn ở /admin/thanh-toan; thiếu id thì nút
+        // không biết gọi DELETE lên đơn nào.
+        include: {
+          order: {
+            select: {
+              id: true,
+              order_code: true,
+              customer_name: true,
+              payment_status: true,
+              order_status: true,
+            },
+          },
+        },
         orderBy: { created_at: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
