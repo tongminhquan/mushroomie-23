@@ -88,6 +88,13 @@ test('the confirm dialog requires typing the order code', () => {
   assert.match(BUTTON, /disabled=\{!canConfirm\}/)
 })
 
+test('the confirm dialog is portaled outside animated table rows', () => {
+  // m-admin-rows keeps a transform after its entrance animation. A fixed dialog rendered
+  // inside that row would be positioned and clipped by the row instead of the viewport.
+  assert.match(BUTTON, /import \{ createPortal \} from 'react-dom'/)
+  assert.match(BUTTON, /createPortal\([\s\S]*document\.body/)
+})
+
 test('paid and fulfilled orders are protected from permanent deletion', () => {
   for (const paymentStatus of ['PAID', 'REFUNDED']) {
     const policy = resolveOrderDeletionPolicy({

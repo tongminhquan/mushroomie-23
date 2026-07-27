@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Trash2, X, AlertTriangle } from 'lucide-react'
@@ -109,8 +110,9 @@ export default function DeleteOrderButton({
         <Trash2 size={16} />
       </button>
 
-      {dialog.mounted && (
-        <div
+      {dialog.mounted &&
+        createPortal(
+          <div
           data-drawer-state={dialog.state}
           className="m-backdrop fixed inset-0 z-[200] grid place-items-center bg-text/50 p-4 backdrop-blur-[2px]"
           onClick={close}
@@ -182,8 +184,9 @@ export default function DeleteOrderButton({
               </Button>
             </div>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   )
 }
