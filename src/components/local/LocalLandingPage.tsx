@@ -12,6 +12,7 @@ import {
   localServiceSchema,
   type LocalPage,
 } from '@/lib/local-seo'
+import { getAreaDelivery, getAreaNote } from '@/lib/local-area-content'
 
 /**
  * Template landing page Local SEO cho Mushroomie.
