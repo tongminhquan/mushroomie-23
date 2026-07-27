@@ -702,6 +702,7 @@ function productLabel(group: LocalGroup): string {
 
 export function getLocalFaqs(page: LocalPage): LocalFaq[] {
   const product = productLabel(page.group)
+  const delivery = getAreaDelivery(page.area)
   const locationAnswer = page.onlineOnly
     ? `Mushroomie không có cửa hàng tại ${page.area}. Sản phẩm được làm thủ công tại Trảng Dài, Đồng Nai và nhận đơn online giao đến ${page.area}.`
     : 'Mushroomie hoạt động tại Hẻm 2, tổ 11, Phường Trảng Dài, tỉnh Đồng Nai. Nếu muốn nhận trực tiếp, bạn nên liên hệ trước để Mushroomie xác nhận thời gian.'
