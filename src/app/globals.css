@@ -399,6 +399,25 @@ body {
   transform: translate3d(0, 0, 0);
 }
 
+/* Trượt xuống (thanh tìm kiếm mobile — panel nằm trong luồng, không cố định).
+   Chỉ dịch một đoạn ngắn rồi fade: panel inline mà trượt cả chiều cao sẽ phải animate
+   height, thứ buộc trình duyệt tính lại layout mỗi khung hình. Phần chiếm chỗ xuất
+   hiện tức thì, chỉ nội dung là chuyển động. */
+.m-drawer-top[data-drawer-state='entering'],
+.m-drawer-top[data-drawer-state='exiting'] {
+  transform: translate3d(0, -8px, 0);
+  opacity: 0;
+}
+.m-drawer-top[data-drawer-state='open'] {
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+}
+.m-drawer-top {
+  transition:
+    transform var(--m-duration-fast) var(--m-ease-out),
+    opacity var(--m-duration-fast) var(--m-ease-out);
+}
+
 /* Nền mờ phía sau: chỉ opacity, không dịch chuyển */
 .m-backdrop {
   transition: opacity var(--m-duration-base) var(--m-ease-out);

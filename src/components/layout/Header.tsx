@@ -4,6 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
+import { useDrawerTransition } from '@/hooks/useDrawerTransition'
 import {
   ChevronDown,
   ClipboardList,
@@ -37,6 +38,8 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
   const { data: session } = useSession()
   const { getTotalItems, toggleCart } = useCartStore()
   const [menuOpen, setMenuOpen] = useState(false)
+  // Giữ menu trong DOM hết hiệu ứng đóng — xem useDrawerTransition.
+  const menu = useDrawerTransition(menuOpen)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -276,9 +279,10 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
         </div>
       </nav>
 
-      {menuOpen && (
+      {menu.mounted && (
         <div
-          className="fixed inset-0 z-[120] bg-black/35 md:hidden"
+          data-drawer-state={menu.state}
+          className="m-backdrop fixed inset-0 z-[120] bg-black/35 md:hidden"
           onClick={() => setMenuOpen(false)}
           role="dialog"
           aria-modal="true"
@@ -286,7 +290,8 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
         >
           <nav
             id="mobile-main-navigation"
-            className="h-[100dvh] w-[84%] max-w-sm overflow-y-auto bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl"
+            data-drawer-state={menu.state}
+            className="m-drawer m-drawer-left h-[100dvh] w-[84%] max-w-sm overflow-y-auto bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-6 flex items-center justify-between">

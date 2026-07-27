@@ -7,16 +7,20 @@ import { formatPrice, getPublicImageUrl } from '@/lib/utils'
 import Button from '@/components/ui/Button'
 import { GiftWrapOptionContent } from '@/components/product/GiftWrapOption'
 import { useGiftWrap } from '@/hooks/useGiftWrap'
+import { useDrawerTransition } from '@/hooks/useDrawerTransition'
 
 export default function CartDrawer() {
   const isOpen = useCartStore((state) => state.isOpen)
+  // Panel phải ở lại DOM hết hiệu ứng đóng — `if (!isOpen) return null` gỡ ngay lập
+  // tức nên trước đây giỏ hàng bật/tắt cụt lủn, không có gì để animate.
+  const { mounted, state } = useDrawerTransition(isOpen)
 
-  if (!isOpen) return null
+  if (!mounted) return null
 
-  return <CartDrawerContent />
+  return <CartDrawerContent drawerState={state} />
 }
 
-function CartDrawerContent() {
+function CartDrawerContent({ drawerState }: { drawerState: 'entering' | 'open' | 'exiting' }) {
   const { items, giftWrap, closeCart, removeItem, updateQuantity, getTotalPrice } = useCartStore()
   const {
     enabled: giftWrapEnabled,
@@ -28,8 +32,18 @@ function CartDrawerContent() {
 
   return (
     <>
-      <div className="fixed inset-0 z-[100] bg-text/45 backdrop-blur-[2px]" onClick={closeCart} />
-      <aside role="dialog" aria-modal="true" aria-label="Giỏ hàng" className="fixed right-0 top-0 z-[110] flex h-full w-full max-w-md flex-col bg-secondary shadow-2xl">
+      <div
+        data-drawer-state={drawerState}
+        className="m-backdrop fixed inset-0 z-[100] bg-text/45 backdrop-blur-[2px]"
+        onClick={closeCart}
+      />
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-label="Giỏ hàng"
+        data-drawer-state={drawerState}
+        className="m-drawer m-drawer-right fixed right-0 top-0 z-[110] flex h-full w-full max-w-md flex-col bg-secondary shadow-2xl"
+      >
         <div className="flex items-center justify-between border-b border-neutral-200 bg-white p-5">
           <div className="flex items-center gap-2">
             <ShoppingBag size={20} className="text-primary" />
