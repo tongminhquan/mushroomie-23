@@ -20,6 +20,12 @@ import { safeJsonLd } from '@/lib/security'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { toAbsoluteUrl } from '@/lib/url'
 import { geoImageGraph } from '@/lib/geo-image-schema'
+import {
+  merchantReturnPolicySchema,
+  offerShippingDetailsSchema,
+  priceValidUntil,
+} from '@/lib/merchant-schema'
+import { getShippingFeeSnapshot } from '@/lib/shipping-fee-server'
 import { buildProductMetadataText } from '@/lib/product-metadata'
 import { inspectImageForRender } from '@/lib/server-image'
 import { resolveDisplayPrice } from '@/lib/product-price'
