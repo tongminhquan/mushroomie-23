@@ -23,6 +23,9 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
     qualities: [70, 75],
     minimumCacheTTL: 31536000,
+    // Next 16.2.11 can permanently poison the self-hosted disk LRU when it
+    // observes a zero-byte entry during concurrent startup image requests.
+    maximumDiskCacheSize: 0,
     deviceSizes: [384, 640, 750, 828, 1080, 1200, 1280, 1440, 1920],
     imageSizes: [32, 48, 64, 96, 128, 256, 320],
     remotePatterns: [
