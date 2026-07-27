@@ -381,13 +381,65 @@ a, button, input, textarea, select,
   }
 }
 
+/* ==========================================================================
+   Giảm chuyển động — phân tầng, không tắt sạch
+   --------------------------------------------------------------------------
+   `prefers-reduced-motion` báo rằng chuyển động gây chóng mặt/buồn nôn, chứ không
+   phải "ghét hoạt ảnh". Tắt sạch mọi thứ lại phản tác dụng: phần tử nhảy cóc từ
+   trạng thái này sang trạng thái kia còn mất phương hướng hơn, và mất luôn các tín
+   hiệu hữu ích (vòng focus, spinner đang tải).
+
+   Phân 3 tầng:
+     Tầng 1 — bỏ hẳn: parallax, trôi/phóng to diện rộng, xoay, marquee vô hạn.
+     Tầng 2 — làm nhẹ: bỏ phần dịch chuyển, giữ lại fade ngắn (≤200ms).
+     Tầng 3 — giữ nguyên: fade, đổi màu, vòng focus, spinner (không gợi cảm giác
+              tự di chuyển nên không gây chóng mặt).
+   ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
+  /* Lưới an toàn: chặn hoạt ảnh chạy hoang. Dùng 0.01ms chứ không phải 0s —
+     0s làm mất sự kiện transitionend/animationend mà JS có thể đang chờ. */
   *,
   *::before,
   *::after {
-    animation-duration: 0.001ms !important;
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
-    transition-duration: 0.001ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Tầng 1 — bỏ hẳn các chuyển động gây chóng mặt */
+  .animate-float,
+  .animate-float-soft,
+  .m-float,
+  .m-marquee > * {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  /* Tầng 2 — giữ transition nhưng chỉ còn fade màu/độ mờ, bỏ dịch chuyển */
+  .m-lift,
+  .hover-lift,
+  .m-card,
+  .m-press {
+    transition-property: opacity, background-color, border-color, color, box-shadow !important;
+    transition-duration: var(--m-duration-fast) !important;
+  }
+  .m-lift:hover,
+  .hover-lift:hover,
+  .m-card:hover,
+  .m-press:active {
+    transform: none !important;
+  }
+  .m-card:hover .m-card-media > * {
+    transform: none !important;
+  }
+
+  /* Tầng 3 — fade và vòng focus phải sống sót qua lưới an toàn ở trên */
+  .m-reveal,
+  .m-fade {
+    transition-duration: var(--m-duration-fast) !important;
+  }
+  :focus-visible {
+    transition-duration: var(--m-duration-fast) !important;
   }
 }
