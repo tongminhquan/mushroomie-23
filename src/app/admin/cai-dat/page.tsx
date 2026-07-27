@@ -176,7 +176,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div data-batch-reveal className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wide mb-1.5 text-neutral-500">Ngân hàng thụ hưởng</label>
                     <input disabled value={loading ? 'Đang tải...' : (data?.env?.bank_name || 'Đang lấy từ file .env')} className="w-full px-4 py-2.5 border-[1.5px] border-[#e2d3c8] rounded-lg bg-neutral-100 text-neutral-500 cursor-not-allowed" />

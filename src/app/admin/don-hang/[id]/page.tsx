@@ -60,7 +60,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
         </span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div data-batch-reveal className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
           {/* Customer info */}
           <div className="bg-white rounded-[16px] p-5 border-[1.5px] border-[#f0e0d6] shadow-card">

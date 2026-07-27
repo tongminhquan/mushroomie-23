@@ -124,7 +124,7 @@ export default function AdminCreateVoucherPage() {
 
       <AdminCard className="rounded-[16px] border-[1.5px] border-[#f0e0d6] p-6 shadow-card">
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
+          <div data-batch-reveal className="grid gap-6 md:grid-cols-2">
             <div>
               <label className="mb-2 block text-sm font-semibold text-neutral-700">Loại voucher</label>
               <select

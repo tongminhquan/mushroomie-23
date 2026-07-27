@@ -327,7 +327,7 @@ export default function AdminBannersPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6">
+        <div data-batch-reveal className="grid grid-cols-1 gap-6">
           {banners.map((banner, index) => (
             <div
               key={banner.id}

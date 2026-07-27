@@ -61,7 +61,7 @@ export default async function AdminDashboard() {
       />
 
       {/* Hành động nhanh — sticker style */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div data-batch-reveal className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {QUICK_ACTIONS.map((qa) => (
           <Link
             key={qa.href}

@@ -328,7 +328,7 @@ export default function AddPostPage() {
       </div>
 
       <div className="max-w-[1400px] mx-auto px-5 py-5">
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-5">
+        <div data-batch-reveal className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-5">
 
           {/* ══ LEFT: Main Editor ══ */}
           <div className="space-y-4">

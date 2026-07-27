@@ -240,7 +240,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             <div className="bg-white rounded-[16px] border-[1.5px] border-[#f0e0d6] shadow-card p-6 space-y-4">
               <h2 className="font-heading text-neutral-800 text-base border-b border-[#f0e0d6] pb-2 mb-2">Giá cả & Tồn kho</h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div data-batch-reveal className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Giá bán lẻ (VNĐ) *</label>
                   <input

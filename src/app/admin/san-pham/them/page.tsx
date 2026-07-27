@@ -126,7 +126,7 @@ export default function AddProductPage() {
         <div className="bg-white p-6 rounded-[16px] shadow-card border-[1.5px] border-[#f0e0d6] space-y-4">
           <h2 className="font-heading text-lg text-neutral-800 border-b border-[#f0e0d6] pb-3 mb-4">Thông tin cơ bản</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div data-batch-reveal className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Tên sản phẩm *</label>
               <input name="name" value={form.name} onChange={handleChange} required

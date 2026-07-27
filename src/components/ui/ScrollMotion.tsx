@@ -16,7 +16,11 @@ import { useEffect, useRef } from 'react'
  *    giảm chuyển động thì KHÔNG khởi tạo ScrollTrigger nào cả, chứ không phải khởi tạo
  *    rồi đặt biên độ bằng 0. Media query CSS không với tới GSAP nên phải chặn ở đây.
  *
- * 3. Dùng `ScrollTrigger.batch` thay vì một trigger cho mỗi thẻ: batch gom các phần tử
+ * 3. `scroller` phải khai báo khi vùng cuộn không phải window. Trang admin cuộn bên
+ *    trong `<main overflow-auto>`; ScrollTrigger mặc định bám viewport nên nếu bỏ trống
+ *    thì mọi hiệu ứng im lặng không chạy — không lỗi, không cảnh báo.
+ *
+ * 4. Dùng `ScrollTrigger.batch` thay vì một trigger cho mỗi thẻ: batch gom các phần tử
  *    cùng vào khung nhìn trong một khoảng ngắn rồi chạy chung một stagger — mượt hơn và
  *    ít instance hơn hẳn so với 12 trigger rời cho 12 thẻ sản phẩm.
  */
@@ -34,10 +38,14 @@ export default function ScrollMotion({ scroller }: { scroller?: string } = {}) {
       // Tầng 1: không dựng gì cả khi người dùng yêu cầu giảm chuyển động.
       if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
 
+      // Khi có scroller riêng, chỉ tìm phần tử BÊN TRONG nó — tránh gắn trigger vào
+      // phần tử nằm ngoài vùng cuộn (sidebar admin chẳng hạn), nơi mốc start/end vô nghĩa.
+      const root: ParentNode = scroller ? (document.querySelector(scroller) ?? document) : document
+
       const hasWork =
-        document.querySelector('[data-parallax]') ||
-        document.querySelector('[data-scroll-progress]') ||
-        document.querySelector('[data-batch-reveal]')
+        root.querySelector('[data-parallax]') ||
+        root.querySelector('[data-scroll-progress]') ||
+        root.querySelector('[data-batch-reveal]')
       if (!hasWork) return
 
       const [{ gsap }, { ScrollTrigger }] = await Promise.all([
@@ -51,7 +59,7 @@ export default function ScrollMotion({ scroller }: { scroller?: string } = {}) {
         // --- Parallax: nền trôi chậm hơn nội dung ---
         // data-parallax nhận cường độ 0..1 (mặc định 0.3). Chỉ dịch theo trục Y và
         // dùng yPercent để biên độ tự co giãn theo chiều cao phần tử.
-        for (const el of document.querySelectorAll<HTMLElement>('[data-parallax]')) {
+        for (const el of root.querySelectorAll<HTMLElement>('[data-parallax]')) {
           const strength = Number(el.dataset.parallax) || 0.3
           el.classList.add('m-parallax')
 
@@ -66,15 +74,16 @@ export default function ScrollMotion({ scroller }: { scroller?: string } = {}) {
                 start: 'top bottom',
                 end: 'bottom top',
                 scrub: true,
+                ...(scroller ? { scroller } : {}),
               },
             },
           )
         }
 
         // --- Thanh tiến trình đọc: gắn vào chiều dài bài viết ---
-        for (const bar of document.querySelectorAll<HTMLElement>('[data-scroll-progress]')) {
+        for (const bar of root.querySelectorAll<HTMLElement>('[data-scroll-progress]')) {
           const targetSelector = bar.dataset.scrollProgress
-          const target = targetSelector ? document.querySelector(targetSelector) : document.body
+          const target = targetSelector ? root.querySelector(targetSelector) : document.body
           if (!target) continue
 
           gsap.fromTo(
@@ -84,19 +93,35 @@ export default function ScrollMotion({ scroller }: { scroller?: string } = {}) {
               scaleX: 1,
               ease: 'none',
               transformOrigin: 'left center',
-              scrollTrigger: { trigger: target, start: 'top top', end: 'bottom bottom', scrub: 0.3 },
+              scrollTrigger: {
+                trigger: target,
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 0.3,
+                ...(scroller ? { scroller } : {}),
+              },
             },
           )
         }
 
         // --- Hiện theo cụm cho lưới thẻ ---
-        const batchTargets = document.querySelectorAll<HTMLElement>('[data-batch-reveal] > *')
+        // Chỉ ẩn phần tử NẰM NGOÀI khung nhìn. Trên trang form admin, lưới này chứa ô
+        // nhập liệu — ẩn thứ người dùng đang nhìn là lỗi nghiêm trọng, và nếu
+        // ScrollTrigger hỏng thì form coi như trắng. Phần tử đã thấy được thì để yên.
+        const batchTargets = Array.from(
+          root.querySelectorAll<HTMLElement>('[data-batch-reveal] > *'),
+        ).filter((el) => {
+          const rect = el.getBoundingClientRect()
+          return rect.top > window.innerHeight || rect.bottom < 0
+        })
+
         if (batchTargets.length > 0) {
           gsap.set(batchTargets, { opacity: 0, y: 28 })
           ScrollTrigger.batch(batchTargets, {
             start: 'top 88%',
             once: true,
             batchMax: 6,
+            ...(scroller ? { scroller } : {}),
             onEnter: (batch) =>
               gsap.to(batch, {
                 opacity: 1,
@@ -128,7 +153,7 @@ export default function ScrollMotion({ scroller }: { scroller?: string } = {}) {
       cancelled = true
       cleanup?.()
     }
-  }, [])
+  }, [scroller])
 
   return null
 }

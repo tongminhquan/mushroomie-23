@@ -387,41 +387,40 @@ body {
 }
 
 /* ==========================================================================
-   Motion cho trang admin — chức năng, không trang trí
+   Motion cho trang admin
    --------------------------------------------------------------------------
-   Admin là công cụ dùng hàng ngày để xử lý đơn. Hiệu ứng trang trí ở đây làm chậm
-   thao tác lặp lại và gây khó chịu, nên chỉ giữ loại motion GIÚP HIỂU điều vừa xảy ra:
-   hàng mới xuất hiện theo thứ tự (mắt bắt được là bảng vừa tải xong), phản hồi khi
-   nhấn, và làm nổi hàng đang trỏ tới.
+   Theo yêu cầu, admin dùng cùng cường độ với trang public: hàng bảng hiện lần lượt
+   với thời lượng và easing giống hệt lưới sản phẩm ngoài site, cộng parallax và
+   hiện-theo-cụm qua ScrollMotion gắn ở admin/layout.tsx.
 
-   Thời lượng cố ý ngắn hơn public (180ms so với 260ms) — người dùng admin lặp lại
-   thao tác hàng trăm lần mỗi ngày, mỗi mili giây chờ đều bị cộng dồn.
+   Riêng trần stagger vẫn giữ: bảng đơn hàng có thể lên tới hàng trăm dòng, so le hết
+   thì dòng cuối phải chờ vài giây mới đọc được — đó là lỗi, không phải phong cách.
    ========================================================================== */
 .m-admin-rows > tr {
-  animation: m-row-in 180ms var(--m-ease-out) both;
+  animation: m-row-in var(--m-duration-base) var(--m-ease-out) both;
 }
-/* Chỉ so le 12 hàng đầu; bảng 100 dòng mà so le hết thì hàng cuối phải chờ 2 giây. */
+/* Chỉ so le 12 hàng đầu, sau đó gộp chung một mốc. */
 .m-admin-rows > tr:nth-child(1) { animation-delay: 0ms; }
-.m-admin-rows > tr:nth-child(2) { animation-delay: 15ms; }
-.m-admin-rows > tr:nth-child(3) { animation-delay: 30ms; }
-.m-admin-rows > tr:nth-child(4) { animation-delay: 45ms; }
-.m-admin-rows > tr:nth-child(5) { animation-delay: 60ms; }
-.m-admin-rows > tr:nth-child(6) { animation-delay: 75ms; }
-.m-admin-rows > tr:nth-child(7) { animation-delay: 90ms; }
-.m-admin-rows > tr:nth-child(8) { animation-delay: 105ms; }
-.m-admin-rows > tr:nth-child(9) { animation-delay: 120ms; }
-.m-admin-rows > tr:nth-child(10) { animation-delay: 135ms; }
-.m-admin-rows > tr:nth-child(11) { animation-delay: 150ms; }
-.m-admin-rows > tr:nth-child(n + 12) { animation-delay: 165ms; }
+.m-admin-rows > tr:nth-child(2) { animation-delay: 40ms; }
+.m-admin-rows > tr:nth-child(3) { animation-delay: 80ms; }
+.m-admin-rows > tr:nth-child(4) { animation-delay: 120ms; }
+.m-admin-rows > tr:nth-child(5) { animation-delay: 160ms; }
+.m-admin-rows > tr:nth-child(6) { animation-delay: 200ms; }
+.m-admin-rows > tr:nth-child(7) { animation-delay: 240ms; }
+.m-admin-rows > tr:nth-child(8) { animation-delay: 280ms; }
+.m-admin-rows > tr:nth-child(9) { animation-delay: 320ms; }
+.m-admin-rows > tr:nth-child(10) { animation-delay: 360ms; }
+.m-admin-rows > tr:nth-child(11) { animation-delay: 400ms; }
+.m-admin-rows > tr:nth-child(n + 12) { animation-delay: 440ms; }
 
 @keyframes m-row-in {
-  from { opacity: 0; transform: translate3d(0, 6px, 0); }
+  from { opacity: 0; transform: translate3d(0, 20px, 0); }
   to   { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
-/* Làm nổi hàng đang trỏ tới — chỉ đổi màu nền, không dịch chuyển gì. */
+/* Làm nổi hàng đang trỏ tới. */
 .m-admin-rows > tr {
-  transition: background-color 120ms linear;
+  transition: background-color var(--m-duration-fast) var(--m-ease-out);
 }
 @media (hover: hover) {
   .m-admin-rows > tr:hover {

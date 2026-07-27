@@ -181,7 +181,7 @@ export default function MediaLibrary() {
           </label>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div data-batch-reveal className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {images.map((image) => (
             <div 
               key={image.id} 
