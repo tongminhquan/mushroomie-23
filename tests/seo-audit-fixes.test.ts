@@ -64,6 +64,29 @@ test('about page schema links the story page to the LocalBusiness entity', () =>
   assert.equal(schema.isPartOf['@id'], 'https://mushroomie.io.vn/#website')
 })
 
+test('publisher and seller resolve to the same brand entity as the homepage', () => {
+  // Bài viết và sản phẩm trước đây khai Organization riêng lẻ, không @id, không sameAs —
+  // Google và các LLM thấy nhiều thực thể rời rạc thay vì một thương hiệu.
+  const ref = brandEntityRef()
+  const home = localBusinessSchema()
+
+  assert.equal(ref['@id'], home['@id'], 'publisher không trỏ về cùng entity với trang chủ')
+  assert.equal(ref['@id'], 'https://mushroomie.io.vn/#localbusiness')
+})
+
+test('the brand entity carries enough identity to stand alone on any page', () => {
+  // @id giúp hợp nhất, nhưng crawler chỉ đọc riêng một trang bài viết vẫn phải nhận ra
+  // thương hiệu — nên node phải tự mang name/url/logo/sameAs.
+  const ref = brandEntityRef()
+
+  assert.equal(ref.name, BRAND.name)
+  assert.equal(ref.url, 'https://mushroomie.io.vn')
+  assert.equal(ref.logo['@type'], 'ImageObject')
+  assert.ok(ref.logo.url.startsWith('https://'))
+  assert.ok(Array.isArray(ref.sameAs) && ref.sameAs.length >= 4, 'thiếu liên kết mạng xã hội')
+  for (const url of ref.sameAs) assert.match(url, /^https:\/\//)
+})
+
 test('related posts spread internal links instead of always pointing at the newest posts', () => {
   const pool = Array.from({ length: 40 }, (_, i) => ({ id: `post-${i}` }))
 
