@@ -678,6 +678,19 @@ a, button, input, textarea, select,
     transition: opacity 120ms linear;
   }
 
+  /* Drawer là chuyển động diện rộng (Tầng 1): bỏ phần trượt, panel hiện thẳng ở đúng
+     vị trí. useDrawerTransition cũng bỏ luôn phần trì hoãn gỡ DOM tương ứng. */
+  .m-drawer,
+  .m-drawer-right[data-drawer-state],
+  .m-drawer-left[data-drawer-state] {
+    transform: none !important;
+    transition: none !important;
+  }
+  /* Nền mờ giữ fade (Tầng 3) để panel không "bụp" ra đột ngột. */
+  .m-backdrop[data-drawer-state='open'] {
+    opacity: 1;
+  }
+
   /* Tầng 2 — giữ transition nhưng chỉ còn fade màu/độ mờ, bỏ dịch chuyển */
   .m-lift,
   .hover-lift,
