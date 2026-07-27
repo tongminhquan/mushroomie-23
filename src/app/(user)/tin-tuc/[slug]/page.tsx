@@ -26,6 +26,7 @@ import {
   resolvePostMetadataDescription,
   resolvePostMetadataTitle,
 } from '@/lib/post-metadata'
+import { brandEntityRef } from '@/lib/local-seo'
 import { rankProductsForPost } from '@/lib/post-product-recommendations'
 import { pickRelatedPosts } from '@/lib/related-posts'
 
