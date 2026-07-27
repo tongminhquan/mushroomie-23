@@ -1,4 +1,5 @@
 import { DEFAULT_SOCIAL_IMAGE } from '@/lib/seo-assets'
+import { getAreaDelivery } from '@/lib/local-area-content'
 
 /**
  * Gói Local SEO cho Mushroomie — bản đồ từ khóa địa phương (Đồng Nai, Biên Hòa,
