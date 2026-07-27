@@ -27,10 +27,10 @@ test('phase 6 baseline preserves all 30 keywords without inventing authenticated
   const rows = buildSeoPhase6KeywordBaseline(keywordRows, '2026-07-17')
 
   assert.equal(rows.length, 30)
-  assert.equal(new Set(rows.map((row) => row.ownerUrl)).size, 9)
+  assert.equal(new Set(rows.map((row) => row.ownerUrl)).size, 8)
   assert.equal(rows[0].ownerUrl, 'https://mushroomie.io.vn/san-pham?category=vong-tay')
   assert.equal(rows[16].ownerUrl, 'https://mushroomie.io.vn/')
-  assert.equal(rows[29].ownerUrl, 'https://mushroomie.io.vn/tin-tuc/qua-handmade-tang-nguoi-yeu')
+  assert.equal(rows[29].ownerUrl, 'https://mushroomie.io.vn/tin-tuc/qua-tang-handmade')
 
   for (const row of rows) {
     assert.equal(row.baselineDate, '2026-07-17')

@@ -1,22 +1,22 @@
 # Mushroomie SEO Phase 6 - Measurement Baseline
 
-Generated: 2026-07-16T21:39:07.701Z
+Generated: 2026-07-27T18:33:18.920Z
 
 ## Kết luận
 
-- Baseline date: `2026-07-17`
-- Keyword plan: 30 từ khóa, 9 canonical owner URL.
-- Public sitemap: 123 URL tại thời điểm audit.
+- Baseline date: `2026-07-28`
+- Keyword plan: 30 từ khóa, 8 canonical owner URL.
+- Public sitemap: 134 URL tại thời điểm audit.
 - Trạng thái dữ liệu tài khoản: `pending_authenticated_data`.
 - Không có thứ hạng, click, impression, CTR, index count, CWV field data, GA4
   organic traffic hoặc Local Pack position nào được suy đoán.
 
 ## Bằng chứng đã xác minh công khai
 
-- Production JavaScript bundle chứa GA4 `G-R95TLDCP0W`, Google Ads
-  `AW-18206718336` và GTM `GTM-K55B6RVG`.
-- GTM container công khai không chứa trực tiếp GA4/Ads ID nói trên; cấu hình
-  hiện tại chưa cho thấy hai nguồn cùng gửi page view.
+- Production JavaScript bundle chứa GTM `GTM-K55B6RVG`; container
+  quản lý GA4 `G-R95TLDCP0W`, Google Ads `AW-18206718336` và Clarity.
+- Website chỉ nạp một GTM container; không nạp thêm gtag.js hoặc Clarity trực tiếp,
+  tránh ghi nhận trùng page view và conversion.
 - `https://mushroomie.io.vn/sitemap.xml` truy cập được và robots.txt trỏ tới
   sitemap này.
 - DNS TXT có token `google-site-verification`. Token này không chứng minh phiên
@@ -70,8 +70,8 @@ Generated: 2026-07-16T21:39:07.701Z
 
 ```json
 {
-  "generatedAt": "2026-07-16T21:39:07.701Z",
-  "baselineDate": "2026-07-17",
+  "generatedAt": "2026-07-27T18:33:18.920Z",
+  "baselineDate": "2026-07-28",
   "measurementStatus": "pending_authenticated_data",
   "publicChecks": {
     "homepage": {
@@ -96,20 +96,18 @@ Generated: 2026-07-16T21:39:07.701Z
     }
   },
   "tags": {
+    "googleTagManagerId": "GTM-K55B6RVG",
     "googleAnalyticsId": "G-R95TLDCP0W",
     "googleAdsId": "AW-18206718336",
-    "googleTagManagerId": "GTM-K55B6RVG",
-    "productionBundleHasGa4": true,
-    "productionBundleHasGoogleAds": true,
     "productionBundleHasGtm": true,
-    "gtmContainerHasDirectGa4Id": false,
-    "gtmContainerHasDirectGoogleAdsId": false
+    "productionBundleHasGa4": false,
+    "productionBundleHasGoogleAds": true
   },
   "searchConsole": {
     "dnsVerificationTokenPresent": true,
     "dnsVerificationTokenCount": 1,
     "sitemapReferencedInRobots": true,
-    "sitemapPublicUrlCount": 123,
+    "sitemapPublicUrlCount": 134,
     "authenticatedAccessConfigured": false,
     "submittedSitemapStatus": "pending_authenticated_data",
     "searchAnalyticsStatus": "pending_authenticated_data",
@@ -131,7 +129,7 @@ Generated: 2026-07-16T21:39:07.701Z
   },
   "keywords": {
     "count": 30,
-    "canonicalOwnerCount": 9,
+    "canonicalOwnerCount": 8,
     "rankingStatus": "pending_authenticated_data"
   }
 }

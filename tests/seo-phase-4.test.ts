@@ -63,15 +63,16 @@ const keywordRows: SeoPhase4KeywordRow[] = keywordNames.map((keyword, index) => 
   note: '',
 }))
 
-test('the 30-keyword plan resolves to exactly nine canonical owner URLs', () => {
+test('the 30-keyword plan resolves to live canonical owner URLs', () => {
   const owners = keywordRows.map((row) => resolveKeywordOwner(row.index))
 
   assert.equal(owners.length, 30)
-  assert.equal(new Set(owners.map((owner) => owner.href)).size, 9)
+  assert.equal(new Set(owners.map((owner) => owner.href)).size, 8)
   assert.equal(resolveKeywordOwner(1).href, '/san-pham?category=vong-tay')
   assert.equal(resolveKeywordOwner(17).href, '/')
   assert.equal(resolveKeywordOwner(24).href, '/san-pham?category=charm')
-  assert.equal(resolveKeywordOwner(30).href, '/tin-tuc/qua-handmade-tang-nguoi-yeu')
+  assert.equal(resolveKeywordOwner(30).href, '/tin-tuc/qua-tang-handmade')
+  assert.notEqual(resolveKeywordOwner(30).href, '/tin-tuc/qua-handmade-tang-nguoi-yeu')
   assert.throws(() => resolveKeywordOwner(0), /Unsupported keyword index/)
   assert.throws(() => resolveKeywordOwner(31), /Unsupported keyword index/)
 })
@@ -148,7 +149,7 @@ test('phase 4 audit reports duplicate targeting, malformed slugs and priority br
   })
 
   assert.equal(audit.summary.keywordCount, 30)
-  assert.equal(audit.summary.ownerCount, 9)
+  assert.equal(audit.summary.ownerCount, 8)
   assert.equal(audit.summary.missingOwnerCount, 0)
   assert.deepEqual(audit.duplicateFocusKeywords, [
     {
@@ -162,7 +163,7 @@ test('phase 4 audit reports duplicate targeting, malformed slugs and priority br
   assert.deepEqual(audit.malformedPostSlugs, [
     { id: 4, slug: 'https://mushroomie.io.vn/vong-tay-handmade-nu/' },
   ])
-  assert.equal(audit.priorityPosts.length, 10)
+  assert.equal(audit.priorityPosts.length, PHASE4_PRIORITY_POST_SLUGS.length)
   assert.deepEqual(
     audit.priorityPosts.map((post) => post.slug),
     PHASE4_PRIORITY_POST_SLUGS,

@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-07-16T21:04:47.442Z",
+  "generatedAt": "2026-07-27T18:33:09.173Z",
   "summary": {
     "keywordCount": 30,
-    "ownerCount": 9,
+    "ownerCount": 8,
     "missingOwnerCount": 0,
     "duplicateFocusKeywordCount": 0,
     "malformedPostSlugCount": 1,
-    "priorityPostCount": 10
+    "priorityPostCount": 9
   },
   "ownerUrls": [
     "/san-pham?category=vong-tay",
@@ -16,8 +16,7 @@
     "/san-pham?category=charm",
     "/san-pham?category=vong-co",
     "/tin-tuc/qua-tang-handmade",
-    "/tin-tuc/vong-tay-best-friend-handmade",
-    "/tin-tuc/qua-handmade-tang-nguoi-yeu"
+    "/tin-tuc/vong-tay-best-friend-handmade"
   ],
   "missingOwnerUrls": [],
   "keywords": [
@@ -653,20 +652,13 @@
       "note": "Nhấn mạnh cá nhân hóa và cảm xúc",
       "owner": {
         "key": "lover-gifts",
-        "href": "/tin-tuc/qua-handmade-tang-nguoi-yeu",
+        "href": "/tin-tuc/qua-tang-handmade",
         "label": "Gợi ý quà handmade cho người yêu",
         "description": "Tìm ý tưởng quà tặng giàu cảm xúc và có dấu ấn riêng cho người thương."
       },
       "ownerReachable": true,
-      "currentTargets": [
-        {
-          "id": 74,
-          "slug": "qua-handmade-tang-nguoi-yeu",
-          "title": "Quà handmade tặng người yêu – Gợi ý chọn quà có ý nghĩa",
-          "focusKeyword": "quà handmade cho người yêu"
-        }
-      ],
-      "status": "mapped"
+      "currentTargets": [],
+      "status": "owner-only"
     }
   ],
   "duplicateFocusKeywords": [],
@@ -739,13 +731,6 @@
       "title": "Vòng tay best friend handmade – Cẩm nang chọn mẫu phù hợp",
       "focusKeyword": "quà sinh nhật cho bạn thân",
       "wordCount": 888
-    },
-    {
-      "id": 74,
-      "slug": "qua-handmade-tang-nguoi-yeu",
-      "title": "Quà handmade tặng người yêu – Gợi ý chọn quà có ý nghĩa",
-      "focusKeyword": "quà handmade cho người yêu",
-      "wordCount": 894
     }
   ]
 }

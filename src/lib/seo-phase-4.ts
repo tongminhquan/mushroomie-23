@@ -87,7 +87,7 @@ const KEYWORD_OWNERS = {
   },
   loverGifts: {
     key: 'lover-gifts',
-    href: '/tin-tuc/qua-handmade-tang-nguoi-yeu',
+    href: '/tin-tuc/qua-tang-handmade',
     label: 'Gợi ý quà handmade cho người yêu',
     description: 'Tìm ý tưởng quà tặng giàu cảm xúc và có dấu ấn riêng cho người thương.',
   },
@@ -96,7 +96,6 @@ const KEYWORD_OWNERS = {
 const ARTICLE_OWNER_SLUGS = new Set([
   'qua-tang-handmade',
   'vong-tay-best-friend-handmade',
-  'qua-handmade-tang-nguoi-yeu',
 ])
 
 export const PHASE4_PRIORITY_POST_SLUGS = [
@@ -109,7 +108,6 @@ export const PHASE4_PRIORITY_POST_SLUGS = [
   'vong-tay-handmade-nu',
   'vong-tay-charm',
   'vong-tay-best-friend-handmade',
-  'qua-handmade-tang-nguoi-yeu',
 ] as const
 
 export const PHASE4_METADATA_CHANGES: SeoPhase4MetadataChange[] = [
@@ -179,12 +177,6 @@ export const PHASE4_METADATA_CHANGES: SeoPhase4MetadataChange[] = [
     slug: 'vong-tay-best-friend-handmade',
     reason: 'Align the editorial owner with the approved keyword plan.',
     data: { focus_keyword: 'quà sinh nhật cho bạn thân' },
-  },
-  {
-    id: 74,
-    slug: 'qua-handmade-tang-nguoi-yeu',
-    reason: 'Align the editorial owner with the approved keyword plan.',
-    data: { focus_keyword: 'quà handmade cho người yêu' },
   },
 ]
 

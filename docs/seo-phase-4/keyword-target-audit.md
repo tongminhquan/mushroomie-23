@@ -1,15 +1,15 @@
 # Mushroomie SEO Phase 4 - Keyword Target Audit
 
-Generated: 2026-07-16T21:04:47.442Z
+Generated: 2026-07-27T18:33:09.173Z
 
 ## Summary
 
 - Keywords: 30
-- Canonical owner URLs: 9
+- Canonical owner URLs: 8
 - Missing owners: 0
 - Duplicate focus-keyword groups: 0
 - Malformed post slugs: 1
-- Priority content briefs: 10
+- Priority content briefs: 9
 
 ## Keyword Ownership
 
@@ -44,7 +44,7 @@ Generated: 2026-07-16T21:04:47.442Z
 | 27 | dây chuyền handmade | /san-pham?category=vong-co | 200/reachable | owner-only |
 | 28 | quà tặng handmade | /tin-tuc/qua-tang-handmade | 200/reachable | mapped |
 | 29 | quà sinh nhật cho bạn thân | /tin-tuc/vong-tay-best-friend-handmade | 200/reachable | mapped |
-| 30 | quà handmade cho người yêu | /tin-tuc/qua-handmade-tang-nguoi-yeu | 200/reachable | mapped |
+| 30 | quà handmade cho người yêu | /tin-tuc/qua-tang-handmade | 200/reachable | owner-only |
 
 ## Duplicate Focus Keywords
 
