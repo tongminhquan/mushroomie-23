@@ -30,6 +30,47 @@ export function reviewRequestEmailsEnabled(): boolean {
 }
 
 // ─────────────────────────────────────────────
+// Lọc địa chỉ không gửi được
+//
+// Đơn hàng test lọt vào DB với email kiểu `AA@gmail.net` — domain đó không có bản ghi MX
+// nên thư chắc chắn bounce. Tỷ lệ bounce cao làm Gmail SMTP hạ uy tín người gửi, kéo theo
+// email thật rơi vào spam.
+//
+// Dùng tra cứu MX thay vì blocklist domain tự đoán: `gmail.co` trông như gõ nhầm nhưng là
+// domain thật có MX, còn `gmail.net` thì không. Chỉ DNS mới phân biệt được chính xác.
+// ─────────────────────────────────────────────
+
+const EMAIL_SHAPE = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/
+
+/** Kết quả tra cứu MX trong một lần chạy cron; không cache lâu hơn để DNS đổi được nhận ra. */
+export type MxCache = Map<string, boolean>
+
+export async function isDeliverableEmail(
+  email: string,
+  cache: MxCache = new Map(),
+  resolveMx: (domain: string) => Promise<unknown[]> = async (domain) =>
+    (await import('node:dns')).promises.resolveMx(domain),
+): Promise<boolean> {
+  if (!EMAIL_SHAPE.test(email)) return false
+
+  const domain = email.slice(email.lastIndexOf('@') + 1).toLowerCase()
+  const cached = cache.get(domain)
+  if (cached !== undefined) return cached
+
+  let deliverable: boolean
+  try {
+    deliverable = (await resolveMx(domain)).length > 0
+  } catch {
+    // Bao gồm cả ENOTFOUND lẫn ESERVFAIL. Lỗi DNS tạm thời cũng rơi vào đây, nên bên gọi
+    // KHÔNG được ghi EmailLog cho trường hợp bị bỏ qua — để lần chạy sau thử lại.
+    deliverable = false
+  }
+
+  cache.set(domain, deliverable)
+  return deliverable
+}
+
+// ─────────────────────────────────────────────
 // Token — cùng cơ chế HMAC với order-access.ts, nhưng namespace riêng ('review') để
 // token đánh giá không dùng thay được token tra cứu đơn.
 // ─────────────────────────────────────────────
