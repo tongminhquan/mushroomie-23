@@ -821,6 +821,29 @@ export function localServiceSchema(page: LocalPage) {
 }
 
 /**
+ * Tham chiếu thương hiệu dùng chung cho `publisher` / `seller` trên MỌI trang.
+ *
+ * Trước đây bài viết và sản phẩm mỗi trang khai một node `Organization` riêng, không có
+ * `@id` và không có `sameAs` — Google cùng các LLM nhìn thấy nhiều thực thể rời rạc thay
+ * vì một thương hiệu duy nhất. Helper này vừa mang `@id` trỏ về LocalBusiness ở trang
+ * chủ (để hợp nhất thực thể), vừa mang đủ thuộc tính nhận dạng để tự đứng vững nếu
+ * crawler chỉ đọc riêng trang đó.
+ */
+export function brandEntityRef() {
+  return {
+    '@type': 'Organization',
+    '@id': `${SITE_URL}/#localbusiness`,
+    name: BRAND.name,
+    url: SITE_URL,
+    logo: {
+      '@type': 'ImageObject',
+      url: BRAND.logo,
+    },
+    sameAs: BRAND.sameAs,
+  }
+}
+
+/**
  * Schema cho /gioi-thieu — trang duy nhất trong sitemap chưa có structured data.
  * Gắn với @id của LocalBusiness để Google nối trang câu chuyện vào entity thương hiệu.
  */
