@@ -7,9 +7,10 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
+        allow: ['/', '/api/auth/session'],
         // Utility pages stay crawlable so search engines can read their noindex metadata.
-        disallow: ['/admin', '/api'],
+        // The public session endpoint is required by SessionProvider during rendering checks.
+        disallow: ['/admin', '/api/'],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
