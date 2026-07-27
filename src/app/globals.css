@@ -235,6 +235,133 @@ body {
   contain-intrinsic-size: auto 720px;
 }
 
+/* ==========================================================================
+   Hệ thống motion — dùng chung cho toàn site
+   --------------------------------------------------------------------------
+   Nguyên tắc bất di bất dịch: CHỈ animate `transform` và `opacity`. Hai thuộc tính
+   này chạy trên compositor nên giữ được 60fps; animate width/height/top/left/
+   box-shadow buộc trình duyệt tính lại layout mỗi khung hình và gây giật.
+   Đổ bóng khi hover được làm bằng lớp ::after mờ dần thay vì animate box-shadow.
+
+   Toàn bộ ở đây là CSS thuần, 0 KB JavaScript — áp dụng cho cả 54 trang mà không
+   ảnh hưởng Core Web Vitals.
+   ========================================================================== */
+:root {
+  /* Thời lượng: đủ nhanh để thấy phản hồi tức thì, đủ chậm để mắt kịp theo */
+  --m-duration-fast: 150ms;   /* phản hồi nhấn, đổi màu */
+  --m-duration-base: 260ms;   /* hover thẻ, nút */
+  --m-duration-slow: 520ms;   /* xuất hiện khi cuộn */
+
+  /* Easing: ra nhanh vào chậm — cảm giác tự nhiên hơn ease mặc định */
+  --m-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --m-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);  /* nảy nhẹ, hợp tông handmade */
+  --m-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* --- Nâng lên khi hover (thẻ, ô bấm) --- */
+.m-lift {
+  transition: transform var(--m-duration-base) var(--m-ease-spring);
+  will-change: transform;
+}
+@media (hover: hover) {
+  .m-lift:hover { transform: translateY(-4px); }
+}
+
+/* --- Phản hồi khi nhấn: co nhẹ, cảm giác "bấm được" trên mobile --- */
+.m-press {
+  transition: transform var(--m-duration-fast) var(--m-ease-out);
+}
+.m-press:active { transform: scale(0.96); }
+
+/* --- Thẻ sản phẩm / bài viết: nâng thẻ + phóng nhẹ ảnh bên trong --- */
+.m-card {
+  transition: transform var(--m-duration-base) var(--m-ease-spring);
+}
+.m-card-media {
+  overflow: hidden;   /* cắt phần ảnh tràn ra khi phóng to */
+}
+.m-card-media > * {
+  transition: transform var(--m-duration-slow) var(--m-ease-out);
+}
+@media (hover: hover) {
+  .m-card:hover { transform: translateY(-6px); }
+  .m-card:hover .m-card-media > * { transform: scale(1.06); }
+}
+.m-card:active { transform: translateY(-2px) scale(0.99); }
+
+/* --- Gạch chân chạy từ trái sang cho link --- */
+.m-underline {
+  position: relative;
+}
+.m-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--m-duration-base) var(--m-ease-out);
+}
+@media (hover: hover) {
+  .m-underline:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+/* --- Đổ bóng khi hover, làm bằng opacity để không animate box-shadow --- */
+.m-glow {
+  position: relative;
+  isolation: isolate;
+}
+.m-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--shadow-hover);
+  opacity: 0;
+  transition: opacity var(--m-duration-base) var(--m-ease-out);
+  z-index: -1;
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .m-glow:hover::before { opacity: 1; }
+}
+
+/* --- Trôi nổi nhẹ cho hình trang trí (sticker, charm) --- */
+@keyframes m-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -6px, 0); }
+}
+.m-float {
+  animation: m-float 4s var(--m-ease-in-out) infinite;
+}
+
+/* --- Xuất hiện khi cuộn tới: mặc định hiện sẵn, chỉ ẩn khi JS gắn cờ.
+       Cách này tránh nội dung biến mất vĩnh viễn nếu JS lỗi hoặc chưa chạy. --- */
+.m-reveal {
+  transition:
+    opacity var(--m-duration-slow) var(--m-ease-out),
+    transform var(--m-duration-slow) var(--m-ease-out);
+}
+[data-m-reveal='hidden'] {
+  opacity: 0;
+  transform: translateY(24px);
+}
+[data-m-reveal='shown'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- Fade thuần (Tầng 3, luôn an toàn) --- */
+.m-fade {
+  transition: opacity var(--m-duration-base) var(--m-ease-out);
+}
+
 /* ========== Animations ========== */
 
 /* Skeleton shimmer */
