@@ -163,17 +163,32 @@ Gửi email mời đánh giá cho đơn `COMPLETED` sau 3 ngày, tối đa 25 em
 curl -sS -H "Authorization: Bearer $CRON_SECRET" https://mushroomie.io.vn/api/cron/review-requests
 ```
 
-**Bật gửi thật** — thêm vào `.env` rồi `pm2 restart mushroomie_pm2`:
+**Trạng thái: ĐÃ BẬT 2026-07-27.** `REVIEW_REQUEST_EMAILS_ENABLED=true`, cron chạy 09:00 hằng ngày.
+
+**Đổi biến môi trường — đọc kỹ, đây là bẫy:** PM2 chạy với `cwd = /var/www/mushroomie/.next/standalone` (xem `ecosystem.config.js`), nên Next.js đọc `.env` **trong thư mục đó**, không phải `.env` ở gốc repo. Sửa mỗi `.env` gốc là không có tác dụng gì cho tới lần deploy sau.
 
 ```bash
-REVIEW_REQUEST_EMAILS_ENABLED=true
+cd /var/www/mushroomie
+# 1. sửa .env gốc (nguồn chuẩn — deploy.sh dòng 86 copy sang standalone mỗi lần deploy)
+# 2. đồng bộ cho process đang chạy:
+cp .env .next/standalone/.env
+# 3. --update-env là BẮT BUỘC; pm2 restart thường dùng lại env đã lưu
+pm2 restart mushroomie_pm2 --update-env
 ```
 
-**Đăng ký crontab (chạy 09:00 hằng ngày):**
+Xác nhận flag đã có hiệu lực — response phải có `"dryRun": false`:
 
 ```bash
-0 9 * * * curl -sS -H "Authorization: Bearer $CRON_SECRET" https://mushroomie.io.vn/api/cron/review-requests >> /var/log/mushroomie-cron.log 2>&1
+curl -sS -H "Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3001/api/cron/review-requests
 ```
+
+**Crontab đã đăng ký:**
+
+```bash
+0 9 * * * curl -sS -H "Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3001/api/cron/review-requests >> /var/log/mushroomie-cron.log 2>&1
+```
+
+Tắt lại: đổi thành `REVIEW_REQUEST_EMAILS_ENABLED=false` theo đúng 3 bước trên. Endpoint sẽ quay về dry run, cron vẫn chạy nhưng không gửi gì.
 
 An toàn khi chạy lặp: mỗi đơn chỉ gửi một lần (chốt bằng bảng `email_logs`), khách bấm huỷ đăng ký sẽ không nhận email loại này nữa. Kiểm tra kết quả gửi:
 
