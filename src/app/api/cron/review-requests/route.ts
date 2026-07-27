@@ -68,7 +68,26 @@ export async function GET(request: NextRequest) {
       ).map((log) => log.recipient_email),
     )
 
-    const eligible = candidates.filter((order) => !optedOut.has(order.customer_email))
+    const notOptedOut = candidates.filter((order) => !optedOut.has(order.customer_email))
+
+    // Loại địa chỉ không gửi được TRƯỚC khi gửi, và không ghi EmailLog cho chúng: lỗi DNS
+    // tạm thời cũng bị coi là không gửi được, ghi log sẽ khoá vĩnh viễn một khách thật.
+    const mxCache: MxCache = new Map()
+    const deliverable: typeof notOptedOut = []
+    const undeliverable: string[] = []
+    for (const order of notOptedOut) {
+      if (await isDeliverableEmail(order.customer_email, mxCache)) deliverable.push(order)
+      else undeliverable.push(order.order_code)
+    }
+
+    if (undeliverable.length > 0) {
+      console.warn(
+        `[cron/review-requests] Bỏ qua ${undeliverable.length} đơn có email không gửi được:`,
+        undeliverable.join(','),
+      )
+    }
+
+    const eligible = deliverable
 
     if (dryRun) {
       return NextResponse.json({
