@@ -252,20 +252,17 @@ async function main() {
   console.log('✅ Posts created')
 
   // ─── REVIEWS ──────────────────────────────────────────────
-  const reviewsData = [
-    { name: 'Nguyễn Thu Hà', content: 'Vòng tay đẹp lắm ạ, làm tỉ mỉ và chắc chắn hơn mình nghĩ. Shop giao hàng nhanh, đóng gói cẩn thận. Sẽ ủng hộ tiếp!', rating: 5, is_featured: true },
-    { name: 'Trần Minh Tâm', content: 'Mua làm quà sinh nhật cho bạn gái, bạn rất thích. Charm nấm dễ thương quá, handmade rõ ràng. Cảm ơn Mushroomie!', rating: 5, is_featured: true },
-    { name: 'Lê Thị Bình', content: 'Sản phẩm ok, giao hàng đúng hẹn. Có thể cá nhân hóa theo yêu cầu, shop tư vấn nhiệt tình. 4 sao vì hơi lâu giao.', rating: 4, is_featured: true },
-    { name: 'Phạm Văn Dũng', content: 'Đặt móc khóa charm cho con gái, bé thích lắm. Chất lượng tốt, giá hợp lý. Sẽ quay lại mua thêm!', rating: 5, is_featured: true },
-    { name: 'Hoàng Thị Mai', content: 'Mua vòng tay couple, cả hai đều rất ưng. Shop làm theo yêu cầu tốt, có ghi chú riêng theo ý mình. Love it!', rating: 5, is_featured: true },
-    { name: 'Vũ Đình Nam', content: 'Tuyệt vời! Mua làm quà 8/3, người nhận rất cảm động. Handmade thật sự khác hàng sản xuất hàng loạt.', rating: 5, is_featured: true },
-  ]
+  // KHÔNG seed đánh giá. Trước đây ở đây có 6 review giả (`is_featured: true`, không gắn
+  // sản phẩm) và chúng đã lọt lên trang chủ production, hiển thị như lời khách thật —
+  // gỡ khỏi DB ngày 2026-07-27.
+  //
+  // Đánh giá bịa vi phạm chính sách structured data của Google và đánh lừa người mua.
+  // Nguồn đánh giá thật là email xin đánh giá sau giao hàng
+  // (src/lib/review-request.ts + /api/cron/review-requests).
+  //
+  // HomeTrust tự chuyển sang khối "Vì sao bạn sẽ thích" khi chưa có đánh giá nào, nên
+  // trang chủ vẫn đầy đủ mà không cần dữ liệu giả.
 
-  for (const review of reviewsData) {
-    await prisma.review.create({ data: { ...review, status: 'approved' } }).catch(() => {})
-  }
-
-  console.log('✅ Reviews created')
 
   console.log('')
   console.log('🎉 Seed completed!')
