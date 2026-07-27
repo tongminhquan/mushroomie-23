@@ -1,7 +1,11 @@
 import { MetadataRoute } from 'next'
 import { prisma } from '@/lib/prisma'
-import { LOCAL_SEO_LAST_MODIFIED, PUBLISHED_LOCAL_PAGES } from '@/lib/local-seo'
-import { isCatalogCategory } from '@/lib/catalog-seo'
+import { getLocalSeoLastModified, PUBLISHED_LOCAL_PAGES } from '@/lib/local-seo'
+import {
+  CATALOG_SEO_LAST_MODIFIED,
+  getCatalogSeoLastModified,
+  isCatalogCategory,
+} from '@/lib/catalog-seo'
 import { shouldIncludePostInSitemap } from '@/lib/sitemap-post-inclusion'
 
 // Regenerate the sitemap at most once an hour (ISR) so newly published posts /
@@ -22,7 +26,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, changeFrequency: 'daily', priority: 1 },
-    { url: `${baseUrl}/san-pham`, changeFrequency: 'daily', priority: 0.9 },
+    {
+      url: `${baseUrl}/san-pham`,
+      lastModified: CATALOG_SEO_LAST_MODIFIED,
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
     { url: `${baseUrl}/tin-tuc`, changeFrequency: 'weekly', priority: 0.8 },
     // /cau-chuyen permanently redirects to /gioi-thieu, so the canonical /gioi-thieu (below)
     // is the sitemap entry — listing the alias would put a redirect URL in the sitemap.
@@ -39,7 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Landing pages Local SEO (Đồng Nai / Biên Hòa / TP.HCM)
   const localPages: MetadataRoute.Sitemap = PUBLISHED_LOCAL_PAGES.map((p) => ({
     url: `${baseUrl}/${p.slug}`,
-    lastModified: LOCAL_SEO_LAST_MODIFIED,
+    lastModified: getLocalSeoLastModified(p.slug),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }))
@@ -83,7 +92,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     categories = categoryList.filter((c) => isValidSlug(c.slug) && isCatalogCategory(c.slug)).map((c) => ({
       url: `${baseUrl}/san-pham?category=${encodeURIComponent(c.slug)}`,
-      lastModified: c.updated_at,
+      lastModified: getCatalogSeoLastModified(c.updated_at),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     }))

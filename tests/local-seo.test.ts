@@ -9,6 +9,7 @@ import {
   PUBLISHED_LOCAL_SLUGS,
   faqPageSchema,
   getLocalFaqs,
+  getLocalSeoLastModified,
   getRelatedPages,
   localBusinessSchema,
   localServiceSchema,
@@ -145,4 +146,48 @@ test('FAQ schema phản ánh đúng câu hỏi đang hiển thị trên landing'
   assert.equal(schema.mainEntity.length, faqs.length)
   assert.equal(schema.mainEntity[0]?.name, faqs[0]?.question)
   assert.equal(schema.mainEntity[0]?.acceptedAnswer.text, faqs[0]?.answer)
+})
+
+test('4 landing ưu tiên có nội dung riêng theo đúng ý định tìm kiếm', () => {
+  const prioritySlugs = [
+    'vong-tay-handmade-dong-nai',
+    'vong-tay-custom-bien-hoa',
+    'moc-khoa-handmade-dong-nai',
+    'qua-tang-handmade-dong-nai',
+  ]
+
+  for (const slug of prioritySlugs) {
+    const page = LOCAL_PAGES.find((candidate) => candidate.slug === slug)
+    assert.ok(page, `Thiếu landing ${slug}`)
+    assert.ok(page.intentSections && page.intentSections.length >= 2, `${slug} thiếu nội dung theo ý định`)
+
+    const wordCount = page.intentSections
+      .flatMap((section) => [section.title, section.body])
+      .join(' ')
+      .trim()
+      .split(/\s+/u)
+      .length
+
+    assert.ok(wordCount >= 110, `${slug} chỉ có ${wordCount} từ nội dung riêng`)
+    assert.ok(page.metaDescription.length >= 140 && page.metaDescription.length <= 160)
+  }
+})
+
+test('sitemap chỉ làm mới lastmod của landing vừa được nâng cấp', () => {
+  const updatedAt = '2026-07-28T00:00:00.000Z'
+  const prioritySlugs = [
+    'vong-tay-handmade-dong-nai',
+    'vong-tay-custom-bien-hoa',
+    'moc-khoa-handmade-dong-nai',
+    'qua-tang-handmade-dong-nai',
+  ]
+
+  for (const slug of prioritySlugs) {
+    assert.equal(getLocalSeoLastModified(slug).toISOString(), updatedAt)
+  }
+
+  assert.equal(
+    getLocalSeoLastModified('phu-kien-handmade-dong-nai').toISOString(),
+    '2026-07-14T00:00:00.000Z',
+  )
 })

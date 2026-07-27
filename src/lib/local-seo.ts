@@ -93,6 +93,11 @@ export interface LocalHighlight {
   body: string
 }
 
+export interface LocalIntentSection {
+  title: string
+  body: string
+}
+
 export interface LocalPage {
   slug: string
   area: LocalArea
@@ -106,6 +111,8 @@ export interface LocalPage {
   intro: string
   /** 3-4 khối giá trị */
   highlights: LocalHighlight[]
+  /** Nội dung tư vấn riêng cho ý định tìm kiếm của landing ưu tiên */
+  intentSections?: LocalIntentSection[]
   /** liên kết sản phẩm/custom nội bộ */
   productLinks: { label: string; href: string }[]
   cta: { label: string; href: string }
@@ -155,6 +162,17 @@ export const PUBLISHED_LOCAL_SLUGS = [
 ] as const
 
 export const LOCAL_SEO_LAST_MODIFIED = new Date('2026-07-14T00:00:00.000Z')
+
+const LOCAL_SEO_LAST_MODIFIED_BY_SLUG: Readonly<Record<string, Date>> = Object.freeze({
+  'vong-tay-handmade-dong-nai': new Date('2026-07-28T00:00:00.000Z'),
+  'vong-tay-custom-bien-hoa': new Date('2026-07-28T00:00:00.000Z'),
+  'moc-khoa-handmade-dong-nai': new Date('2026-07-28T00:00:00.000Z'),
+  'qua-tang-handmade-dong-nai': new Date('2026-07-28T00:00:00.000Z'),
+})
+
+export function getLocalSeoLastModified(slug: string): Date {
+  return LOCAL_SEO_LAST_MODIFIED_BY_SLUG[slug] ?? LOCAL_SEO_LAST_MODIFIED
+}
 
 const productHub = {
   all: { label: 'Xem tất cả sản phẩm', href: '/san-pham' },
@@ -275,7 +293,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     serviceType: 'Vòng tay handmade',
     seoTitle: 'Vòng Tay Handmade Đồng Nai – Dễ Phối, Custom',
     metaDescription:
-      'Khám phá vòng tay handmade Mushroomie tại Đồng Nai, phối thủ công từ hạt, dây và charm, phù hợp đi học, đi chơi hoặc làm quà tặng.',
+      'Khám phá vòng tay handmade Đồng Nai tại Mushroomie: mẫu hạt cườm, charm, vòng đôi và custom theo size, phối thủ công để đeo hoặc làm quà. Xem mẫu.',
     h1: 'Vòng tay handmade Đồng Nai – nhỏ xinh, dễ phối',
     intro:
       'Vòng tay handmade của Mushroomie tại Đồng Nai được phối thủ công từ hạt, dây và charm, thiết kế nhỏ xinh dễ phối đồ. Bạn có thể chọn vòng hạt cườm, vòng charm, vòng đôi hay vòng bạn thân, và custom màu – charm theo gu riêng.',
@@ -283,6 +301,16 @@ export const LOCAL_PAGES: LocalPage[] = [
       { emoji: '🌈', title: 'Đa dạng kiểu', body: 'Vòng hạt cườm, vòng charm, vòng đôi, vòng bạn thân — nhiều lựa chọn để phối theo mood.' },
       { emoji: '🎨', title: 'Custom màu & charm', body: 'Tự chọn tông màu và charm yêu thích để chiếc vòng thật sự là của riêng bạn.' },
       { emoji: '🎓', title: 'Hợp mọi dịp', body: 'Đeo đi học, đi chơi, chụp ảnh hay làm quà tặng nhỏ đều xinh.' },
+    ],
+    intentSections: [
+      {
+        title: 'Chọn size vòng tay handmade vừa cổ tay',
+        body: 'Để vòng đeo thoải mái, bạn nên đo sát quanh cổ tay bằng thước dây hoặc một sợi chỉ rồi ghi lại số đo theo centimet. Nếu thích vòng ôm gọn, Mushroomie sẽ chừa độ thoải mái vừa phải; nếu thích đeo lỏng hoặc phối nhiều vòng, hãy nói rõ khi đặt. Size được xác nhận trước khi làm để hạn chế vòng quá chật, quá rộng hoặc phải chỉnh lại sau khi nhận.',
+      },
+      {
+        title: 'Chọn hạt, màu và charm theo cách sử dụng',
+        body: 'Vòng đeo hằng ngày nên ưu tiên hạt nhẹ, tông màu dễ phối và một charm làm điểm nhấn. Vòng tặng bạn thân hoặc người yêu có thể dùng hai bảng màu liên kết, chữ cái hoặc biểu tượng chung nhưng vẫn giữ nét riêng cho từng người. Khi gửi yêu cầu, bạn chỉ cần nêu màu yêu thích, dịp sử dụng và ngân sách; Mushroomie sẽ đề xuất cách phối phù hợp với vật liệu đang có.',
+      },
     ],
     productLinks: [productHub.bracelet, productHub.all, productHub.contact],
     cta: { label: 'Xem mẫu vòng tay', href: '/san-pham?category=vong-tay' },
@@ -317,7 +345,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     serviceType: 'Vòng tay custom theo yêu cầu',
     seoTitle: 'Vòng Tay Custom Biên Hòa – Theo Tên Và Charm',
     metaDescription:
-      'Đặt vòng tay custom tại Biên Hòa với Mushroomie: chọn màu, chọn charm, phối kiểu dáng riêng và nhận tư vấn theo gu cá nhân.',
+      'Đặt vòng tay custom Biên Hòa tại Mushroomie: chọn tên, size, màu hạt và charm theo gu; được tư vấn cách phối, thời gian hoàn thiện và giao nhận rõ ràng.',
     h1: 'Vòng tay custom Biên Hòa – đặt theo tên, màu và charm',
     intro:
       'Ở Biên Hòa và muốn một chiếc vòng tay của riêng mình? Mushroomie (ngay gần Biên Hòa, tại Trảng Dài – Đồng Nai) nhận đặt vòng tay custom: chọn màu, charm, thêm chữ cái hoặc ký hiệu và phối kiểu dáng theo gu của bạn.',
@@ -325,6 +353,16 @@ export const LOCAL_PAGES: LocalPage[] = [
       { emoji: '📍', title: 'Gần Biên Hòa', body: 'Vị trí thuận tiện để đặt và nhận hàng nhanh trong khu vực Biên Hòa – Đồng Nai.' },
       { emoji: '🔤', title: 'Theo tên & ký hiệu', body: 'Thêm chữ cái, tên hoặc charm ý nghĩa để chiếc vòng thật riêng biệt.' },
       { emoji: '🎨', title: 'Phối theo gu', body: 'Chọn tông màu và charm hợp phong cách hoặc người nhận.' },
+    ],
+    intentSections: [
+      {
+        title: 'Cần gửi gì khi đặt vòng tay custom tại Biên Hòa?',
+        body: 'Một yêu cầu rõ ràng nên có số đo cổ tay, hai hoặc ba màu chủ đạo, chữ cái hoặc tên muốn thêm, loại charm yêu thích và ảnh tham khảo nếu có. Bạn cũng nên cho biết vòng dùng để đeo hằng ngày, làm quà hay làm set đôi để Mushroomie cân bằng độ nổi bật và độ bền. Trước khi làm, cửa hàng sẽ xác nhận lại phương án, vật liệu có sẵn, giá và thời gian dự kiến.',
+      },
+      {
+        title: 'Thời gian hoàn thiện và cách nhận vòng',
+        body: 'Vòng custom cần thời gian phối thử và hoàn thiện thủ công nên không giống sản phẩm có sẵn. Thời gian cụ thể phụ thuộc số lượng, mức độ cá nhân hóa và vật liệu tại thời điểm đặt; lịch hẹn sẽ được chốt trước khi bạn thanh toán. Khách ở Biên Hòa có thể chọn giao hàng hoặc liên hệ trước để hẹn nhận gần khu vực Trảng Dài, tránh đến khi đơn chưa hoàn thiện.',
+      },
     ],
     productLinks: [productHub.bracelet, productHub.contact, productHub.all],
     cta: { label: 'Xem mẫu vòng tay', href: '/san-pham?category=vong-tay' },
@@ -338,7 +376,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     serviceType: 'Móc khóa & charm handmade',
     seoTitle: 'Móc Khóa Handmade Đồng Nai – Custom Theo Gu',
     metaDescription:
-      'Mushroomie có móc khóa handmade tại Đồng Nai, phối hạt và charm thủ công, phù hợp trang trí balo, túi xách hoặc làm quà tặng.',
+      'Khám phá móc khóa handmade Đồng Nai tại Mushroomie: phối hạt và charm cho balo, túi, chìa khóa; nhận custom theo màu, tên và nhu cầu làm quà nhóm.',
     h1: 'Móc khóa handmade Đồng Nai – cho túi, balo và điện thoại',
     intro:
       'Móc khóa handmade của Mushroomie tại Đồng Nai được phối hạt và charm thủ công, giúp balo, túi xách, chìa khóa hay điện thoại của bạn thêm điểm nhấn dễ thương. Có mẫu sẵn và nhận làm theo yêu cầu.',
@@ -346,6 +384,16 @@ export const LOCAL_PAGES: LocalPage[] = [
       { emoji: '🎒', title: 'Điểm nhấn cho đồ dùng', body: 'Trang trí balo, túi, chìa khóa, điện thoại thêm cá tính và nổi bật.' },
       { emoji: '🧷', title: 'Phối hạt & charm', body: 'Nhiều kiểu charm cute để chọn theo sở thích và màu sắc yêu thích.' },
       { emoji: '🎁', title: 'Quà nhỏ dễ thương', body: 'Giá dễ tiếp cận, gọn nhẹ, hợp làm quà tặng bạn bè.' },
+    ],
+    intentSections: [
+      {
+        title: 'Chọn móc khóa theo balo, túi hay chùm chìa khóa',
+        body: 'Móc dùng cho chùm chìa khóa nên gọn, chắc và không có quá nhiều chi tiết dễ vướng. Với balo hoặc túi xách, bạn có thể chọn dây dài hơn, cụm hạt nổi bật hoặc charm theo chủ đề để nhìn rõ từ xa. Dây treo điện thoại cần đúng cấu tạo và điểm gắn của mẫu; vì vậy hãy xem công dụng ghi trên sản phẩm, không mặc định mọi móc khóa đều dùng an toàn cho điện thoại.',
+      },
+      {
+        title: 'Đặt móc khóa nhóm và quà tặng theo chủ đề',
+        body: 'Khi đặt cho lớp, nhóm bạn hoặc sự kiện nhỏ, hãy gửi số lượng, ngày cần nhận, màu chung và phần chi tiết muốn thay đổi cho từng người. Mushroomie có thể giữ một ngôn ngữ thiết kế thống nhất rồi biến tấu chữ cái, màu hạt hoặc charm để mỗi món vẫn dễ nhận biết. Số lượng và thời hạn được kiểm tra trước nhằm bảo đảm vật liệu đủ, chất lượng đồng đều và không hẹn giao gấp thiếu thực tế.',
+      },
     ],
     productLinks: [productHub.keychain, productHub.all, productHub.contact],
     cta: { label: 'Xem mẫu móc khóa & charm', href: '/san-pham?category=moc-khoa' },
@@ -380,7 +428,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     serviceType: 'Quà tặng handmade',
     seoTitle: 'Quà Tặng Handmade Đồng Nai – Có Dấu Ấn Riêng',
     metaDescription:
-      'Mushroomie gợi ý quà tặng handmade tại Đồng Nai: vòng tay, móc khóa, charm và hộp quà custom theo màu sắc, phong cách người nhận.',
+      'Chọn quà tặng handmade Đồng Nai tại Mushroomie: vòng tay, móc khóa, charm và gói quà có thiệp viết tay, custom theo người nhận và dịp tặng ý nghĩa.',
     h1: 'Quà tặng handmade Đồng Nai – món quà nhỏ có dấu ấn riêng',
     intro:
       'Tìm một món quà nhỏ mà giàu cảm xúc ở Đồng Nai? Mushroomie có vòng tay, móc khóa, charm và hộp quà handmade, có thể custom theo màu sắc và phong cách người nhận — hợp cho sinh nhật, kỷ niệm, 20/10, Noel hay Valentine.',
@@ -388,6 +436,16 @@ export const LOCAL_PAGES: LocalPage[] = [
       { emoji: '🎁', title: 'Set quà chỉn chu', body: 'Phụ kiện nhỏ xinh đóng gói gọn gàng, kèm thiệp, sẵn sàng để tặng.' },
       { emoji: '🗓️', title: 'Hợp mọi dịp', body: 'Sinh nhật, kỷ niệm, 20/10, Noel, Valentine — chọn quà theo dịp và người nhận.' },
       { emoji: '💗', title: 'Cá nhân hóa cảm xúc', body: 'Thêm tên, màu hoặc charm ý nghĩa để món quà thật sự dành riêng cho ai đó.' },
+    ],
+    intentSections: [
+      {
+        title: 'Chọn quà handmade theo người nhận và dịp tặng',
+        body: 'Với bạn thân, một vòng tay hoặc móc khóa có màu chung, chữ cái hay biểu tượng kỷ niệm thường dễ tạo cảm xúc. Quà sinh nhật có thể nổi bật hơn bằng charm theo sở thích; quà kỷ niệm nên ưu tiên chi tiết gắn với câu chuyện của hai người. Nếu chưa biết chọn gì, hãy cho Mushroomie biết độ tuổi, phong cách, dịp tặng và khoảng ngân sách để được gợi ý từ sản phẩm đang có thật.',
+      },
+      {
+        title: 'Gói quà, thiệp viết tay và thời gian chuẩn bị',
+        body: 'Tùy chọn gói quà áp dụng cho đơn phù hợp và có thể kèm nội dung thư tay do bạn gửi. Hãy kiểm tra chính tả, tên người nhận và giới hạn nội dung trước khi xác nhận vì thiệp được viết theo thông tin đã chốt. Với quà custom hoặc đơn cần giao đúng ngày tại Đồng Nai, nên đặt sớm để có thời gian duyệt cách phối, hoàn thiện thủ công, đóng gói và dự phòng thời gian vận chuyển.',
+      },
     ],
     productLinks: [productHub.gift, productHub.all, productHub.contact],
     cta: { label: 'Xem set quà tặng', href: '/san-pham' },

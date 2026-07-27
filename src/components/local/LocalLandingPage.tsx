@@ -157,6 +157,25 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
         </div>
       </section>
 
+      {page.intentSections && page.intentSections.length > 0 && (
+        <section data-reveal className="brand-container mt-9" aria-labelledby="local-intent-heading">
+          <div className="border-y border-warm-border py-7 sm:py-8">
+            <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-primary">Tư vấn trước khi đặt</p>
+            <h2 id="local-intent-heading" className="mt-2 max-w-3xl font-heading text-xl text-neutral-900 md:text-2xl">
+              Thông tin giúp bạn chọn đúng sản phẩm
+            </h2>
+            <div className="mt-6 grid gap-7 lg:grid-cols-2 lg:gap-10">
+              {page.intentSections.map((section) => (
+                <article key={section.title}>
+                  <h3 className="font-heading text-base leading-snug text-neutral-900">{section.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-neutral-600">{section.body}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Quy trình đặt hàng rõ ràng cho truy vấn có ý định mua */}
       <section data-reveal className="brand-container mt-8" aria-labelledby="order-process-heading">
         <h2 id="order-process-heading" className="font-heading text-xl text-neutral-900">
