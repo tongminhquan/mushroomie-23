@@ -50,21 +50,33 @@ export default function AnimateOnScroll({
     return () => observer.disconnect()
   }, [once])
 
+  // Tầng 2 khi người dùng bật giảm chuyển động: bỏ toàn bộ phần dịch chuyển, chỉ
+  // giữ một nhịp fade ngắn. Vẫn có transition để nội dung không "nhảy" đột ngột,
+  // nhưng không còn cảm giác tự di chuyển gây chóng mặt.
   const baseStyles: React.CSSProperties = {
-    transitionProperty: 'opacity, transform',
-    transitionDuration: `${duration}ms`,
+    transitionProperty: reduced ? 'opacity' : 'opacity, transform',
+    transitionDuration: reduced ? '150ms' : `${duration}ms`,
     transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-    transitionDelay: `${delay}ms`,
+    transitionDelay: reduced ? '0ms' : `${delay}ms`,
   }
 
-  const hiddenStyles: Record<string, React.CSSProperties> = {
-    'fade-up': { opacity: 0, transform: 'translateY(40px)' },
-    'fade-down': { opacity: 0, transform: 'translateY(-40px)' },
-    'fade-left': { opacity: 0, transform: 'translateX(-40px)' },
-    'fade-right': { opacity: 0, transform: 'translateX(40px)' },
-    'zoom-in': { opacity: 0, transform: 'scale(0.92)' },
-    'fade': { opacity: 0, transform: 'none' },
-  }
+  const hiddenStyles: Record<string, React.CSSProperties> = reduced
+    ? {
+        'fade-up': { opacity: 0 },
+        'fade-down': { opacity: 0 },
+        'fade-left': { opacity: 0 },
+        'fade-right': { opacity: 0 },
+        'zoom-in': { opacity: 0 },
+        'fade': { opacity: 0 },
+      }
+    : {
+        'fade-up': { opacity: 0, transform: 'translateY(40px)' },
+        'fade-down': { opacity: 0, transform: 'translateY(-40px)' },
+        'fade-left': { opacity: 0, transform: 'translateX(-40px)' },
+        'fade-right': { opacity: 0, transform: 'translateX(40px)' },
+        'zoom-in': { opacity: 0, transform: 'scale(0.92)' },
+        'fade': { opacity: 0, transform: 'none' },
+      }
 
   const visibleStyle: React.CSSProperties = { opacity: 1, transform: 'none' }
 
