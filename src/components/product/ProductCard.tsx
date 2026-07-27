@@ -138,7 +138,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           imageKind="product"
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="object-contain p-3 transition-transform duration-500 ease-out group-hover:scale-[1.035]"
+          className="object-contain p-3"
         />
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
           {product.is_customizable && (
