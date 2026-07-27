@@ -558,13 +558,24 @@ a, button, input, textarea, select,
     transition-duration: 0.01ms !important;
   }
 
-  /* Tầng 1 — bỏ hẳn các chuyển động gây chóng mặt */
+  /* Tầng 1 — bỏ hẳn các chuyển động gây chóng mặt.
+     Parallax nằm ở đây vì nó gợi cảm giác chiều sâu và tự di chuyển — tác nhân gây
+     chóng mặt mạnh nhất trong nhóm. JS cũng phải tự chặn (CSS không với tới GSAP);
+     xem ScrollMotion.tsx. */
   .animate-float,
   .animate-float-soft,
   .m-float,
+  .m-parallax,
   .m-marquee > * {
     animation: none !important;
     transform: none !important;
+  }
+
+  /* Vào trang: giữ lại một nhịp fade rất ngắn thay vì trượt lên — bỏ hẳn sẽ khiến
+     trang "nháy" đột ngột mỗi lần điều hướng. */
+  .m-page-enter {
+    animation: none !important;
+    transition: opacity 120ms linear;
   }
 
   /* Tầng 2 — giữ transition nhưng chỉ còn fade màu/độ mờ, bỏ dịch chuyển */
