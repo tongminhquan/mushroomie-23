@@ -27,6 +27,10 @@ import {
   resolvePostMetadataTitle,
 } from '@/lib/post-metadata'
 import { rankProductsForPost } from '@/lib/post-product-recommendations'
+import { pickRelatedPosts } from '@/lib/related-posts'
+
+/** 2 hàng x 3 cột trên desktop — gấp đôi link nội bộ toả ra từ mỗi bài. */
+const RELATED_POST_COUNT = 6
 import { DEFAULT_SOCIAL_IMAGE } from '@/lib/seo-assets'
 
 const SITE_URL = 'https://mushroomie.io.vn'
