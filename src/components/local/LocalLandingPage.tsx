@@ -22,6 +22,8 @@ import { getAreaDelivery, getAreaNote } from '@/lib/local-area-content'
 export default function LocalLandingPage({ page }: { page: LocalPage }) {
   const related = getRelatedPages(page.slug)
   const faqs = getLocalFaqs(page)
+  const areaNote = getAreaNote(page.slug)
+  const areaDelivery = getAreaDelivery(page.area)
   const crumbs = [
     { name: 'Trang chủ', url: '/' },
     { name: page.crumb, url: `/${page.slug}` },
