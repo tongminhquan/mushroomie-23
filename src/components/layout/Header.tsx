@@ -41,6 +41,8 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
   // Giữ menu trong DOM hết hiệu ứng đóng — xem useDrawerTransition.
   const menu = useDrawerTransition(menuOpen)
   const [searchOpen, setSearchOpen] = useState(false)
+  // Thanh tìm kiếm mobile: fade ngắn 150ms, không trượt cả chiều cao (xem .m-drawer-top).
+  const search = useDrawerTransition(searchOpen, 150)
   const [searchQuery, setSearchQuery] = useState('')
 
   const hydrated = useSyncExternalStore(
@@ -215,8 +217,13 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
           </div>
         </div>
 
-        {searchOpen && (
-          <form id="mobile-product-search" onSubmit={submitSearch} className="brand-container pb-3 md:hidden">
+        {search.mounted && (
+          <form
+            id="mobile-product-search"
+            onSubmit={submitSearch}
+            data-drawer-state={search.state}
+            className="m-drawer-top brand-container pb-3 md:hidden"
+          >
             <div className="flex gap-2">
               <input
                 id="product-search-mobile"

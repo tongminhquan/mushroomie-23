@@ -139,7 +139,9 @@ export default function AdminSidebar() {
         id="admin-sidebar"
         aria-label="Điều hướng quản trị"
         className={cn(
-          'fixed inset-y-0 left-0 z-50 isolate flex h-[100dvh] flex-shrink-0 transform flex-col overflow-visible border-r border-[#ead8cd] shadow-[16px_0_40px_rgba(91,48,35,0.10)] transition-all duration-300 ease-in-out motion-reduce:transition-none md:relative md:translate-x-0 md:shadow-none',
+          // transition-all animate cả box-shadow/width mỗi khung hình; giới hạn còn transform
+          // để chạy trên compositor, và dùng chung easing với các drawer khác.
+          'fixed inset-y-0 left-0 z-50 isolate flex h-[100dvh] flex-shrink-0 transform flex-col overflow-visible border-r border-[#ead8cd] shadow-[16px_0_40px_rgba(91,48,35,0.10)] m-drawer motion-reduce:transition-none md:relative md:translate-x-0 md:shadow-none',
           sidebarSurface,
           isOpen ? 'translate-x-0' : '-translate-x-full',
           isCollapsed ? 'w-[78px]' : 'w-[274px]',

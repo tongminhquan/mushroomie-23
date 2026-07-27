@@ -172,3 +172,42 @@ test('the LCP area is excluded from scroll reveal', () => {
     'hero trang địa phương bị gắn data-reveal',
   )
 })
+
+test('drawers stay mounted long enough to animate closed', () => {
+  // `if (!isOpen) return null` gỡ panel ngay lập tức — không còn gì để animate. Đó là
+  // lý do giỏ hàng trước đây bật/tắt cụt lủn.
+  const hook = read('src/hooks/useDrawerTransition.ts')
+  assert.match(hook, /setTimeout\(\(\) => setMounted\(false\), durationMs\)/)
+
+  // Phải render một khung hình ở trạng thái đóng trước khi lật sang mở, nếu không
+  // trình duyệt không có gì để nội suy và panel hiện tức thì.
+  assert.match(hook, /requestAnimationFrame/)
+  const rafCount = (hook.match(/requestAnimationFrame/g) ?? []).length
+  assert.ok(rafCount >= 2, 'cần rAF lồng nhau để chắc chắn kiểu dáng ban đầu đã áp')
+
+  for (const file of ['src/components/cart/CartDrawer.tsx', 'src/components/layout/Header.tsx']) {
+    const src = read(file)
+    assert.match(src, /useDrawerTransition/, `${file} chưa dùng hook`)
+    assert.match(src, /data-drawer-state=/, `${file} thiếu thuộc tính trạng thái`)
+  }
+})
+
+test('drawers exit faster than they enter', () => {
+  // Quy ước micro-interaction: vào thong thả (ease-out), ra dứt khoát (ease-in).
+  // Panel nán lại khi đóng làm giao diện có cảm giác chậm.
+  const drawer = CSS.slice(CSS.indexOf('Drawer / panel trượt'))
+  const exiting = drawer.match(/\.m-drawer\[data-drawer-state='exiting'\]\s*\{[^}]*transition-duration:\s*(\d+)ms/)
+
+  assert.ok(exiting, 'không đọc được thời lượng đóng')
+  assert.ok(Number(exiting[1]) < 260, 'đóng phải nhanh hơn mở (260ms)')
+})
+
+test('drawer motion is dropped under reduced motion', () => {
+  // Panel trượt cả chiều rộng màn hình là chuyển động Tầng 1.
+  const block = CSS.slice(CSS.indexOf('@media (prefers-reduced-motion: reduce)'))
+  assert.match(block, /\.m-drawer[\s\S]*?transform:\s*none/)
+
+  // Hook cũng phải bỏ phần trì hoãn, nếu không panel còn treo lại 280ms vô ích.
+  const hook = read('src/hooks/useDrawerTransition.ts')
+  assert.match(hook, /if \(reduced\)/)
+})
