@@ -152,6 +152,12 @@ export default async function ProductDetailPage({
     sale_price: productRaw.sale_price ? Number(productRaw.sale_price) : null,
   }
 
+  // Phí ship dùng cho shippingDetails trong Product schema; lỗi settings không được
+  // làm hỏng trang sản phẩm nên fallback về mức mặc định.
+  const { shippingFee } = await getShippingFeeSnapshot().catch(() => ({
+    shippingFee: DEFAULT_SHIPPING_FEE,
+  }))
+
   const relatedProducts = await prisma.product
     .findMany({
       where: { category_id: product.category_id, status: 'active', id: { not: product.id } },
