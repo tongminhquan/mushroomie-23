@@ -818,6 +818,43 @@ export function localServiceSchema(page: LocalPage) {
   }
 }
 
+/**
+ * Schema cho /gioi-thieu — trang duy nhất trong sitemap chưa có structured data.
+ * Gắn với @id của LocalBusiness để Google nối trang câu chuyện vào entity thương hiệu.
+ */
+export function aboutPageSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    '@id': `${SITE_URL}/gioi-thieu#aboutpage`,
+    url: `${SITE_URL}/gioi-thieu`,
+    name: `Câu chuyện thương hiệu ${BRAND.name}`,
+    description: BRAND.description,
+    inLanguage: 'vi-VN',
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    about: {
+      '@id': `${SITE_URL}/#localbusiness`,
+      '@type': 'LocalBusiness',
+      name: BRAND.name,
+      legalName: BRAND.legalName,
+      slogan: BRAND.slogan,
+      foundingDate: '2018',
+      foundingLocation: {
+        '@type': 'Place',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: BRAND.addressLocality,
+          addressRegion: BRAND.addressRegion,
+          addressCountry: BRAND.addressCountry,
+        },
+      },
+      url: SITE_URL,
+      logo: BRAND.logo,
+      sameAs: BRAND.sameAs,
+    },
+  }
+}
+
 export function faqPageSchema(faqs: LocalFaq[]) {
   return {
     '@context': 'https://schema.org',
