@@ -5,6 +5,8 @@ import AnimateOnScroll, { StaggerChildren } from '@/components/ui/AnimateOnScrol
 import CategoryIcon from '@/components/ui/CategoryIcon'
 import { prisma } from '@/lib/prisma'
 import { Category } from '@prisma/client'
+import { aboutPageSchema } from '@/lib/local-seo'
+import { safeJsonLd } from '@/lib/security'
 
 export const metadata: Metadata = {
   title: 'Câu chuyện thương hiệu phụ kiện handmade',
