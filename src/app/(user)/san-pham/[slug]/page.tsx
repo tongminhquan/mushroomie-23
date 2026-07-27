@@ -217,7 +217,7 @@ export default async function ProductDetailPage({
           ? 'https://schema.org/InStock'
           : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
-      seller: { '@type': 'Organization', name: 'Mushroomie' },
+      seller: brandEntityRef(),
       hasMerchantReturnPolicy: merchantReturnPolicySchema(),
       shippingDetails: offerShippingDetailsSchema(shippingFee),
     },
