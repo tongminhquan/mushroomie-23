@@ -245,6 +245,7 @@ export default async function PostDetailPage({
       caption: (post.focus_keyword || post.title) + ' tại Mushroomie Handmade, Đồng Nai.',
     })),
   ])
+  const relatedPosts = pickRelatedPosts(relatedCandidates, post.id, RELATED_POST_COUNT)
   const recommendedProducts = rankProductsForPost(
     {
       title: post.title,
