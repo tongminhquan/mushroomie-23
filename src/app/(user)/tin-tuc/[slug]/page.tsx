@@ -202,10 +202,22 @@ export default async function PostDetailPage({
   const [relatedCandidates, productCandidates, coverImage, structuredImage, articleHtml] = await Promise.all([
     // Lấy pool rộng rồi mới chọn 6 bài — xem pickRelatedPosts() để biết vì sao không
     // dùng thẳng "6 bài mới nhất".
+    //
+    // select thay vì include: Post.content là LongText (~1200 từ/bài). Kéo cả cột đó cho
+    // 60 bài chỉ để render 6 thẻ card sẽ tốn hàng trăm KB mỗi request. Danh sách dưới đây
+    // đúng bằng những gì PostCard cần.
     prisma.post
       .findMany({
         where: relatedWhere,
-        include: { category: true },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          featured_image: true,
+          published_at: true,
+          category: { select: { name: true, slug: true } },
+        },
         take: 60,
         orderBy: { published_at: 'desc' },
       })
