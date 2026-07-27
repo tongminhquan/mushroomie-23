@@ -113,7 +113,32 @@ test('page transition uses template.tsx and ships no JS', () => {
   assert.match(CSS, /@keyframes m-page-enter/)
 })
 
-test('admin motion is functional and shorter than public motion', () => {
+test('batch reveal never hides what the user can already see', () => {
+  // data-batch-reveal có mặt trên trang form admin (sửa sản phẩm, sửa bài). Đặt
+  // opacity:0 lên ô nhập liệu đang hiển thị là lỗi nghiêm trọng — và nếu ScrollTrigger
+  // hỏng thì cả form trắng xoá.
+  const motion = read('src/components/ui/ScrollMotion.tsx')
+
+  const batchIndex = motion.indexOf('data-batch-reveal')
+  const setIndex = motion.indexOf('gsap.set(batchTargets')
+  const guardIndex = motion.indexOf('getBoundingClientRect', batchIndex)
+
+  assert.ok(guardIndex > -1, 'batch reveal thiếu guard khung nhìn')
+  assert.ok(guardIndex < setIndex, 'guard phải chạy TRƯỚC khi đặt opacity 0')
+})
+
+test('admin scroll motion targets the admin scroll container', () => {
+  const layout = read('src/app/admin/layout.tsx')
+  // Admin cuộn trong <main overflow-auto>, không phải window. Thiếu scroller thì
+  // ScrollTrigger bám viewport và im lặng không chạy — không lỗi, không cảnh báo.
+  assert.match(layout, /<ScrollMotion scroller="#main-content"/)
+  assert.match(layout, /id="main-content"/)
+
+  const motion = read('src/components/ui/ScrollMotion.tsx')
+  assert.match(motion, /\.\.\.\(scroller \? \{ scroller \} : \{\}\)/)
+})
+
+test('admin motion matches public intensity but caps table stagger', () => {
   // Cắt đúng khối admin: sau nó là khối reduced-motion toàn cục, trong đó có nhắc
   // .m-parallax — lấy tràn sang sẽ làm phép kiểm "admin không có parallax" báo sai.
   const adminStart = CSS.indexOf('Motion cho trang admin')
