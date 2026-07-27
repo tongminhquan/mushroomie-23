@@ -145,16 +145,18 @@ test('admin motion matches public intensity but caps table stagger', () => {
   const adminEnd = CSS.indexOf('@media (prefers-reduced-motion: reduce)', adminStart)
   const admin = CSS.slice(adminStart, adminEnd > -1 ? adminEnd : undefined)
 
-  // Hàng bảng chỉ mờ dần + dịch nhẹ; không có parallax hay hiệu ứng trang trí.
   assert.match(admin, /@keyframes m-row-in/)
-  assert.doesNotMatch(admin, /parallax|scale\(1\.\d/)
 
-  // So le phải có trần — bảng 100 dòng mà so le hết thì hàng cuối chờ hàng giây.
+  // Cùng token thời lượng với public — đây là điều "mạnh như public" nghĩa là.
+  assert.match(
+    admin,
+    /animation: m-row-in var\(--m-duration-base\)/,
+    'hàng admin không dùng chung token thời lượng với public',
+  )
+
+  // Trần stagger vẫn phải giữ dù cường độ tăng: bảng đơn hàng có thể hàng trăm dòng,
+  // so le hết thì dòng cuối chờ vài giây mới đọc được.
   assert.match(admin, /nth-child\(n \+ 12\)/)
-
-  const rowIn = admin.match(/\.m-admin-rows > tr \{\s*animation: m-row-in (\d+)ms/)
-  assert.ok(rowIn, 'không đọc được thời lượng hàng admin')
-  assert.ok(Number(rowIn[1]) <= 200, 'motion admin quá chậm cho thao tác lặp lại hàng ngày')
 })
 
 test('the LCP area is excluded from scroll reveal', () => {
