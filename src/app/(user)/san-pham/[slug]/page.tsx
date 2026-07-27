@@ -211,12 +211,15 @@ export default async function ProductDetailPage({
       url: toAbsoluteUrl(`/san-pham/${product.slug}`),
       priceCurrency: 'VND',
       price: displayPrice,
+      priceValidUntil: priceValidUntil(),
       availability:
         product.stock > 0
           ? 'https://schema.org/InStock'
           : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
       seller: { '@type': 'Organization', name: 'Mushroomie' },
+      hasMerchantReturnPolicy: merchantReturnPolicySchema(),
+      shippingDetails: offerShippingDetailsSchema(shippingFee),
     },
     ...(reviewAverage
       ? {
