@@ -124,8 +124,11 @@ export async function generateMetadata({
   }
 }
 
+/** Quan hệ author được include trong getPublishedPostBySlug, nhưng không nằm trong type Post. */
+type PostWithAuthor = Post & { author?: { name: string | null } | null }
+
 function generateJsonLd(
-  post: Post,
+  post: PostWithAuthor,
   imageUrl: string,
   imageDimensions?: { width: number; height: number },
 ) {
