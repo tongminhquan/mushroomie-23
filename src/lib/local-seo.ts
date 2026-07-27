@@ -187,7 +187,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'phu-kien',
     crumb: 'Phụ kiện handmade Đồng Nai',
     serviceType: 'Phụ kiện handmade cá nhân hóa',
-    seoTitle: 'Phụ Kiện Handmade Đồng Nai – Mushroomie Cá Nhân Hóa Theo Gu Riêng',
+    seoTitle: 'Phụ Kiện Handmade Đồng Nai – Custom Theo Gu',
     metaDescription:
       'Khám phá phụ kiện handmade Mushroomie tại Đồng Nai: vòng tay, móc khóa, charm và quà tặng custom theo màu sắc, kiểu dáng, cá tính riêng.',
     h1: 'Phụ kiện handmade Đồng Nai – cá nhân hóa theo gu riêng',
@@ -208,7 +208,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'phu-kien',
     crumb: 'Shop phụ kiện handmade Đồng Nai',
     serviceType: 'Shop phụ kiện handmade',
-    seoTitle: 'Shop Phụ Kiện Handmade Đồng Nai – Vòng Tay, Charm Và Quà Tặng Custom',
+    seoTitle: 'Shop Phụ Kiện Handmade Đồng Nai – Vòng, Charm',
     metaDescription:
       'Mushroomie là shop phụ kiện handmade tại Đồng Nai, chuyên vòng tay custom, móc khóa, charm và hộp quà cá nhân hóa cho giới trẻ.',
     h1: 'Shop phụ kiện handmade Đồng Nai',
@@ -229,7 +229,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'phu-kien',
     crumb: 'Phụ kiện handmade Biên Hòa',
     serviceType: 'Phụ kiện handmade cá nhân hóa',
-    seoTitle: 'Phụ Kiện Handmade Biên Hòa – Đồ Nhỏ Xinh, Custom Theo Phong Cách',
+    seoTitle: 'Phụ Kiện Handmade Biên Hòa – Nhỏ Xinh, Custom',
     metaDescription:
       'Mushroomie mang đến phụ kiện handmade tại Biên Hòa với vòng tay, móc khóa, charm và set quà tặng được phối thủ công theo sở thích.',
     h1: 'Phụ kiện handmade Biên Hòa – nhỏ xinh, custom theo phong cách',
@@ -251,7 +251,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     onlineOnly: true,
     crumb: 'Phụ kiện handmade TP.HCM',
     serviceType: 'Phụ kiện handmade cá nhân hóa (giao TP.HCM)',
-    seoTitle: 'Phụ Kiện Handmade TP.HCM – Mẫu Cute, Cá Tính, Có Thể Custom',
+    seoTitle: 'Phụ Kiện Handmade TP.HCM – Cute, Custom',
     metaDescription:
       'Mushroomie nhận đặt phụ kiện handmade giao TP.HCM: vòng tay custom, móc khóa, charm và set quà tặng nhỏ xinh cho giới trẻ.',
     h1: 'Phụ kiện handmade giao TP.HCM – cute, cá tính, có thể custom',
@@ -272,7 +272,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'vong-tay',
     crumb: 'Vòng tay handmade Đồng Nai',
     serviceType: 'Vòng tay handmade',
-    seoTitle: 'Vòng Tay Handmade Đồng Nai – Nhỏ Xinh, Dễ Phối, Có Thể Custom',
+    seoTitle: 'Vòng Tay Handmade Đồng Nai – Dễ Phối, Custom',
     metaDescription:
       'Khám phá vòng tay handmade Mushroomie tại Đồng Nai, phối thủ công từ hạt, dây và charm, phù hợp đi học, đi chơi hoặc làm quà tặng.',
     h1: 'Vòng tay handmade Đồng Nai – nhỏ xinh, dễ phối',
@@ -293,7 +293,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'vong-tay',
     crumb: 'Vòng tay custom Đồng Nai',
     serviceType: 'Vòng tay custom theo yêu cầu',
-    seoTitle: 'Vòng Tay Custom Đồng Nai – Chọn Màu, Chọn Charm Theo Gu Riêng',
+    seoTitle: 'Vòng Tay Custom Đồng Nai – Chọn Màu, Chọn Charm',
     metaDescription:
       'Mushroomie nhận làm vòng tay custom tại Đồng Nai, cho phép chọn màu sắc, charm, kiểu dáng và phong cách theo sở thích cá nhân.',
     h1: 'Vòng tay custom Đồng Nai – chọn màu, chọn charm theo gu riêng',
@@ -314,7 +314,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'vong-tay',
     crumb: 'Vòng tay custom Biên Hòa',
     serviceType: 'Vòng tay custom theo yêu cầu',
-    seoTitle: 'Vòng Tay Custom Biên Hòa – Đặt Vòng Theo Tên, Màu Và Charm',
+    seoTitle: 'Vòng Tay Custom Biên Hòa – Theo Tên Và Charm',
     metaDescription:
       'Đặt vòng tay custom tại Biên Hòa với Mushroomie: chọn màu, chọn charm, phối kiểu dáng riêng và nhận tư vấn theo gu cá nhân.',
     h1: 'Vòng tay custom Biên Hòa – đặt theo tên, màu và charm',
@@ -335,7 +335,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'moc-khoa',
     crumb: 'Móc khóa handmade Đồng Nai',
     serviceType: 'Móc khóa & charm handmade',
-    seoTitle: 'Móc Khóa Handmade Đồng Nai – Phụ Kiện Nhỏ Cho Túi, Balo Và Điện Thoại',
+    seoTitle: 'Móc Khóa Handmade Đồng Nai – Custom Theo Gu',
     metaDescription:
       'Mushroomie có móc khóa handmade tại Đồng Nai, phối hạt và charm thủ công, phù hợp trang trí balo, túi xách hoặc làm quà tặng.',
     h1: 'Móc khóa handmade Đồng Nai – cho túi, balo và điện thoại',
@@ -356,7 +356,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'moc-khoa',
     crumb: 'Móc khóa theo yêu cầu Đồng Nai',
     serviceType: 'Móc khóa handmade theo yêu cầu',
-    seoTitle: 'Móc Khóa Handmade Theo Yêu Cầu Đồng Nai – Làm Riêng Cho Bạn',
+    seoTitle: 'Móc Khóa Handmade Theo Yêu Cầu – Đồng Nai',
     metaDescription:
       'Mushroomie nhận làm móc khóa handmade theo yêu cầu tại Đồng Nai, từ màu sắc, charm đến kiểu phối phù hợp cá tính riêng.',
     h1: 'Móc khóa handmade theo yêu cầu Đồng Nai',
@@ -377,7 +377,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'qua-tang',
     crumb: 'Quà tặng handmade Đồng Nai',
     serviceType: 'Quà tặng handmade',
-    seoTitle: 'Quà Tặng Handmade Đồng Nai – Món Quà Nhỏ Có Dấu Ấn Riêng',
+    seoTitle: 'Quà Tặng Handmade Đồng Nai – Có Dấu Ấn Riêng',
     metaDescription:
       'Mushroomie gợi ý quà tặng handmade tại Đồng Nai: vòng tay, móc khóa, charm và hộp quà custom theo màu sắc, phong cách người nhận.',
     h1: 'Quà tặng handmade Đồng Nai – món quà nhỏ có dấu ấn riêng',
@@ -398,7 +398,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'qua-tang',
     crumb: 'Quà tặng cá nhân hóa Đồng Nai',
     serviceType: 'Quà tặng cá nhân hóa handmade',
-    seoTitle: 'Quà Tặng Cá Nhân Hóa Đồng Nai – Phụ Kiện Handmade Theo Gu Người Nhận',
+    seoTitle: 'Quà Tặng Cá Nhân Hóa Đồng Nai – Handmade',
     metaDescription:
       'Đặt quà tặng cá nhân hóa tại Đồng Nai cùng Mushroomie: chọn màu, charm, kiểu dáng và cách gói quà theo cảm xúc riêng.',
     h1: 'Quà tặng cá nhân hóa Đồng Nai – theo gu người nhận',
@@ -421,7 +421,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'phu-kien',
     crumb: 'Phụ kiện handmade Trảng Dài',
     serviceType: 'Phụ kiện handmade cá nhân hóa',
-    seoTitle: 'Phụ Kiện Handmade Trảng Dài – Mushroomie Ngay Tại Khu Bạn',
+    seoTitle: 'Phụ Kiện Handmade Trảng Dài – Ngay Khu Bạn',
     metaDescription:
       'Mushroomie làm phụ kiện handmade ngay tại Trảng Dài, Đồng Nai: vòng tay, móc khóa, charm và quà tặng custom, tiện đặt và nhận hàng gần bạn.',
     h1: 'Phụ kiện handmade Trảng Dài – ngay tại khu của bạn',
@@ -442,7 +442,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'vong-tay',
     crumb: 'Vòng tay handmade Trảng Dài',
     serviceType: 'Vòng tay handmade',
-    seoTitle: 'Vòng Tay Handmade Trảng Dài – Phối Tay Từng Chiếc, Custom Theo Gu',
+    seoTitle: 'Vòng Tay Handmade Trảng Dài – Phối Thủ Công',
     metaDescription:
       'Vòng tay handmade Mushroomie tại Trảng Dài, Đồng Nai: phối tay từ hạt, dây và charm, chọn màu theo sở thích, tiện nhận hàng gần bạn.',
     h1: 'Vòng tay handmade Trảng Dài – phối tay từng chiếc',
@@ -463,7 +463,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'phu-kien',
     crumb: 'Shop phụ kiện handmade Biên Hòa',
     serviceType: 'Shop phụ kiện handmade',
-    seoTitle: 'Shop Phụ Kiện Handmade Biên Hòa – Vòng Tay, Móc Khóa, Quà Custom',
+    seoTitle: 'Shop Phụ Kiện Handmade Biên Hòa – Vòng, Charm',
     metaDescription:
       'Mushroomie là shop phụ kiện handmade phục vụ Biên Hòa: vòng tay custom, móc khóa, charm và quà tặng cá nhân hóa, đặt online tiện lợi.',
     h1: 'Shop phụ kiện handmade Biên Hòa',
@@ -484,7 +484,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'vong-tay',
     crumb: 'Vòng tay handmade Biên Hòa',
     serviceType: 'Vòng tay handmade',
-    seoTitle: 'Vòng Tay Handmade Biên Hòa – Nhỏ Xinh, Dễ Phối, Custom Theo Gu',
+    seoTitle: 'Vòng Tay Handmade Biên Hòa – Dễ Phối, Custom',
     metaDescription:
       'Vòng tay handmade Mushroomie phục vụ Biên Hòa: phối tay từ hạt và charm, chọn màu theo sở thích, giao nhanh khu vực Biên Hòa – Đồng Nai.',
     h1: 'Vòng tay handmade Biên Hòa – nhỏ xinh, dễ phối',
@@ -505,7 +505,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'moc-khoa',
     crumb: 'Móc khóa handmade Biên Hòa',
     serviceType: 'Móc khóa & charm handmade',
-    seoTitle: 'Móc Khóa Handmade Biên Hòa – Điểm Nhấn Cho Túi, Balo, Điện Thoại',
+    seoTitle: 'Móc Khóa Handmade Biên Hòa – Cho Túi, Balo',
     metaDescription:
       'Móc khóa handmade Mushroomie phục vụ Biên Hòa: phối hạt và charm thủ công, trang trí balo, túi, chìa khóa hoặc làm quà tặng nhỏ.',
     h1: 'Móc khóa handmade Biên Hòa – điểm nhấn cho đồ dùng',
@@ -526,7 +526,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'qua-tang',
     crumb: 'Quà tặng handmade Biên Hòa',
     serviceType: 'Quà tặng handmade',
-    seoTitle: 'Quà Tặng Handmade Biên Hòa – Món Quà Nhỏ Có Dấu Ấn Riêng',
+    seoTitle: 'Quà Tặng Handmade Biên Hòa – Có Dấu Ấn Riêng',
     metaDescription:
       'Quà tặng handmade Mushroomie phục vụ Biên Hòa: vòng tay, móc khóa, charm và hộp quà custom theo dịp, giao nhanh khu vực Biên Hòa – Đồng Nai.',
     h1: 'Quà tặng handmade Biên Hòa – món quà nhỏ có dấu ấn riêng',
@@ -548,7 +548,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     onlineOnly: true,
     crumb: 'Vòng tay custom TP.HCM',
     serviceType: 'Vòng tay custom theo yêu cầu (giao TP.HCM)',
-    seoTitle: 'Vòng Tay Custom TP.HCM – Đặt Online, Chọn Màu Và Charm Theo Gu',
+    seoTitle: 'Vòng Tay Custom TP.HCM – Đặt Online, Giao Nhanh',
     metaDescription:
       'Mushroomie nhận làm vòng tay custom giao TP.HCM: chọn màu, charm, size và kiểu phối theo sở thích, đặt online và nhận hàng tận nơi.',
     h1: 'Vòng tay custom giao TP.HCM – chọn màu, chọn charm theo gu',
@@ -570,7 +570,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     onlineOnly: true,
     crumb: 'Móc khóa handmade TP.HCM',
     serviceType: 'Móc khóa & charm handmade (giao TP.HCM)',
-    seoTitle: 'Móc Khóa Handmade TP.HCM – Mẫu Cute, Đặt Online Giao Tận Nơi',
+    seoTitle: 'Móc Khóa Handmade TP.HCM – Đặt Online',
     metaDescription:
       'Móc khóa handmade Mushroomie giao TP.HCM: phối hạt và charm thủ công, mẫu cute cho balo, túi, điện thoại, đặt online tiện lợi.',
     h1: 'Móc khóa handmade giao TP.HCM – cute, đặt online',
@@ -592,7 +592,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     onlineOnly: true,
     crumb: 'Quà tặng handmade TP.HCM',
     serviceType: 'Quà tặng handmade (giao TP.HCM)',
-    seoTitle: 'Quà Tặng Handmade TP.HCM – Set Quà Cá Nhân Hóa, Giao Tận Nơi',
+    seoTitle: 'Quà Tặng Handmade TP.HCM – Set Quà Cá Nhân Hóa',
     metaDescription:
       'Quà tặng handmade Mushroomie giao TP.HCM: vòng tay, móc khóa, charm và hộp quà custom theo dịp và người nhận, đặt online tiện lợi.',
     h1: 'Quà tặng handmade giao TP.HCM – set quà cá nhân hóa',
@@ -613,7 +613,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'vong-tay',
     crumb: 'Vòng tay cặp đôi Đồng Nai',
     serviceType: 'Vòng tay cặp đôi & bạn thân handmade',
-    seoTitle: 'Vòng Tay Cặp Đôi Đồng Nai – Vòng Đôi, Bạn Thân Custom Theo Tên',
+    seoTitle: 'Vòng Tay Cặp Đôi Đồng Nai – Custom Theo Tên',
     metaDescription:
       'Mushroomie làm vòng tay cặp đôi và bạn thân tại Đồng Nai: phối set theo màu, charm và tên riêng, lưu giữ kỷ niệm cùng nhau.',
     h1: 'Vòng tay cặp đôi Đồng Nai – lưu giữ kỷ niệm cùng nhau',
@@ -634,7 +634,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'moc-khoa',
     crumb: 'Charm handmade Đồng Nai',
     serviceType: 'Charm handmade',
-    seoTitle: 'Charm Handmade Đồng Nai – Phụ Kiện Nhỏ Để Phối Vòng, Móc Khóa',
+    seoTitle: 'Charm Handmade Đồng Nai – Phối Vòng, Móc Khóa',
     metaDescription:
       'Charm handmade Mushroomie tại Đồng Nai: nhiều mẫu charm cute để phối vòng tay, móc khóa hoặc trang trí, chọn theo màu và sở thích.',
     h1: 'Charm handmade Đồng Nai – phối vòng, móc khóa theo gu',
@@ -655,7 +655,7 @@ export const LOCAL_PAGES: LocalPage[] = [
     group: 'phu-kien',
     crumb: 'Dây chuyền handmade Đồng Nai',
     serviceType: 'Dây chuyền & vòng cổ handmade',
-    seoTitle: 'Dây Chuyền Handmade Đồng Nai – Vòng Cổ Nhỏ Xinh, Custom Theo Gu',
+    seoTitle: 'Dây Chuyền Handmade Đồng Nai – Custom Theo Gu',
     metaDescription:
       'Dây chuyền và vòng cổ handmade Mushroomie tại Đồng Nai: phối hạt và charm thủ công, chọn màu và kiểu dáng theo phong cách riêng.',
     h1: 'Dây chuyền handmade Đồng Nai – vòng cổ nhỏ xinh, custom',

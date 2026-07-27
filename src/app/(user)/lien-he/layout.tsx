@@ -8,7 +8,7 @@ import { BRAND, SITE_URL, breadcrumbSchema, localBusinessSchema, websiteSchema }
  * "shop phụ kiện handmade Trảng Dài", "gần tôi", "gần đây"... (NAP + LocalBusiness).
  */
 export const metadata: Metadata = {
-  title: 'Liên Hệ Mushroomie – Shop Phụ Kiện Handmade Trảng Dài, Đồng Nai',
+  title: 'Liên Hệ – Shop Phụ Kiện Handmade Trảng Dài',
   description:
     'Liên hệ Mushroomie để đặt vòng tay handmade, móc khóa, charm và quà tặng cá nhân hóa tại Trảng Dài, Đồng Nai, gần Biên Hòa và giao online đến TP.HCM.',
   alternates: { canonical: `${SITE_URL}/lien-he` },
