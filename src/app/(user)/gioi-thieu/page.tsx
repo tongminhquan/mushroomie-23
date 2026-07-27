@@ -43,6 +43,10 @@ export default async function AboutPage() {
 
   return (
     <div className="min-h-screen bg-secondary pb-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(aboutPageSchema()) }}
+      />
       {/* Hero */}
       <section
         className="relative overflow-hidden text-center"
