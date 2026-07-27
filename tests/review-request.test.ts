@@ -101,6 +101,49 @@ test('customer names are HTML-escaped in the email body', () => {
   assert.ok(html.includes('&lt;script&gt;'))
 })
 
+test('addresses on domains without MX records are treated as undeliverable', async () => {
+  // Đơn test lọt vào DB với AA@gmail.net — domain đó không có MX, thư chắc chắn bounce.
+  const withMx = async () => [{ exchange: 'mx.example.com', priority: 10 }]
+  const noMx = async () => {
+    const error = new Error('queryMx ESERVFAIL') as Error & { code: string }
+    error.code = 'ESERVFAIL'
+    throw error
+  }
+
+  assert.equal(await isDeliverableEmail('khach@gmail.com', new Map(), withMx), true)
+  assert.equal(await isDeliverableEmail('AA@gmail.net', new Map(), noMx), false)
+  // Domain có MX nhưng rỗng cũng không gửi được.
+  assert.equal(await isDeliverableEmail('a@b.com', new Map(), async () => []), false)
+})
+
+test('malformed addresses are rejected without touching DNS', async () => {
+  let dnsCalls = 0
+  const spy = async () => {
+    dnsCalls += 1
+    return [{ exchange: 'mx', priority: 1 }]
+  }
+
+  for (const bad of ['khong-co-a-cong', 'thieu-domain@', '@thieu-local.com', 'a@b', 'a b@c.com', '']) {
+    assert.equal(await isDeliverableEmail(bad, new Map(), spy), false, `chấp nhận nhầm: ${bad}`)
+  }
+  assert.equal(dnsCalls, 0, 'đã tra DNS cho địa chỉ sai định dạng')
+})
+
+test('MX lookups are cached per run so one domain is resolved once', async () => {
+  let lookups = 0
+  const counting = async () => {
+    lookups += 1
+    return [{ exchange: 'mx', priority: 1 }]
+  }
+  const cache = new Map<string, boolean>()
+
+  for (const address of ['a@gmail.com', 'b@gmail.com', 'c@GMAIL.com']) {
+    assert.equal(await isDeliverableEmail(address, cache, counting), true)
+  }
+
+  assert.equal(lookups, 1, 'phải cache theo domain, không tra lại mỗi địa chỉ')
+})
+
 test('template keys and delay stay stable — changing them would re-send to past customers', () => {
   assert.equal(REVIEW_REQUEST_TEMPLATE_KEY, 'review_request')
   assert.equal(OPT_OUT_TEMPLATE_KEY, 'review_request_optout')
