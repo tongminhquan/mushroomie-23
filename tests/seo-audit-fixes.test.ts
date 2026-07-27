@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { LOCAL_PAGES, aboutPageSchema } from '../src/lib/local-seo'
+import { BRAND, LOCAL_PAGES, aboutPageSchema, brandEntityRef, localBusinessSchema } from '../src/lib/local-seo'
 import {
   RETURN_WINDOW_DAYS,
   merchantReturnPolicySchema,
