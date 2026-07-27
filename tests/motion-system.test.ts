@@ -76,6 +76,58 @@ test('no other module imports GSAP statically', () => {
   assert.deepEqual(offenders, [], 'import GSAP tĩnh sẽ kéo ~23KB vào bundle của mọi trang')
 })
 
+test('parallax is fully removed under reduced motion, not just weakened', () => {
+  // Parallax gợi cảm giác chiều sâu + tự di chuyển — tác nhân gây chóng mặt mạnh nhất.
+  // Phải bỏ hẳn ở cả hai lớp: CSS cho phần khai báo, JS cho phần GSAP điều khiển.
+  const block = CSS.slice(CSS.indexOf('@media (prefers-reduced-motion: reduce)'))
+  assert.match(block, /\.m-parallax/)
+
+  const motion = read('src/components/ui/ScrollMotion.tsx')
+  // Phải thoát sớm, không được dựng ScrollTrigger rồi đặt biên độ 0.
+  assert.match(
+    motion,
+    /prefers-reduced-motion: reduce'\)\.matches\)\s*return/,
+    'ScrollMotion vẫn khởi tạo ScrollTrigger khi người dùng bật giảm chuyển động',
+  )
+  // Việc kiểm tra phải nằm TRƯỚC khi nạp GSAP — nếu không vẫn tốn 34KB vô ích.
+  assert.ok(
+    motion.indexOf('prefers-reduced-motion') < motion.indexOf("import('gsap')"),
+    'kiểm tra giảm chuyển động phải chạy trước khi nạp GSAP',
+  )
+})
+
+test('ScrollTrigger cleans up and refreshes after images load', () => {
+  const motion = read('src/components/ui/ScrollMotion.tsx')
+  assert.match(motion, /gsap\.context\(/, 'thiếu gsap.context → ScrollTrigger rò rỉ khi unmount')
+  assert.match(motion, /ctx\.revert\(\)/)
+  // Ảnh tải xong làm đổi chiều cao trang; resize thì GSAP tự lo, ảnh thì không.
+  assert.match(motion, /ScrollTrigger\.refresh\(\)/)
+  assert.doesNotMatch(motion, /markers:\s*true/, 'markers dev còn sót lại trong production')
+})
+
+test('page transition uses template.tsx and ships no JS', () => {
+  const template = read('src/app/template.tsx')
+  assert.doesNotMatch(template, /'use client'/, 'template thành client component → tốn JS mọi trang')
+  assert.match(template, /m-page-enter/)
+  // template remount mỗi lần điều hướng; layout thì không, nên hiệu ứng sẽ chỉ chạy một lần.
+  assert.match(CSS, /@keyframes m-page-enter/)
+})
+
+test('admin motion is functional and shorter than public motion', () => {
+  const admin = CSS.slice(CSS.indexOf('Motion cho trang admin'))
+
+  // Hàng bảng chỉ mờ dần + dịch nhẹ; không có parallax hay hiệu ứng trang trí.
+  assert.match(admin, /@keyframes m-row-in/)
+  assert.doesNotMatch(admin, /parallax|scale\(1\.\d/)
+
+  // So le phải có trần — bảng 100 dòng mà so le hết thì hàng cuối chờ hàng giây.
+  assert.match(admin, /nth-child\(n \+ 12\)/)
+
+  const rowIn = admin.match(/\.m-admin-rows > tr \{\s*animation: m-row-in (\d+)ms/)
+  assert.ok(rowIn, 'không đọc được thời lượng hàng admin')
+  assert.ok(Number(rowIn[1]) <= 200, 'motion admin quá chậm cho thao tác lặp lại hàng ngày')
+})
+
 test('the LCP area is excluded from scroll reveal', () => {
   const home = read('src/components/home/landing/HomeLanding.tsx')
   const heroLine = home.split('\n').find((line) => line.includes('<HomeHeroLanding'))

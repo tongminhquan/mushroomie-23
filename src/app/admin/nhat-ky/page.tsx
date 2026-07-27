@@ -115,7 +115,7 @@ export default function AdminLogsPage() {
                     <th className="px-6 py-3.5 font-semibold text-[11px] uppercase tracking-wider">Chi tiết</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#f5ebe3]">
+                <tbody className="m-admin-rows divide-y divide-[#f5ebe3]">
                   {logs.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="px-6 py-8 text-center text-neutral-500">

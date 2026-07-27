@@ -345,7 +345,7 @@ export default function AdminPostsPage() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f6ece5]">
+            <tbody className="m-admin-rows divide-y divide-[#f6ece5]">
               {loading ? (
                 <tr><td colSpan={8} className="py-12 text-center text-neutral-400">
                   <Loader2 size={20} className="animate-spin mx-auto mb-2" />Đang tải bài viết…

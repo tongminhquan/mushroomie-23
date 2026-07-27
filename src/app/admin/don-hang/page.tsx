@@ -109,7 +109,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                 <th className="text-right py-3 px-4 text-neutral-500 font-bold text-[11px] uppercase tracking-wide">Chi tiết</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f6ece5]">
+            <tbody className="m-admin-rows divide-y divide-[#f6ece5]">
               {orders.map((order: any) => {
                 const isExpired = order.payment?.status === 'EXPIRED'
                 const displayOrderStatus = isExpired ? 'CANCELLED' : order.order_status

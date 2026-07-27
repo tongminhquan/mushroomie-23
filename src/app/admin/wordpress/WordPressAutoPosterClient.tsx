@@ -408,7 +408,7 @@ WORDPRESS_APPLICATION_PASSWORD=xxxx xxxx xxxx xxxx`}
                     <th className="px-4 py-3">Trạng thái</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#f0f0f1]">
+                <tbody className="m-admin-rows divide-y divide-[#f0f0f1]">
                   {preview.posts.map((post) => (
                     <tr key={`${post.rowNumber}-${post.title}`} className="hover:bg-[#fff7f2]">
                       <td className="px-4 py-3 text-[#646970]">{post.rowNumber}</td>

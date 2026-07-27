@@ -69,7 +69,7 @@ export default function AdminPaymentsPage() {
                 <th className="px-6 py-3.5 font-bold text-[11px] uppercase tracking-wide">Nội dung CK</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f6ece4] text-neutral-700">
+            <tbody className="m-admin-rows divide-y divide-[#f6ece4] text-neutral-700">
               {loading ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-neutral-500">Đang tải dữ liệu...</td>

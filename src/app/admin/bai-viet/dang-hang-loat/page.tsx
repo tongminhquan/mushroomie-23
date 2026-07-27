@@ -231,7 +231,7 @@ export default function BulkImportPage() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#f6ece5]">
+              <tbody className="m-admin-rows divide-y divide-[#f6ece5]">
                 {preview.rows.map((row) => (
                   <tr key={row.index} className="hover:bg-[#fdf6f2] transition-colors">
                     <td className="py-2.5 px-4 text-neutral-400 text-xs">{row.index}</td>

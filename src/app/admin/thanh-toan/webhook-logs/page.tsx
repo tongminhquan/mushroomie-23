@@ -181,7 +181,7 @@ export default function WebhookLogsPage() {
                 <th className="px-6 py-3.5 font-semibold text-xs uppercase tracking-[0.05em] text-right">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f5ebe4]">
+            <tbody className="m-admin-rows divide-y divide-[#f5ebe4]">
               {loading ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-8 text-center text-neutral-500">Đang tải dữ liệu...</td>

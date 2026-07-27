@@ -75,7 +75,7 @@ export default async function AdminVoucherPage() {
                 <th className="px-4 py-3">Trạng thái</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f6ece5]">
+            <tbody className="m-admin-rows divide-y divide-[#f6ece5]">
               {vouchers.map((voucher) => (
                 <tr key={voucher.id} className="transition-colors hover:bg-[#fff7f2]">
                   <td className="px-5 py-3">

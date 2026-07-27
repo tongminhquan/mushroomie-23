@@ -141,7 +141,7 @@ export default function AdminAccountsPage() {
                 <th className="px-6 py-3 text-neutral-500 font-bold text-[11px] uppercase tracking-wide text-right">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f6ece5]">
+            <tbody className="m-admin-rows divide-y divide-[#f6ece5]">
               {isLoading ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-8 text-center text-neutral-500">

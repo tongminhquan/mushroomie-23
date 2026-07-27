@@ -197,7 +197,7 @@ export default async function AdminVoucherHistoryPage({ searchParams }: { search
                 <th className="px-4 py-3">Hạn dùng</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f5ece6]">
+            <tbody className="m-admin-rows divide-y divide-[#f5ece6]">
               {vouchers.map((uv: any) => (
                 <tr key={uv.id} className="transition-colors hover:bg-[#faf4f0]">
                   <td className="px-4 py-3 text-xs text-neutral-500">{formatDate(uv.createdAt)}</td>

@@ -103,7 +103,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                 <th className="text-right py-3 px-4 text-neutral-500 font-bold text-[11px] uppercase tracking-[0.05em]">Hành động</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f5ece5]">
+            <tbody className="m-admin-rows divide-y divide-[#f5ece5]">
               {products.map((product: any) => (
                 <tr key={product.id} className="hover:bg-[#fff7f2] transition-colors">
                   <td className="py-3 px-4">
