@@ -13,6 +13,7 @@ import {
   type LocalPage,
 } from '@/lib/local-seo'
 import { getAreaDelivery, getAreaNote } from '@/lib/local-area-content'
+import ScrollReveal from '@/components/ui/ScrollReveal'
 
 /**
  * Template landing page Local SEO cho Mushroomie.
@@ -31,6 +32,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
 
   return (
     <div className="min-h-screen bg-secondary pb-16">
+      <ScrollReveal />
       {/* JSON-LD: LocalBusiness + Breadcrumb + Service (self-contained để @id resolve) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(localBusinessSchema()) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbSchema(crumbs)) }} />
@@ -84,7 +86,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
       </section>
 
       {/* Thông tin địa phương hiển thị đồng nhất với LocalBusiness schema */}
-      <section className="brand-container mt-8" aria-labelledby="local-contact-heading">
+      <section data-reveal className="brand-container mt-8" aria-labelledby="local-contact-heading">
         <div className="grid gap-5 rounded-[18px] border-[1.5px] border-warm-border bg-white p-5 shadow-card sm:p-6 lg:grid-cols-[1.5fr_0.75fr_0.75fr]">
           <div>
             <h2 id="local-contact-heading" className="flex items-center gap-2 font-heading text-base text-neutral-900">
@@ -141,7 +143,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
       </section>
 
       {/* Highlights */}
-      <section className="brand-container mt-8">
+      <section data-reveal className="brand-container mt-8">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {page.highlights.map((h) => (
             <div key={h.title} className="rounded-[18px] border-[1.5px] border-warm-border bg-white p-5 shadow-card">
@@ -154,7 +156,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
       </section>
 
       {/* Quy trình đặt hàng rõ ràng cho truy vấn có ý định mua */}
-      <section className="brand-container mt-8" aria-labelledby="order-process-heading">
+      <section data-reveal className="brand-container mt-8" aria-labelledby="order-process-heading">
         <h2 id="order-process-heading" className="font-heading text-xl text-neutral-900">
           Đặt phụ kiện handmade theo yêu cầu như thế nào?
         </h2>
@@ -187,7 +189,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
       </section>
 
       {/* Giao hàng địa phương + USP */}
-      <section className="brand-container mt-8">
+      <section data-reveal className="brand-container mt-8">
         <div className="rounded-[18px] border-[1.5px] border-[#ffe7a3] bg-[#fffdf5] p-5 sm:p-6">
           <h2 className="flex items-center gap-2 font-heading text-lg text-neutral-900">
             <Sparkles size={18} className="text-primary" /> Đặt hàng &amp; giao đến {page.area}
@@ -204,7 +206,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
       {/* Nội dung riêng của từng khu vực — phần KHÔNG dùng chung giữa các landing page.
           Xem src/lib/local-area-content.ts để biết vì sao khối này tồn tại. */}
       {areaNote && (
-        <section className="brand-container mt-8" aria-labelledby="area-note-heading">
+        <section data-reveal className="brand-container mt-8" aria-labelledby="area-note-heading">
           <div className="rounded-[18px] border-[1.5px] border-warm-border bg-white p-5 sm:p-6">
             <h2 id="area-note-heading" className="font-heading text-lg text-neutral-900">
               Điều nên biết khi đặt tại {page.area}
@@ -215,7 +217,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
       )}
 
       {/* Internal links: sản phẩm + custom + liên hệ */}
-      <section className="brand-container mt-8">
+      <section data-reveal className="brand-container mt-8">
         <h2 className="font-heading text-lg text-neutral-900">Xem thêm tại {BRAND.name}</h2>
         <div className="mt-3 flex flex-wrap gap-2.5">
           {page.productLinks.map((l) => (
@@ -232,7 +234,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
 
       {/* Related local pages */}
       {related.length > 0 && (
-        <section className="brand-container mt-8">
+        <section data-reveal className="brand-container mt-8">
           <h2 className="font-heading text-lg text-neutral-900">Khu vực &amp; sản phẩm liên quan</h2>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             {related.map((r) => (
@@ -249,7 +251,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
         </section>
       )}
 
-      <section className="brand-container mt-8" aria-labelledby="local-faq-heading">
+      <section data-reveal className="brand-container mt-8" aria-labelledby="local-faq-heading">
         <h2 id="local-faq-heading" className="font-heading text-xl text-neutral-900">
           Câu hỏi thường gặp
         </h2>
@@ -267,7 +269,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
       </section>
 
       {/* Final CTA */}
-      <section className="brand-container mt-10">
+      <section data-reveal className="brand-container mt-10">
         <div className="rounded-[24px] bg-[linear-gradient(120deg,#e41d1d,#ff6b6b)] p-7 text-center text-white shadow-strong sm:p-9">
           <h2 className="font-heading text-xl md:text-2xl">Sẵn sàng tạo phụ kiện của riêng bạn?</h2>
           <p className="mx-auto mt-2 max-w-xl text-sm text-white/90">

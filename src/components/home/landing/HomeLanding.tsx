@@ -12,6 +12,7 @@ import HomeTrust from './HomeTrust'
 import HomeFinalCTA from './HomeFinalCTA'
 import HomeMiniGameCTA from './HomeMiniGameCTA'
 import type {
+import ScrollReveal from '@/components/ui/ScrollReveal'
   HomeBanner,
   HomeCategory,
   HomePost,
@@ -34,19 +35,22 @@ export default function HomeLanding({
 }) {
   return (
     <>
+      <ScrollReveal />
+      {/* Hero và dải danh mục KHÔNG mang data-reveal: cả hai nằm trên màn hình đầu
+          tiên, ẩn rồi mới hiện sẽ làm hỏng LCP và tạo cú giật ngay khi mở trang. */}
       <HomeHeroLanding banners={banners} />
       <HomeCategoryShowcase categories={categories} />
-      <div className="home-deferred-section"><HomeFeaturedProducts products={products} /></div>
-      <div className="home-deferred-section"><HomeCustomCTA /></div>
-      <div className="home-deferred-section"><HomeBrandStory products={products} /></div>
-      <div className="home-deferred-section"><HomeVisionMissionGoals /></div>
-      <div className="home-deferred-section"><HomeCoreValues /></div>
-      <div className="home-deferred-section"><HomeCustomProcess products={products} /></div>
-      <div className="home-deferred-section"><HomeHandmadeBehindScenes products={products} /></div>
-      <div className="home-deferred-section"><HomeMiniGameCTA /></div>
-      <div className="home-deferred-section"><HomeTrust reviews={reviews} /></div>
-      <div className="home-deferred-section"><HomeLatestPosts posts={posts} /></div>
-      <div className="home-deferred-section"><HomeFinalCTA /></div>
+      <div data-reveal className="home-deferred-section"><HomeFeaturedProducts products={products} /></div>
+      <div data-reveal className="home-deferred-section"><HomeCustomCTA /></div>
+      <div data-reveal className="home-deferred-section"><HomeBrandStory products={products} /></div>
+      <div data-reveal className="home-deferred-section"><HomeVisionMissionGoals /></div>
+      <div data-reveal className="home-deferred-section"><HomeCoreValues /></div>
+      <div data-reveal className="home-deferred-section"><HomeCustomProcess products={products} /></div>
+      <div data-reveal className="home-deferred-section"><HomeHandmadeBehindScenes products={products} /></div>
+      <div data-reveal className="home-deferred-section"><HomeMiniGameCTA /></div>
+      <div data-reveal className="home-deferred-section"><HomeTrust reviews={reviews} /></div>
+      <div data-reveal className="home-deferred-section"><HomeLatestPosts posts={posts} /></div>
+      <div data-reveal className="home-deferred-section"><HomeFinalCTA /></div>
     </>
   )
 }
