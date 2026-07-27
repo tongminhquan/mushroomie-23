@@ -150,18 +150,13 @@ function generateJsonLd(
       ...imageDimensions,
     }),
     url: postUrl,
-    author: {
-      '@type': 'Organization',
-      name: SITE_NAME,
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: SITE_NAME,
-      logo: {
-        '@type': 'ImageObject',
-        url: `${SITE_URL}/logo.webp`,
-      },
-    },
+    inLanguage: 'vi-VN',
+    // Tác giả là người thật khi bài có author — tín hiệu Experience trong E-E-A-T mạnh
+    // hơn hẳn so với ghi tên thương hiệu. Không có thì lùi về thực thể thương hiệu.
+    author: post.author?.name
+      ? { '@type': 'Person', name: post.author.name }
+      : brandEntityRef(),
+    publisher: brandEntityRef(),
     datePublished: post.published_at?.toISOString() || post.created_at?.toISOString(),
     dateModified: post.updated_at?.toISOString(),
     mainEntityOfPage: {
