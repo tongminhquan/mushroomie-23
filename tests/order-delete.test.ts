@@ -47,9 +47,22 @@ test('the whole deletion runs in one transaction', () => {
   assert.ok(orderDeleteIndex > txIndex, 'order.delete phải nằm trong transaction')
 })
 
-test('deletion is restricted to admin roles and audited', () => {
+test('only super_admin can delete an order', () => {
   const deleteBlock = ROUTE.slice(ROUTE.indexOf('export async function DELETE'))
-  assert.match(deleteBlock, /\['super_admin', 'admin'\]\.includes\(role\)/)
+
+  // Xoá đơn siết chặt hơn PUT (đổi trạng thái), vốn cho phép cả 'admin'.
+  assert.match(deleteBlock, /role !== 'super_admin'/)
+  assert.doesNotMatch(
+    deleteBlock,
+    /\['super_admin', 'admin'\]/,
+    "DELETE vẫn cho phép role 'admin'",
+  )
+  // 403 chứ không 401: người dùng đã đăng nhập hợp lệ, chỉ là không đủ quyền.
+  assert.match(deleteBlock, /status: 403/)
+
+  // PUT phải giữ nguyên quyền cũ — siết nhầm sẽ khoá luồng đổi trạng thái đơn.
+  const putBlock = ROUTE.slice(ROUTE.indexOf('export async function PUT'), ROUTE.indexOf('export async function DELETE'))
+  assert.match(putBlock, /\['super_admin', 'admin'\]/)
 
   // Ảnh chụp phải lấy TRƯỚC transaction — sau khi xoá thì không còn gì để đọc.
   const snapshotIndex = deleteBlock.indexOf('const snapshot')
@@ -59,6 +72,13 @@ test('deletion is restricted to admin roles and audited', () => {
   assert.match(deleteBlock, /action: 'DELETE'/)
   assert.match(deleteBlock, /entity: 'ORDER'/)
   assert.match(deleteBlock, /order_code: order\.order_code/)
+})
+
+test('the delete button is hidden from non super_admin accounts', () => {
+  // Không phải lớp bảo mật (API tự chặn 403), mà để 'admin' không gõ hết mã đơn rồi
+  // mới nhận lỗi từ chối.
+  assert.match(BUTTON, /role === 'super_admin'/)
+  assert.match(BUTTON, /if \(!canDelete\) return null/)
 })
 
 test('the confirm dialog requires typing the order code', () => {

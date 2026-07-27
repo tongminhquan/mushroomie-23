@@ -207,13 +207,25 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
  *
  * 4. Toàn bộ ảnh chụp đơn được ghi vào admin_logs trước khi xoá, để còn dấu vết đối
  *    chiếu doanh thu về sau.
+ *
+ * 5. Giới hạn ở role `super_admin`. Các thao tác admin khác (kể cả PUT đổi trạng thái
+ *    đơn) mở cho cả 'admin', nhưng xoá thì không hoàn tác được nên siết chặt hơn.
  */
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth()
     const role = (session?.user as { role?: string } | undefined)?.role
-    if (!session || !role || !['super_admin', 'admin'].includes(role)) {
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    // Chỉ super_admin. Xoá đơn là thao tác không hoàn tác được trên hồ sơ doanh thu,
+    // chặt hơn hẳn PUT (đổi trạng thái) vốn cho phép cả 'admin'. 403 chứ không 401:
+    // người dùng đã đăng nhập hợp lệ, chỉ là không đủ quyền.
+    if (role !== 'super_admin') {
+      return NextResponse.json(
+        { error: 'Chỉ tài khoản super admin mới được xoá đơn hàng' },
+        { status: 403 },
+      )
     }
 
     const { id } = await params

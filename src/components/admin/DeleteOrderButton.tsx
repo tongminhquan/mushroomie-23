@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { Trash2, X, AlertTriangle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { useDrawerTransition } from '@/hooks/useDrawerTransition'
@@ -30,6 +31,9 @@ interface DeleteOrderButtonProps {
  *
  * Đơn đã thu tiền (PAID) hiện thêm cảnh báo riêng: xoá nó làm lệch số liệu doanh thu,
  * và tiền đã nhận thì không tự mất đi theo bản ghi.
+ *
+ * Chỉ super_admin thấy nút này. API cũng tự chặn (403) nên đây không phải lớp bảo mật —
+ * mục đích là để tài khoản 'admin' không gõ hết mã đơn rồi mới nhận lỗi từ chối.
  */
 export default function DeleteOrderButton({
   orderId,
@@ -45,6 +49,8 @@ export default function DeleteOrderButton({
   const [error, setError] = useState('')
   const dialog = useDrawerTransition(open, 200)
   const router = useRouter()
+  const { data: session } = useSession()
+  const canDelete = (session?.user as { role?: string } | undefined)?.role === 'super_admin'
 
   const isPaid = paymentStatus === 'PAID'
   const canConfirm = confirmText.trim() === orderCode && !busy
@@ -81,6 +87,8 @@ export default function DeleteOrderButton({
       setBusy(false)
     }
   }
+
+  if (!canDelete) return null
 
   return (
     <>
