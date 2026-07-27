@@ -351,7 +351,6 @@ model Order {
   userVouchers   UserVoucher[]
 
   @@index([order_status, is_reviewed, updated_at])
-  @@index([user_id])
   @@index([customer_email])
   @@map("orders")
 }
@@ -462,7 +461,6 @@ model EmailLog {
   order Order? @relation(fields: [order_id], references: [id], onDelete: SetNull)
 
   @@index([template_key, recipient_email])
-  @@index([order_id])
   @@map("email_logs")
 }
 
@@ -517,7 +515,6 @@ model Post {
 
   @@index([status, published_at])
   @@index([category_id, status])
-  @@index([author_id])
   @@map("posts")
 }
 
