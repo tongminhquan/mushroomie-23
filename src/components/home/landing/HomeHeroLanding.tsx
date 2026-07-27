@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import HomeBannerImage from './HomeBannerImage'
 import HomeHeroControls from './HomeHeroControls'
+import HeroProofMotion from './HeroProofMotion'
 import type { HomeBanner } from './types'
 
 const fallbackSlide: HomeBanner = {
@@ -82,7 +83,7 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
         </div>
       </div>
 
-      <div className="brand-container relative grid grid-cols-2 rounded-b-[24px] border-x-[1.5px] border-b-[1.5px] border-warm-border bg-white sm:grid-cols-4">
+      <div id="hero-proof-strip" className="brand-container relative grid grid-cols-2 rounded-b-[24px] border-x-[1.5px] border-b-[1.5px] border-warm-border bg-white sm:grid-cols-4">
         {proofItems.map(({ icon: Icon, label }, index) => (
           <div
             key={label}
@@ -97,6 +98,8 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
           </div>
         ))}
       </div>
+
+      <HeroProofMotion targetId="hero-proof-strip" />
     </section>
   )
 }
