@@ -126,10 +126,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     })
   }
 
+  // m-card: nâng thẻ + phóng ảnh bằng transform (chạy trên compositor).
+  // m-glow: đổ bóng bằng opacity của lớp ::before thay vì animate box-shadow —
+  // box-shadow buộc trình duyệt repaint mỗi khung hình và gây giật trên mobile.
   return (
-    {/* m-card: nâng thẻ + phóng ảnh bằng transform (chạy trên compositor).
-        m-glow: đổ bóng bằng opacity của lớp ::before thay vì animate box-shadow —
-        box-shadow buộc trình duyệt repaint mỗi khung hình và gây giật trên mobile. */}
     <article className="m-card m-glow group relative flex h-full flex-col overflow-hidden rounded-[24px] border-[1.5px] border-warm-border bg-white transition-colors duration-200 hover:border-pink">
       <Link href={`/san-pham/${product.slug}`} onClick={handleSelectItem} className="m-card-media relative block aspect-[3/4] w-full shrink-0 overflow-hidden bg-secondary">
         <SafeImage
