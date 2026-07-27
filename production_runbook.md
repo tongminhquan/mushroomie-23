@@ -115,6 +115,30 @@ pm2 flush
 ## 13. Security Headers
 Hệ thống đã bật sẵn `Strict-Transport-Security`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, và `Content-Security-Policy`.
 
+## 13.1. Migration đang chờ: `20260727040000_add_hot_path_indexes`
+
+Thêm 9 index vào `posts`, `products`, `reviews`, `orders`, `email_logs`. Trước migration này 5 bảng đó không có index nào ngoài `UNIQUE` trên slug/sku, nên mọi truy vấn lọc theo `status` hoặc sắp xếp theo `published_at` đều full table scan.
+
+Toàn bộ là `CREATE INDEX` — additive, không đụng dữ liệu. Trên MySQL 8 dùng `ALGORITHM=INPLACE` nên không khoá ghi lâu; với kích thước bảng hiện tại (vài chục bản ghi) gần như tức thì.
+
+```bash
+cd /var/www/mushroomie
+npx prisma migrate deploy
+```
+
+Kiểm tra sau khi chạy:
+
+```bash
+mysql -e "SHOW INDEX FROM posts WHERE Key_name LIKE '%status%'; SHOW INDEX FROM orders WHERE Key_name LIKE '%order_status%';" mushroomie
+```
+
+Nếu cần lùi lại (index không ảnh hưởng dữ liệu nên rollback an toàn):
+
+```sql
+DROP INDEX `posts_status_published_at_idx` ON `posts`;
+-- ...tương tự cho các index còn lại trong migration.sql
+```
+
 ## 14. Cron jobs
 
 Tất cả cron endpoint đều xác thực bằng `Bearer $CRON_SECRET`. Thiếu `CRON_SECRET` trong `.env` → endpoint luôn trả 401, không bao giờ mở public.
