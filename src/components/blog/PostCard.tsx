@@ -21,7 +21,6 @@ export default async function PostCard({ post }: PostCardProps) {
 
   return (
     <Link href={`/tin-tuc/${post.slug}`} className="group block h-full">
-      {/* Xem ProductCard để biết vì sao dùng m-card/m-glow thay cho hover:shadow-*. */}
       <article className="m-card m-glow flex h-full flex-col overflow-hidden rounded-[24px] border-[1.5px] border-warm-border bg-white shadow-card transition-colors duration-200 hover:border-primary">
         <div className="m-card-media relative aspect-[16/9] overflow-hidden bg-secondary">
           <SafeImage

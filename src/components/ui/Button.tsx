@@ -27,7 +27,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((
       ref={ref}
       disabled={disabled || isLoading}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-full font-bold transition duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 active:translate-y-px active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60',
+        // `transition` (shorthand) animate mọi thuộc tính kể cả box-shadow/border —
+        // giới hạn lại còn transform + màu để giữ 60fps. m-press cho phản hồi nhấn
+        // rõ hơn trên mobile, nơi không có trạng thái hover.
+        'm-press inline-flex items-center justify-center gap-2 rounded-full font-bold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60',
         variants[variant],
         sizes[size],
         className,
