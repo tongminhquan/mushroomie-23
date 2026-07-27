@@ -121,15 +121,20 @@ Thêm 9 index vào `posts`, `products`, `reviews`, `orders`, `email_logs`. Trư�
 
 Toàn bộ là `CREATE INDEX` — additive, không đụng dữ liệu. Trên MySQL 8 dùng `ALGORITHM=INPLACE` nên không khoá ghi lâu; với kích thước bảng hiện tại (vài chục bản ghi) gần như tức thì.
 
+> **KHÔNG chạy `npx prisma migrate deploy` trên server này.** DB production được dựng bằng `prisma db push`, không có bảng `_prisma_migrations` nào ghi nhận 6 migration cũ. `migrate deploy` sẽ bắt đầu từ `20260528073004_init` và cố `CREATE TABLE` trên bảng đã tồn tại → fail. Thư mục `prisma/migrations/` chỉ để lưu vết chủ đích; pipeline thật là `db push` (xem `deploy.sh` dòng 72).
+
+Index được áp dụng tự động khi chạy `deploy.sh`. Muốn xem trước chính xác những gì `db push` sẽ đổi:
+
 ```bash
-cd /var/www/mushroomie
-npx prisma migrate deploy
+cd /var/www/mushroomie && npx prisma migrate diff --from-schema-datasource prisma/schema.prisma --to-schema-datamodel prisma/schema.prisma --script
 ```
+
+Kết quả phải chỉ gồm `CREATE INDEX`. Nếu thấy `DROP`, `ALTER TABLE ... DROP COLUMN` hay `TRUNCATE` thì **dừng lại** — schema đã lệch so với DB theo cách có thể mất dữ liệu.
 
 Kiểm tra sau khi chạy:
 
 ```bash
-mysql -e "SHOW INDEX FROM posts WHERE Key_name LIKE '%status%'; SHOW INDEX FROM orders WHERE Key_name LIKE '%order_status%';" mushroomie
+cd /var/www/mushroomie && node -e "const{PrismaClient}=require('@prisma/client');new PrismaClient().\$queryRawUnsafe(\"SELECT TABLE_NAME,INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND INDEX_NAME LIKE '%_idx'\").then(r=>{console.table(r);process.exit(0)})"
 ```
 
 Nếu cần lùi lại (index không ảnh hưởng dữ liệu nên rollback an toàn):
