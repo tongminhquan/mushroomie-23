@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import path from 'node:path'
 import test from 'node:test'
 import { BRAND, LOCAL_PAGES, aboutPageSchema, brandEntityRef, localBusinessSchema } from '../src/lib/local-seo'
 import {
