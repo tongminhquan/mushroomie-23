@@ -362,6 +362,58 @@ body {
   transition: opacity var(--m-duration-base) var(--m-ease-out);
 }
 
+/* ==========================================================================
+   Drawer / panel trượt — giỏ hàng, menu mobile
+   --------------------------------------------------------------------------
+   Vào chậm hơn ra: 280ms lúc mở (ease-out, panel "đến" thong thả) và 200ms lúc đóng
+   (ease-in, "đi" dứt khoát). Đây là quy ước chuẩn của micro-interaction — panel nán
+   lại khi đóng sẽ tạo cảm giác giao diện chậm chạp.
+
+   Trạng thái do useDrawerTransition điều khiển qua data-drawer-state; xem hook đó để
+   biết vì sao phải render một khung hình ở trạng thái đóng trước khi lật sang mở.
+   ========================================================================== */
+.m-drawer {
+  transition: transform var(--m-duration-base) var(--m-ease-out);
+  will-change: transform;
+}
+.m-drawer[data-drawer-state='exiting'] {
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1); /* ease-in */
+}
+
+/* Trượt từ phải (giỏ hàng) */
+.m-drawer-right[data-drawer-state='entering'],
+.m-drawer-right[data-drawer-state='exiting'] {
+  transform: translate3d(100%, 0, 0);
+}
+.m-drawer-right[data-drawer-state='open'] {
+  transform: translate3d(0, 0, 0);
+}
+
+/* Trượt từ trái (menu mobile) */
+.m-drawer-left[data-drawer-state='entering'],
+.m-drawer-left[data-drawer-state='exiting'] {
+  transform: translate3d(-100%, 0, 0);
+}
+.m-drawer-left[data-drawer-state='open'] {
+  transform: translate3d(0, 0, 0);
+}
+
+/* Nền mờ phía sau: chỉ opacity, không dịch chuyển */
+.m-backdrop {
+  transition: opacity var(--m-duration-base) var(--m-ease-out);
+}
+.m-backdrop[data-drawer-state='entering'],
+.m-backdrop[data-drawer-state='exiting'] {
+  opacity: 0;
+}
+.m-backdrop[data-drawer-state='open'] {
+  opacity: 1;
+}
+.m-backdrop[data-drawer-state='exiting'] {
+  transition-duration: 200ms;
+}
+
 /* --- Vào trang: chạy ở mọi route qua src/app/template.tsx ---
    Chỉ dịch 10px: đủ để cảm nhận trang vừa đổi, không đủ để gây khó chịu khi điều
    hướng liên tục trong admin. Dùng `both` để giữ trạng thái cuối. */
