@@ -64,3 +64,17 @@ test('utility pages expose noindex metadata to crawlers', () => {
     return !disallow.some((path) => path === '/tai-khoan' || path === '/gio-hang' || path === '/thanh-toan')
   }))
 })
+
+test('robots allows the public session resource without exposing other API routes', () => {
+  const rules = robots().rules
+  const normalizedRules = Array.isArray(rules) ? rules : [rules]
+  const wildcardRule = normalizedRules.find((rule) => rule.userAgent === '*')
+
+  assert.ok(wildcardRule)
+
+  const allow = Array.isArray(wildcardRule.allow) ? wildcardRule.allow : [wildcardRule.allow]
+  const disallow = Array.isArray(wildcardRule.disallow) ? wildcardRule.disallow : [wildcardRule.disallow]
+
+  assert.ok(allow.includes('/api/auth/session'))
+  assert.ok(disallow.includes('/api/'))
+})
