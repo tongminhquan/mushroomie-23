@@ -131,7 +131,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
             aria-expanded={menuOpen}
             aria-controls="mobile-main-navigation"
             onClick={() => setMenuOpen((value) => !value)}
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-neutral-200 text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 md:hidden"
+            className="m-press grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-neutral-200 text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 md:hidden"
           >
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
