@@ -135,21 +135,23 @@ export default function ProductGallery({
         )}
       </div>
 
-      {lightboxOpen && (
+      {lightbox.mounted && (
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
+          data-drawer-state={lightbox.state}
+          className="m-backdrop fixed inset-0 z-[200] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
           onClick={() => setLightboxOpen(false)}
         >
           <button
             onClick={() => setLightboxOpen(false)}
             aria-label="Đóng ảnh lớn"
-            className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+            className="m-press absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
             type="button"
           >
             <X size={20} />
           </button>
           <div
-            className="relative h-[85vmin] w-[85vmin] max-h-[85vh] max-w-4xl"
+            data-drawer-state={lightbox.state}
+            className="m-modal relative h-[85vmin] w-[85vmin] max-h-[85vh] max-w-4xl"
             onClick={(event) => event.stopPropagation()}
           >
             <SafeImage
