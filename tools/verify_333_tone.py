@@ -1,9 +1,9 @@
 """Final structural verification for the edited Mushroomie section 3.3.3.
 
-This verifier deliberately compares the source and edited DOCX files rather
-than relying on a text-only count.  It protects the evidence, document
-structure, images, table layout, headings/captions, and paragraph formatting
-that are outside the approved prose rewrite scope.
+The editor may change only approved prose.  This verifier therefore compares
+the source and output DOCX at evidence and OOXML-layout level: each drawing's
+relationship/size/crop, all table-grid and cell-width values, and protected
+styles, settings, numbering, headers, footers, and relationship parts.
 """
 
 from __future__ import annotations
@@ -12,7 +12,6 @@ import hashlib
 import re
 import sys
 import zipfile
-from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterator
@@ -21,6 +20,7 @@ from docx import Document
 from docx.document import Document as DocumentType
 from docx.oxml.ns import qn
 from docx.text.paragraph import Paragraph
+from lxml import etree
 
 try:
     from tools.sync_333_prose_to_asm import OUTPUT_PATH, SOURCE_PATH
@@ -33,12 +33,31 @@ URL_PATTERN = re.compile(r"https?://[^\s,;)\]]+")
 STAGE_PATTERN = re.compile(r"^➔ Giai đoạn .+", re.MULTILINE)
 ACTIVITY_PATTERN = re.compile(r"^Hoạt động \d+:.+", re.MULTILINE)
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+R_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 
 
 @dataclass(frozen=True)
 class ParagraphRecord:
     location: str
     paragraph: Paragraph
+
+
+@dataclass(frozen=True)
+class DrawingSignature:
+    location: str
+    ordinal: int
+    relationship_id: str
+    target: str
+    extent: tuple[str | None, str | None]
+    crop: tuple[tuple[tuple[str, str], ...], ...]
+
+
+@dataclass(frozen=True)
+class TableSignature:
+    width: tuple[str | None, str | None]
+    indent: tuple[str | None, str | None]
+    grid: tuple[tuple[str | None, str | None], ...]
+    rows: tuple[tuple[tuple[str | None, str | None], ...], ...]
 
 
 def iter_paragraphs(document: DocumentType) -> Iterator[ParagraphRecord]:
@@ -68,44 +87,163 @@ def media_hashes(path: Path) -> dict[str, str]:
         }
 
 
-def _xml_without_first_line_indent(paragraph: Paragraph) -> str:
-    """Serialize paragraph properties while allowing the requested indent reset."""
+def canonical_xml(data: bytes) -> bytes:
+    """Canonicalize XML so ZIP timestamps and XML attribute order do not matter."""
+    return etree.tostring(etree.fromstring(data), method="c14n", with_comments=False)
+
+
+def _strip_whitespace_nodes(element) -> None:
+    """Remove serialisation-only indentation so semantic XML compares cleanly."""
+    if element.text is not None and not element.text.strip():
+        element.text = None
+    for child in element:
+        _strip_whitespace_nodes(child)
+        if child.tail is not None and not child.tail.strip():
+            child.tail = None
+
+
+def protected_part_hashes(path: Path) -> dict[str, str]:
+    """Hash canonical XML for structure/style parts that prose editing must not alter."""
+    base_parts = {
+        "word/styles.xml",
+        "word/numbering.xml",
+        "word/settings.xml",
+        "word/_rels/document.xml.rels",
+    }
+    with zipfile.ZipFile(path) as package:
+        part_names = set(package.namelist())
+        protected = base_parts & part_names
+        protected.update(
+            name
+            for name in part_names
+            if re.fullmatch(r"word/(?:header|footer)\d+\.xml", name)
+            or re.fullmatch(r"word/_rels/(?:header|footer)\d+\.xml\.rels", name)
+        )
+        return {
+            name: hashlib.sha256(canonical_xml(package.read(name))).hexdigest()
+            for name in sorted(protected)
+        }
+
+
+def _attribute_signature(element, attribute: str = "w:w") -> tuple[str | None, str | None]:
+    if element is None:
+        return (None, None)
+    return (element.get(qn("w:type")), element.get(qn(attribute)))
+
+
+def drawing_signatures(document: DocumentType) -> list[DrawingSignature]:
+    """Capture every drawing's document order, media relationship, geometry, and crop."""
+    signatures: list[DrawingSignature] = []
+    for record in iter_paragraphs(document):
+        drawings = record.paragraph._p.xpath(".//w:drawing")
+        for ordinal, drawing in enumerate(drawings):
+            blips = drawing.xpath(".//a:blip")
+            if len(blips) != 1:
+                raise ValueError(f"Expected one a:blip at {record.location} drawing {ordinal}")
+            relationship_id = blips[0].get(f"{{{R_NS}}}embed") or ""
+            relationship = record.paragraph.part.rels.get(relationship_id)
+            target = relationship.target_ref if relationship is not None else "<missing>"
+            extents = drawing.xpath(".//wp:extent")
+            extent = (
+                extents[0].get("cx") if extents else None,
+                extents[0].get("cy") if extents else None,
+            )
+            crop = tuple(
+                tuple(sorted(source_rect.attrib.items()))
+                for source_rect in drawing.xpath(".//a:srcRect")
+            )
+            signatures.append(
+                DrawingSignature(record.location, ordinal, relationship_id, target, extent, crop)
+            )
+    return signatures
+
+
+def table_signature(table) -> TableSignature:
+    """Return all geometry values that determine an existing table's layout."""
+    table_properties = table._tbl.tblPr
+    width = _attribute_signature(table_properties.find(qn("w:tblW")))
+    indent = _attribute_signature(table_properties.find(qn("w:tblInd")))
+    grid = table._tbl.tblGrid
+    grid_columns = tuple(
+        (column.get(qn("w:type")), column.get(qn("w:w"))) for column in grid.gridCol_lst
+    )
+    rows: list[tuple[tuple[str | None, str | None], ...]] = []
+    for row in table.rows:
+        widths: list[tuple[str | None, str | None]] = []
+        for cell in row.cells:
+            cell_properties = cell._tc.tcPr
+            widths.append(
+                _attribute_signature(
+                    cell_properties.find(qn("w:tcW")) if cell_properties is not None else None
+                )
+            )
+        rows.append(tuple(widths))
+    return TableSignature(width, indent, grid_columns, tuple(rows))
+
+
+def _as_dxa(value: tuple[str | None, str | None]) -> int | None:
+    type_value, width_value = value
+    # Word omits w:type on gridCol, where dxa is implicit.
+    if type_value not in (None, "dxa") or width_value is None:
+        return None
+    try:
+        return int(width_value)
+    except ValueError:
+        return None
+
+
+def validate_table_geometry(signature: TableSignature) -> list[str]:
+    """Validate relationships between tblW, grid columns, and all tcW values."""
+    errors: list[str] = []
+    table_width = _as_dxa(signature.width)
+    grid_widths = [_as_dxa(column) for column in signature.grid]
+    if table_width is None:
+        errors.append("tblW must be an explicit dxa value")
+    if not signature.grid or any(width is None for width in grid_widths):
+        errors.append("tblGrid must contain explicit dxa gridCol widths")
+        return errors
+    grid_total = sum(width for width in grid_widths if width is not None)
+    if table_width is not None and grid_total != table_width:
+        errors.append(f"tblGrid sum {grid_total} differs from tblW {table_width}")
+    for row_index, row in enumerate(signature.rows):
+        cell_widths = [_as_dxa(width) for width in row]
+        if len(row) != len(signature.grid):
+            errors.append(
+                f"row {row_index} has {len(row)} cells; expected {len(signature.grid)} grid columns"
+            )
+        if any(width is None for width in cell_widths):
+            errors.append(f"row {row_index} has non-dxa or missing tcW")
+        elif sum(width for width in cell_widths if width is not None) != grid_total:
+            errors.append(
+                f"row {row_index} tcW sum {sum(cell_widths)} differs from grid sum {grid_total}"
+            )
+    return errors
+
+
+def _xml_without_first_line_indent(paragraph: Paragraph) -> bytes:
+    """Canonicalize paragraph properties while allowing the requested indent reset."""
     properties = paragraph._p.pPr
     if properties is None:
-        return ""
-    copied = deepcopy(properties)
+        return b""
+    copied = etree.fromstring(properties.xml.encode("utf-8"))
     indent = copied.find(qn("w:ind"))
     if indent is not None:
         indent.attrib.pop(qn("w:firstLine"), None)
         indent.attrib.pop(qn("w:firstLineChars"), None)
         if not indent.attrib:
             copied.remove(indent)
-    return copied.xml
+    _strip_whitespace_nodes(copied)
+    return etree.tostring(copied, method="c14n", with_comments=False)
 
 
-def _run_properties(paragraph: Paragraph) -> list[str]:
-    """Return only direct run formatting, not rewriteable text values."""
-    return [run._r.rPr.xml if run._r.rPr is not None else "" for run in paragraph.runs]
-
-
-def _table_geometry(table) -> list[str]:
-    """Return deterministic geometry checks for a single Word table."""
-    errors: list[str] = []
-    table_xml = table._tbl
-    if table_xml.find(qn("w:tblPr")) is None:
-        errors.append("missing tblPr")
-    table_width = table_xml.find(f".//{{{W_NS}}}tblW")
-    if table_width is None:
-        errors.append("missing tblW")
-    grid = table_xml.find(qn("w:tblGrid"))
-    if grid is None or not list(grid):
-        errors.append("missing tblGrid")
-    for row_index, row in enumerate(table.rows):
-        for cell_index, cell in enumerate(row.cells):
-            width = cell._tc.tcPr.find(qn("w:tcW")) if cell._tc.tcPr is not None else None
-            if width is None:
-                errors.append(f"missing tcW at R{row_index}C{cell_index}")
-    return errors
+def _run_properties(paragraph: Paragraph) -> list[bytes]:
+    """Return direct run formatting only, not the allowed prose text values."""
+    return [
+        etree.tostring(etree.fromstring(run._r.rPr.xml.encode("utf-8")), method="c14n")
+        if run._r.rPr is not None
+        else b""
+        for run in paragraph.runs
+    ]
 
 
 def _assert_equal(errors: list[str], label: str, before, after) -> None:
@@ -114,7 +252,7 @@ def _assert_equal(errors: list[str], label: str, before, after) -> None:
 
 
 def verify(source: Path = SOURCE_PATH, output: Path = OUTPUT_PATH) -> list[str]:
-    """Return all final-QA failures; an empty list means the DOCX passed."""
+    """Return final-QA failures; an empty list means the DOCX passed."""
     errors: list[str] = []
     if not source.is_file():
         return [f"Source DOCX not found: {source}"]
@@ -140,6 +278,8 @@ def verify(source: Path = SOURCE_PATH, output: Path = OUTPUT_PATH) -> list[str]:
         [(len(table.rows), len(table.columns)) for table in after.tables],
     )
     _assert_equal(errors, "embedded media hashes", media_hashes(source), media_hashes(output))
+    _assert_equal(errors, "drawing signatures", drawing_signatures(before), drawing_signatures(after))
+    _assert_equal(errors, "protected OOXML parts", protected_part_hashes(source), protected_part_hashes(output))
 
     _assert_equal(errors, "numeric evidence", NUMBER_PATTERN.findall(before_text), NUMBER_PATTERN.findall(after_text))
     _assert_equal(errors, "URLs", URL_PATTERN.findall(before_text), URL_PATTERN.findall(after_text))
@@ -190,12 +330,18 @@ def verify(source: Path = SOURCE_PATH, output: Path = OUTPUT_PATH) -> list[str]:
             errors.append(f"first-line indent remains at {after_record.location}")
 
     for table_index, (before_table, after_table) in enumerate(zip(before.tables, after.tables)):
-        _assert_equal(errors, f"table {table_index} properties", before_table._tbl.tblPr.xml, after_table._tbl.tblPr.xml)
-        _assert_equal(errors, f"table {table_index} grid", before_table._tbl.tblGrid.xml, after_table._tbl.tblGrid.xml)
-        for geometry_error in _table_geometry(after_table):
+        before_signature = table_signature(before_table)
+        after_signature = table_signature(after_table)
+        _assert_equal(errors, f"table {table_index} geometry", before_signature, after_signature)
+        for geometry_error in validate_table_geometry(after_signature):
             errors.append(f"table {table_index}: {geometry_error}")
 
-    _assert_equal(errors, "section properties", [section._sectPr.xml for section in before.sections], [section._sectPr.xml for section in after.sections])
+    _assert_equal(
+        errors,
+        "section properties",
+        [section._sectPr.xml for section in before.sections],
+        [section._sectPr.xml for section in after.sections],
+    )
     return errors
 
 
@@ -207,7 +353,7 @@ def main() -> int:
             print(f"- {error}")
         return 1
     print("PASS: 4 stages; 11 activities; 28 inline images; 12 tables; Bảng 3.14 STT 1–30.")
-    print("PASS: media, numeric evidence, URLs, headings/captions, formatting, table geometry, and zero first-line indentation are preserved.")
+    print("PASS: media/drawing targets, numeric evidence, URLs, headings/captions, protected OOXML, formatting, and exact table geometry are preserved.")
     return 0
 
 
