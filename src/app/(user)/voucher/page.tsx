@@ -87,7 +87,7 @@ export default function VoucherLandingPage() {
             <span className="brand-kicker">Cách nhận voucher</span>
             <h2 className="mt-2 font-heading text-2xl text-text md:text-3xl">3 bước đơn giản</h2>
           </div>
-          <div className="grid gap-5 md:grid-cols-3">
+          <div data-batch-reveal className="grid gap-5 md:grid-cols-3">
             {HOW_TO_STEPS.map((step, i) => (
               <div
                 key={i}
