@@ -373,7 +373,7 @@ export default async function ProductDetailPage({
 
         <div className={`mt-8 grid gap-8 ${product.description ? 'lg:grid-cols-[minmax(0,1fr)_360px]' : ''}`}>
           {product.description && (
-            <section className="rounded-[28px] border border-warm-border bg-white p-6 shadow-card sm:p-8">
+            <section data-reveal className="rounded-[28px] border border-warm-border bg-white p-6 shadow-card sm:p-8">
               <SectionHeader
                 eyebrow="Chi tiết sản phẩm"
                 title="Mô tả đầy đủ"
