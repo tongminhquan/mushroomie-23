@@ -62,7 +62,7 @@ export default function MobileBottomNav() {
               key={index}
               href={item.href}
               aria-current={isActive ? 'page' : undefined}
-              className="group flex min-h-14 min-w-16 flex-col items-center justify-center gap-0.5 rounded-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20"
+              className="m-press group flex min-h-14 min-w-16 flex-col items-center justify-center gap-0.5 rounded-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20"
             >
               <div className={`rounded-xl p-1.5 transition duration-200 ${isActive ? 'bg-primary-light text-primary' : 'text-neutral-500 group-hover:bg-white group-hover:text-primary'}`}>
                 <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
