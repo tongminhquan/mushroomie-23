@@ -4,6 +4,8 @@ import MobileBottomNav from '@/components/layout/MobileBottomNav'
 import GoogleTagManagerInit from '@/components/analytics/GoogleTagManagerInit'
 import DeferredPublicWidgets from '@/components/layout/DeferredPublicWidgets'
 import PublicProviders from '@/components/layout/PublicProviders'
+import ScrollReveal from '@/components/ui/ScrollReveal'
+import ScrollMotion from '@/components/ui/ScrollMotion'
 import { prisma } from '@/lib/prisma'
 
 export const revalidate = 3600
