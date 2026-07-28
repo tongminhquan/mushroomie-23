@@ -151,7 +151,7 @@ export default function AddToCartButton({ product }: Props) {
               type="button"
               aria-label="Giảm số lượng"
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="grid h-9 w-9 place-items-center rounded-full border border-warm-border bg-secondary transition hover:border-primary hover:text-primary"
+              className="m-press grid h-9 w-9 place-items-center rounded-full border border-warm-border bg-secondary transition hover:border-primary hover:text-primary"
             >
               <Minus size={16} />
             </button>
@@ -160,7 +160,7 @@ export default function AddToCartButton({ product }: Props) {
               type="button"
               aria-label="Tăng số lượng"
               onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-              className="grid h-9 w-9 place-items-center rounded-full border border-warm-border bg-secondary transition hover:border-primary hover:text-primary"
+              className="m-press grid h-9 w-9 place-items-center rounded-full border border-warm-border bg-secondary transition hover:border-primary hover:text-primary"
             >
               <Plus size={16} />
             </button>
