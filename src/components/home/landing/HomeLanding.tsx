@@ -11,8 +11,6 @@ import HomeLatestPosts from './HomeLatestPosts'
 import HomeTrust from './HomeTrust'
 import HomeFinalCTA from './HomeFinalCTA'
 import HomeMiniGameCTA from './HomeMiniGameCTA'
-import ScrollReveal from '@/components/ui/ScrollReveal'
-import ScrollMotion from '@/components/ui/ScrollMotion'
 import type {
   HomeBanner,
   HomeCategory,
