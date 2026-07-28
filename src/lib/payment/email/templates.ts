@@ -80,7 +80,7 @@ export function renderGiftWrapDetails(order: GiftWrapEmailOrder): string {
 export function renderPaymentSuccessEmail(order: any): string {
   const itemsHtml = order.items.map((item: any) => `
     <div class="product-item">
-      <div class="name">${escapeHtml(item.product_name)} x${item.quantity}</div>
+      <div class="name">${escapeHtml(item.product_name)} x${escapeHtml(item.quantity)}</div>
       <div>${formatMoney(item.total_price)}</div>
     </div>`).join('')
 

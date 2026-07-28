@@ -58,6 +58,7 @@ const allowedSharpFormats = new Set(['jpeg', 'png', 'webp', 'avif'])
 export function normalizeUploadPurpose(value?: FormDataEntryValue | string | null): UploadImagePurpose {
   const normalized = typeof value === 'string' ? value.trim().toLowerCase() : ''
   if (normalized === 'banner') return 'banner'
+  if (normalized === 'product') return 'product'
   if (normalized === 'post' || normalized === 'blog') return 'post'
   if (normalized === 'category') return 'category'
   if (normalized === 'icon') return 'icon'

@@ -33,6 +33,7 @@ jobs:
           --health-retries=10
 
     env:
+      CI: "true"
       NEXT_PUBLIC_APP_URL: https://mushroomie.io.vn
       NEXT_PUBLIC_SITE_URL: https://mushroomie.io.vn
       NEXT_PUBLIC_ENABLE_ANALYTICS: "false"
@@ -56,5 +57,9 @@ jobs:
       - run: npm run typecheck
 
       - run: npm run test:coverage
+
+      - run: npm run test:coverage:all
+
+      - run: npm run lint
 
       - run: npm run build
