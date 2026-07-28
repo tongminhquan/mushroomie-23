@@ -269,7 +269,11 @@ test('no parent unmounts a drawer the moment it closes', () => {
   // gỡ panel khỏi DOM ngay khi cartOpen thành false. useDrawerTransition bên trong giữ
   // DOM đúng 280ms, nhưng component cha cắt trước — nên giỏ hàng đóng phụt, không trượt.
   // Bộ test cũ không bắt được vì chỉ soi hook và chính component drawer.
+  // Bỏ chú thích trước khi so khớp: phần giải thích lỗi cũ có trích lại đúng đoạn code
+  // sai, nếu quét cả chú thích thì chính tài liệu sẽ làm test đỏ.
   const widgets = read('src/components/layout/DeferredPublicWidgets.tsx')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^\s*\/\/.*$/gm, '')
 
   assert.doesNotMatch(
     widgets,
