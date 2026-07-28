@@ -66,7 +66,7 @@ export default function ManageStatusesModal() {
       </button>
       {show && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[80vh] flex flex-col">
+          <div className="m-pop-in bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[80vh] flex flex-col">
             <h3 className="font-bold text-lg mb-4 text-neutral-800">Quản lý trạng thái sản phẩm</h3>
             
             <div className="flex gap-2 mb-4">
