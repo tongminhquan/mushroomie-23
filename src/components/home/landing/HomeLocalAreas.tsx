@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, MapPin } from 'lucide-react'
+import { getPriorityLocalHomeCards } from '@/lib/priority-local-keywords'
 
 /**
  * Khối liên kết Local SEO trên trang chủ — dẫn về các landing page khu vực chính.
@@ -7,12 +8,19 @@ import { ArrowRight, MapPin } from 'lucide-react'
  * cho gói Local SEO (Đồng Nai / Biên Hòa / TP.HCM).
  */
 const AREAS = [
-  { href: '/phu-kien-handmade-dong-nai', emoji: '🧶', label: 'Phụ kiện handmade Đồng Nai', desc: 'Vòng tay, móc khóa, charm & quà tặng custom' },
-  { href: '/vong-tay-custom-dong-nai', emoji: '🎨', label: 'Vòng tay custom Đồng Nai', desc: 'Chọn màu, chọn charm theo gu riêng' },
-  { href: '/moc-khoa-handmade-dong-nai', emoji: '🔑', label: 'Móc khóa handmade Đồng Nai', desc: 'Điểm nhấn cho túi, balo, điện thoại' },
-  { href: '/qua-tang-handmade-dong-nai', emoji: '🎁', label: 'Quà tặng handmade Đồng Nai', desc: 'Set quà nhỏ xinh, cá nhân hóa theo dịp' },
-  { href: '/phu-kien-handmade-bien-hoa', emoji: '📍', label: 'Phụ kiện handmade Biên Hòa', desc: 'Đặt gần Biên Hòa, tư vấn và giao hàng linh hoạt' },
-  { href: '/vong-tay-custom-bien-hoa', emoji: '🪄', label: 'Vòng tay custom Biên Hòa', desc: 'Đặt theo tên, màu và charm mang dấu ấn riêng' },
+  {
+    href: '/phu-kien-handmade-dong-nai',
+    emoji: '🧶',
+    label: 'Phụ kiện handmade Đồng Nai',
+    description: 'Vòng tay, móc khóa, charm và quà tặng custom',
+  },
+  ...getPriorityLocalHomeCards(),
+  {
+    href: '/phu-kien-handmade-bien-hoa',
+    emoji: '📍',
+    label: 'Phụ kiện handmade gần Biên Hòa',
+    description: 'Tư vấn từ xưởng Trảng Dài và giao hàng linh hoạt',
+  },
 ]
 
 export default function HomeLocalAreas() {
@@ -36,7 +44,7 @@ export default function HomeLocalAreas() {
           >
             <div className="mb-2 text-2xl" aria-hidden>{a.emoji}</div>
             <h3 className="font-heading text-base text-neutral-900 group-hover:text-primary">{a.label}</h3>
-            <p className="mt-1 text-xs leading-relaxed text-neutral-500">{a.desc}</p>
+            <p className="mt-1 text-xs leading-relaxed text-neutral-500">{a.description}</p>
             <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-primary">
               Xem ngay <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
             </span>

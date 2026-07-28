@@ -6,15 +6,14 @@ import Button from '@/components/ui/Button'
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 import SafeEmail from '@/components/ui/SafeEmail'
 import { BRAND } from '@/lib/local-seo'
+import { getPriorityLocalLinks } from '@/lib/priority-local-keywords'
 
 const LINE = '#f0e0d6' // warm hairline từ Claude Design
 
 // Liên kết Local SEO trong thân trang liên hệ (nội bộ, anchor tự nhiên)
 const LOCAL_LINKS = [
-  { href: '/phu-kien-handmade-dong-nai', label: 'Phụ kiện handmade Đồng Nai' },
-  { href: '/vong-tay-custom-dong-nai', label: 'Vòng tay custom Đồng Nai' },
-  { href: '/moc-khoa-handmade-dong-nai', label: 'Móc khóa handmade Đồng Nai' },
-  { href: '/qua-tang-ca-nhan-hoa-dong-nai', label: 'Quà tặng cá nhân hóa Đồng Nai' },
+  { href: '/phu-kien-handmade-dong-nai', label: 'Khám phá phụ kiện handmade tại Đồng Nai' },
+  ...getPriorityLocalLinks('contact'),
 ]
 
 const socials = [

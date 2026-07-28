@@ -3,6 +3,9 @@ import { Globe, Mail, MapPin, Phone } from 'lucide-react'
 import SafeEmail from '@/components/ui/SafeEmail'
 import SafeImage from '@/components/ui/SafeImage'
 import { BRAND } from '@/lib/local-seo'
+import { getPriorityLocalLinks } from '@/lib/priority-local-keywords'
+
+const priorityLocalLinks = getPriorityLocalLinks('footer')
 
 export default function Footer({ categories }: { categories: Array<{ id: number; name: string; slug: string }> }) {
 
@@ -62,7 +65,11 @@ export default function Footer({ categories }: { categories: Array<{ id: number;
               <li><Link href="/mini-game" className="m-underline hover:text-white">Mini game</Link></li>
               <li><Link href="/lien-he" className="m-underline hover:text-white">Liên hệ</Link></li>
               <li><Link href="/phu-kien-handmade-dong-nai" className="m-underline hover:text-white">Phụ kiện handmade Đồng Nai</Link></li>
-              <li><Link href="/vong-tay-custom-bien-hoa" className="m-underline hover:text-white">Vòng tay custom Biên Hòa</Link></li>
+              {priorityLocalLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="m-underline hover:text-white">{link.label}</Link>
+                </li>
+              ))}
             </ul>
           </div>
 
