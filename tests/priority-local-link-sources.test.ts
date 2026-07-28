@@ -46,10 +46,9 @@ test('trang lien he render du bon owner voi tap target 44px', () => {
   assert.ok(ownerAnchors.every((anchor) => anchor.className.includes('min-h-11')))
 })
 
-test('footer render du bon owner voi tap target 44px', () => {
+test('footer khong render nhom lien ket local SEO uu tien', () => {
   const anchors = getAnchorData(renderToStaticMarkup(createElement(Footer, { categories: [] })))
-  const ownerAnchors = anchors.filter((anchor) => OWNER_HREFS.includes(anchor.href))
+  const localFooterHrefs = ['/phu-kien-handmade-dong-nai', ...OWNER_HREFS]
 
-  assert.deepEqual(ownerAnchors.map((anchor) => anchor.href), OWNER_HREFS)
-  assert.ok(ownerAnchors.every((anchor) => anchor.className.includes('min-h-11')))
+  assert.ok(!anchors.some((anchor) => localFooterHrefs.includes(anchor.href)))
 })
