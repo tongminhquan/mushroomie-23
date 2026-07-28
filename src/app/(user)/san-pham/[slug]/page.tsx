@@ -441,7 +441,8 @@ export default async function ProductDetailPage({
               title="Sản phẩm liên quan"
               description="Những thiết kế cùng tinh thần hoặc cùng danh mục để bạn chọn thêm."
             />
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {/* Lưới hiện lần lượt khi cuộn tới — cùng cách lưới sản phẩm ở /san-pham. */}
+            <div data-batch-reveal className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {relatedProducts.map((item) => (
                 <ProductCard key={item.id} product={item} />
               ))}
