@@ -72,7 +72,9 @@ export default function ProfileCompletionGuard({ children }: { children: React.R
   if (isMissingInfo) {
     return (
       <div className="fixed inset-0 z-[9999] bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 animate-in fade-in zoom-in duration-300">
+        {/* `animate-in fade-in zoom-in` là class chết: dự án không cài tailwindcss-animate
+            và cũng không định nghĩa trong globals.css. .m-pop-in là utility có thật. */}
+        <div className="m-pop-in bg-white w-full max-w-md rounded-3xl shadow-2xl p-8">
           <div className="text-center mb-6 flex flex-col items-center">
             <div className="relative h-16 w-40 mb-4">
               <Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority />
