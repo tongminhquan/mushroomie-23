@@ -42,8 +42,6 @@ const protectedRoutes: ProtectedRouteCase[] = [
   { name: 'contact inbox', load: () => import('@/app/api/contacts/route'), method: 'GET', path: '/api/contacts' },
   { name: 'contact update', load: () => import('@/app/api/contacts/[id]/route'), method: 'PUT', path: '/api/contacts/7' },
   { name: 'mini-game points', load: () => import('@/app/api/minigame/get-points/route'), method: 'GET', path: '/api/minigame/get-points' },
-  { name: 'mini-game start', load: () => import('@/app/api/minigame/start/route'), method: 'POST', path: '/api/minigame/start' },
-  { name: 'mini-game score', load: () => import('@/app/api/minigame/submit-score/route'), method: 'POST', path: '/api/minigame/submit-score' },
   { name: 'mini-game voucher exchange', load: () => import('@/app/api/minigame/exchange-voucher/route'), method: 'POST', path: '/api/minigame/exchange-voucher' },
   { name: 'order list', load: () => import('@/app/api/orders/route'), method: 'GET', path: '/api/orders' },
   { name: 'order review', load: () => import('@/app/api/orders/[id]/reviews/route'), method: 'POST', path: '/api/orders/7/reviews' },
@@ -170,5 +168,14 @@ describe('API authorization contract', () => {
 
     expect(response.status).toBe(200)
     expect(await response.json()).toEqual({ authenticated: false })
+  })
+
+  it.each([
+    ['start', () => import('@/app/api/minigame/start/route')],
+    ['score', () => import('@/app/api/minigame/submit-score/route')],
+  ])('retires the legacy mini-game %s endpoint', async (_name, load) => {
+    const { POST } = await load()
+    const response = await POST()
+    expect(response.status).toBe(410)
   })
 })

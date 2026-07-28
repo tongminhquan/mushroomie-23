@@ -10,7 +10,10 @@ const mocks = vi.hoisted(() => ({
   voucherUpdateMany: vi.fn(),
   transaction: vi.fn(),
   txPaymentUpdate: vi.fn(),
+  txPaymentUpdateMany: vi.fn(),
   txOrderUpdate: vi.fn(),
+  txOrderFindUnique: vi.fn(),
+  txOrderUpdateMany: vi.fn(),
   txHistoryCreate: vi.fn(),
   txEventUpdate: vi.fn(),
   sendOrderEmail: vi.fn(),
@@ -81,15 +84,31 @@ describe('payment webhook route', () => {
     mocks.paymentUpdate.mockResolvedValue({})
     mocks.voucherUpdateMany.mockResolvedValue({ count: 1 })
     mocks.txPaymentUpdate.mockResolvedValue({})
+    mocks.txPaymentUpdateMany.mockResolvedValue({ count: 1 })
     mocks.txOrderUpdate.mockResolvedValue({})
+    mocks.txOrderFindUnique.mockResolvedValue({
+      ...payment.order,
+      inventory_reserved_at: null,
+      items: [],
+    })
+    mocks.txOrderUpdateMany.mockResolvedValue({ count: 1 })
     mocks.txHistoryCreate.mockResolvedValue({})
     mocks.txEventUpdate.mockResolvedValue({})
     mocks.sendOrderEmail.mockResolvedValue(undefined)
     mocks.transaction.mockImplementation(async (argument: unknown) => {
       if (typeof argument !== 'function') return Promise.all(argument as Promise<unknown>[])
       return argument({
-        payment: { update: mocks.txPaymentUpdate },
-        order: { update: mocks.txOrderUpdate },
+        payment: {
+          update: mocks.txPaymentUpdate,
+          updateMany: mocks.txPaymentUpdateMany,
+        },
+        order: {
+          update: mocks.txOrderUpdate,
+          findUnique: mocks.txOrderFindUnique,
+          updateMany: mocks.txOrderUpdateMany,
+        },
+        product: { update: vi.fn() },
+        userVoucher: { updateMany: mocks.voucherUpdateMany },
         orderStatusHistory: { create: mocks.txHistoryCreate },
         paymentWebhookEvent: { update: mocks.txEventUpdate },
       })
@@ -106,7 +125,7 @@ describe('payment webhook route', () => {
       status: 'FAILED',
       signature: '[REDACTED]',
       sanitized_headers: expect.objectContaining({ authorization: '[REDACTED]' }),
-      raw_payload: { transaction: 'TX-100', token: '[REDACTED]', nested: { signature: '[REDACTED]' } },
+      raw_payload: { transaction: 'TX-100', token: '[redacted]', nested: { signature: '[redacted]' } },
     }) })
     expect(mocks.paymentFindFirst).not.toHaveBeenCalled()
   })
@@ -146,12 +165,15 @@ describe('payment webhook route', () => {
     const response = await POST(webhookRequest())
 
     expect(response.status).toBe(200)
-    expect(mocks.paymentUpdate).toHaveBeenCalledWith({ where: { id: 4 }, data: { status: 'EXPIRED' } })
+    expect(mocks.txPaymentUpdateMany).toHaveBeenCalledWith({
+      where: { id: 4, status: 'PENDING' },
+      data: { status: 'EXPIRED' },
+    })
     expect(mocks.voucherUpdateMany).toHaveBeenCalledWith({
       where: { orderId: 99, status: 'USED' },
       data: { status: 'AVAILABLE', orderId: null, usedAt: null },
     })
-    expect(mocks.eventUpdate).toHaveBeenCalledWith({ where: { id: 20 }, data: expect.objectContaining({
+    expect(mocks.txEventUpdate).toHaveBeenCalledWith({ where: { id: 20 }, data: expect.objectContaining({
       status: 'FAILED', error_message: 'Payment expired', payment_id: 4, order_id: 99,
     }) })
   })

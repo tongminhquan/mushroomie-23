@@ -11,6 +11,8 @@ const mocks = vi.hoisted(() => ({
   transaction: vi.fn(),
   txOrderCreate: vi.fn(),
   txHistoryCreate: vi.fn(),
+  txSettingFindMany: vi.fn(),
+  txProductUpdateMany: vi.fn(),
   txVoucherFindFirst: vi.fn(),
   txVoucherUpdateMany: vi.fn(),
   isLimited: vi.fn(),
@@ -58,6 +60,7 @@ const validOrderBody = {
     selected_options: { color: 'đỏ' },
   }],
   payment_method: 'bank_transfer',
+  expected_shipping_fee: 30_000,
 }
 
 function jsonRequest(path: string, body: unknown) {
@@ -86,6 +89,14 @@ describe('order and payment route contracts', () => {
     }])
     mocks.txOrderCreate.mockResolvedValue({ id: 99, order_code: 'MSH-99', items: [] })
     mocks.txHistoryCreate.mockResolvedValue({})
+    mocks.txSettingFindMany.mockResolvedValue([
+      { key: 'default_shipping_fee', value: '30000' },
+      { key: 'shipping_fee_updated_at', value: '2026-07-19T00:00:00.000Z' },
+      { key: 'gift_wrap_enabled', value: 'true' },
+      { key: 'gift_wrap_fee', value: '15000' },
+      { key: 'gift_wrap_updated_at', value: '2026-07-19T00:00:00.000Z' },
+    ])
+    mocks.txProductUpdateMany.mockResolvedValue({ count: 1 })
     mocks.txVoucherFindFirst.mockResolvedValue(null)
     mocks.txVoucherUpdateMany.mockResolvedValue({ count: 1 })
     mocks.transaction.mockImplementation(async (argument: unknown) => {
@@ -93,6 +104,8 @@ describe('order and payment route contracts', () => {
       return argument({
         order: { create: mocks.txOrderCreate },
         orderStatusHistory: { create: mocks.txHistoryCreate },
+        setting: { findMany: mocks.txSettingFindMany },
+        product: { updateMany: mocks.txProductUpdateMany },
         userVoucher: { findFirst: mocks.txVoucherFindFirst, updateMany: mocks.txVoucherUpdateMany },
       })
     })

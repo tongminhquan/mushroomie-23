@@ -50,8 +50,8 @@ describe('upload and profile routes', () => {
     mocks.requireAuth.mockRejectedValue(new Error('UNAUTHORIZED'))
 
     expect((await listUploads()).status).toBe(401)
-    expect((await uploadImage(new Request('https://mushroomie.test/api/upload', { method: 'POST' }))).status).toBe(401)
-    expect((await deleteUpload(new Request('https://mushroomie.test/api/upload?filename=item.webp', { method: 'DELETE' }))).status).toBe(401)
+    expect((await uploadImage(new NextRequest('https://mushroomie.test/api/upload', { method: 'POST' }))).status).toBe(401)
+    expect((await deleteUpload(new NextRequest('https://mushroomie.test/api/upload?filename=item.webp', { method: 'DELETE' }))).status).toBe(401)
     expect((await processUpload(new Request('https://mushroomie.test/api/upload/process', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}',
     }))).status).toBe(401)
@@ -74,7 +74,7 @@ describe('upload and profile routes', () => {
   })
 
   it('validates upload presence and returns the optimized upload contract', async () => {
-    const noFile = await uploadImage(new Request('https://mushroomie.test/api/upload', {
+    const noFile = await uploadImage(new NextRequest('https://mushroomie.test/api/upload', {
       method: 'POST', body: new FormData(),
     }))
     expect(noFile.status).toBe(400)
@@ -84,36 +84,24 @@ describe('upload and profile routes', () => {
     data.set('file', new File([new Uint8Array([1, 2, 3])], 'item.png', { type: 'image/png' }))
     mocks.optimizeUploadImage.mockResolvedValue({ id: 1, url: '/uploads/id.webp', filename: 'id.webp', size: 3, created_at: '2026-07-19' })
 
-    const response = await uploadImage(new Request('https://mushroomie.test/api/upload', { method: 'POST', body: data }))
+    const response = await uploadImage(new NextRequest('https://mushroomie.test/api/upload', { method: 'POST', body: data }))
     expect(response.status).toBe(200)
     expect(mocks.optimizeUploadImage).toHaveBeenCalledWith(expect.objectContaining({ declaredMime: 'image/png', purpose: 'product' }))
   })
 
-  it('allows a regular user to upload only an avatar image', async () => {
-    mocks.requireAuth.mockResolvedValue({ user: { id: '7', role: 'user' } })
-    const avatarData = new FormData()
-    avatarData.set('purpose', 'avatar')
-    avatarData.set('file', new File([new Uint8Array([1, 2, 3])], 'avatar.png', { type: 'image/png' }))
-    mocks.normalizeUploadPurpose.mockReturnValueOnce('avatar')
-    mocks.optimizeUploadImage.mockResolvedValue({ id: 1, url: '/uploads/id.webp', filename: 'id.webp', size: 3, created_at: '2026-07-19' })
-
-    const avatarResponse = await uploadImage(new Request('https://mushroomie.test/api/upload', { method: 'POST', body: avatarData }))
-    expect(avatarResponse.status).toBe(200)
-    expect(mocks.optimizeUploadImage).toHaveBeenCalledWith(expect.objectContaining({ purpose: 'avatar' }))
-
+  it('blocks regular users from the admin media upload endpoint', async () => {
+    mocks.requireAdmin.mockRejectedValue(new Error('FORBIDDEN'))
     const productData = new FormData()
     productData.set('purpose', 'product')
     productData.set('file', new File([new Uint8Array([1])], 'product.png', { type: 'image/png' }))
-    mocks.normalizeUploadPurpose.mockReturnValueOnce('product')
-    mocks.optimizeUploadImage.mockClear()
 
-    const productResponse = await uploadImage(new Request('https://mushroomie.test/api/upload', { method: 'POST', body: productData }))
+    const productResponse = await uploadImage(new NextRequest('https://mushroomie.test/api/upload', { method: 'POST', body: productData }))
     expect(productResponse.status).toBe(403)
     expect(mocks.optimizeUploadImage).not.toHaveBeenCalled()
   })
 
   it('blocks traversal filenames before touching the filesystem', async () => {
-    const response = await deleteUpload(new Request('https://mushroomie.test/api/upload?filename=..%2Fsecret', { method: 'DELETE' }))
+    const response = await deleteUpload(new NextRequest('https://mushroomie.test/api/upload?filename=..%2Fsecret', { method: 'DELETE' }))
     expect(response.status).toBe(400)
     expect(mocks.unlink).not.toHaveBeenCalled()
   })

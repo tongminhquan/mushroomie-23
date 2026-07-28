@@ -6,7 +6,10 @@ const mocks = vi.hoisted(() => ({
   orderFindFirst: vi.fn(),
   orderFindUnique: vi.fn(),
   orderUpdate: vi.fn(),
-  paymentUpdate: vi.fn(),
+  orderUpdateMany: vi.fn(),
+  orderFindUniqueOrThrow: vi.fn(),
+  paymentUpdateMany: vi.fn(),
+  productUpdate: vi.fn(),
   voucherUpdateMany: vi.fn(),
   historyCreate: vi.fn(),
   userFindUnique: vi.fn(),
@@ -30,7 +33,7 @@ vi.mock('@/lib/prisma', () => ({
       findUnique: mocks.orderFindUnique,
       update: mocks.orderUpdate,
     },
-    payment: { update: mocks.paymentUpdate },
+    payment: { updateMany: mocks.paymentUpdateMany },
     userVoucher: { updateMany: mocks.voucherUpdateMany },
     orderStatusHistory: { create: mocks.historyCreate },
     user: { findUnique: mocks.userFindUnique },
@@ -80,7 +83,10 @@ describe('order detail, payment status, and review contracts', () => {
     mocks.orderFindFirst.mockResolvedValue(order)
     mocks.orderFindUnique.mockResolvedValue(order)
     mocks.orderUpdate.mockResolvedValue({ ...order, order_status: 'CANCELLED' })
-    mocks.paymentUpdate.mockResolvedValue({})
+    mocks.orderUpdateMany.mockResolvedValue({ count: 1 })
+    mocks.orderFindUniqueOrThrow.mockResolvedValue({ ...order, order_status: 'CANCELLED' })
+    mocks.paymentUpdateMany.mockResolvedValue({ count: 1 })
+    mocks.productUpdate.mockResolvedValue({})
     mocks.voucherUpdateMany.mockResolvedValue({ count: 1 })
     mocks.historyCreate.mockResolvedValue({})
     mocks.userFindUnique.mockResolvedValue({ id: 7, name: 'Nguyễn An' })
@@ -88,8 +94,16 @@ describe('order detail, payment status, and review contracts', () => {
     mocks.transaction.mockImplementation(async (argument: unknown) => {
       if (typeof argument !== 'function') return Promise.all(argument as Promise<unknown>[])
       return argument({
-        order: { update: mocks.orderUpdate },
+        order: {
+          findUnique: mocks.orderFindUnique,
+          update: mocks.orderUpdate,
+          updateMany: mocks.orderUpdateMany,
+          findUniqueOrThrow: mocks.orderFindUniqueOrThrow,
+        },
+        payment: { updateMany: mocks.paymentUpdateMany },
+        product: { update: mocks.productUpdate },
         userVoucher: { updateMany: mocks.voucherUpdateMany },
+        orderStatusHistory: { create: mocks.historyCreate },
       })
     })
   })
@@ -153,7 +167,10 @@ describe('order detail, payment status, and review contracts', () => {
 
     expect(response.status).toBe(200)
     expect(await response.json()).toMatchObject({ status: 'EXPIRED', paymentStatus: 'PENDING' })
-    expect(mocks.paymentUpdate).toHaveBeenCalledWith({ where: { id: 4 }, data: { status: 'EXPIRED' } })
+    expect(mocks.paymentUpdateMany).toHaveBeenCalledWith({
+      where: { id: 4, status: 'PENDING' },
+      data: { status: 'EXPIRED' },
+    })
     expect(mocks.voucherUpdateMany).toHaveBeenCalledWith({
       where: { orderId: 99, status: 'USED' },
       data: { status: 'AVAILABLE', orderId: null, usedAt: null },

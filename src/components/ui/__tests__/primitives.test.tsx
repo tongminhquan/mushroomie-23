@@ -3,7 +3,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
 import BrandBadge from '@/components/ui/BrandBadge'
 import EmptyState from '@/components/ui/EmptyState'
 import PriceText from '@/components/ui/PriceText'
@@ -27,7 +26,7 @@ describe('UI primitives', () => {
     const { container } = render(
       <>
         <PriceText price={100_000} originalPrice={125_000} />
-        <Badge variant="sale">Sale</Badge>
+        <BrandBadge tone="red">Sale</BrandBadge>
         <BrandBadge tone="yellow">Custom</BrandBadge>
         <EmptyState title="Chưa có sản phẩm" description="Quay lại sau" action={<button>Khám phá</button>} />
       </>,
@@ -35,7 +34,7 @@ describe('UI primitives', () => {
 
     expect(screen.getByText(/100\.000/)).toBeInTheDocument()
     expect(screen.getByText(/125\.000/)).toHaveClass('line-through')
-    expect(screen.getByText('Sale')).toHaveClass('bg-red-500')
+    expect(screen.getByText('Sale')).toHaveClass('bg-primary')
     expect(screen.getByText('Custom')).toHaveClass('bg-yellow')
     expect(screen.getByRole('heading', { name: 'Chưa có sản phẩm' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Khám phá' })).toBeInTheDocument()

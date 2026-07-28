@@ -1,7 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+
+vi.mock('@/lib/order-access', () => ({
+  createOrderAccessToken: () => 'signed-order-token',
+}))
+
 import { renderOrderStatusEmail, renderPaymentSuccessEmail } from '@/lib/payment/email/templates'
 
 const order = {
+  id: 42,
   customer_name: 'Nguyễn An',
   customer_email: 'buyer@example.com',
   order_code: 'MSH-42',
@@ -25,7 +31,7 @@ describe('order email templates', () => {
     expect(html).toContain('Nguyễn An')
     expect(html).toContain('Vòng tay nấm x2')
     expect(html).toContain('230.000')
-    expect(html).toContain('href="https://mushroomie.test/tai-khoan/don-hang/MSH-42"')
+    expect(html).toContain('href="https://mushroomie.test/tai-khoan/don-hang/MSH-42?accessToken=signed-order-token"')
   })
 
   it('renders status-specific and fallback updates with current order status', () => {

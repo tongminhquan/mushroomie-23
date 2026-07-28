@@ -91,6 +91,8 @@ describe('mini-game domain behavior', () => {
     const tx = {
       userVoucher: {
         findMany: vi.fn().mockResolvedValue([]),
+        findFirst: vi.fn().mockResolvedValue(null),
+        update: vi.fn(),
         create: vi.fn().mockResolvedValue(granted),
       },
       voucher: {

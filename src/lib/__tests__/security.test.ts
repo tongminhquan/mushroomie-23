@@ -1,4 +1,17 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+
+const prismaMocks = vi.hoisted(() => ({
+  transaction: vi.fn(),
+  deleteMany: vi.fn(),
+}))
+
+vi.mock('@/lib/prisma', () => ({
+  prisma: {
+    $transaction: prismaMocks.transaction,
+    rateLimitBucket: { deleteMany: prismaMocks.deleteMany },
+  },
+}))
+
 import {
   checkRateLimit,
   getApplicationSecret,
@@ -28,18 +41,41 @@ describe('security helpers', () => {
     expect(getClientIp(new Request('https://example.test'))).toBe('unknown')
   })
 
-  it('limits repeated requests per scope and resets after the configured window', () => {
+  it('limits repeated requests per scope and resets after the configured window', async () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-07-19T00:00:00Z'))
+    const buckets = new Map<string, { count: number; reset_at: Date }>()
+    prismaMocks.transaction.mockImplementation(async (callback) => callback({
+      rateLimitBucket: {
+        findUnique: vi.fn(({ where: { key } }) => buckets.get(key) ?? null),
+        upsert: vi.fn(({ where: { key }, create, update }) => {
+          const next = buckets.has(key) ? update : create
+          const bucket = { count: next.count, reset_at: next.reset_at }
+          buckets.set(key, bucket)
+          return bucket
+        }),
+        update: vi.fn(({ where: { key } }) => {
+          const current = buckets.get(key)
+          if (!current) throw new Error('Missing test rate-limit bucket')
+          const bucket = { ...current, count: current.count + 1 }
+          buckets.set(key, bucket)
+          return bucket
+        }),
+      },
+    }))
     const request = new Request('https://example.test', { headers: { 'x-real-ip': '203.0.113.9' } })
     const scope = `test-${crypto.randomUUID()}`
 
-    expect(checkRateLimit(request, scope, { limit: 2, windowMs: 10_000 })).toMatchObject({ allowed: true, remaining: 1 })
-    expect(checkRateLimit(request, scope, { limit: 2, windowMs: 10_000 })).toMatchObject({ allowed: true, remaining: 0 })
-    expect(checkRateLimit(request, scope, { limit: 2, windowMs: 10_000 })).toMatchObject({ allowed: false, retryAfter: 10 })
+    await expect(checkRateLimit(request, scope, { limit: 2, windowMs: 10_000 }))
+      .resolves.toMatchObject({ allowed: true, remaining: 1 })
+    await expect(checkRateLimit(request, scope, { limit: 2, windowMs: 10_000 }))
+      .resolves.toMatchObject({ allowed: true, remaining: 0 })
+    await expect(checkRateLimit(request, scope, { limit: 2, windowMs: 10_000 }))
+      .resolves.toMatchObject({ allowed: false, retryAfter: 10 })
 
     vi.advanceTimersByTime(10_001)
-    expect(checkRateLimit(request, scope, { limit: 2, windowMs: 10_000 })).toMatchObject({ allowed: true, remaining: 1 })
+    await expect(checkRateLimit(request, scope, { limit: 2, windowMs: 10_000 }))
+      .resolves.toMatchObject({ allowed: true, remaining: 1 })
   })
 
   it('escapes JSON-LD control characters and hashes sensitive values', () => {

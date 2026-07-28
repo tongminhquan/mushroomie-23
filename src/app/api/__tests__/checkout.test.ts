@@ -4,10 +4,16 @@ import { NextRequest } from 'next/server'
 const mocks = vi.hoisted(() => ({
   auth: vi.fn(),
   findFirst: vi.fn(),
+  settingFindMany: vi.fn(),
 }))
 
 vi.mock('@/lib/auth', () => ({ auth: mocks.auth }))
-vi.mock('@/lib/prisma', () => ({ prisma: { userVoucher: { findFirst: mocks.findFirst } } }))
+vi.mock('@/lib/prisma', () => ({
+  prisma: {
+    userVoucher: { findFirst: mocks.findFirst },
+    setting: { findMany: mocks.settingFindMany },
+  },
+}))
 
 import { POST as applyVoucher } from '@/app/api/checkout/apply-voucher/route'
 import { POST as removeVoucher } from '@/app/api/checkout/remove-voucher/route'
@@ -23,6 +29,10 @@ function request(body: unknown) {
 describe('checkout voucher routes', () => {
   beforeEach(() => {
     mocks.auth.mockResolvedValue({ user: { id: '7' } })
+    mocks.settingFindMany.mockResolvedValue([
+      { key: 'default_shipping_fee', value: '30000' },
+      { key: 'shipping_fee_updated_at', value: '2026-07-19T00:00:00.000Z' },
+    ])
   })
 
   it('requires authentication before querying a user voucher', async () => {

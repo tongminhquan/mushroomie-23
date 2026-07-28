@@ -57,7 +57,7 @@ describe('order email sender', () => {
     vi.stubEnv('SMTP_PORT', '465')
     vi.stubEnv('SMTP_USER', 'user')
     vi.stubEnv('SMTP_PASSWORD', 'pass')
-    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined)
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined)
 
     await sendOrderEmail(42, 'payment_success')
 
@@ -65,7 +65,7 @@ describe('order email sender', () => {
     expect(mocks.emailLogCreate).toHaveBeenCalledWith({ data: expect.objectContaining({ order_id: 42, recipient_email: 'buyer@example.com', status: 'PENDING' }) })
     expect(mocks.sendMail).toHaveBeenCalledWith(expect.objectContaining({ to: 'buyer@example.com', html: expect.stringContaining('MSH-42') }))
     expect(mocks.emailLogUpdate).toHaveBeenCalledWith({ where: { id: 9 }, data: { status: 'SENT', sent_at: expect.any(Date) } })
-    expect(log).toHaveBeenCalled()
+    expect(info).toHaveBeenCalled()
   })
 
   it('supports Resend SMTP and records delivery failure without throwing', async () => {

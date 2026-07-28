@@ -4,13 +4,19 @@ import { NextRequest } from 'next/server'
 const mocks = vi.hoisted(() => ({
   auth: vi.fn(),
   transaction: vi.fn(),
+  gameScoreCount: vi.fn(),
   gameScoreCreate: vi.fn(),
   pointsUpsert: vi.fn(),
   userVoucherFindMany: vi.fn(),
 }))
 
 vi.mock('@/lib/auth', () => ({ auth: mocks.auth }))
-vi.mock('@/lib/prisma', () => ({ prisma: { $transaction: mocks.transaction } }))
+vi.mock('@/lib/prisma', () => ({
+  prisma: {
+    $transaction: mocks.transaction,
+    gameScore: { count: mocks.gameScoreCount },
+  },
+}))
 
 import { POST as startGame } from '@/app/api/game/start/route'
 import { POST as submitScore } from '@/app/api/game/submit-score/route'
@@ -26,6 +32,7 @@ describe('game session routes', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-07-19T12:00:00Z'))
     mocks.auth.mockResolvedValue({ user: { id: '7' } })
+    mocks.gameScoreCount.mockResolvedValue(0)
     mocks.gameScoreCreate.mockResolvedValue({ id: 9, game: 'tetris', score: 100 })
     mocks.pointsUpsert.mockResolvedValue({ points: 1_100 })
     mocks.userVoucherFindMany.mockResolvedValue([])
@@ -79,7 +86,14 @@ describe('game session routes', () => {
 
     expect(response.status).toBe(200)
     expect(mocks.gameScoreCreate).toHaveBeenCalledWith({ data: {
-      user_id: 7, game: 'tetris', score: 100, lines: 2, combo: 3, level: 1, duration_sec: 10,
+      user_id: 7,
+      game: 'tetris',
+      score: 100,
+      lines: 2,
+      combo: 3,
+      level: 1,
+      duration_sec: 10,
+      session_token_hash: expect.stringMatching(/^[a-f0-9]{64}$/),
     } })
     expect(await response.json()).toMatchObject({ success: true, points: 1_100, voucher: null })
   })

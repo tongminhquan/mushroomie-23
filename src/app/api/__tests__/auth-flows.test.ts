@@ -6,14 +6,17 @@ const mocks = vi.hoisted(() => ({
   userFindFirst: vi.fn(),
   userCreate: vi.fn(),
   userUpdate: vi.fn(),
+  userUpdateMany: vi.fn(),
   otpFindUnique: vi.fn(),
   otpUpsert: vi.fn(),
   otpDelete: vi.fn(),
+  transaction: vi.fn(),
   hash: vi.fn(),
   genSalt: vi.fn(),
   sendMail: vi.fn(),
   createTransporter: vi.fn(),
   sendPasswordResetEmail: vi.fn(),
+  checkRateLimit: vi.fn(),
 }))
 
 vi.mock('@/lib/prisma', () => ({
@@ -23,8 +26,10 @@ vi.mock('@/lib/prisma', () => ({
       findFirst: mocks.userFindFirst,
       create: mocks.userCreate,
       update: mocks.userUpdate,
+      updateMany: mocks.userUpdateMany,
     },
     otp: { findUnique: mocks.otpFindUnique, upsert: mocks.otpUpsert, delete: mocks.otpDelete },
+    $transaction: mocks.transaction,
   },
 }))
 vi.mock('bcryptjs', () => ({
@@ -33,6 +38,10 @@ vi.mock('bcryptjs', () => ({
 vi.mock('@/lib/email', () => ({
   createTransporter: mocks.createTransporter,
   sendPasswordResetEmail: mocks.sendPasswordResetEmail,
+}))
+vi.mock('@/lib/security', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/security')>()),
+  checkRateLimit: mocks.checkRateLimit,
 }))
 
 import { POST as register } from '@/app/api/register/route'
@@ -53,6 +62,7 @@ const registration = {
   password: 'strong-password',
   phone: '0901234567',
   address: '123 Đường Nấm, Thành phố Hồ Chí Minh',
+  otp: '123456',
 }
 
 describe('registration, OTP, and password recovery routes', () => {
@@ -63,10 +73,27 @@ describe('registration, OTP, and password recovery routes', () => {
     mocks.sendMail.mockResolvedValue({ messageId: 'mail-1' })
     mocks.hash.mockResolvedValue('hashed-password')
     mocks.genSalt.mockResolvedValue('salt')
+    mocks.checkRateLimit.mockResolvedValue({ allowed: true, remaining: 4, retryAfter: 0 })
     mocks.userFindUnique.mockResolvedValue(null)
+    mocks.otpFindUnique.mockResolvedValue({
+      code: registration.otp,
+      expires_at: new Date('2026-07-19T12:05:00Z'),
+    })
+    mocks.otpDelete.mockResolvedValue({})
+    mocks.userUpdateMany.mockResolvedValue({ count: 1 })
+    mocks.transaction.mockImplementation((callback) => callback({
+      user: {
+        findUnique: mocks.userFindUnique,
+        create: mocks.userCreate,
+      },
+      otp: {
+        findUnique: mocks.otpFindUnique,
+        delete: mocks.otpDelete,
+      },
+    }))
   })
 
-  it('validates direct registration and never trusts client role or password hash', async () => {
+  it('validates OTP registration and never trusts client role or password hash', async () => {
     expect((await register(request('/api/register', { ...registration, password: 'short' }))).status).toBe(400)
     expect(mocks.userFindUnique).not.toHaveBeenCalled()
 
@@ -89,44 +116,34 @@ describe('registration, OTP, and password recovery routes', () => {
   })
 
   it('stores a six-digit OTP for five minutes before sending it to the requested email', async () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0)
     const response = await sendOtp(request('/api/auth/send-otp', { email: 'new@example.com' }))
 
     expect(response.status).toBe(200)
-    expect(mocks.otpUpsert).toHaveBeenCalledWith({
+    const otpWrite = mocks.otpUpsert.mock.calls[0][0]
+    expect(otpWrite).toEqual({
       where: { email: 'new@example.com' },
-      update: { code: '100000', expires_at: new Date('2026-07-19T12:05:00Z'), created_at: new Date('2026-07-19T12:00:00Z') },
-      create: { email: 'new@example.com', code: '100000', expires_at: new Date('2026-07-19T12:05:00Z') },
+      update: {
+        code: expect.stringMatching(/^\d{6}$/),
+        expires_at: new Date('2026-07-19T12:05:00Z'),
+        created_at: new Date('2026-07-19T12:00:00Z'),
+      },
+      create: {
+        email: 'new@example.com',
+        code: expect.stringMatching(/^\d{6}$/),
+        expires_at: new Date('2026-07-19T12:05:00Z'),
+      },
     })
-    expect(mocks.sendMail).toHaveBeenCalledWith(expect.objectContaining({ to: 'new@example.com', html: expect.stringContaining('100000') }))
-  })
-
-  it('rejects missing, wrong, and expired OTP values without creating a user', async () => {
-    expect((await verifyAndRegister(request('/api/auth/verify-and-register', { email: 'new@example.com' }))).status).toBe(400)
-
-    mocks.otpFindUnique.mockResolvedValueOnce({ code: '100000', expires_at: new Date('2026-07-19T12:05:00Z') })
-    expect((await verifyAndRegister(request('/api/auth/verify-and-register', {
-      email: 'new@example.com', otp: '999999', phone: '0901234567', address: '123 Đường Nấm',
-    }))).status).toBe(400)
-
-    mocks.otpFindUnique.mockResolvedValueOnce({ code: '100000', expires_at: new Date('2026-07-19T11:59:00Z') })
-    expect((await verifyAndRegister(request('/api/auth/verify-and-register', {
-      email: 'new@example.com', otp: '100000', phone: '0901234567', address: '123 Đường Nấm',
-    }))).status).toBe(400)
-    expect(mocks.userCreate).not.toHaveBeenCalled()
-  })
-
-  it('creates an email-verified OAuth user and consumes the OTP once', async () => {
-    mocks.otpFindUnique.mockResolvedValue({ code: '100000', expires_at: new Date('2026-07-19T12:05:00Z') })
-    mocks.userFindUnique.mockResolvedValue(null)
-    mocks.userCreate.mockResolvedValue({ id: 8 })
-    const response = await verifyAndRegister(request('/api/auth/verify-and-register', {
-      email: 'new@example.com', otp: '100000', phone: '0901234567', address: '123 Đường Nấm', name: 'New User', google_id: 'google-8',
+    expect(otpWrite.update.code).toBe(otpWrite.create.code)
+    expect(mocks.sendMail).toHaveBeenCalledWith(expect.objectContaining({
+      to: 'new@example.com',
+      html: expect.stringContaining(otpWrite.create.code),
     }))
+  })
 
-    expect(response.status).toBe(200)
-    expect(mocks.userCreate).toHaveBeenCalledWith({ data: expect.objectContaining({ email: 'new@example.com', is_email_verified: true, role: 'user' }) })
-    expect(mocks.otpDelete).toHaveBeenCalledWith({ where: { email: 'new@example.com' } })
+  it('retires the legacy OAuth completion endpoint instead of creating users', async () => {
+    const response = await verifyAndRegister()
+    expect(response.status).toBe(410)
+    expect(mocks.userCreate).not.toHaveBeenCalled()
   })
 
   it('does not reveal whether a forgot-password email exists', async () => {
@@ -144,26 +161,44 @@ describe('registration, OTP, and password recovery routes', () => {
     expect(response.status).toBe(200)
     expect(mocks.userUpdate).toHaveBeenCalledWith({
       where: { email: 'buyer@example.com' },
-      data: { reset_token: expect.stringMatching(/^[a-f0-9]{64}$/), reset_token_expires: new Date('2026-07-19T13:00:00Z') },
+      data: {
+        reset_token: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
+        reset_token_expires: new Date('2026-07-19T13:00:00Z'),
+      },
     })
     expect(mocks.sendPasswordResetEmail).toHaveBeenCalledWith('buyer@example.com', expect.stringMatching(/^https:\/\/mushroomie\.io\.vn\/tai-khoan\/dat-lai-mat-khau\?token=[a-f0-9]{64}$/))
   })
 
   it('rejects weak or expired reset requests and consumes a valid token', async () => {
-    expect((await resetPassword(request('/api/auth/reset-password', { token: 'token', password: 'short' }))).status).toBe(400)
+    const token = 'a'.repeat(64)
+    const hashedToken = 'sha256:ffe054fe7ae0cb6dc65c3af9b61d5209f439851db43d0ba5997337df154668eb'
+    expect((await resetPassword(request('/api/auth/reset-password', { token, password: 'short' }))).status).toBe(400)
     mocks.userFindFirst.mockResolvedValueOnce(null)
-    expect((await resetPassword(request('/api/auth/reset-password', { token: 'token', password: 'new-password' }))).status).toBe(400)
+    expect((await resetPassword(request('/api/auth/reset-password', { token, password: 'new-password' }))).status).toBe(400)
     expect(mocks.userFindFirst).toHaveBeenLastCalledWith({
-      where: { reset_token: 'token', reset_token_expires: { gt: new Date('2026-07-19T12:00:00Z') } },
+      where: {
+        reset_token: { in: [hashedToken, token] },
+        reset_token_expires: { gt: new Date('2026-07-19T12:00:00Z') },
+      },
+      select: { id: true },
     })
 
     mocks.userFindFirst.mockResolvedValueOnce({ id: 7 })
-    const response = await resetPassword(request('/api/auth/reset-password', { token: 'token', password: 'new-password' }))
+    const response = await resetPassword(request('/api/auth/reset-password', { token, password: 'new-password' }))
     expect(response.status).toBe(200)
     expect(mocks.hash).toHaveBeenCalledWith('new-password', 'salt')
-    expect(mocks.userUpdate).toHaveBeenCalledWith({
-      where: { id: 7 },
-      data: { password_hash: 'hashed-password', reset_token: null, reset_token_expires: null },
+    expect(mocks.userUpdateMany).toHaveBeenCalledWith({
+      where: {
+        id: 7,
+        reset_token: { in: [hashedToken, token] },
+        reset_token_expires: { gt: new Date('2026-07-19T12:00:00Z') },
+      },
+      data: {
+        password_hash: 'hashed-password',
+        is_email_verified: true,
+        reset_token: null,
+        reset_token_expires: null,
+      },
     })
   })
 })

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Check, ShoppingBag } from 'lucide-react'
+import { Check, Eye, ShoppingBag } from 'lucide-react'
 import SafeImage from '@/components/ui/SafeImage'
 import { useCartStore } from '@/store/cart'
 import { useVoucherStore } from '@/store/voucher'
@@ -140,6 +140,12 @@ export default function ProductCard({ product }: ProductCardProps) {
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="object-contain p-3"
         />
+        <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
+          <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-white/95 px-3.5 py-1.5 text-xs font-extrabold text-text shadow-card backdrop-blur-sm">
+            <Eye aria-hidden="true" size={14} />
+            Xem nhanh
+          </span>
+        </div>
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
           {product.is_customizable && (
             <span className="inline-flex min-h-7 items-center rounded-lg bg-yellow px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-text">

@@ -31,7 +31,7 @@ describe('image URL normalization', () => {
   })
 
   it('uses distinct user and banner fallbacks', () => {
-    expect(getImageFallback('user')).toBe('/images/avatar-placeholder.png')
-    expect(getImageFallback('banner')).toBe('/images/banner-placeholder.png')
+    expect(getImageFallback('user')).toBe('/logo.webp')
+    expect(getImageFallback('banner')).toBe('/images/banner-placeholder.webp')
   })
 })

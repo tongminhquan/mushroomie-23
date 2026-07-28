@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { cn, formatDate, formatPrice, generateOrderCode, generateSlug, truncate } from '@/lib/utils'
+import { cn } from '@/lib/cn'
+import { formatDate, formatPrice, generateOrderCode, generateSlug, truncate } from '@/lib/utils'
 import { sanitizeCallbackUrl, toAbsoluteUrl } from '@/lib/url'
 
 describe('shared formatting and URL helpers', () => {

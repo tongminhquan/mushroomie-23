@@ -50,6 +50,7 @@ describe('ProductCard', () => {
     expect(frame).toHaveAttribute('href', '/san-pham/vong-tay-nam')
     expect(screen.getAllByRole('link').filter((link) => link.getAttribute('href') === '/san-pham/vong-tay-nam')).toHaveLength(2)
     expect(container).toHaveTextContent('Vòng tay')
+    expect(screen.getByText('Xem nhanh')).toBeInTheDocument()
     expect(screen.getByText(/100\.000/)).toBeInTheDocument()
     expect(screen.getByText(/125\.000/)).toHaveClass('line-through')
   })
