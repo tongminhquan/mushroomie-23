@@ -834,6 +834,17 @@ a, button, input, textarea, select,
     opacity: 1;
   }
 
+  /* Hộp thoại là Tầng 2: bỏ trượt và phóng to, giữ lại fade để nó không hiện đột ngột
+     giữa màn hình. Hộp thoại xuất hiện do người dùng chủ động mở nên một nhịp fade
+     ngắn giúp mắt định vị được nó vừa xuất hiện từ đâu. */
+  .m-modal[data-drawer-state='entering'],
+  .m-modal[data-drawer-state='exiting'] {
+    transform: none !important;
+  }
+  .m-modal[data-drawer-state='open'] {
+    transform: none !important;
+  }
+
   /* Tầng 2 — giữ transition nhưng chỉ còn fade màu/độ mờ, bỏ dịch chuyển */
   .m-lift,
   .hover-lift,
