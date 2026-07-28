@@ -110,7 +110,7 @@ export default function ProductGallery({
                 onClick={() => setSelectedIndex(index)}
                 aria-label={`Xem ảnh sản phẩm ${index + 1}`}
                 aria-pressed={selectedIndex === index}
-                className={`relative aspect-[3/4] overflow-hidden rounded-[20px] border bg-white transition ${
+                className={`m-press relative aspect-[3/4] overflow-hidden rounded-[20px] border bg-white transition ${
                   selectedIndex === index
                     ? 'border-primary ring-2 ring-primary/15'
                     : 'border-warm-border hover:border-primary/60'
