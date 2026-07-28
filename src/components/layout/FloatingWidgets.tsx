@@ -31,12 +31,13 @@ export default function FloatingWidgets() {
 
   return (
     <div className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-4 z-50 md:bottom-6 md:right-6">
-      {open && (
+      {panel.mounted && (
         <div
           id="contact-channels"
           role="region"
           aria-label="Các kênh liên hệ Mushroomie"
-          className="absolute bottom-14 right-0 w-52 max-w-[calc(100vw-2rem)] rounded-[18px] border border-neutral-200 bg-white p-2 shadow-strong"
+          data-drawer-state={panel.state}
+          className="m-modal absolute bottom-14 right-0 w-52 max-w-[calc(100vw-2rem)] origin-bottom-right rounded-[18px] border border-neutral-200 bg-white p-2 shadow-strong"
         >
           <p className="px-3 pb-2 pt-1 text-[10px] font-extrabold uppercase tracking-[0.08em] text-neutral-400">Kết nối với Mushroomie</p>
           {channels.map((channel) => (
