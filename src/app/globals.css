@@ -595,6 +595,36 @@ body {
   border-radius: var(--radius-card);
 }
 
+/* Ánh sáng quét qua slogan "Làm bằng tay, trao bằng tim".
+   Đặt cạnh .skeleton chứ không nằm trong khối utility motion ở trên là có chủ đích:
+   animate `background-position` gây vẽ lại, không chạy trên compositor — cùng đánh đổi
+   như .skeleton. Chấp nhận được vì phạm vi chỉ là một dòng chữ ngắn, nhưng phải để
+   ngoài nhóm utility để không ai tưởng đây là pattern nên nhân rộng.
+
+   @supports bọc ngoài: trình duyệt không hỗ trợ background-clip:text sẽ bỏ qua cả khối,
+   giữ nguyên màu chữ bình thường thay vì hiện chữ trong suốt. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  @keyframes m-slogan-shimmer {
+    0%, 100% { background-position: 0% center; }
+    50%      { background-position: 100% center; }
+  }
+  .m-slogan-shimmer {
+    background: linear-gradient(
+      90deg,
+      currentColor 0%,
+      currentColor 38%,
+      var(--color-primary) 50%,
+      currentColor 62%,
+      currentColor 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: m-slogan-shimmer 4.5s var(--m-ease-in-out) infinite;
+  }
+}
+
 /* Float animation */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
