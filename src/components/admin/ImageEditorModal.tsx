@@ -75,7 +75,7 @@ export default function ImageEditorModal({ src, purpose = 'media', onSave, onCan
 
   return (
     <div className="image-editor-modal fixed inset-0 z-[110] bg-black/80 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden">
+      <div className="m-pop-in bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden">
         
         {/* Toolbar */}
         <div className="p-3 border-b border-[#f0e0d6] flex flex-wrap gap-2 items-center justify-between bg-[#fdfaf7]">
