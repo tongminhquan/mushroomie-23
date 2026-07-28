@@ -47,7 +47,7 @@ export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
         aria-label="Breadcrumb"
         className="flex flex-wrap items-center gap-1.5 py-3 text-sm text-neutral-500"
       >
-        <Link href="/" className="flex items-center gap-1 hover:text-primary transition-colors">
+        <Link href="/" className="m-underline flex items-center gap-1 hover:text-primary transition-colors">
           <Home size={14} />
           <span>Trang chủ</span>
         </Link>
