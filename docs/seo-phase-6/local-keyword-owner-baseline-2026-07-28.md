@@ -38,6 +38,23 @@ git grep -n -I -e "vòng tay handmade Đồng Nai" -e "vòng tay custom Biên H�
 
 Kết quả: không có exact-match trong ba file. Do đó không phát hiện title, canonical hoặc H1 exact-match tự nhận bốn intent ưu tiên trên các trang cạnh tranh này. Việc một trang có thể chứa liên kết điều hướng đến owner URL không được xem là cannibalization; owner URL vẫn được xác định trong bảng baseline ở trên.
 
+## Gửi lại tín hiệu lập chỉ mục
+
+Ngày thực hiện: 28/07/2026.
+
+- Search Console ghi nhận `https://mushroomie.io.vn/sitemap.xml` ở trạng thái **Thành công**, được gửi và đọc lần cuối ngày 28/07/2026, với 134 trang được phát hiện. Không gửi trùng sitemap trong cùng ngày.
+- HTML trang chủ sau khi cache Cloudflare hết hạn đã chứa đủ liên kết đến bốn owner URL; phản hồi production là HTTP 200 và `cf-cache-status: EXPIRED`.
+- Cả bốn owner URL đã được gửi bằng chức năng **Yêu cầu lập chỉ mục** và Search Console xác nhận đã thêm vào hàng đợi ưu tiên thu thập dữ liệu.
+
+| Owner URL | Trạng thái trước khi gửi lại | Kết quả yêu cầu |
+| --- | --- | --- |
+| `/vong-tay-handmade-dong-nai` | URL nằm trên Google | Đã thêm vào hàng đợi ưu tiên |
+| `/vong-tay-custom-bien-hoa` | URL nằm trên Google | Đã thêm vào hàng đợi ưu tiên |
+| `/moc-khoa-handmade-dong-nai` | URL nằm trên Google | Đã thêm vào hàng đợi ưu tiên |
+| `/qua-tang-handmade-dong-nai` | URL không nằm trên Google; Google chưa xác định được URL | Đã thêm vào hàng đợi ưu tiên |
+
+Trạng thái “đã thêm vào hàng đợi” không đồng nghĩa URL sẽ được lập chỉ mục ngay. URL `/qua-tang-handmade-dong-nai` cần được ưu tiên kiểm tra lại tại mốc tiếp theo vì đây là owner URL duy nhất chưa nằm trên Google tại thời điểm gửi.
+
 ## Mốc theo dõi
 
 - Mốc hiện tại: baseline ngày 28/07/2026.
