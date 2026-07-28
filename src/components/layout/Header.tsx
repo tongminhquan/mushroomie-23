@@ -136,7 +136,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
 
-          <Link href="/" className="relative h-11 w-28 shrink-0 md:h-14 md:w-36" aria-label="Mushroomie - Trang chủ">
+          <Link href="/" className="m-press relative h-11 w-28 shrink-0 md:h-14 md:w-36" aria-label="Mushroomie - Trang chủ">
             <SafeImage
               src="/logo.webp"
               fallbackSrc="/logo.webp"
