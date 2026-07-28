@@ -137,7 +137,7 @@ export default function VoucherLandingPage() {
           <div className="mb-6 text-center">
             <h2 className="font-heading text-2xl text-text">Câu hỏi thường gặp</h2>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div data-batch-reveal className="grid gap-4 md:grid-cols-2">
             {FAQ.map((item, i) => (
               <div key={i} className="rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-5">
                 <p className="mb-1.5 text-sm font-extrabold text-text">{item.q}</p>
