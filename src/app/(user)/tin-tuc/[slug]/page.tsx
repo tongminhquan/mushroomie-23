@@ -29,7 +29,6 @@ import {
 import { brandEntityRef } from '@/lib/local-seo'
 import { rankProductsForPost } from '@/lib/post-product-recommendations'
 import { pickRelatedPosts } from '@/lib/related-posts'
-import ScrollMotion from '@/components/ui/ScrollMotion'
 
 /** 2 hàng x 3 cột trên desktop — gấp đôi link nội bộ toả ra từ mỗi bài. */
 const RELATED_POST_COUNT = 6
