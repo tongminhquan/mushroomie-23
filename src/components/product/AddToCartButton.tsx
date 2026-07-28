@@ -114,7 +114,7 @@ export default function AddToCartButton({ product }: Props) {
                   onClick={() =>
                     setSelectedOptions((prev) => ({ ...prev, [option.option_name]: value }))
                   }
-                  className={`rounded-full border px-4 py-2 text-sm font-medium transition-all ${
+                  className={`m-press rounded-full border px-4 py-2 text-sm font-medium transition-all ${
                     selectedOptions[option.option_name] === value
                       ? 'border-primary bg-primary text-white'
                       : 'border-warm-border bg-white text-neutral-700 hover:border-primary hover:text-primary'
