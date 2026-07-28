@@ -65,3 +65,5 @@ backups/
 !prisma/migrations/**/*.sql
 *.dump
 .worktrees/
+.superpowers/
+__pycache__/
