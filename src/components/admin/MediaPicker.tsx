@@ -153,7 +153,7 @@ export default function MediaPicker({ value, onChange, onClose, title, submitTex
         />
       )}
       <div className="media-picker-modal fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden">
+      <div className="m-pop-in bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#f0e0d6]">
           <h2 className="font-bold text-lg text-neutral-800">{title || 'Ảnh đại diện'}</h2>
