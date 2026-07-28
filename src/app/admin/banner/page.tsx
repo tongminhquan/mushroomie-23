@@ -472,7 +472,7 @@ export default function AdminBannersPage() {
       {/* Slide-over / Modal Form */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-[3px] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[18px] shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="m-pop-in bg-white rounded-[18px] shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden">
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-[#f0e0d6] flex items-center justify-between bg-[#fafafa]">
               <div>
