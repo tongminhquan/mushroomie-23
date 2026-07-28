@@ -467,7 +467,7 @@ export default async function PostDetailPage({
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div data-batch-reveal className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {relatedPosts.map((relatedPost) => (
               <PostCard key={relatedPost.id} post={relatedPost} />
             ))}
