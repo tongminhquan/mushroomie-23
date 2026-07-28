@@ -3,9 +3,14 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Star, X } from 'lucide-react'
+import { useDrawerTransition } from '@/hooks/useDrawerTransition'
 
 export default function ReviewOrderModal({ orderId }: { orderId: number }) {
   const [isOpen, setIsOpen] = useState(false)
+  // Trước đây hộp thoại gắn class `animate-in fade-in zoom-in` — nhưng dự án không cài
+  // tailwindcss-animate và cũng không tự định nghĩa, nên đó là class chết, không chạy
+  // gì cả. Thay bằng .m-modal (có thật trong globals.css) + hook giữ DOM lúc đóng.
+  const modal = useDrawerTransition(isOpen, 180)
   const [rating, setRating] = useState(5)
   const [content, setContent] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
