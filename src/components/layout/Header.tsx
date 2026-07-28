@@ -232,11 +232,18 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
               type="button"
               onClick={toggleCart}
               aria-label={`Giỏ hàng, ${totalItems} sản phẩm`}
-              className="relative grid h-11 w-11 place-items-center rounded-xl bg-primary text-white shadow-[0_7px_16px_rgba(228,29,29,0.2)] transition hover:bg-primary-dark"
+              className="m-press relative grid h-11 w-11 place-items-center rounded-xl bg-primary text-white shadow-[0_7px_16px_rgba(228,29,29,0.2)] transition hover:bg-primary-dark"
             >
-              <ShoppingBag size={20} />
+              <span key={`cart-${cartBump}`} className={cartBump > 0 ? 'm-cart-bounce' : undefined}>
+                <ShoppingBag size={20} />
+              </span>
               {totalItems > 0 && (
-                <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-md bg-yellow px-1 text-[10px] font-black text-text ring-2 ring-white">
+                <span
+                  key={`badge-${cartBump}`}
+                  className={`absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-md bg-yellow px-1 text-[10px] font-black text-text ring-2 ring-white${
+                    cartBump > 0 ? ' m-badge-pop' : ''
+                  }`}
+                >
                   {totalItems}
                 </span>
               )}
