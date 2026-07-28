@@ -309,8 +309,13 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                 key={link.href}
                 href={link.href}
                 aria-current={active ? 'page' : undefined}
+                /* m-underline chỉ gắn cho mục KHÔNG active: mục đang mở đã có sẵn
+                   border-bottom màu đỏ, thêm gạch chân chạy vào nữa sẽ thành hai vạch
+                   chồng lên nhau. */
                 className={`flex h-full items-center border-b-2 px-3 text-sm font-bold transition ${
-                  active ? 'border-primary text-primary' : 'border-transparent text-neutral-700 hover:text-primary'
+                  active
+                    ? 'border-primary text-primary'
+                    : 'm-underline border-transparent text-neutral-700 hover:text-primary'
                 }`}
               >
                 {link.label}
