@@ -84,6 +84,33 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
   const isAdmin = Boolean(role && ['super_admin', 'admin', 'viewer'].includes(role))
   const totalItems = hydrated ? getTotalItems() : 0
 
+  /**
+   * Nhịp phản hồi khi giỏ hàng tăng.
+   *
+   * Khách bấm "Thêm vào giỏ" ở giữa trang, còn giỏ hàng nằm trên header — nếu không có
+   * gì nối hai chỗ đó, thao tác quan trọng nhất của trang bán hàng trôi qua không dấu vết.
+   *
+   * Đếm số lần tăng rồi truyền vào `key` để React mount lại phần tử: CSS animation chỉ
+   * chạy khi phần tử vừa xuất hiện hoặc vừa được gán class lần đầu, nên thêm thêm class
+   * vào phần tử đang có sẵn class đó sẽ không chạy lại lần thứ hai.
+   *
+   * `previousItems` khởi tạo null để bỏ qua bước hydrate: giỏ hàng đọc từ localStorage
+   * làm số nhảy 0 → N ngay khi tải trang, đó không phải hành động của người dùng và
+   * không được nảy.
+   */
+  const [cartBump, setCartBump] = useState(0)
+  const previousItems = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (!hydrated) return
+    if (previousItems.current === null) {
+      previousItems.current = totalItems
+      return
+    }
+    if (totalItems > previousItems.current) setCartBump((count) => count + 1)
+    previousItems.current = totalItems
+  }, [hydrated, totalItems])
+
   return (
     <header className="relative z-50 border-b border-warm-border bg-secondary">
       <div className="hidden bg-text text-white md:block">
