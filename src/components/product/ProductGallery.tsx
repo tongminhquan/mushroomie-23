@@ -63,7 +63,9 @@ export default function ProductGallery({
           type="button"
           onClick={() => setLightboxOpen(true)}
           aria-label="Xem ảnh sản phẩm lớn hơn"
-          className="relative flex aspect-[3/4] flex-1 cursor-zoom-in items-center justify-center overflow-hidden rounded-[28px] border border-warm-border bg-white shadow-card lg:min-h-[640px]"
+          /* `group` vốn bị thiếu: ảnh bên trong khai báo `group-hover:scale-[1.02]` nhưng
+             không có phần tử nào mang class `group` nên hiệu ứng phóng chưa từng chạy. */
+          className="group relative flex aspect-[3/4] flex-1 cursor-zoom-in items-center justify-center overflow-hidden rounded-[28px] border border-warm-border bg-white shadow-card lg:min-h-[640px]"
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,214,214,0.35),_transparent_55%)]" />
           <SafeImage
