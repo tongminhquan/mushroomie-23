@@ -47,7 +47,7 @@ export default function ReviewOrderModal({ orderId }: { orderId: number }) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-primary text-white text-xs px-4 py-1.5 rounded-full font-semibold hover:bg-primary-dark transition-colors"
+        className="m-press bg-primary text-white text-xs px-4 py-1.5 rounded-full font-semibold hover:bg-primary-dark transition-colors"
       >
         Đánh giá
       </button>
