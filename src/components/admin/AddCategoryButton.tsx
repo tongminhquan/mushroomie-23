@@ -41,7 +41,7 @@ export default function AddCategoryButton() {
       </button>
       {show && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+          <div className="m-pop-in bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <h3 className="font-bold text-lg mb-4 text-neutral-800">Thêm danh mục sản phẩm mới</h3>
             <input 
               autoFocus
