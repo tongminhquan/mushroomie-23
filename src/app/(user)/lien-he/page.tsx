@@ -279,7 +279,7 @@ export default function ContactPage() {
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="inline-flex items-center rounded-full border-[1.5px] border-warm-border bg-secondary px-4 py-2 text-[13px] font-semibold text-neutral-700 transition-colors hover:border-primary hover:text-primary"
+                  className="inline-flex min-h-11 items-center rounded-full border-[1.5px] border-warm-border bg-secondary px-4 py-2 text-[13px] font-semibold text-neutral-700 transition-colors hover:border-primary hover:text-primary"
                 >
                   {l.label}
                 </Link>

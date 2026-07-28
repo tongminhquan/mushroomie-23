@@ -67,7 +67,7 @@ export default function Footer({ categories }: { categories: Array<{ id: number;
               <li><Link href="/phu-kien-handmade-dong-nai" className="m-underline hover:text-white">Phụ kiện handmade Đồng Nai</Link></li>
               {priorityLocalLinks.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="m-underline hover:text-white">{link.label}</Link>
+                  <Link href={link.href} className="m-underline inline-flex min-h-11 items-center hover:text-white">{link.label}</Link>
                 </li>
               ))}
             </ul>

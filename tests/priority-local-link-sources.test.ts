@@ -1,26 +1,55 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import { resolve } from 'node:path'
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import ContactPage from '../src/app/(user)/lien-he/page'
+import HomeLocalAreas from '../src/components/home/landing/HomeLocalAreas'
+import Footer from '../src/components/layout/Footer'
 
-const readSource = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8')
+const OWNER_HREFS = [
+  '/vong-tay-handmade-dong-nai',
+  '/vong-tay-custom-bien-hoa',
+  '/moc-khoa-handmade-dong-nai',
+  '/qua-tang-handmade-dong-nai',
+]
 
-test('trang chu dung owner map chung cho bon card local uu tien', () => {
-  const source = readSource('src/components/home/landing/HomeLocalAreas.tsx')
+function getAnchorData(markup: string) {
+  return Array.from(markup.matchAll(/<a\s+([^>]+)>/g), (match) => {
+    const attributes = match[1]
+    return {
+      href: attributes.match(/href="([^"]+)"/)?.[1] ?? '',
+      className: attributes.match(/class="([^"]+)"/)?.[1] ?? '',
+    }
+  })
+}
 
-  assert.match(source, /getPriorityLocalHomeCards/)
-  assert.doesNotMatch(source, /href:\s*['"]\/vong-tay-custom-dong-nai['"]/)
+test('trang chu render dung thu tu hub va bon owner local uu tien', () => {
+  const anchors = getAnchorData(renderToStaticMarkup(createElement(HomeLocalAreas)))
+
+  assert.deepEqual(
+    anchors.map((anchor) => anchor.href),
+    [
+      '/phu-kien-handmade-dong-nai',
+      ...OWNER_HREFS,
+      '/phu-kien-handmade-bien-hoa',
+    ],
+  )
+  assert.equal(new Set(anchors.map((anchor) => anchor.href)).size, 6)
+  assert.ok(!anchors.some((anchor) => anchor.href === '/vong-tay-custom-dong-nai'))
 })
 
-test('trang lien he dung owner map chung thay vi danh sach owner viet tay', () => {
-  const source = readSource('src/app/(user)/lien-he/page.tsx')
+test('trang lien he render du bon owner voi tap target 44px', () => {
+  const anchors = getAnchorData(renderToStaticMarkup(createElement(ContactPage)))
+  const ownerAnchors = anchors.filter((anchor) => OWNER_HREFS.includes(anchor.href))
 
-  assert.match(source, /getPriorityLocalLinks\('contact'\)/)
+  assert.deepEqual(ownerAnchors.map((anchor) => anchor.href), OWNER_HREFS)
+  assert.ok(ownerAnchors.every((anchor) => anchor.className.includes('min-h-11')))
 })
 
-test('footer dung owner map chung cho nhom lien ket local', () => {
-  const source = readSource('src/components/layout/Footer.tsx')
+test('footer render du bon owner voi tap target 44px', () => {
+  const anchors = getAnchorData(renderToStaticMarkup(createElement(Footer, { categories: [] })))
+  const ownerAnchors = anchors.filter((anchor) => OWNER_HREFS.includes(anchor.href))
 
-  assert.match(source, /getPriorityLocalLinks\('footer'\)/)
-  assert.match(source, /priorityLocalLinks\.map/)
+  assert.deepEqual(ownerAnchors.map((anchor) => anchor.href), OWNER_HREFS)
+  assert.ok(ownerAnchors.every((anchor) => anchor.className.includes('min-h-11')))
 })
