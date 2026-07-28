@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
+        allow: ['/', '/api/auth/session'],
         // Utility pages stay crawlable so search engines can read their noindex metadata.
         // API responses use X-Robots-Tag for index control so rendering tools can still
         // load public dependencies such as /api/auth/session.
