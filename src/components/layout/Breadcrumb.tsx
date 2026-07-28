@@ -55,7 +55,7 @@ export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
           <span key={index} className="flex items-center gap-1.5">
             <ChevronRight size={14} className="text-neutral-400" />
             {item.href && index < items.length - 1 ? (
-              <Link href={item.href} className="hover:text-primary transition-colors">
+              <Link href={item.href} className="m-underline hover:text-primary transition-colors">
                 {item.label}
               </Link>
             ) : (
