@@ -457,6 +457,82 @@ body {
   display: block;
 }
 
+/* --- Giỏ hàng lắc khi vừa thêm sản phẩm ---
+   Phản hồi cho hành động quan trọng nhất của trang bán hàng: người dùng bấm "thêm vào
+   giỏ" ở giữa trang, còn giỏ hàng nằm trên header — không có gì nối hai chỗ đó lại thì
+   khách không biết thao tác đã ăn. Icon lắc chính là sợi dây nối ấy.
+
+   Kích hoạt bằng cách đổi `key` của phần tử trong React để nó mount lại; gán/gỡ class
+   không chạy lại được animation nếu class chưa từng bị bỏ ra. */
+@keyframes m-cart-bounce {
+  0%   { transform: scale(1) rotate(0); }
+  20%  { transform: scale(1.18) rotate(-10deg); }
+  40%  { transform: scale(0.95) rotate(8deg); }
+  60%  { transform: scale(1.08) rotate(-4deg); }
+  80%  { transform: scale(0.98) rotate(2deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+.m-cart-bounce {
+  animation: m-cart-bounce 600ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* --- Số trên badge giỏ hàng nảy lên khi đổi --- */
+@keyframes m-badge-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+.m-badge-pop {
+  animation: m-badge-pop 450ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* --- Quầng sáng thở quanh nút liên hệ nổi ---
+   Bản gốc bên site tham chiếu animate `box-shadow`, thứ buộc trình duyệt vẽ lại mỗi
+   khung hình. Ở đây quầng sáng là một lớp ::before có box-shadow TĨNH, chỉ opacity và
+   transform chạy — cùng hiệu ứng thị giác nhưng nằm trọn trên compositor. */
+@keyframes m-pulse-glow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%      { opacity: 0.85; transform: scale(1.14); }
+}
+.m-pulse-glow {
+  position: relative;
+  isolation: isolate;
+}
+.m-pulse-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-primary) 28%, transparent);
+  opacity: 0.3;
+  z-index: -1;
+  pointer-events: none;
+  animation: m-pulse-glow 2.4s var(--m-ease-in-out) infinite;
+}
+
+/* --- Hộp thoại: hiện lên tại chỗ, thoát nhanh hơn lúc vào ---
+   Dùng chung `data-drawer-state` với drawer nên tái sử dụng nguyên hook
+   useDrawerTransition, không cần thêm JavaScript nào. */
+.m-modal {
+  transition:
+    opacity var(--m-duration-base) var(--m-ease-out),
+    transform var(--m-duration-base) var(--m-ease-out);
+  will-change: transform;
+}
+.m-modal[data-drawer-state='entering'],
+.m-modal[data-drawer-state='exiting'] {
+  opacity: 0;
+  transform: translate3d(0, 8px, 0) scale(0.96);
+}
+.m-modal[data-drawer-state='open'] {
+  opacity: 1;
+  transform: none;
+}
+.m-modal[data-drawer-state='exiting'] {
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+
 /* ==========================================================================
    Motion cho trang admin
    --------------------------------------------------------------------------
