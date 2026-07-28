@@ -52,9 +52,15 @@ export default function ReviewOrderModal({ orderId }: { orderId: number }) {
         Đánh giá
       </button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+      {modal.mounted && (
+        <div
+          data-drawer-state={modal.state}
+          className="m-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        >
+          <div
+            data-drawer-state={modal.state}
+            className="m-modal bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+          >
             <div className="flex items-center justify-between p-4 border-b border-neutral-100">
               <h3 className="font-bold text-lg text-primary">Đánh giá sản phẩm</h3>
               <button onClick={() => setIsOpen(false)} className="text-neutral-400 hover:text-red-500 transition-colors">
