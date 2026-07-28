@@ -796,6 +796,24 @@ a, button, input, textarea, select,
     transform: none !important;
   }
 
+  /* Lắc giỏ hàng, nảy badge, quầng sáng thở: đều là chuyển động lặp hoặc xoay/phóng
+     to — cùng nhóm gây chóng mặt nên bỏ hẳn phần chuyển động. Riêng badge và giỏ hàng
+     vẫn giữ nguyên nội dung hiển thị nên người dùng không mất thông tin gì. */
+  .m-cart-bounce,
+  .m-badge-pop {
+    animation: none !important;
+    transform: none !important;
+  }
+  .m-pulse-glow::before {
+    animation: none !important;
+    transform: none !important;
+    opacity: 0.3;
+  }
+  /* Slogan: bỏ ánh sáng quét, giữ lại chữ đọc được (gradient đứng yên vẫn hiện màu). */
+  .m-slogan-shimmer {
+    animation: none !important;
+  }
+
   /* Vào trang: giữ lại một nhịp fade rất ngắn thay vì trượt lên — bỏ hẳn sẽ khiến
      trang "nháy" đột ngột mỗi lần điều hướng. */
   .m-page-enter {
