@@ -19,9 +19,11 @@ jobs:
     timeout-minutes: 20
 
     env:
+      CI: "true"
       NEXT_PUBLIC_APP_URL: https://mushroomie.io.vn
       NEXT_PUBLIC_SITE_URL: https://mushroomie.io.vn
       NEXT_PUBLIC_ENABLE_ANALYTICS: "false"
+      AUTH_SECRET: ci-only-secret-value-at-least-32-characters
 
     steps:
       - uses: actions/checkout@v4
@@ -33,6 +35,14 @@ jobs:
 
       - run: npm ci
 
+      - run: npx prisma generate
+
       - run: npm run typecheck
+
+      - run: npm run test:coverage
+
+      - run: npm run test:coverage:all
+
+      - run: npm run lint
 
       - run: npm run build

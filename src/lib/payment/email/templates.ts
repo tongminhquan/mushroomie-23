@@ -38,10 +38,24 @@ function formatMoney(amount: number | string | any): string {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(amount))
 }
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+function getOrderUrl(orderCode: unknown): string {
+  const siteUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://mushroomie.io.vn').replace(/\/$/, '')
+  return `${siteUrl}/tai-khoan/don-hang/${encodeURIComponent(String(orderCode ?? ''))}`
+}
+
 export function renderPaymentSuccessEmail(order: any): string {
   const itemsHtml = order.items.map((item: any) => `
     <div class="product-item">
-      <div class="name">${item.product_name} x${item.quantity}</div>
+      <div class="name">${escapeHtml(item.product_name)} x${escapeHtml(item.quantity)}</div>
       <div>${formatMoney(item.total_price)}</div>
     </div>`).join('')
 
@@ -52,10 +66,10 @@ export function renderPaymentSuccessEmail(order: any): string {
     </div>
     <div class="body">
       <span class="badge">✅ Thanh toán thành công</span>
-      <h2>Xin chào ${order.customer_name}!</h2>
+      <h2>Xin chào ${escapeHtml(order.customer_name)}!</h2>
       <p style="font-size:14px;color:#6B7280;margin-bottom:16px">Mushroomie đã nhận được thanh toán của bạn. Chúng mình sẽ bắt đầu làm sản phẩm ngay nha! 💛</p>
       <div class="info-box">
-        <div class="info-row"><span>Mã đơn hàng</span><strong>#${order.order_code}</strong></div>
+        <div class="info-row"><span>Mã đơn hàng</span><strong>#${escapeHtml(order.order_code)}</strong></div>
         <div class="info-row"><span>Trạng thái thanh toán</span><span style="color:#16a34a">✅ Đã thanh toán</span></div>
         <div class="info-row"><span>Trạng thái đơn hàng</span><span>Đang xử lý</span></div>
       </div>
@@ -66,7 +80,7 @@ export function renderPaymentSuccessEmail(order: any): string {
         <div class="info-row"><span>Phí vận chuyển</span><span>${formatMoney(order.shipping_fee)}</span></div>
         <div class="info-row"><span>Tổng cộng</span><span>${formatMoney(order.total)}</span></div>
       </div>
-      <a href="${process.env.NEXT_PUBLIC_APP_URL}/tai-khoan/don-hang/${order.order_code}" class="btn">Xem chi tiết đơn hàng →</a>
+      <a href="${getOrderUrl(order.order_code)}" class="btn">Xem chi tiết đơn hàng →</a>
     </div>
     <div class="footer">Cảm ơn bạn đã tin tưởng Mushroomie 🍄<br><small>Nếu có thắc mắc, liên hệ chúng mình qua email hoặc mạng xã hội nhé!</small></div>
   `)
@@ -90,13 +104,13 @@ export function renderOrderStatusEmail(order: any, templateKey: EmailTemplateKey
     </div>
     <div class="body">
       <span class="badge">${msg.emoji} ${msg.title}</span>
-      <h2>Xin chào ${order.customer_name}!</h2>
+      <h2>Xin chào ${escapeHtml(order.customer_name)}!</h2>
       <p style="font-size:14px;color:#6B7280;margin-bottom:16px">${msg.body}</p>
       <div class="info-box">
-        <div class="info-row"><span>Mã đơn hàng</span><strong>#${order.order_code}</strong></div>
-        <div class="info-row"><span>Trạng thái</span><span>${ORDER_STATUS_LABELS[order.order_status as keyof typeof ORDER_STATUS_LABELS] || order.order_status}</span></div>
+        <div class="info-row"><span>Mã đơn hàng</span><strong>#${escapeHtml(order.order_code)}</strong></div>
+        <div class="info-row"><span>Trạng thái</span><span>${escapeHtml(ORDER_STATUS_LABELS[order.order_status as keyof typeof ORDER_STATUS_LABELS] || order.order_status)}</span></div>
       </div>
-      <a href="${process.env.NEXT_PUBLIC_APP_URL}/tai-khoan/don-hang/${order.order_code}" class="btn">Theo dõi đơn hàng →</a>
+      <a href="${getOrderUrl(order.order_code)}" class="btn">Theo dõi đơn hàng →</a>
     </div>
     <div class="footer">Mushroomie — Phụ kiện Handmade Cá nhân hóa 🍄</div>
   `)

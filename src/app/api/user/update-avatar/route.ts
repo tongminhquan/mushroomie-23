@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+import { isSafeAvatarPath } from '@/lib/avatar'
 
 export async function PUT(request: NextRequest) {
   try {
@@ -10,7 +11,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const { avatar } = await request.json()
-    if (!avatar) {
+    if (!isSafeAvatarPath(avatar)) {
       return NextResponse.json({ error: 'Thiếu đường dẫn ảnh' }, { status: 400 })
     }
 

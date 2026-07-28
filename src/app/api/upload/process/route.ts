@@ -46,6 +46,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json(result)
   } catch (error) {
+    if (error instanceof Error && error.message === 'UNAUTHORIZED') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    if (error instanceof Error && error.message === 'FORBIDDEN') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
     console.error('Process image error:', error)
     const message = error instanceof Error ? error.message : 'Process failed'
     return NextResponse.json({ error: message }, { status: 500 })
