@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { X } from 'lucide-react'
+import { useDrawerTransition } from '@/hooks/useDrawerTransition'
 import BrandBadge from '@/components/ui/BrandBadge'
 import SafeImage from '@/components/ui/SafeImage'
 import { getPublicImageUrl } from '@/lib/utils'
