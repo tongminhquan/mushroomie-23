@@ -28,6 +28,15 @@ export default async function UserLayout({ children }: { children: React.ReactNo
         <Footer categories={categories.slice(0, 5)} />
         <MobileBottomNav />
         <DeferredPublicWidgets />
+        {/* Runtime chuyển động gắn MỘT lần cho mọi trang public, thay vì mỗi trang tự
+            mount. Trước đây chỉ trang chủ, landing địa phương và chi tiết bài viết có
+            hai component này — nên `data-reveal` thêm vào các trang khác không chạy.
+
+            Không tốn gì với trang không dùng: ScrollReveal thoát ngay khi không tìm
+            thấy `[data-reveal]`, còn ScrollMotion kiểm tra `hasWork` TRƯỚC khi
+            `await import('gsap')` nên GSAP không được tải. */}
+        <ScrollReveal />
+        <ScrollMotion />
         <GoogleTagManagerInit />
     </PublicProviders>
   )
