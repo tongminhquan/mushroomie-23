@@ -236,7 +236,7 @@ export default function MediaLibrary() {
       {/* Editor Modal */}
       {selectedImage && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row animate-in fade-in zoom-in-95 duration-200">
+          <div className="m-pop-in bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row">
             {/* Left side: Image / Cropper */}
             <div className="flex-1 bg-neutral-100 p-4 flex items-center justify-center min-h-[300px] overflow-hidden relative">
               {isEditing ? (
