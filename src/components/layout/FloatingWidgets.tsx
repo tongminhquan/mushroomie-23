@@ -14,6 +14,9 @@ const channels = [
 
 export default function FloatingWidgets() {
   const [open, setOpen] = useState(false)
+  // Trước đây panel render theo `{open && …}` nên biến mất tức thì khi đóng — không còn
+  // gì để chạy hiệu ứng. Hook này giữ nó trong DOM hết nhịp đóng (xem useDrawerTransition).
+  const panel = useDrawerTransition(open, 180)
 
   useEffect(() => {
     if (!open) return
