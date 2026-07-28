@@ -51,7 +51,7 @@ export default function DeferredPublicWidgets() {
 
   return (
     <>
-      {cartOpen && <CartDrawer />}
+      {(cartNeeded || widgetsReady) && <CartDrawer />}
       {widgetsReady && <FloatingWidgets />}
     </>
   )
