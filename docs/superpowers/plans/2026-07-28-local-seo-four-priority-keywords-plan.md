@@ -419,7 +419,7 @@ Expected: exit code 0, không có TypeScript error.
 - [ ] **Step 8: Commit internal links**
 
 ```bash
-git add src/components/home/landing/HomeLocalAreas.tsx src/app/\(user\)/lien-he/page.tsx src/components/layout/Footer.tsx tests/priority-local-link-sources.test.ts
+git add src/components/home/landing/HomeLocalAreas.tsx "src/app/(user)/lien-he/page.tsx" src/components/layout/Footer.tsx tests/priority-local-link-sources.test.ts
 git commit -m "seo: consolidate priority local internal links"
 ```
 
