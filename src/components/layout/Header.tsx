@@ -177,7 +177,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
               aria-expanded={searchOpen}
               aria-controls="mobile-product-search"
               onClick={() => setSearchOpen((value) => !value)}
-              className="grid h-11 w-11 place-items-center rounded-xl text-text hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 md:hidden"
+              className="m-press grid h-11 w-11 place-items-center rounded-xl text-text hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 md:hidden"
             >
               <Search size={20} />
             </button>
