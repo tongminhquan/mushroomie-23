@@ -24,7 +24,18 @@ export type DrawerState = 'entering' | 'open' | 'exiting'
 export function useDrawerTransition(isOpen: boolean, durationMs = 280) {
   const reduced = useReducedMotion()
   const [mounted, setMounted] = useState(isOpen)
-  const [state, setState] = useState<DrawerState>(isOpen ? 'open' : 'exiting')
+  /**
+   * Mount lúc đã mở sẵn thì vẫn phải bắt đầu ở 'entering', không phải 'open'.
+   *
+   * Panel nạp động (CartDrawer qua next/dynamic) chỉ xuất hiện SAU khi người dùng bấm
+   * mở, nên lần render đầu tiên của nó đã có isOpen = true. Khởi tạo thẳng bằng 'open'
+   * làm khung hình đầu tiên vẽ ngay ở vị trí cuối — trình duyệt không còn khoảng nào
+   * để nội suy và panel hiện tức thì, không trượt.
+   *
+   * Với panel mount lúc đang đóng (menu, tìm kiếm) thì không đổi gì: isOpen = false
+   * nên vẫn là 'exiting' như cũ.
+   */
+  const [state, setState] = useState<DrawerState>(isOpen ? 'entering' : 'exiting')
 
   useEffect(() => {
     // Giảm chuyển động: bỏ qua toàn bộ phần trì hoãn, đóng/mở tức thì.
