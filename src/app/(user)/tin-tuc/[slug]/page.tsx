@@ -281,7 +281,8 @@ export default async function PostDetailPage({
           <Link href={`/admin/bai-viet/${post.id}`} className="underline ml-2 text-[#ffe7a3]">Sửa bài</Link>
         </div>
       )}
-      <ScrollMotion />
+      {/* ScrollMotion mount ở src/app/(user)/layout.tsx — nó tự tìm [data-scroll-progress]
+          bên dưới nên thanh tiến trình đọc vẫn chạy bình thường. */}
       {/* Thanh tiến trình đọc: bám theo chiều dài bài, scaleX chạy trên compositor
           nên không tốn layout. Ẩn với trình đọc màn hình vì đây là trang trí. */}
       <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[3px]">
