@@ -387,7 +387,7 @@ export default async function ProductDetailPage({
             </section>
           )}
 
-          <section className="rounded-[28px] border border-warm-border bg-white p-6 shadow-card sm:p-8">
+          <section data-reveal className="rounded-[28px] border border-warm-border bg-white p-6 shadow-card sm:p-8">
             <h2 className="font-heading text-2xl text-text">Đánh giá</h2>
 
             {reviewCount > 0 ? (
