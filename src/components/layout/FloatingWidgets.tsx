@@ -60,7 +60,11 @@ export default function FloatingWidgets() {
         aria-label={open ? 'Đóng kênh liên hệ' : 'Mở kênh liên hệ'}
         aria-expanded={open}
         aria-controls="contact-channels"
-        className="grid h-12 w-12 place-items-center rounded-xl bg-primary text-white shadow-[0_10px_28px_rgba(228,29,29,0.28)] transition hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 motion-reduce:transition-none"
+        /* Quầng sáng chỉ thở khi panel ĐANG ĐÓNG: nó là lời mời bấm vào. Khi panel đã mở
+           thì lời mời đó không còn nghĩa gì, để tiếp chỉ gây nhiễu mắt. */
+        className={`m-press grid h-12 w-12 place-items-center rounded-xl bg-primary text-white shadow-[0_10px_28px_rgba(228,29,29,0.28)] transition hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 motion-reduce:transition-none${
+          open ? '' : ' m-pulse-glow'
+        }`}
       >
         {open ? <X size={21} /> : <MessageCircle size={22} />}
       </button>
