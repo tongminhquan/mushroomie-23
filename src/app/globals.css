@@ -533,6 +533,19 @@ body {
   transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
 }
 
+/* --- Hiện lên tại chỗ ngay khi vừa gắn vào DOM ---
+   Dành cho hộp thoại viết kiểu `{open && …}`: mỗi lần mở là một lần mount mới, nên
+   `animation` chạy được ngay, khác `transition` vốn cần một lần đổi trạng thái. Dùng
+   khi hộp thoại không cần nhịp đóng (đóng xong là điều hướng hoặc tải lại trang) —
+   nếu cần cả đóng thì dùng .m-modal kèm useDrawerTransition. */
+@keyframes m-pop-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+.m-pop-in {
+  animation: m-pop-in var(--m-duration-base) var(--m-ease-out) both;
+}
+
 /* ==========================================================================
    Motion cho trang admin
    --------------------------------------------------------------------------
