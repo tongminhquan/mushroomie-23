@@ -85,7 +85,7 @@ function CartDrawerContent({ drawerState }: { drawerState: 'entering' | 'open' |
                       <button aria-label="Tăng số lượng" onClick={() => updateQuantity(item.id, item.quantity + 1)} className="m-press grid h-7 w-7 place-items-center rounded-lg bg-neutral-100 hover:bg-neutral-200">
                         <Plus size={12} />
                       </button>
-                      <button aria-label="Xóa sản phẩm" onClick={() => removeItem(item.id)} className="ml-auto grid h-7 w-7 place-items-center rounded-lg hover:bg-red-50 hover:text-primary">
+                      <button aria-label="Xóa sản phẩm" onClick={() => removeItem(item.id)} className="m-press ml-auto grid h-7 w-7 place-items-center rounded-lg hover:bg-red-50 hover:text-primary">
                         <Trash2 size={14} />
                       </button>
                     </div>
