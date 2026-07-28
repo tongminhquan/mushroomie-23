@@ -13,8 +13,6 @@ import {
   type LocalPage,
 } from '@/lib/local-seo'
 import { getAreaDelivery, getAreaNote } from '@/lib/local-area-content'
-import ScrollReveal from '@/components/ui/ScrollReveal'
-import ScrollMotion from '@/components/ui/ScrollMotion'
 
 /**
  * Template landing page Local SEO cho Mushroomie.
