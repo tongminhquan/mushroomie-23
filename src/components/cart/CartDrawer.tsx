@@ -49,7 +49,7 @@ function CartDrawerContent({ drawerState }: { drawerState: 'entering' | 'open' |
             <ShoppingBag size={20} className="text-primary" />
             <h2 className="font-heading font-bold text-lg">Giỏ hàng ({items.length})</h2>
           </div>
-          <button onClick={closeCart} aria-label="Đóng giỏ hàng" className="grid h-10 w-10 place-items-center rounded-xl hover:bg-neutral-100">
+          <button onClick={closeCart} aria-label="Đóng giỏ hàng" className="m-press grid h-10 w-10 place-items-center rounded-xl hover:bg-neutral-100">
             <X size={20} />
           </button>
         </div>
