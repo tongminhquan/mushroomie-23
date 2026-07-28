@@ -33,6 +33,9 @@ export default function ProductGallery({
 
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  // Ảnh lớn trước đây tắt phụt vì render theo `{lightboxOpen && …}`; hook giữ nó lại
+  // trong DOM đủ một nhịp đóng.
+  const lightbox = useDrawerTransition(lightboxOpen, 200)
   const mainImage = gallery[selectedIndex] || FALLBACK_IMAGE
 
   useEffect(() => {
