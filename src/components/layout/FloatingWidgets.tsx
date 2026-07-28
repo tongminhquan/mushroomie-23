@@ -46,7 +46,7 @@ export default function FloatingWidgets() {
               href={channel.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-text hover:bg-neutral-100"
+              className="m-press flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-text hover:bg-neutral-100"
             >
               <span className={`grid h-7 w-7 place-items-center rounded-lg text-[10px] font-black uppercase text-white ${channel.color}`}>{channel.short}</span>
               {channel.name}
