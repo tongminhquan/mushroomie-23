@@ -9,9 +9,15 @@ export default function Footer({ categories }: { categories: Array<{ id: number;
   return (
     <footer className="border-t border-neutral-200 bg-text text-white">
       <div className="brand-container py-12 md:py-16">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.35fr_0.7fr_0.75fr_0.75fr_1fr]">
+        {/* 5 cột hiện lần lượt khi cuộn tới. Dùng data-batch-reveal (ScrollMotion gom
+            chung một stagger) thay vì data-reveal cho từng cột — cùng cách lưới sản
+            phẩm ngoài trang chủ đang làm. */}
+        <div
+          data-batch-reveal
+          className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.35fr_0.7fr_0.75fr_0.75fr_1fr]"
+        >
           <div>
-            <Link href="/" className="relative mb-5 block h-14 w-36">
+            <Link href="/" className="m-press relative mb-5 block h-14 w-36">
               <SafeImage
                 src="/logo.webp"
                 fallbackSrc="/logo.webp"
