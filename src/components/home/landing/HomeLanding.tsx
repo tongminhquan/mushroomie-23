@@ -34,8 +34,8 @@ export default function HomeLanding({
 }) {
   return (
     <>
-      <ScrollReveal />
-      <ScrollMotion />
+      {/* ScrollReveal/ScrollMotion nay mount ở src/app/(user)/layout.tsx cho mọi trang.
+          Mount thêm ở đây sẽ tạo instance ScrollTrigger thứ hai trên cùng phần tử. */}
       {/* Hero và dải danh mục KHÔNG mang data-reveal: cả hai nằm trên màn hình đầu
           tiên, ẩn rồi mới hiện sẽ làm hỏng LCP và tạo cú giật ngay khi mở trang. */}
       <HomeHeroLanding banners={banners} />
