@@ -93,7 +93,7 @@ export default function ManageCategoriesModal() {
 
   return (
     <>
-      <button onClick={() => setShow(true)} className="bg-white border border-red-200 text-red-600 px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-red-50 transition-colors shadow-sm">
+      <button onClick={() => setShow(true)} className="m-press bg-white border border-red-200 text-red-600 px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-red-50 transition-colors shadow-sm">
         Quản lý danh mục
       </button>
       {show && (

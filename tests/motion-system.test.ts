@@ -127,6 +127,78 @@ test('batch reveal never hides what the user can already see', () => {
   assert.ok(guardIndex < setIndex, 'guard phải chạy TRƯỚC khi đặt opacity 0')
 })
 
+test('public motion runtime is mounted exactly once, in the layout', () => {
+  // Trước đây ScrollReveal/ScrollMotion gắn thủ công theo từng trang nên đa số trang
+  // public không có runtime — thêm data-reveal vào cũng không chạy. Gắn ở layout là
+  // lời giải, nhưng gắn THÊM ở trang con sẽ tạo instance ScrollTrigger thứ hai trên
+  // cùng phần tử (chạy hai animation chồng nhau, và một ctx.revert() không dọn hết).
+  const layout = read('src/app/(user)/layout.tsx')
+  assert.match(layout, /<ScrollReveal \/>/)
+  assert.match(layout, /<ScrollMotion \/>/)
+
+  const offenders: string[] = []
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name)
+      if (entry.isDirectory()) {
+        // Admin có vùng cuộn riêng nên phải tự mount kèm scroller — không tính.
+        if (full.endsWith(path.join('app', 'admin'))) continue
+        walk(full)
+      } else if (/\.tsx$/.test(entry.name)) {
+        const rel = path.relative(ROOT, full)
+        if (rel.endsWith(path.join('app', '(user)', 'layout.tsx'))) continue
+        if (rel.includes(path.join('components', 'ui', 'Scroll'))) continue
+        if (/<Scroll(Reveal|Motion)[\s/>]/.test(fs.readFileSync(full, 'utf8'))) offenders.push(rel)
+      }
+    }
+  }
+  walk(path.join(ROOT, 'src'))
+
+  assert.deepEqual(offenders, [], 'mount trùng runtime chuyển động ngoài layout public')
+})
+
+test('the pulsing glow never animates box-shadow', () => {
+  // Bản gốc bên site tham chiếu animate box-shadow — buộc vẽ lại mỗi khung hình. Quầng
+  // sáng ở đây phải là lớp ::before có box-shadow tĩnh, chỉ opacity/transform chạy.
+  const glow = CSS.slice(CSS.indexOf('.m-pulse-glow'), CSS.indexOf('.m-modal'))
+  assert.match(glow, /animation:\s*m-pulse-glow/)
+  assert.doesNotMatch(glow, /transition:[^;]*box-shadow/)
+
+  const keyframes = CSS.slice(CSS.indexOf('@keyframes m-pulse-glow'))
+  const body = keyframes.slice(0, keyframes.indexOf('}\n}') + 3)
+  assert.doesNotMatch(body, /box-shadow/, 'box-shadow không được nằm trong keyframes')
+})
+
+test('every new motion pattern declares its reduced-motion tier', () => {
+  const block = CSS.slice(CSS.indexOf('@media (prefers-reduced-motion: reduce)', CSS.indexOf('Giảm chuyển động')))
+
+  // Bỏ sót ở đây là lỗi âm thầm: hiệu ứng vẫn chạy với người đã báo là chuyển động
+  // làm họ chóng mặt, và không có gì báo động.
+  for (const pattern of ['.m-cart-bounce', '.m-badge-pop', '.m-pulse-glow', '.m-slogan-shimmer', '.m-modal', '.m-pop-in']) {
+    assert.ok(block.includes(pattern), `${pattern} chưa khai báo tầng giảm chuyển động`)
+  }
+})
+
+test('modal entrance classes exist in CSS, unlike the tailwindcss-animate ones they replaced', () => {
+  // `animate-in fade-in zoom-in` từng được dùng ở 4 hộp thoại, nhưng dự án không cài
+  // tailwindcss-animate và cũng không tự định nghĩa — class chết, không chạy gì cả.
+  assert.match(CSS, /@keyframes m-pop-in/)
+  assert.match(CSS, /\.m-pop-in\s*\{/)
+
+  const walk = (dir: string, hits: string[] = []): string[] => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name)
+      if (entry.isDirectory()) walk(full, hits)
+      else if (/\.tsx$/.test(entry.name) && /className="[^"]*\banimate-in\b/.test(fs.readFileSync(full, 'utf8'))) {
+        hits.push(path.relative(ROOT, full))
+      }
+    }
+    return hits
+  }
+
+  assert.deepEqual(walk(path.join(ROOT, 'src')), [], 'class animate-in không tồn tại trong dự án này')
+})
+
 test('admin scroll motion targets the admin scroll container', () => {
   const layout = read('src/app/admin/layout.tsx')
   // Admin cuộn trong <main overflow-auto>, không phải window. Thiếu scroller thì

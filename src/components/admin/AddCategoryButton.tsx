@@ -36,7 +36,7 @@ export default function AddCategoryButton() {
 
   return (
     <>
-      <button onClick={() => setShow(true)} className="bg-white border border-[#f0e0d6] text-neutral-700 px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#fdfaf7] transition-colors shadow-sm">
+      <button onClick={() => setShow(true)} className="m-press bg-white border border-[#f0e0d6] text-neutral-700 px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#fdfaf7] transition-colors shadow-sm">
         + Thêm danh mục
       </button>
       {show && (
