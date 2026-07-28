@@ -264,6 +264,30 @@ test('drawers stay mounted long enough to animate closed', () => {
   }
 })
 
+test('no parent unmounts a drawer the moment it closes', () => {
+  // Lỗi đã xảy ra thật: DeferredPublicWidgets render `{cartOpen && <CartDrawer />}`,
+  // gỡ panel khỏi DOM ngay khi cartOpen thành false. useDrawerTransition bên trong giữ
+  // DOM đúng 280ms, nhưng component cha cắt trước — nên giỏ hàng đóng phụt, không trượt.
+  // Bộ test cũ không bắt được vì chỉ soi hook và chính component drawer.
+  const widgets = read('src/components/layout/DeferredPublicWidgets.tsx')
+
+  assert.doesNotMatch(
+    widgets,
+    /\{\s*cartOpen\s*&&\s*<CartDrawer/,
+    'gắn CartDrawer trực tiếp vào cartOpen sẽ vô hiệu hoá hiệu ứng đóng',
+  )
+  // Đã cần tới thì giữ lại trong DOM, để hook tự quyết định lúc gỡ.
+  assert.match(widgets, /cartNeeded/)
+})
+
+test('a drawer that mounts already-open still starts closed', () => {
+  // CartDrawer nạp động nên lần render đầu tiên của nó đã có isOpen = true. Khởi tạo
+  // thẳng ở 'open' thì khung hình đầu vẽ luôn ở vị trí cuối — không còn gì để nội suy.
+  const hook = read('src/hooks/useDrawerTransition.ts')
+  assert.match(hook, /useState<DrawerState>\(isOpen \? 'entering' : 'exiting'\)/)
+  assert.doesNotMatch(hook, /useState<DrawerState>\(isOpen \? 'open'/)
+})
+
 test('drawers exit faster than they enter', () => {
   // Quy ước micro-interaction: vào thong thả (ease-out), ra dứt khoát (ease-in).
   // Panel nán lại khi đóng làm giao diện có cảm giác chậm.
