@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import ThemeToggle from '@/components/theme/ThemeToggle'
 import SafeImage from '@/components/ui/SafeImage'
+import CompactHeader from '@/components/layout/CompactHeader'
 import { useCartStore } from '@/store/cart'
 
 interface CategoryLink {
@@ -45,6 +46,8 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
   // Thanh tìm kiếm mobile: fade ngắn 150ms, không trượt cả chiều cao (xem .m-drawer-top).
   const search = useDrawerTransition(searchOpen, 150)
   const [searchQuery, setSearchQuery] = useState('')
+  const [compactVisible, setCompactVisible] = useState(false)
+  const compactSentinelRef = useRef<HTMLSpanElement>(null)
 
   const hydrated = useSyncExternalStore(
     () => () => undefined,
@@ -71,7 +74,19 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
     }
   }, [menuOpen, searchOpen])
 
-  const submitSearch = (event: React.FormEvent) => {
+  useEffect(() => {
+    const sentinel = compactSentinelRef.current
+    if (!sentinel || typeof IntersectionObserver === 'undefined') return
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setCompactVisible(!entry.isIntersecting && entry.boundingClientRect.top < 0)
+    })
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [])
+
+  const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const query = searchQuery.trim()
     if (!query) return
@@ -113,6 +128,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
   }, [hydrated, totalItems])
 
   return (
+    <>
     <header className="theme-transition relative z-50 border-b border-theme-border bg-theme-page text-theme-primary">
       <div className="hidden bg-text text-white md:block">
         <div className="brand-container flex h-9 items-center justify-between text-[11px] font-semibold">
@@ -407,6 +423,26 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
           </nav>
         </div>
       )}
+      <span
+        ref={compactSentinelRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
+      />
     </header>
+    <CompactHeader
+      visible={compactVisible}
+      pathname={pathname}
+      searchQuery={searchQuery}
+      totalItems={totalItems}
+      cartBump={cartBump}
+      accountHref={session ? '/tai-khoan' : '/tai-khoan/dang-nhap'}
+      accountLabel={session?.user?.name?.split(' ')[0] || 'Tài khoản'}
+      menuOpen={menuOpen}
+      onMenuToggle={() => setMenuOpen((value) => !value)}
+      onSearchQueryChange={setSearchQuery}
+      onSubmitSearch={submitSearch}
+      onCartToggle={toggleCart}
+    />
+    </>
   )
 }
