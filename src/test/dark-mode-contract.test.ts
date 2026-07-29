@@ -117,16 +117,25 @@ describe('sitewide dark-mode contract', () => {
     expect(css).toContain('prefers-reduced-motion: reduce')
   })
 
-  it('keeps legacy text aliases theme-aware instead of pinning dark ink in dark mode', () => {
+  it('keeps the dual-use text token dark for surfaces and remaps only text utilities in dark mode', () => {
     const css = read('src/app/globals.css')
     const darkTheme = css.slice(
       css.indexOf('html[data-theme="dark"]'),
       css.indexOf('/* Keep light-mode game text readable'),
     )
 
-    expect(css).toContain('--color-text: var(--text-primary-theme)')
+    expect(css).toContain('--color-text: #2b2b2b')
+    expect(css).toContain('html[data-theme="dark"] [class~="text-text"]')
     expect(darkTheme).toContain('--color-neutral-600: #b8b8b8')
     expect(darkTheme).toContain('--color-neutral-800: #e5e5e5')
+  })
+
+  it('keeps the site footer on an explicit black surface in both themes', () => {
+    const footer = read('src/components/layout/Footer.tsx')
+
+    expect(footer).toContain('bg-black')
+    expect(footer).not.toContain('bg-text')
+    expect(footer).toContain('text-white')
   })
 
   it('keeps all semantic dark text tiers above WCAG AA on page and card surfaces', () => {

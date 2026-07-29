@@ -7,7 +7,7 @@ import { BRAND } from '@/lib/local-seo'
 export default function Footer({ categories }: { categories: Array<{ id: number; name: string; slug: string }> }) {
 
   return (
-    <footer className="theme-transition border-t border-theme-border bg-text text-white">
+    <footer className="theme-transition border-t border-theme-border bg-black text-white">
       <div className="brand-container py-12 md:py-16">
         {/* 5 cột hiện lần lượt khi cuộn tới. Dùng data-batch-reveal (ScrollMotion gom
             chung một stagger) thay vì data-reveal cho từng cột — cùng cách lưới sản
