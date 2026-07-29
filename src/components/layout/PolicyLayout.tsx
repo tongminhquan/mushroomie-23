@@ -12,8 +12,6 @@ const policies = [
   { name: 'Chính sách bảo mật', slug: '/chinh-sach-bao-mat', icon: '🔒' },
 ]
 
-const LINE = '#f0e0d6' // warm hairline border từ Claude Design
-
 export default function PolicyLayout({
   children,
   title,
@@ -24,25 +22,22 @@ export default function PolicyLayout({
   const pathname = usePathname()
 
   return (
-    <div className="min-h-screen bg-secondary pb-16">
+    <div className="theme-transition min-h-screen bg-theme-page pb-16 text-theme-primary">
       {/* Breadcrumb (giữ JSON-LD BreadcrumbList cho SEO) */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <Breadcrumb items={[{ label: title }]} />
       </div>
 
       {/* Hero / page head */}
-      <section
-        className="relative overflow-hidden text-center"
-        style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
-      >
+      <section className="relative overflow-hidden bg-theme-section text-center">
         <span aria-hidden className="pointer-events-none select-none absolute left-[12%] top-[40%] text-xl text-coral animate-float-soft">❤</span>
         <span aria-hidden className="pointer-events-none select-none absolute right-[13%] top-[30%] text-lg text-accent-mint animate-float-soft" style={{ animationDelay: '1.2s' }}>★</span>
         <div className="relative max-w-2xl mx-auto px-6 pt-8 pb-9">
           <span className="inline-block text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-2.5">
             Chính sách &amp; hỗ trợ
           </span>
-          <h1 className="font-heading text-3xl md:text-4xl text-neutral-900 mb-2 leading-tight">{title}</h1>
-          <p className="m-0 text-sm text-neutral-500">Minh bạch, rõ ràng &amp; luôn đặt bạn lên hàng đầu ♡</p>
+          <h1 className="mb-2 font-heading text-3xl leading-tight text-theme-primary md:text-4xl">{title}</h1>
+          <p className="m-0 text-sm text-theme-muted">Minh bạch, rõ ràng &amp; luôn đặt bạn lên hàng đầu ♡</p>
         </div>
       </section>
 
@@ -53,10 +48,9 @@ export default function PolicyLayout({
           <AnimateOnScroll animation="fade-right">
             <nav
               aria-label="Danh mục chính sách"
-              className="bg-white rounded-[18px] p-3.5 shadow-card border-[1.5px]"
-              style={{ borderColor: LINE }}
+              className="rounded-[18px] border-[1.5px] border-theme-border bg-theme-card p-3.5 shadow-card"
             >
-              <div className="px-3 py-1.5 mb-1 text-[11px] font-extrabold uppercase tracking-[0.08em] text-neutral-400">
+              <div className="mb-1 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.08em] text-theme-muted">
                 Danh mục chính sách
               </div>
               <ul className="space-y-0.5">
@@ -70,7 +64,7 @@ export default function PolicyLayout({
                         className={`flex items-center gap-2.5 px-3 py-3 rounded-[10px] text-sm font-semibold transition-colors ${
                           isActive
                             ? 'text-primary bg-primary-light'
-                            : 'text-neutral-700 hover:text-primary hover:bg-primary-light/60'
+                            : 'text-theme-secondary hover:bg-theme-subtle hover:text-primary'
                         }`}
                       >
                         <span aria-hidden className="text-base leading-none">{policy.icon}</span>
@@ -87,11 +81,8 @@ export default function PolicyLayout({
         {/* Main content */}
         <div className="flex flex-col gap-4 min-w-0">
           <AnimateOnScroll animation="fade-up">
-            <article
-              className="bg-white rounded-[22px] p-6 md:p-8 shadow-card border-[1.5px]"
-              style={{ borderColor: LINE }}
-            >
-              <div className="prose prose-sm md:prose-base max-w-none prose-headings:font-heading prose-headings:text-neutral-800 prose-a:text-primary hover:prose-a:text-primary-dark prose-strong:text-accent-kraft">
+            <article className="rounded-[22px] border-[1.5px] border-theme-border bg-theme-card p-6 shadow-card md:p-8">
+              <div className="prose prose-sm max-w-none prose-headings:font-heading prose-headings:text-theme-primary prose-a:text-primary hover:prose-a:text-primary-dark prose-strong:text-accent-kraft md:prose-base">
                 {children}
               </div>
             </article>
@@ -99,12 +90,9 @@ export default function PolicyLayout({
 
           {/* CTA liên hệ */}
           <AnimateOnScroll animation="fade-up">
-            <div
-              className="text-center rounded-[22px] p-6 border-[1.5px]"
-              style={{ borderColor: LINE, background: 'linear-gradient(135deg,#fff0ec,#fff7f2)' }}
-            >
-              <div className="font-heading text-lg text-neutral-900 mb-1.5">Còn thắc mắc gì không?</div>
-              <p className="m-0 mb-4 text-sm text-neutral-500">
+            <div className="rounded-[22px] border-[1.5px] border-theme-border bg-theme-subtle p-6 text-center">
+              <div className="mb-1.5 font-heading text-lg text-theme-primary">Còn thắc mắc gì không?</div>
+              <p className="m-0 mb-4 text-sm text-theme-muted">
                 Nhắn cho Nhà Nấm nhỏ, chúng mình luôn sẵn sàng hỗ trợ ♡
               </p>
               <Link

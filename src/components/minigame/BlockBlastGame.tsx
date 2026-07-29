@@ -500,6 +500,7 @@ export default function BlockBlastGame({
     <div
       ref={containerRef}
       aria-busy={ready && starting}
+      className="bg-theme-card text-theme-primary"
       style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center',
         width: '100%', userSelect: 'none',
@@ -622,28 +623,28 @@ export default function BlockBlastGame({
         {/* ── Sidebar ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 160, maxWidth: 200, flex: 1 }}>
           <div style={{
-            background: 'rgba(255,255,255,.04)',
-            border: '1px solid rgba(255,255,255,.08)',
+            background: 'var(--surface-muted)',
+            border: '1px solid var(--border-default-theme)',
             borderRadius: 14,
             padding: '12px 16px',
           }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,.4)', marginBottom: 5 }}>BẢNG</div>
-            <div style={{ fontSize: 22, fontWeight: 900, color: '#fff' }}>{BOARD_SIZE} x {BOARD_SIZE}</div>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-muted-theme)', marginBottom: 5 }}>BẢNG</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--text-primary-theme)' }}>{BOARD_SIZE} x {BOARD_SIZE}</div>
           </div>
           {[
-            { label: 'ĐIỂM SỐ', val: score.toLocaleString(), color: '#00e5ff', big: true  },
-            { label: 'HÀNG',    val: lines,                   color: '#39e75f', big: false },
-            { label: 'COMBO',   val: combo,                   color: '#ffe14d', big: false },
+            { label: 'ĐIỂM SỐ', val: score.toLocaleString(), color: 'var(--game-score)', big: true  },
+            { label: 'HÀNG',    val: lines,                   color: 'var(--game-positive)', big: false },
+            { label: 'COMBO',   val: combo,                   color: 'var(--game-warning)', big: false },
           ].map(({ label, val, color, big }) => (
             <div key={label} style={{
-              background: 'rgba(255,255,255,.04)',
-              border: '1px solid rgba(255,255,255,.08)',
+              background: 'var(--surface-muted)',
+              border: '1px solid var(--border-default-theme)',
               borderRadius: 14, padding: '14px 16px',
             }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,.4)', marginBottom: 5 }}>{label}</div>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-muted-theme)', marginBottom: 5 }}>{label}</div>
               <div style={{ fontSize: big ? 32 : 26, fontWeight: 900, color, textShadow: `0 0 12px ${color},0 0 30px ${color}` }}>{val}</div>
               {big && (
-                <div style={{ marginTop: 10, height: 4, borderRadius: 4, background: 'rgba(255,255,255,.06)', overflow: 'hidden' }}>
+                <div style={{ marginTop: 10, height: 4, borderRadius: 4, background: 'var(--border-default-theme)', overflow: 'hidden' }}>
                   <div style={{ height: '100%', borderRadius: 4, background: 'linear-gradient(90deg,#00e5ff,#b44dff)', width: `${Math.min((score / 20000) * 100, 100)}%`, transition: 'width .5s' }} />
                 </div>
               )}
@@ -672,7 +673,7 @@ export default function BlockBlastGame({
           aria-labelledby="block-blast-game-over-title"
           style={{
           position: 'absolute', inset: 0,
-          background: 'rgba(0,0,0,.88)',
+          background: 'var(--game-overlay)',
           borderRadius: 14, display: 'flex',
           justifyContent: 'center', alignItems: 'center',
           zIndex: 200, backdropFilter: 'blur(10px)',
@@ -681,7 +682,7 @@ export default function BlockBlastGame({
             <div id="block-blast-game-over-title" style={{ color: '#ff4d6a', fontSize: 40, lineHeight: 1.15, fontWeight: 900, marginBottom: 10, textShadow: '0 0 20px rgba(255,77,106,.6)' }}>
               {endReason === 'manual' ? 'LƯỢT CHƠI KẾT THÚC' : 'HẾT CHỖ!'}
             </div>
-            <div style={{ color: 'rgba(255,255,255,.8)', fontSize: 20, marginBottom: 28 }}>Tổng điểm: {score.toLocaleString()}</div>
+            <div style={{ color: 'var(--text-primary-theme)', fontSize: 20, marginBottom: 28 }}>Tổng điểm: {score.toLocaleString()}</div>
             <button
               type="button"
               onClick={onRestart}

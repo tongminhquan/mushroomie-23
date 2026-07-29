@@ -59,11 +59,11 @@ export default function ReviewOrderModal({ orderId }: { orderId: number }) {
         >
           <div
             data-drawer-state={modal.state}
-            className="m-modal bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+            className="m-modal w-full max-w-md overflow-hidden rounded-2xl border border-theme-border bg-theme-card shadow-xl"
           >
-            <div className="flex items-center justify-between p-4 border-b border-neutral-100">
+            <div className="flex items-center justify-between p-4 border-b border-theme-border">
               <h3 className="font-bold text-lg text-primary">Đánh giá sản phẩm</h3>
-              <button onClick={() => setIsOpen(false)} className="text-neutral-400 hover:text-red-500 transition-colors">
+              <button onClick={() => setIsOpen(false)} className="text-theme-muted hover:text-red-500 transition-colors">
                 <X size={20} />
               </button>
             </div>
@@ -72,7 +72,7 @@ export default function ReviewOrderModal({ orderId }: { orderId: number }) {
               {error && <div className="p-3 bg-red-50 text-red-600 text-sm rounded-xl">{error}</div>}
               
               <div>
-                <label className="block text-sm font-semibold text-neutral-700 mb-2">Chất lượng sản phẩm</label>
+                <label className="block text-sm font-semibold text-theme-secondary mb-2">Chất lượng sản phẩm</label>
                 <div className="flex items-center gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -91,14 +91,14 @@ export default function ReviewOrderModal({ orderId }: { orderId: number }) {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-neutral-700 mb-2">Nội dung đánh giá</label>
+                <label className="block text-sm font-semibold text-theme-secondary mb-2">Nội dung đánh giá</label>
                 <textarea
                   required
                   rows={4}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="Hãy chia sẻ cảm nhận của bạn về sản phẩm nhé..."
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-light"
+                  className="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2 text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light"
                 />
               </div>
 
@@ -106,7 +106,7 @@ export default function ReviewOrderModal({ orderId }: { orderId: number }) {
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 text-sm font-semibold text-neutral-500 hover:bg-neutral-100 rounded-xl transition-colors"
+                  className="px-4 py-2 text-sm font-semibold text-theme-secondary hover:bg-theme-subtle rounded-xl transition-colors"
                 >
                   Hủy
                 </button>

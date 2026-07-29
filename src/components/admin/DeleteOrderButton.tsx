@@ -122,7 +122,7 @@ export default function DeleteOrderButton({
         >
           <div
             data-drawer-state={dialog.state}
-            className="m-drawer-top w-full max-w-md rounded-[20px] bg-white p-6 shadow-2xl"
+            className="theme-transition m-drawer-top w-full max-w-md rounded-[20px] border border-theme-border bg-theme-card p-6 text-theme-primary shadow-[var(--shadow-overlay-theme)]"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-4 flex items-start justify-between gap-3">
@@ -131,32 +131,32 @@ export default function DeleteOrderButton({
                   <AlertTriangle size={20} />
                 </span>
                 <div>
-                  <h2 className="font-heading text-lg text-neutral-900">Xoá đơn hàng</h2>
-                  <p className="text-sm text-neutral-500">{orderCode}</p>
+                  <h2 className="font-heading text-lg text-theme-primary">Xoá đơn hàng</h2>
+                  <p className="text-sm text-theme-muted">{orderCode}</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={close}
                 aria-label="Đóng"
-                className="grid h-9 w-9 place-items-center rounded-lg text-neutral-400 hover:bg-neutral-100"
+                className="grid h-9 w-9 place-items-center rounded-lg text-theme-muted hover:bg-theme-subtle hover:text-theme-primary"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <p className="text-sm leading-relaxed text-neutral-600">
+            <p className="text-sm leading-relaxed text-theme-secondary">
               Thao tác này <strong>không hoàn tác được</strong>. Sản phẩm trong đơn, lịch sử trạng thái và bản ghi
               thanh toán sẽ bị xoá cùng.
             </p>
 
             {orderStatus !== 'CANCELLED' && (
-              <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+              <p className="mt-2 text-sm leading-relaxed text-theme-secondary">
                 Tồn kho đơn này đang giữ sẽ được cộng trả về sản phẩm, voucher đã dùng được trả lại ví khách.
               </p>
             )}
 
-            <label htmlFor={`confirm-${orderId}`} className="mt-4 block text-sm font-semibold text-neutral-700">
+            <label htmlFor={`confirm-${orderId}`} className="mt-4 block text-sm font-semibold text-theme-primary">
               Gõ <span className="font-mono text-primary">{orderCode}</span> để xác nhận
             </label>
             <input
@@ -164,7 +164,7 @@ export default function DeleteOrderButton({
               value={confirmText}
               onChange={(event) => setConfirmText(event.target.value)}
               autoComplete="off"
-              className="mt-1.5 h-11 w-full rounded-xl border border-neutral-200 px-4 font-mono text-sm outline-none focus:border-red-400 focus:ring-4 focus:ring-red-100"
+              className="theme-transition mt-1.5 h-11 w-full rounded-xl border border-theme-border bg-theme-input px-4 font-mono text-sm text-theme-primary caret-primary outline-none focus:border-red-400 focus:ring-4 focus:ring-red-100"
             />
 
             {error && <p className="mt-2 text-sm text-red-600">{error}</p>}

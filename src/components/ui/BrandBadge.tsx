@@ -14,11 +14,11 @@ export default function BrandBadge({
     pink: 'bg-pink text-text',
     yellow: 'bg-yellow text-text',
     kraft: 'bg-kraft text-white',
-    neutral: 'bg-white text-text border border-neutral-200',
+    neutral: 'border border-theme-border bg-theme-subtle text-theme-secondary',
   }
 
   return (
-    <span className={cn('inline-flex min-h-7 items-center rounded-lg px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em]', tones[tone], className)}>
+    <span className={cn('theme-transition inline-flex min-h-7 items-center rounded-lg px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em]', tones[tone], className)}>
       {children}
     </span>
   )

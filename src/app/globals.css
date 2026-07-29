@@ -42,7 +42,9 @@
   --color-neutral-300: #d3c7bf;
   --color-neutral-400: #746d68;
   --color-neutral-500: #66615d;
+  --color-neutral-600: #5f5955;
   --color-neutral-700: #4a4542;
+  --color-neutral-800: #36312e;
   --color-neutral-900: #2b2b2b;  /* Đen mềm */
 
   /* Typography */
@@ -65,12 +67,109 @@
   --color-kraft: #8a5635;
   --color-admin-bg: #faf4ee; /* kem ấm Mushroomie thay xám lạnh — card trắng nổi rõ trên nền này */
   --color-warm-border: #ece0d6;
+  --color-theme-page: var(--surface-page);
+  --color-theme-section: var(--surface-section);
+  --color-theme-card: var(--surface-card);
+  --color-theme-elevated: var(--surface-elevated);
+  --color-theme-subtle: var(--surface-muted);
+  --color-theme-input: var(--surface-input);
+  --color-theme-primary: var(--text-primary-theme);
+  --color-theme-secondary: var(--text-secondary-theme);
+  --color-theme-muted: var(--text-muted-theme);
+  --color-theme-border: var(--border-default-theme);
+  --color-theme-border-strong: var(--border-strong-theme);
   --radius-card: 24px;
   --radius-admin-card: 16px;
 }
 
-:root {
-  --mushroomie-static-revision: "20260619-b";
+:root,
+html[data-theme="light"] {
+  --mushroomie-static-revision: "20260729-mini-game-colors";
+  --surface-page: #fff7f2;
+  --surface-section: #fffaf6;
+  --surface-card: #ffffff;
+  --surface-elevated: #fffdfa;
+  --surface-muted: #f7f2ee;
+  --surface-input: #ffffff;
+  --text-primary-theme: #2b2b2b;
+  --text-secondary-theme: #5f5955;
+  --text-muted-theme: #746d68;
+  --border-default-theme: #e9dfd8;
+  --border-strong-theme: #d3c7bf;
+  --primary-control: #d71919;
+  --primary-control-hover: #b91515;
+  --primary-content: #c91414;
+  --primary-foreground: #fff7f2;
+  --shadow-card-theme: 0 8px 24px rgb(91 48 35 / 0.07);
+  --shadow-overlay-theme: 0 22px 55px rgb(91 48 35 / 0.14);
+  --theme-color: #fff7f2;
+  --paper-grid-theme: rgb(185 121 75 / 0.035);
+  --game-score: #087f8f;
+  --game-positive: #16813a;
+  --game-warning: #9a6a00;
+  --game-overlay: rgb(255 247 242 / 0.92);
+  --wordpress-automation-hero: linear-gradient(135deg, #fff 0%, #fff7f2 58%, #ffd6d6 100%);
+}
+
+html[data-theme="dark"] {
+  --surface-page: #000000;
+  --surface-section: #050505;
+  --surface-card: #0a0a0a;
+  --surface-elevated: #111111;
+  --surface-muted: #171717;
+  --surface-input: #0a0a0a;
+  --text-primary-theme: #fafafa;
+  --text-secondary-theme: #d4d4d4;
+  --text-muted-theme: #a3a3a3;
+  --border-default-theme: #262626;
+  --border-strong-theme: #404040;
+  --primary-control: #c91414;
+  --primary-control-hover: #e02424;
+  --primary-content: #ff7b7b;
+  --primary-foreground: #fff7f2;
+  --shadow-card-theme: 0 10px 28px rgb(0 0 0 / 0.26);
+  --shadow-overlay-theme: 0 24px 62px rgb(0 0 0 / 0.42);
+  --theme-color: #000000;
+  --paper-grid-theme: rgb(255 255 255 / 0.04);
+  --game-score: #00e5ff;
+  --game-positive: #39e75f;
+  --game-warning: #ffe14d;
+  --game-overlay: rgb(7 7 17 / 0.92);
+  --wordpress-automation-hero: linear-gradient(135deg, #0a0a0a 0%, #111111 58%, #2b0b0b 100%);
+  --color-admin-bg: #000000;
+  --color-warm-border: #262626;
+  --color-secondary: #000000;
+  --color-neutral-50: #0a0a0a;
+  --color-neutral-100: #171717;
+  --color-neutral-200: #262626;
+  --color-neutral-300: #404040;
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-500: #a3a3a3;
+  --color-neutral-600: #b8b8b8;
+  --color-neutral-700: #d4d4d4;
+  --color-neutral-800: #e5e5e5;
+  --color-neutral-900: #fafafa;
+  --color-primary-light: #2b0b0b;
+  --shadow-card: var(--shadow-card-theme);
+  --shadow-strong: var(--shadow-overlay-theme);
+}
+
+/* `text` is also used as a dark brand surface. Remap only its text utility. */
+html[data-theme="dark"] [class~="text-text"] {
+  color: var(--text-primary-theme);
+}
+
+/* Keep light-mode game text readable while an older client chunk is replaced. */
+html[data-theme="light"] .mini-game-theme-scope [class~="text-white"] {
+  color: var(--text-primary-theme) !important;
+}
+
+html[data-theme="light"] .mini-game-theme-scope [class*="text-white/"] {
+  color: var(--text-secondary-theme) !important;
+}
+
+html[data-theme="light"] .mini-game-theme-scope [class*="bg-[#e41d1d]"] {
+  color: var(--primary-foreground) !important;
 }
 
 * {
@@ -79,21 +178,21 @@
 
 html {
   scroll-behavior: smooth;
-  background: var(--color-secondary);
+  background: var(--surface-page);
 }
 
 body {
   font-family: var(--font-body);
-  background-color: var(--color-secondary);
-  color: var(--color-neutral-900);
+  background-color: var(--surface-page);
+  color: var(--text-primary-theme);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: clip;
 }
 
 ::selection {
-  color: #fff;
-  background: var(--color-primary);
+  color: var(--primary-foreground);
+  background: var(--primary-control);
 }
 
 .skip-link {
@@ -103,8 +202,8 @@ body {
   z-index: 200;
   transform: translateY(-180%);
   border-radius: 10px;
-  background: var(--color-neutral-900);
-  color: white;
+  background: var(--text-primary-theme);
+  color: var(--surface-card);
   padding: 0.75rem 1rem;
   font-weight: 700;
 }
@@ -138,10 +237,10 @@ body {
 }
 
 .paper-surface {
-  background-color: #fffdfa;
+  background-color: var(--surface-elevated);
   background-image:
-    linear-gradient(rgba(185, 121, 75, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(185, 121, 75, 0.035) 1px, transparent 1px);
+    linear-gradient(var(--paper-grid-theme) 1px, transparent 1px),
+    linear-gradient(90deg, var(--paper-grid-theme) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -222,9 +321,9 @@ body {
 
 /* ========== Custom Scrollbar ========== */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--color-neutral-100); }
-::-webkit-scrollbar-thumb { background: var(--color-primary-light); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
+::-webkit-scrollbar-track { background: var(--surface-muted); }
+::-webkit-scrollbar-thumb { background: var(--border-strong-theme); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary-control); }
 
 /* Hide scrollbar */
 .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -713,6 +812,104 @@ body {
 }
 
 /* ========== Smooth Transitions (scoped) ========== */
+.theme-transition {
+  transition-property: all;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+  color-scheme: dark;
+  background-color: var(--surface-input);
+  color: var(--text-primary-theme);
+  border-color: var(--border-default-theme);
+}
+
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: var(--text-muted-theme);
+}
+
+html[data-theme="dark"] .prose {
+  --tw-prose-body: var(--text-secondary-theme);
+  --tw-prose-headings: var(--text-primary-theme);
+  --tw-prose-links: var(--primary-content);
+  --tw-prose-bold: var(--text-primary-theme);
+  --tw-prose-counters: var(--text-muted-theme);
+  --tw-prose-bullets: var(--primary-content);
+  --tw-prose-hr: var(--border-default-theme);
+  --tw-prose-quotes: var(--text-primary-theme);
+  --tw-prose-quote-borders: var(--primary-content);
+  --tw-prose-captions: var(--text-muted-theme);
+  --tw-prose-code: var(--text-primary-theme);
+  --tw-prose-th-borders: var(--border-strong-theme);
+  --tw-prose-td-borders: var(--border-default-theme);
+}
+
+/*
+ * Admin still contains legacy utility classes across many CRUD screens.
+ * Keep this compatibility layer scoped to the authenticated admin shell so
+ * older cards inherit the active theme without changing brand-white buttons
+ * on the public storefront.
+ */
+html[data-theme="dark"] .admin-theme-scope [class~="bg-white"] {
+  background-color: var(--surface-card);
+}
+
+html[data-theme="dark"] .admin-theme-scope :is(
+  [class~="bg-white/70"],
+  [class~="bg-white/75"],
+  [class~="bg-white/80"],
+  [class~="bg-white/90"],
+  [class~="bg-white/92"],
+  [class~="bg-white/94"],
+  [class~="bg-white/95"]
+) {
+  background-color: color-mix(in srgb, var(--surface-card) 92%, transparent);
+}
+
+html[data-theme="dark"] .admin-theme-scope :is(
+  [class~="bg-[#fff7f2]"],
+  [class~="bg-[#fffaf6]"],
+  [class~="bg-[#fffdfb]"],
+  [class~="bg-gray-100"]
+) {
+  background-color: var(--surface-muted);
+}
+
+html[data-theme="dark"] .admin-theme-scope :is(
+  [class~="border-[#ead8cd]"],
+  [class~="border-[#f0dfd4]"],
+  [class~="border-[#f0e0d6]"],
+  [class~="border-gray-200"]
+) {
+  border-color: var(--border-default-theme);
+}
+
+html[data-theme="dark"] .admin-theme-scope :is(
+  [class~="text-gray-700"],
+  [class~="text-neutral-600"],
+  [class~="text-neutral-700"]
+) {
+  color: var(--text-secondary-theme);
+}
+
+html[data-theme="dark"] .admin-theme-scope :is(
+  [class~="text-neutral-400"],
+  [class~="text-neutral-500"]
+) {
+  color: var(--text-muted-theme);
+}
+
+html[data-theme="dark"] .admin-theme-scope :is(
+  [class~="text-neutral-800"],
+  [class~="text-neutral-900"]
+) {
+  color: var(--text-primary-theme);
+}
+
 /* Only apply transitions to interactive elements, not all elements */
 a, button, input, textarea, select,
 [role="button"], [tabindex],
@@ -746,7 +943,7 @@ a, button, input, textarea, select,
   height: auto;
   border: 1px solid var(--color-warm-border);
   border-radius: 18px;
-  background: var(--color-secondary);
+  background: var(--surface-card);
 }
 
 .mushroomie-article-media figcaption {
@@ -785,6 +982,10 @@ a, button, input, textarea, select,
               tự di chuyển nên không gây chóng mặt).
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
+  .theme-transition {
+    transition-duration: 1ms !important;
+  }
+
   /* Lưới an toàn: chặn hoạt ảnh chạy hoang. Dùng 0.01ms chứ không phải 0s —
      0s làm mất sự kiện transitionend/animationend mà JS có thể đang chờ. */
   *,

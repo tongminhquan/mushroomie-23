@@ -13,7 +13,7 @@ describe('UI primitives', () => {
     const { rerender } = render(<Button onClick={onClick} variant="outline" size="lg" className="custom">Mua ngay</Button>)
     const button = screen.getByRole('button', { name: 'Mua ngay' })
 
-    expect(button).toHaveClass('border-primary', 'min-h-12', 'custom')
+    expect(button).toHaveClass('border-primary', 'bg-theme-card', 'theme-transition', 'min-h-12', 'custom')
     button.click()
     expect(onClick).toHaveBeenCalledOnce()
 
@@ -39,5 +39,6 @@ describe('UI primitives', () => {
     expect(screen.getByRole('heading', { name: 'Chưa có sản phẩm' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Khám phá' })).toBeInTheDocument()
     expect(container.querySelector('[aria-hidden="true"]')).toBeInTheDocument()
+    expect(container.querySelector('.bg-theme-card')).toBeInTheDocument()
   })
 })

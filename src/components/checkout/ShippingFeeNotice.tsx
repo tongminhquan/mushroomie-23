@@ -19,10 +19,10 @@ export default function ShippingFeeNotice({
     <div
       role="status"
       aria-live="polite"
-      className="flex items-start gap-3 rounded-lg border border-[#f2c5b9] bg-[#fff7f2] p-3 text-sm text-neutral-700"
+      className="flex items-start gap-3 rounded-lg border border-primary/25 bg-theme-subtle p-3 text-sm text-theme-secondary"
     >
       <span
-        className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white text-primary"
+        className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-theme-elevated text-primary"
         aria-hidden="true"
       >
         <Truck size={17} />
@@ -35,7 +35,7 @@ export default function ShippingFeeNotice({
       <button
         type="button"
         onClick={onDismiss}
-        className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-neutral-500 transition-colors hover:bg-white hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+        className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-theme-muted transition-colors hover:bg-theme-elevated hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
         aria-label="Đóng thông báo phí vận chuyển"
       >
         <X size={18} />

@@ -130,8 +130,8 @@ export default function ProductCard({ product }: ProductCardProps) {
   // m-glow: đổ bóng bằng opacity của lớp ::before thay vì animate box-shadow —
   // box-shadow buộc trình duyệt repaint mỗi khung hình và gây giật trên mobile.
   return (
-    <article className="m-card m-glow group relative flex h-full flex-col overflow-hidden rounded-[24px] border-[1.5px] border-warm-border bg-white transition-colors duration-200 hover:border-pink">
-      <Link href={`/san-pham/${product.slug}`} prefetch={false} onClick={handleSelectItem} className="m-card-media relative block aspect-[3/4] w-full shrink-0 overflow-hidden bg-secondary">
+    <article className="theme-transition m-card m-glow group relative flex h-full flex-col overflow-hidden rounded-[24px] border-[1.5px] border-theme-border bg-theme-card hover:border-pink">
+      <Link href={`/san-pham/${product.slug}`} prefetch={false} onClick={handleSelectItem} className="m-card-media relative block aspect-[3/4] w-full shrink-0 overflow-hidden bg-theme-subtle">
         <SafeImage
           src={imageUrl}
           alt={product.name}
@@ -141,7 +141,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           className="object-contain p-3"
         />
         <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
-          <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-white/95 px-3.5 py-1.5 text-xs font-extrabold text-text shadow-card backdrop-blur-sm">
+          <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-theme-elevated/95 px-3.5 py-1.5 text-xs font-extrabold text-theme-primary shadow-card backdrop-blur-sm">
             <Eye aria-hidden="true" size={14} />
             Xem nhanh
           </span>
@@ -163,7 +163,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             </span>
           )}
           {isOutOfStock && (
-            <span className="inline-flex min-h-7 items-center rounded-lg border border-neutral-200 bg-white px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-text">
+            <span className="inline-flex min-h-7 items-center rounded-lg border border-theme-border bg-theme-elevated px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-theme-primary">
               Hết hàng
             </span>
           )}
@@ -177,7 +177,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           </p>
         )}
         <Link href={`/san-pham/${product.slug}`} prefetch={false} onClick={handleSelectItem} className="mb-3 block flex-1">
-          <h3 className="line-clamp-2 text-sm font-extrabold leading-snug text-text transition-colors group-hover:text-primary sm:text-[15px]">
+          <h3 className="line-clamp-2 text-sm font-extrabold leading-snug text-theme-primary transition-colors group-hover:text-primary sm:text-[15px]">
             {product.name}
           </h3>
         </Link>
@@ -196,7 +196,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="flex flex-wrap items-baseline gap-2 tabular-nums">
             <strong className="text-xl text-primary">{formatPrice(displayPrice)}</strong>
             {originalPrice && originalPrice > displayPrice && (
-              <span className="text-xs text-neutral-500 line-through">{formatPrice(originalPrice)}</span>
+              <span className="text-xs text-theme-muted line-through">{formatPrice(originalPrice)}</span>
             )}
           </div>
           <button
@@ -206,7 +206,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               added
                 ? 'bg-yellow text-text'
                 : isOutOfStock
-                  ? 'cursor-not-allowed bg-neutral-200 text-neutral-500'
+                  ? 'cursor-not-allowed bg-theme-subtle text-theme-muted'
                   : 'bg-primary text-white hover:bg-primary-dark'
             }`}
             aria-label={added ? 'Đã thêm' : isOutOfStock ? 'Hết hàng' : 'Chọn mua'}

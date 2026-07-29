@@ -15,7 +15,7 @@ import {
 } from '@/lib/game-config'
 
 const gameLoading = () => (
-  <div className="flex min-h-[420px] w-full items-center justify-center rounded-2xl border border-white/10 bg-black/25 text-sm font-bold text-white/72">
+  <div className="flex min-h-[420px] w-full items-center justify-center rounded-2xl border border-theme-border bg-theme-subtle text-sm font-bold text-theme-secondary">
     Đang tải game...
   </div>
 )
@@ -211,10 +211,10 @@ export default function GamePageClient({ game }: { game: GameKey }) {
   const GameComponent = useMemo(() => (game === 'tetris' ? TetrisGame : BlockBlastGame), [game])
 
   return (
-    <div className="min-h-[100dvh] bg-[#090916] text-white">
-      <section className="border-b border-white/10 bg-[radial-gradient(circle_at_top,rgba(228,29,29,0.18),transparent_45%)]">
+    <div className="min-h-[100dvh] bg-theme-page text-theme-primary">
+      <section className="border-b border-theme-border bg-theme-section">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-7 md:px-6 md:py-9">
-          <Link href="/mini-game" className="inline-flex min-h-11 w-fit items-center gap-2 text-sm font-bold text-white/75 hover:text-white">
+          <Link href="/mini-game" className="inline-flex min-h-11 w-fit items-center gap-2 text-sm font-bold text-theme-secondary hover:text-primary">
             <ArrowLeft size={16} />
             Về trang chọn game
           </Link>
@@ -226,14 +226,14 @@ export default function GamePageClient({ game }: { game: GameKey }) {
               <h1 className="mt-2 font-body text-4xl font-extrabold leading-tight tracking-normal md:text-5xl">
                 {config.title}
               </h1>
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-white/75 md:text-base">
+              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-theme-secondary md:text-base">
                 {config.description}
               </p>
             </div>
             <button
               type="button"
               onClick={() => persistSound(!soundEnabled)}
-              className="inline-flex h-11 w-fit items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-extrabold text-white/72 hover:bg-white/10"
+              className="theme-transition inline-flex h-11 w-fit items-center gap-2 rounded-xl border border-theme-border bg-theme-card px-4 text-sm font-extrabold text-theme-secondary hover:bg-theme-subtle"
             >
               {soundEnabled ? <Music2 size={17} /> : <Music size={17} />}
               {soundEnabled ? 'Âm thanh bật' : 'Âm thanh tắt'}
@@ -244,13 +244,13 @@ export default function GamePageClient({ game }: { game: GameKey }) {
 
       <section className="mx-auto grid max-w-6xl gap-5 px-4 py-6 md:px-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0">
-          <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-3 shadow-[0_30px_90px_rgba(0,0,0,0.35)] sm:p-4 md:p-5">
+          <section className="rounded-2xl border border-theme-border bg-theme-card p-3 shadow-card sm:p-4 md:p-5">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/65">
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-theme-muted">
                   {config.controlMode}
                 </p>
-                <h2 className="mt-1 text-2xl font-extrabold tracking-normal text-white md:text-3xl">
+                <h2 className="mt-1 text-2xl font-extrabold tracking-normal text-theme-primary md:text-3xl">
                   {config.title}
                 </h2>
               </div>
@@ -298,15 +298,15 @@ function VoucherTierPanel({ game }: { game: GameKey }) {
   const config = GAME_DEFINITIONS[game]
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-5" id="game-voucher">
-      <div className="mb-4 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white/65">
+    <section className="rounded-2xl border border-theme-border bg-theme-card p-5" id="game-voucher">
+      <div className="mb-4 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-theme-muted">
         <Ticket size={15} />
         Mốc voucher
       </div>
       <div className="space-y-3">
         {config.voucherTiers.map((tier) => (
-          <div key={tier.percent} className="flex items-center justify-between rounded-xl border border-white/10 bg-black/20 px-4 py-3">
-            <span className="text-sm font-bold text-white/70">{tier.score.toLocaleString('vi-VN')} điểm</span>
+          <div key={tier.percent} className="flex items-center justify-between rounded-xl border border-theme-border bg-theme-subtle px-4 py-3">
+            <span className="text-sm font-bold text-theme-secondary">{tier.score.toLocaleString('vi-VN')} điểm</span>
             <span className="rounded-full bg-[#e41d1d]/15 px-3 py-1 text-sm font-black text-[#ff6b6b]">
               Giảm {tier.percent}%
             </span>
@@ -331,24 +331,24 @@ function ResultPanel({
   signedIn: boolean
 }) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
-      <div className="mb-4 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white/65">
+    <section className="rounded-2xl border border-theme-border bg-theme-card p-5">
+      <div className="mb-4 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-theme-muted">
         <Trophy size={15} />
         Kết quả
       </div>
       {result ? (
         <div>
-          <div className="text-4xl font-black text-[#00e5ff]">{result.score.toLocaleString('vi-VN')}</div>
-          <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs font-bold text-white/74">
-            <div className="rounded-xl bg-black/20 p-2">Hàng<br />{result.lines ?? 0}</div>
-            <div className="rounded-xl bg-black/20 p-2">Combo<br />{result.combo ?? 0}</div>
-            <div className="rounded-xl bg-black/20 p-2">Giây<br />{result.durationSec ?? 0}</div>
+          <div className="text-4xl font-black text-[var(--game-score)]">{result.score.toLocaleString('vi-VN')}</div>
+          <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs font-bold text-theme-secondary">
+            <div className="rounded-xl bg-theme-subtle p-2">Hàng<br />{result.lines ?? 0}</div>
+            <div className="rounded-xl bg-theme-subtle p-2">Combo<br />{result.combo ?? 0}</div>
+            <div className="rounded-xl bg-theme-subtle p-2">Giây<br />{result.durationSec ?? 0}</div>
           </div>
           {state.message && (
             <div className={`mt-4 rounded-xl border px-3 py-2 text-sm font-semibold ${
               state.status === 'error'
                 ? 'border-red-400/20 bg-red-400/10 text-red-100'
-                : 'border-white/10 bg-black/20 text-white/66'
+                : 'border-theme-border bg-theme-subtle text-theme-secondary'
             }`}>
               {state.message}
             </div>
@@ -356,7 +356,7 @@ function ResultPanel({
           {state.voucher && (
             <div className="mt-3 rounded-xl border border-[#e41d1d]/25 bg-[#e41d1d]/10 px-3 py-2">
               <div className="text-xs font-bold uppercase tracking-[0.12em] text-[#ff8a8a]">Voucher mới</div>
-              <div className="mt-1 font-mono text-sm font-black text-white">{state.voucher.code}</div>
+              <div className="mt-1 font-mono text-sm font-black text-theme-primary">{state.voucher.code}</div>
               <Link href="/thanh-toan" className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-lg bg-[#e41d1d] text-sm font-extrabold text-white">
                 Dùng voucher ngay
               </Link>
@@ -366,14 +366,14 @@ function ResultPanel({
             type="button"
             onClick={onRestart}
             disabled={restartDisabled}
-            className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 text-sm font-extrabold text-white/72 hover:bg-white/10 disabled:cursor-wait disabled:opacity-50"
+            className="theme-transition mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-theme-border bg-theme-subtle text-sm font-extrabold text-theme-secondary hover:bg-theme-elevated disabled:cursor-wait disabled:opacity-50"
           >
             <RotateCcw size={16} />
             {restartDisabled ? 'Đang lưu điểm...' : 'Chơi lại'}
           </button>
         </div>
       ) : (
-        <p className="text-sm font-medium leading-6 text-white/70">
+        <p className="text-sm font-medium leading-6 text-theme-secondary">
           {signedIn ? 'Kết quả lượt chơi sẽ hiển thị tại đây.' : 'Bạn có thể chơi khách, nhưng cần đăng nhập để lưu điểm.'}
         </p>
       )}
@@ -401,9 +401,9 @@ function LeaderboardPanel({
   }
 
   return (
-    <section id="game-leaderboard" className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
+    <section id="game-leaderboard" className="rounded-2xl border border-theme-border bg-theme-card p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white/65">
+        <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-theme-muted">
           <BarChart3 size={15} />
           Bảng xếp hạng
         </div>
@@ -417,7 +417,7 @@ function LeaderboardPanel({
             className={`rounded-lg px-2 py-2 text-xs font-extrabold ${
               period === value
                 ? 'bg-[#e41d1d] text-white'
-                : 'border border-white/10 bg-black/20 text-white/72 hover:bg-white/10'
+                : 'border border-theme-border bg-theme-subtle text-theme-secondary hover:bg-theme-elevated'
             }`}
           >
             {labels[value]}
@@ -426,7 +426,7 @@ function LeaderboardPanel({
       </div>
       {loading ? (
         <div className="space-y-2">
-          {[1, 2, 3].map((item) => <div key={item} className="h-10 animate-pulse rounded-xl bg-white/5" />)}
+          {[1, 2, 3].map((item) => <div key={item} className="h-10 animate-pulse rounded-xl bg-theme-subtle" />)}
         </div>
       ) : error ? (
         <div className="rounded-xl border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm font-semibold text-red-100">
@@ -440,19 +440,19 @@ function LeaderboardPanel({
               className={`flex items-center justify-between rounded-xl border px-3 py-2 ${
                 item.isCurrentUser
                   ? 'border-[#e41d1d]/35 bg-[#e41d1d]/12'
-                  : 'border-white/10 bg-black/20'
+                  : 'border-theme-border bg-theme-subtle'
               }`}
             >
               <div className="min-w-0">
-                <div className="truncate text-sm font-extrabold text-white/80">#{item.rank} {item.name}</div>
-                <div className="text-xs font-semibold text-white/62">{new Date(item.createdAt).toLocaleDateString('vi-VN')}</div>
+                <div className="truncate text-sm font-extrabold text-theme-primary">#{item.rank} {item.name}</div>
+                <div className="text-xs font-semibold text-theme-muted">{new Date(item.createdAt).toLocaleDateString('vi-VN')}</div>
               </div>
-              <div className="text-right text-lg font-black text-[#00e5ff]">{item.score.toLocaleString('vi-VN')}</div>
+              <div className="text-right text-lg font-black text-[var(--game-score)]">{item.score.toLocaleString('vi-VN')}</div>
             </div>
           ))}
         </div>
       ) : (
-        <p className="rounded-xl border border-white/10 bg-black/20 px-3 py-4 text-sm font-medium text-white/65">
+        <p className="rounded-xl border border-theme-border bg-theme-subtle px-3 py-4 text-sm font-medium text-theme-muted">
           Chưa có điểm cho bộ lọc này.
         </p>
       )}

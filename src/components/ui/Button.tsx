@@ -13,7 +13,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((
   const variants = {
     primary: 'bg-primary text-white shadow-[0_10px_24px_rgba(228,29,29,0.22)] hover:bg-primary-dark hover:-translate-y-0.5',
     secondary: 'bg-pink text-text hover:bg-primary hover:text-white',
-    outline: 'border-[1.5px] border-primary bg-white text-primary hover:bg-primary hover:text-white',
+    outline: 'border-[1.5px] border-primary bg-theme-card text-primary hover:bg-primary hover:text-white',
     ghost: 'text-primary hover:bg-primary-light',
   }
   const sizes = {
@@ -30,7 +30,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((
         // `transition` (shorthand) animate mọi thuộc tính kể cả box-shadow/border —
         // giới hạn lại còn transform + màu để giữ 60fps. m-press cho phản hồi nhấn
         // rõ hơn trên mobile, nơi không có trạng thái hover.
-        'm-press inline-flex items-center justify-center gap-2 rounded-full font-bold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60',
+        'theme-transition m-press inline-flex items-center justify-center gap-2 rounded-full font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60',
         variants[variant],
         sizes[size],
         className,

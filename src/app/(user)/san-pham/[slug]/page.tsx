@@ -241,7 +241,7 @@ export default async function ProductDetailPage({
   )
 
   return (
-    <div className="min-h-screen bg-secondary py-5 md:py-8">
+    <div className="theme-transition min-h-screen bg-theme-page py-5 text-theme-primary md:py-8">
       <ProductViewTracker
         product={{
           id: product.id,
@@ -278,7 +278,7 @@ export default async function ProductDetailPage({
             isOnSale={isOnSale}
           />
 
-          <div className="flex h-full flex-col rounded-[28px] border border-warm-border bg-white p-6 shadow-card sm:p-8">
+          <div className="flex h-full flex-col rounded-[28px] border border-theme-border bg-theme-card p-6 shadow-card sm:p-8">
             <div className="flex flex-wrap items-center gap-2">
               {product.category && (
                 <Link
@@ -316,54 +316,54 @@ export default async function ProductDetailPage({
               />
 
               {reviewAverage && (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-warm-border bg-white px-3 py-2 text-sm font-semibold text-neutral-600">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-theme-border bg-theme-elevated px-3 py-2 text-sm font-semibold text-theme-secondary">
                   <Star size={15} className="fill-[#ffe7a3] text-[#d4a100]" />
                   {reviewAverage}/5
-                  <span className="text-neutral-400">({reviewCount} đánh giá)</span>
+                  <span className="text-theme-muted">({reviewCount} đánh giá)</span>
                 </span>
               )}
             </div>
 
             {product.short_description && (
-              <p className="mt-4 max-w-xl text-sm leading-7 text-neutral-600 md:text-base">
+              <p className="mt-4 max-w-xl text-sm leading-7 text-theme-secondary md:text-base">
                 {product.short_description}
               </p>
             )}
 
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-[22px] border border-warm-border bg-secondary px-4 py-4">
+              <div className="rounded-[22px] border border-theme-border bg-theme-subtle px-4 py-4">
                 <CheckCircle2 size={18} className="text-primary" />
-                <p className="mt-3 text-sm font-semibold text-neutral-800">Làm thủ công tỉ mỉ</p>
-                <p className="mt-1 text-xs leading-5 text-neutral-500">
+                <p className="mt-3 text-sm font-semibold text-theme-primary">Làm thủ công tỉ mỉ</p>
+                <p className="mt-1 text-xs leading-5 text-theme-muted">
                   Mỗi chi tiết được hoàn thiện thủ công theo đúng tinh thần Mushroomie.
                 </p>
               </div>
-              <div className="rounded-[22px] border border-warm-border bg-secondary px-4 py-4">
+              <div className="rounded-[22px] border border-theme-border bg-theme-subtle px-4 py-4">
                 <MessageCircleHeart size={18} className="text-primary" />
-                <p className="mt-3 text-sm font-semibold text-neutral-800">Tùy chỉnh theo ý bạn</p>
-                <p className="mt-1 text-xs leading-5 text-neutral-500">
+                <p className="mt-3 text-sm font-semibold text-theme-primary">Tùy chỉnh theo ý bạn</p>
+                <p className="mt-1 text-xs leading-5 text-theme-muted">
                   Dễ thêm tên, charm hoặc lời nhắn riêng khi sản phẩm hỗ trợ cá nhân hóa.
                 </p>
               </div>
-              <div className="rounded-[22px] border border-warm-border bg-secondary px-4 py-4">
+              <div className="rounded-[22px] border border-theme-border bg-theme-subtle px-4 py-4">
                 <Truck size={18} className="text-primary" />
-                <p className="mt-3 text-sm font-semibold text-neutral-800">Đóng gói sẵn để tặng</p>
-                <p className="mt-1 text-xs leading-5 text-neutral-500">
+                <p className="mt-3 text-sm font-semibold text-theme-primary">Đóng gói sẵn để tặng</p>
+                <p className="mt-1 text-xs leading-5 text-theme-muted">
                   Phù hợp cho quà sinh nhật, dịp đặc biệt hoặc một món quà nhỏ cho chính mình.
                 </p>
               </div>
             </div>
 
-            <div className="mt-8 rounded-[24px] border border-warm-border bg-[#fffaf6] p-5">
+            <div className="mt-8 rounded-[24px] border border-theme-border bg-theme-section p-5">
               <AddToCartButton product={product} />
             </div>
 
             {/* Gói quà áp dụng cho mọi sản phẩm; phí tính một lần cho cả đơn hàng. */}
             <GiftWrapOption className="mt-4" />
 
-            <div className="mt-4 flex items-start gap-3 rounded-[20px] border border-dashed border-[#d9b89e] bg-secondary p-4">
+            <div className="mt-4 flex items-start gap-3 rounded-[20px] border border-dashed border-theme-border-strong bg-theme-subtle p-4">
               <PackageCheck size={20} className="mt-0.5 shrink-0 text-primary" />
-              <p className="m-0 text-[13px] leading-relaxed text-neutral-600">
+              <p className="m-0 text-[13px] leading-relaxed text-theme-secondary">
                 Sản phẩm handmade có thể khác nhau một chút giữa từng lần hoàn thiện. Điều đó
                 giúp mỗi món quà giữ được cảm giác riêng và tự nhiên hơn.
               </p>
@@ -373,7 +373,7 @@ export default async function ProductDetailPage({
 
         <div className={`mt-8 grid gap-8 ${product.description ? 'lg:grid-cols-[minmax(0,1fr)_360px]' : ''}`}>
           {product.description && (
-            <section data-reveal className="rounded-[28px] border border-warm-border bg-white p-6 shadow-card sm:p-8">
+            <section data-reveal className="rounded-[28px] border border-theme-border bg-theme-card p-6 shadow-card sm:p-8">
               <SectionHeader
                 eyebrow="Chi tiết sản phẩm"
                 title="Mô tả đầy đủ"
@@ -381,28 +381,28 @@ export default async function ProductDetailPage({
                 className="mb-6"
               />
               <div
-                className="prose prose-sm max-w-none text-neutral-700 prose-headings:font-heading prose-headings:text-text prose-a:text-primary prose-img:rounded-[22px]"
+                className="prose prose-sm max-w-none text-theme-secondary prose-headings:font-heading prose-headings:text-theme-primary prose-a:text-primary prose-img:rounded-[22px]"
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description) }}
               />
             </section>
           )}
 
-          <section data-reveal className="rounded-[28px] border border-warm-border bg-white p-6 shadow-card sm:p-8">
+          <section data-reveal className="rounded-[28px] border border-theme-border bg-theme-card p-6 shadow-card sm:p-8">
             <h2 className="font-heading text-2xl text-text">Đánh giá</h2>
 
             {reviewCount > 0 ? (
               <>
                 <div className="mt-3 flex items-center gap-2">
                   <Star size={18} className="fill-[#ffe7a3] text-[#d4a100]" />
-                  <span className="text-lg font-bold text-neutral-900">{reviewAverage}</span>
-                  <span className="text-sm text-neutral-500">trên 5 điểm từ {reviewCount} đánh giá</span>
+                  <span className="text-lg font-bold text-theme-primary">{reviewAverage}</span>
+                  <span className="text-sm text-theme-muted">trên 5 điểm từ {reviewCount} đánh giá</span>
                 </div>
 
                 <div className="mt-6 space-y-5">
                   {product.reviews.map((review) => (
                     <div
                       key={review.id}
-                      className="border-b border-warm-border pb-5 last:border-0 last:pb-0"
+                      className="border-b border-theme-border pb-5 last:border-0 last:pb-0"
                     >
                       <div className="mb-2 flex items-center justify-between gap-3">
                         <span className="text-sm font-semibold text-text">{review.name}</span>
@@ -416,18 +416,18 @@ export default async function ProductDetailPage({
                           ))}
                         </div>
                       </div>
-                      <p className="text-sm leading-6 text-neutral-600">{review.content}</p>
+                      <p className="text-sm leading-6 text-theme-secondary">{review.content}</p>
                     </div>
                   ))}
                 </div>
               </>
             ) : (
-              <p className="mt-3 text-sm leading-6 text-neutral-500">
+              <p className="mt-3 text-sm leading-6 text-theme-muted">
                 Chưa có đánh giá nào. Hãy là người đầu tiên chia sẻ cảm nhận về sản phẩm này.
               </p>
             )}
 
-            <div className="mt-8 border-t border-warm-border pt-6">
+            <div className="mt-8 border-t border-theme-border pt-6">
               <h3 className="mb-4 text-sm font-semibold text-text">Viết đánh giá của bạn</h3>
               <ReviewForm productId={product.id} productName={product.name} />
             </div>
@@ -435,7 +435,7 @@ export default async function ProductDetailPage({
         </div>
 
         {relatedProducts.length > 0 && (
-          <section className="mt-16 border-t border-warm-border pt-12">
+          <section className="mt-16 border-t border-theme-border pt-12">
             <SectionHeader
               eyebrow="Bạn có thể thích"
               title="Sản phẩm liên quan"

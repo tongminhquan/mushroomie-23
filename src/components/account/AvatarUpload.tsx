@@ -81,7 +81,7 @@ export function AvatarUpload({ initialAvatar, userName }: AvatarUploadProps) {
         className="hidden" 
       />
       {loading && (
-        <div className="absolute inset-0 bg-white/50 rounded-full flex items-center justify-center">
+        <div className="absolute inset-0 bg-theme-card/60 rounded-full flex items-center justify-center">
           <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}

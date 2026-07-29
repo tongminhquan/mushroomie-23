@@ -95,6 +95,24 @@ test('the confirm dialog is portaled outside animated table rows', () => {
   assert.match(BUTTON, /createPortal\([\s\S]*document\.body/)
 })
 
+test('the confirm dialog uses semantic theme colors in both light and dark mode', () => {
+  for (const semanticClass of [
+    'bg-theme-card',
+    'text-theme-primary',
+    'text-theme-secondary',
+    'border-theme-border',
+    'bg-theme-input',
+  ]) {
+    assert.ok(BUTTON.includes(semanticClass), `delete dialog thiếu ${semanticClass}`)
+  }
+
+  assert.doesNotMatch(
+    BUTTON,
+    /className="[^"]*\bbg-white\b[^"]*"/,
+    'delete dialog vẫn dùng nền trắng hardcode',
+  )
+})
+
 test('paid and fulfilled orders are protected from permanent deletion', () => {
   for (const paymentStatus of ['PAID', 'REFUNDED']) {
     const policy = resolveOrderDeletionPolicy({

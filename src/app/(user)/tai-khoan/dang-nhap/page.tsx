@@ -38,10 +38,7 @@ function LoginPageContent() {
 
 
   return (
-    <div
-      className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden"
-      style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
-    >
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-theme-page p-4 text-theme-primary">
       <span className="animate-float-soft absolute left-[10%] top-[16%] text-3xl text-[#ffb3b3]" aria-hidden style={{ pointerEvents: 'none' }}>🍄</span>
       <span className="animate-float-soft absolute right-[12%] top-[24%] text-2xl text-[#ff6b6b]" aria-hidden style={{ pointerEvents: 'none' }}>❤</span>
 
@@ -50,15 +47,15 @@ function LoginPageContent() {
           <div className="relative h-20 w-48 mb-4"><Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority /></div>
           <span className="text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-2">Ghé Nhà Nấm nhỏ</span>
           <h1 className="font-heading text-3xl font-bold">Đăng nhập Mushroomie</h1>
-          <p className="text-neutral-500 text-sm mt-2">Chào mừng bạn trở lại! ♡</p>
+          <p className="mt-2 text-sm text-theme-muted">Chào mừng bạn trở lại! ♡</p>
         </div>
-        <div className="bg-white rounded-[24px] shadow-card p-8 border-[1.5px]" style={{ borderColor: '#f0e0d6' }}>
+        <div className="rounded-[24px] border-[1.5px] border-theme-border bg-theme-card p-8 shadow-card">
           {/* Nút đăng nhập Google */}
           <button
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isGoogleLoading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 border-[1.5px] border-[#e2d3c8] rounded-xl bg-[#fffdfb] text-sm font-semibold hover:border-primary hover:bg-[#fff7f2] transition-all disabled:opacity-60 disabled:cursor-not-allowed mb-4"
+            className="theme-transition mb-4 flex w-full items-center justify-center gap-3 rounded-xl border-[1.5px] border-theme-border bg-theme-input px-4 py-3 text-sm font-semibold text-theme-primary hover:border-primary hover:bg-theme-subtle disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isGoogleLoading ? (
               <span className="w-5 h-5 border-2 border-neutral-400 border-t-transparent rounded-full animate-spin" />
@@ -76,9 +73,9 @@ function LoginPageContent() {
 
           {/* Đường phân cách */}
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex-1 h-px bg-[#f0e0d6]" />
-            <span className="text-xs text-neutral-400 font-medium">hoặc đăng nhập bằng email</span>
-            <div className="flex-1 h-px bg-[#f0e0d6]" />
+            <div className="h-px flex-1 bg-theme-border" />
+            <span className="text-xs font-medium text-theme-muted">hoặc đăng nhập bằng email</span>
+            <div className="h-px flex-1 bg-theme-border" />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -89,7 +86,7 @@ function LoginPageContent() {
                 value={form.email}
                 onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                 required
-                className="w-full px-4 py-3 border-[1.5px] border-[#e2d3c8] rounded-xl bg-[#fffdfb] text-sm focus:outline-none focus:border-primary transition-colors"
+                className="theme-transition w-full rounded-xl border-[1.5px] border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-primary outline-none focus:border-primary"
                 placeholder="email@example.com"
               />
             </div>
@@ -105,7 +102,7 @@ function LoginPageContent() {
                 value={form.password}
                 onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
                 required
-                className="w-full px-4 py-3 border-[1.5px] border-[#e2d3c8] rounded-xl bg-[#fffdfb] text-sm focus:outline-none focus:border-primary transition-colors"
+                className="theme-transition w-full rounded-xl border-[1.5px] border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-primary outline-none focus:border-primary"
                 placeholder="Nhập mật khẩu"
               />
             </div>
@@ -116,12 +113,12 @@ function LoginPageContent() {
               Đăng nhập
             </Button>
           </form>
-          <p className="text-center text-sm text-neutral-500 mt-5">
+          <p className="mt-5 text-center text-sm text-theme-muted">
             Chưa có tài khoản?{' '}
             <Link href="/tai-khoan/dang-ky" className="text-primary font-semibold hover:underline">Đăng ký ngay</Link>
           </p>
         </div>
-        <p className="text-center text-xs text-neutral-400 mt-6">Làm bằng tay, trao bằng tim 🍄</p>
+        <p className="mt-6 text-center text-xs text-theme-muted">Làm bằng tay, trao bằng tim 🍄</p>
       </div>
     </div>
   )
@@ -129,7 +126,7 @@ function LoginPageContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-secondary py-16 text-center text-sm text-neutral-500">Đang tải trang đăng nhập...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-theme-page py-16 text-center text-sm text-theme-muted">Đang tải trang đăng nhập...</div>}>
       <LoginPageContent />
     </Suspense>
   )

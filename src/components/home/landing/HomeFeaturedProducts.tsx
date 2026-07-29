@@ -9,10 +9,7 @@ export default function HomeFeaturedProducts({ products }: { products: HomeProdu
   if (products.length === 0) return null
 
   return (
-    <section
-      className="relative overflow-hidden bg-secondary py-16 md:py-24"
-      style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
-    >
+    <section className="relative overflow-hidden bg-theme-section py-16 text-theme-primary md:py-24">
       <Sparkles aria-hidden className="pointer-events-none absolute left-[6%] top-24 hidden h-7 w-7 text-primary/70 md:block" />
       <Gift aria-hidden className="pointer-events-none absolute right-[7%] top-32 hidden h-7 w-7 text-kraft/70 md:block" />
 

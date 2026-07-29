@@ -7,17 +7,17 @@ const icons = [Palette, Sparkles]
 
 export default function CatalogSeoContent({ content }: { content: CatalogSeoConfig }) {
   return (
-    <section className="mt-14 border-y border-warm-border bg-white py-12" aria-labelledby="catalog-guide-heading">
+    <section className="mt-14 border-y border-theme-border bg-theme-section py-12" aria-labelledby="catalog-guide-heading">
       <BrandContainer>
         <div className="grid gap-8 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-14">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-primary">
               Chọn phụ kiện có chủ đích
             </p>
-            <h2 id="catalog-guide-heading" className="mt-2 text-balance font-heading text-2xl text-neutral-900 md:text-3xl">
+            <h2 id="catalog-guide-heading" className="mt-2 text-balance font-heading text-2xl text-theme-primary md:text-3xl">
               {content.h1}
             </h2>
-            <p className="mt-4 text-sm leading-7 text-neutral-600 md:text-base">
+            <p className="mt-4 text-sm leading-7 text-theme-secondary md:text-base">
               {content.intro}
             </p>
             <Link
@@ -37,8 +37,8 @@ export default function CatalogSeoContent({ content }: { content: CatalogSeoConf
                     <Icon size={18} />
                   </span>
                   <div>
-                    <h3 className="font-heading text-lg text-neutral-900">{section.title}</h3>
-                    <p className="mt-2 text-sm leading-7 text-neutral-600">{section.body}</p>
+                    <h3 className="font-heading text-lg text-theme-primary">{section.title}</h3>
+                    <p className="mt-2 text-sm leading-7 text-theme-secondary">{section.body}</p>
                   </div>
                 </div>
               )
@@ -46,12 +46,12 @@ export default function CatalogSeoContent({ content }: { content: CatalogSeoConf
           </div>
         </div>
 
-        <nav aria-label="Nội dung và danh mục liên quan" className="mt-9 flex flex-wrap gap-2.5 border-t border-warm-border pt-7">
+        <nav aria-label="Nội dung và danh mục liên quan" className="mt-9 flex flex-wrap gap-2.5 border-t border-theme-border pt-7">
           {content.links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-warm-border bg-secondary px-4 py-2.5 text-sm font-semibold text-neutral-700 transition-colors hover:border-primary hover:text-primary"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-theme-border bg-theme-subtle px-4 py-2.5 text-sm font-semibold text-theme-secondary transition-colors hover:border-primary hover:text-primary"
             >
               {link.label} <ArrowRight size={14} />
             </Link>

@@ -1,6 +1,8 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
+import ThemeBootstrapScript from '@/components/theme/ThemeBootstrapScript'
 import { DEFAULT_SOCIAL_IMAGE } from '@/lib/seo-assets'
+import { THEME_META_COLORS } from '@/lib/theme'
 import './globals.css'
 
 const montserrat = localFont({
@@ -66,10 +68,21 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  colorScheme: 'light dark',
+  themeColor: THEME_META_COLORS.light,
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="vi" suppressHydrationWarning className={`${montserrat.variable} ${paytoneOne.variable}`}>
-      <body suppressHydrationWarning className="font-body bg-secondary min-h-screen">
+    <html
+      lang="vi"
+      data-theme="light"
+      suppressHydrationWarning
+      className={`${montserrat.variable} ${paytoneOne.variable}`}
+    >
+      <body suppressHydrationWarning className="theme-transition min-h-screen bg-secondary font-body">
+        <ThemeBootstrapScript />
         <a href="#main-content" className="skip-link">Đi đến nội dung chính</a>
         {children}
       </body>

@@ -10,6 +10,7 @@ vi.mock('next-auth/react', () => ({ useSession: navigationMocks.session }))
 
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import MobileBottomNav from '@/components/layout/MobileBottomNav'
+import ThemeToggle from '@/components/theme/ThemeToggle'
 
 describe('navigation components', () => {
   beforeEach(() => {
@@ -45,5 +46,11 @@ describe('navigation components', () => {
     const jsonLd = container.querySelector('script[type="application/ld+json"]')!
     expect(jsonLd.textContent).not.toContain('</script>')
     expect(jsonLd.textContent).toContain('\\u003c')
+  })
+
+  it('exposes an accessible theme control', () => {
+    document.documentElement.dataset.theme = 'light'
+    render(<ThemeToggle variant="icon" />)
+    expect(screen.getByRole('button', { name: 'Chuyển sang giao diện tối' })).toHaveClass('h-11', 'w-11')
   })
 })

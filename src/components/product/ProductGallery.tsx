@@ -69,7 +69,7 @@ export default function ProductGallery({
           aria-label="Xem ảnh sản phẩm lớn hơn"
           /* `group` vốn bị thiếu: ảnh bên trong khai báo `group-hover:scale-[1.02]` nhưng
              không có phần tử nào mang class `group` nên hiệu ứng phóng chưa từng chạy. */
-          className="group relative flex aspect-[3/4] flex-1 cursor-zoom-in items-center justify-center overflow-hidden rounded-[28px] border border-warm-border bg-white shadow-card lg:min-h-[640px]"
+          className="group relative flex aspect-[3/4] flex-1 cursor-zoom-in items-center justify-center overflow-hidden rounded-[28px] border border-theme-border bg-theme-card shadow-card lg:min-h-[640px]"
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,214,214,0.35),_transparent_55%)]" />
           <SafeImage
@@ -100,7 +100,7 @@ export default function ProductGallery({
             )}
           </div>
 
-          <span className="absolute bottom-3 right-3 rounded-xl bg-white/85 px-3 py-1.5 text-[11px] font-bold text-neutral-500 shadow-card backdrop-blur-sm">
+          <span className="absolute bottom-3 right-3 rounded-xl bg-theme-elevated/90 px-3 py-1.5 text-[11px] font-bold text-theme-muted shadow-card backdrop-blur-sm">
             Nhấn để xem lớn
           </span>
         </button>
@@ -114,10 +114,10 @@ export default function ProductGallery({
                 onClick={() => setSelectedIndex(index)}
                 aria-label={`Xem ảnh sản phẩm ${index + 1}`}
                 aria-pressed={selectedIndex === index}
-                className={`m-press relative aspect-[3/4] overflow-hidden rounded-[20px] border bg-white transition ${
+                className={`m-press relative aspect-[3/4] overflow-hidden rounded-[20px] border bg-theme-card transition ${
                   selectedIndex === index
                     ? 'border-primary ring-2 ring-primary/15'
-                    : 'border-warm-border hover:border-primary/60'
+                    : 'border-theme-border hover:border-primary/60'
                 }`}
               >
                 <SafeImage

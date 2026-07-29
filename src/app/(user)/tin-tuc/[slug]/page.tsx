@@ -273,7 +273,7 @@ export default async function PostDetailPage({
   const usesSquareSeoCover = isSquareSeoArticleImage(coverImage.renderSrc)
 
   return (
-    <div className="min-h-screen bg-secondary pb-16">
+    <div className="theme-transition min-h-screen bg-theme-page pb-16 text-theme-primary">
       {isPreview && (
         <div className="bg-[#2b2b2b] text-white text-sm text-center py-2.5 px-4 sticky top-0 z-50">
           👁 <strong>Bản xem trước</strong> — {PREVIEW_LABELS[post.status] || post.status}. Chỉ admin nhìn thấy trang này.
@@ -297,11 +297,7 @@ export default async function PostDetailPage({
       />
 
       <section
-        className="relative overflow-hidden border-b border-warm-border"
-        style={{
-          background:
-            'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))',
-        }}
+        className="relative overflow-hidden border-b border-theme-border bg-theme-section"
       >
         <div className="mx-auto max-w-3xl px-4 pb-10 pt-4 sm:px-6">
           <Breadcrumb
@@ -314,7 +310,7 @@ export default async function PostDetailPage({
             ]}
           />
 
-          <div className="rounded-[28px] border border-warm-border bg-white/92 p-6 shadow-card backdrop-blur md:p-8">
+          <div className="rounded-[28px] border border-theme-border bg-theme-card/95 p-6 shadow-card backdrop-blur md:p-8">
             <div className="flex flex-wrap items-center gap-2.5">
               {post.category && (
                 <Link
@@ -325,24 +321,24 @@ export default async function PostDetailPage({
                 </Link>
               )}
               {post.reading_time ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-warm-border bg-white px-4 py-2 text-xs font-semibold text-neutral-500">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-theme-border bg-theme-elevated px-4 py-2 text-xs font-semibold text-theme-muted">
                   <Clock3 size={14} />
                   {post.reading_time} phút đọc
                 </span>
               ) : null}
             </div>
 
-            <h1 className="mt-4 font-heading text-3xl leading-tight text-neutral-900 md:text-[44px]">
+            <h1 className="mt-4 font-heading text-3xl leading-tight text-theme-primary md:text-[44px]">
               {post.title}
             </h1>
 
             {post.excerpt && (
-              <p className="mt-4 max-w-2xl text-base leading-relaxed text-neutral-600">
+              <p className="mt-4 max-w-2xl text-base leading-relaxed text-theme-secondary">
                 {post.excerpt}
               </p>
             )}
 
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-warm-border pt-4">
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-theme-border pt-4">
               <div className="flex items-center gap-3">
                 <span
                   aria-hidden
@@ -351,17 +347,17 @@ export default async function PostDetailPage({
                   M
                 </span>
                 <div className="text-sm">
-                  <div className="font-bold text-neutral-900">
+                  <div className="font-bold text-theme-primary">
                     {post.author?.name || 'Mushroomie Team'}
                   </div>
-                  <div className="text-xs text-neutral-500">Biên tập nội dung thương hiệu</div>
+                  <div className="text-xs text-theme-muted">Biên tập nội dung thương hiệu</div>
                 </div>
               </div>
 
               <div className="flex flex-wrap items-center justify-end gap-3">
                 {post.published_at && (
                   <span
-                    className="inline-flex items-center gap-1.5 text-sm text-neutral-500"
+                    className="inline-flex items-center gap-1.5 text-sm text-theme-muted"
                     suppressHydrationWarning
                   >
                     <CalendarDays size={15} />
@@ -374,7 +370,7 @@ export default async function PostDetailPage({
           </div>
 
           <div
-            className={`relative mt-6 w-full overflow-hidden rounded-[28px] border border-warm-border bg-white shadow-card ${
+            className={`relative mt-6 w-full overflow-hidden rounded-[28px] border border-theme-border bg-theme-card shadow-card ${
               usesSquareSeoCover ? 'mx-auto aspect-square max-w-3xl' : 'aspect-[16/9]'
             }`}
           >
@@ -392,9 +388,9 @@ export default async function PostDetailPage({
       </section>
 
       <div className="mx-auto mt-8 max-w-3xl px-4 sm:px-6">
-        <article id="article-body" className="rounded-[28px] border border-warm-border bg-white px-5 py-8 shadow-card sm:px-8 md:px-10">
+        <article id="article-body" className="rounded-[28px] border border-theme-border bg-theme-card px-5 py-8 shadow-card sm:px-8 md:px-10">
           <div
-            className="prose prose-neutral max-w-none prose-headings:font-heading prose-headings:text-neutral-900 prose-p:leading-8 prose-p:text-neutral-700 prose-a:text-primary hover:prose-a:text-primary-dark prose-strong:text-accent-kraft prose-img:my-8 prose-img:rounded-[22px]"
+            className="prose max-w-none prose-headings:font-heading prose-headings:text-theme-primary prose-p:leading-8 prose-p:text-theme-secondary prose-a:text-primary hover:prose-a:text-primary-dark prose-strong:text-accent-kraft prose-img:my-8 prose-img:rounded-[22px]"
             dangerouslySetInnerHTML={{ __html: articleHtml }}
           />
 
@@ -404,28 +400,28 @@ export default async function PostDetailPage({
           />
 
           {recommendedProducts.length >= 2 && (
-            <section className="mt-10 border-t border-warm-border pt-8" aria-labelledby="post-product-suggestions">
+            <section className="mt-10 border-t border-theme-border pt-8" aria-labelledby="post-product-suggestions">
               <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-primary">
                 Gợi ý từ Mushroomie
               </p>
-              <h2 id="post-product-suggestions" className="mt-2 font-heading text-2xl text-neutral-900">
+              <h2 id="post-product-suggestions" className="mt-2 font-heading text-2xl text-theme-primary">
                 Sản phẩm hợp với chủ đề này
               </h2>
-              <p className="mt-2 text-sm leading-6 text-neutral-600">
+              <p className="mt-2 text-sm leading-6 text-theme-secondary">
                 Hai thiết kế được chọn theo nội dung bạn đang đọc, ưu tiên sản phẩm còn hàng và cùng nhóm phụ kiện.
               </p>
 
-              <ul className="mt-5 divide-y divide-warm-border border-y border-warm-border">
+              <ul className="mt-5 divide-y divide-theme-border border-y border-theme-border">
                 {recommendedProducts.map((product) => (
                   <li key={product.id}>
                     <Link
                       href={`/san-pham/${product.slug}`}
-                      className="group flex min-h-16 items-center justify-between gap-4 py-4 text-neutral-900 transition-colors hover:text-primary"
+                      className="group flex min-h-16 items-center justify-between gap-4 py-4 text-theme-primary transition-colors hover:text-primary"
                     >
                       <span>
                         <span className="block font-semibold">{product.name}</span>
                         {product.category?.name && (
-                          <span className="mt-1 block text-xs text-neutral-500">
+                          <span className="mt-1 block text-xs text-theme-muted">
                             {product.category.name}
                           </span>
                         )}
@@ -455,13 +451,13 @@ export default async function PostDetailPage({
               <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-primary">
                 Đọc thêm
               </p>
-              <h2 className="mt-2 font-heading text-2xl text-neutral-900 md:text-3xl">
+              <h2 className="mt-2 font-heading text-2xl text-theme-primary md:text-3xl">
                 {post.category ? 'Bài viết cùng chủ đề' : 'Bài viết liên quan'}
               </h2>
             </div>
             <Link
               href="/tin-tuc"
-              className="rounded-full border border-warm-border bg-white px-4 py-2 text-sm font-semibold text-neutral-700 transition-colors hover:border-primary hover:text-primary"
+              className="theme-transition rounded-full border border-theme-border bg-theme-card px-4 py-2 text-sm font-semibold text-theme-secondary hover:border-primary hover:text-primary"
             >
               Xem tất cả bài viết
             </Link>

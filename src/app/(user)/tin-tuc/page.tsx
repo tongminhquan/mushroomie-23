@@ -106,7 +106,7 @@ export default async function BlogPage({
     `rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
       active
         ? 'border-primary bg-primary text-white'
-        : 'border-warm-border bg-white text-neutral-600 hover:border-primary hover:text-primary'
+        : 'border-theme-border bg-theme-card text-theme-secondary hover:border-primary hover:text-primary'
     }`
 
   const buildUrl = (params: Partial<Record<'category' | 'page', string | undefined>>) => {
@@ -126,14 +126,8 @@ export default async function BlogPage({
   }
 
   return (
-    <div className="min-h-screen bg-secondary pb-16">
-      <section
-        className="relative overflow-hidden border-b border-warm-border"
-        style={{
-          background:
-            'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))',
-        }}
-      >
+    <div className="min-h-screen bg-theme-page pb-16">
+      <section className="relative overflow-hidden border-b border-theme-border bg-theme-section">
         <BrandContainer className="py-5 md:py-7">
           <Breadcrumb items={[{ label: 'Tin tức' }]} />
 
@@ -144,19 +138,19 @@ export default async function BlogPage({
             />
             <span
               aria-hidden
-              className="pointer-events-none absolute right-[10%] top-[18%] h-4 w-4 rounded-full bg-[#ffd6d6]"
+              className="pointer-events-none absolute right-[10%] top-[18%] h-4 w-4 rounded-full bg-primary/15"
             />
-            <span className="mb-3 inline-flex rounded-full border border-white/70 bg-white/80 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-primary shadow-sm">
+            <span className="mb-3 inline-flex rounded-full border border-theme-border bg-theme-card px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-primary shadow-sm">
               Blog &amp; câu chuyện thương hiệu
             </span>
-            <h1 className="font-heading text-3xl leading-tight text-neutral-900 md:text-5xl">
+            <h1 className="font-heading text-3xl leading-tight text-theme-primary md:text-5xl">
               {title}
             </h1>
-            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-neutral-600 md:text-base">
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-theme-secondary md:text-base">
               {description}
             </p>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
-              <span className="rounded-full border border-warm-border bg-white px-4 py-2 text-sm font-semibold text-neutral-700">
+              <span className="rounded-full border border-theme-border bg-theme-card px-4 py-2 text-sm font-semibold text-theme-secondary">
                 {total} bài viết đã xuất bản
               </span>
               {activeCategory && (
@@ -223,7 +217,7 @@ export default async function BlogPage({
                 className={`grid h-10 w-10 place-items-center rounded-full border text-sm font-bold transition-colors ${
                   pageNumber === page
                     ? 'border-primary bg-primary text-white'
-                    : 'border-warm-border bg-white text-neutral-600 hover:border-primary hover:text-primary'
+                    : 'border-theme-border bg-theme-card text-theme-secondary hover:border-primary hover:text-primary'
                 }`}
               >
                 {pageNumber}

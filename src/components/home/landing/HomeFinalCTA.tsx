@@ -4,7 +4,7 @@ import BrandContainer from '@/components/ui/BrandContainer'
 
 export default function HomeFinalCTA() {
   return (
-    <section className="relative overflow-hidden bg-secondary py-20 md:py-28">
+    <section className="relative overflow-hidden bg-theme-page py-20 text-theme-primary md:py-28">
       {/* soft decorative hearts */}
       <span aria-hidden className="animate-float-soft pointer-events-none absolute left-[8%] top-10 text-3xl opacity-60 select-none">❤</span>
       <span aria-hidden className="animate-float-soft pointer-events-none absolute right-[10%] bottom-10 text-2xl opacity-50 delay-500 select-none">✨</span>
@@ -12,10 +12,10 @@ export default function HomeFinalCTA() {
       <BrandContainer>
         <div className="mx-auto max-w-2xl text-center">
           <p className="mb-4 text-xs font-extrabold uppercase tracking-widest text-primary">Món riêng của bạn</p>
-          <h2 className="mb-5 font-heading text-3xl leading-tight text-text sm:text-4xl md:text-5xl">
+          <h2 className="mb-5 font-heading text-3xl leading-tight text-theme-primary sm:text-4xl md:text-5xl">
             Tạo món phụ kiện của riêng bạn ngay hôm nay
           </h2>
-          <p className="mb-9 text-sm leading-7 text-neutral-600 md:text-base">
+          <p className="mb-9 text-sm leading-7 text-theme-secondary md:text-base">
             Làm bằng tay, trao bằng tim — mỗi món là một câu chuyện chỉ thuộc về bạn.
           </p>
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">

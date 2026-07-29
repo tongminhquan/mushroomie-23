@@ -37,16 +37,16 @@ export default function FloatingWidgets() {
           role="region"
           aria-label="Các kênh liên hệ Mushroomie"
           data-drawer-state={panel.state}
-          className="m-modal absolute bottom-14 right-0 w-52 max-w-[calc(100vw-2rem)] origin-bottom-right rounded-[18px] border border-neutral-200 bg-white p-2 shadow-strong"
+          className="m-modal absolute bottom-14 right-0 w-52 max-w-[calc(100vw-2rem)] origin-bottom-right rounded-[18px] border border-theme-border bg-theme-card p-2 shadow-strong"
         >
-          <p className="px-3 pb-2 pt-1 text-[10px] font-extrabold uppercase tracking-[0.08em] text-neutral-400">Kết nối với Mushroomie</p>
+          <p className="px-3 pb-2 pt-1 text-[10px] font-extrabold uppercase tracking-[0.08em] text-theme-muted">Kết nối với Mushroomie</p>
           {channels.map((channel) => (
             <a
               key={channel.name}
               href={channel.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="m-press flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-text hover:bg-neutral-100"
+              className="m-press flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-theme-primary hover:bg-theme-subtle"
             >
               <span className={`grid h-7 w-7 place-items-center rounded-lg text-[10px] font-black uppercase text-white ${channel.color}`}>{channel.short}</span>
               {channel.name}
