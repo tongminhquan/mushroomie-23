@@ -24,4 +24,17 @@ describe('sitewide dark-mode contract', () => {
     expect(bootstrap).toContain('strategy="beforeInteractive"')
     expect(bootstrap).toContain('buildThemeBootstrapScript')
   })
+
+  it('defines semantic light and dark tokens with scoped transition behavior', () => {
+    const css = read('src/app/globals.css')
+    expect(css).toContain('--color-theme-page: var(--surface-page)')
+    expect(css).toContain(':root,')
+    expect(css).toContain('html[data-theme="light"]')
+    expect(css).toContain('html[data-theme="dark"]')
+    expect(css).toContain('--surface-page: #171313')
+    expect(css).toContain('.theme-transition')
+    expect(css).toContain('transition-property: all')
+    expect(css).not.toContain('.theme-transition *')
+    expect(css).toContain('prefers-reduced-motion: reduce')
+  })
 })
