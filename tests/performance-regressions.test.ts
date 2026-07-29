@@ -9,6 +9,10 @@ const homeCustomCtaSource = readFileSync(
   resolve(process.cwd(), 'src', 'components', 'home', 'landing', 'HomeCustomCTA.tsx'),
   'utf8',
 )
+const homeBannerImageSource = readFileSync(
+  resolve(process.cwd(), 'src', 'components', 'home', 'landing', 'HomeBannerImage.tsx'),
+  'utf8',
+)
 const productCardSource = readFileSync(
   resolve(process.cwd(), 'src', 'components', 'product', 'ProductCard.tsx'),
   'utf8',
@@ -36,6 +40,12 @@ test('native date formatting preserves the public Vietnamese date format', () =>
 
 test('static homepage CTA stays a Server Component', () => {
   assert.doesNotMatch(homeCustomCtaSource, /['"]use client['"]/)
+})
+
+test('homepage hero does not inject image preloads while its route is prefetched', () => {
+  assert.doesNotMatch(homeBannerImageSource, /<link\s+rel=["']preload["']/)
+  assert.match(homeBannerImageSource, /loading=\{priority \? ['"]eager['"] : ['"]lazy['"]\}/)
+  assert.match(homeBannerImageSource, /fetchPriority=\{priority \? ['"]high['"] : ['"]low['"]\}/)
 })
 
 test('interactive product cards do not pull tailwind-merge through presentational wrappers', () => {

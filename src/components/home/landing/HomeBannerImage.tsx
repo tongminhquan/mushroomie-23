@@ -22,12 +22,6 @@ export default function HomeBannerImage({
 
   return (
     <picture>
-      {priority && (
-        <>
-          <link rel="preload" as="image" href={mobileSrc} media="(max-width: 640px)" fetchPriority="high" />
-          <link rel="preload" as="image" href={desktopSrc} media="(min-width: 641px)" fetchPriority="high" />
-        </>
-      )}
       {supportsVariants && <source media="(max-width: 640px)" srcSet={mobileSrc} />}
       <img
         src={desktopSrc}
