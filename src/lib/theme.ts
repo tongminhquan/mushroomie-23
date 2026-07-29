@@ -5,7 +5,7 @@ export const THEME_COOKIE_MAX_AGE = 60 * 60 * 24 * 400
 export const THEME_CHANGE_EVENT = 'mushroomie:theme-change'
 export const THEME_META_COLORS: Record<Theme, string> = {
   light: '#fff7f2',
-  dark: '#171313',
+  dark: '#000000',
 }
 
 export function isTheme(value: unknown): value is Theme {

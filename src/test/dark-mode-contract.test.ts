@@ -65,11 +65,30 @@ describe('sitewide dark-mode contract', () => {
 
   it('defines semantic light and dark tokens with scoped transition behavior', () => {
     const css = read('src/app/globals.css')
+    const theme = read('src/lib/theme.ts')
     expect(css).toContain('--color-theme-page: var(--surface-page)')
     expect(css).toContain(':root,')
     expect(css).toContain('html[data-theme="light"]')
     expect(css).toContain('html[data-theme="dark"]')
-    expect(css).toContain('--surface-page: #171313')
+    const darkTheme = css.slice(
+      css.indexOf('html[data-theme="dark"]'),
+      css.indexOf('/* Keep light-mode game text readable'),
+    )
+    for (const token of [
+      '--surface-page: #000000',
+      '--surface-section: #050505',
+      '--surface-card: #0a0a0a',
+      '--surface-elevated: #111111',
+      '--surface-muted: #171717',
+      '--surface-input: #0a0a0a',
+      '--text-primary-theme: #fafafa',
+      '--text-secondary-theme: #d4d4d4',
+      '--text-muted-theme: #a3a3a3',
+    ]) {
+      expect(darkTheme).toContain(token)
+    }
+    expect(darkTheme).not.toContain('#171313')
+    expect(theme).toContain("dark: '#000000'")
     expect(css).toContain('.theme-transition')
     expect(css).toContain('transition-property: all')
     expect(css).not.toContain('.theme-transition *')
