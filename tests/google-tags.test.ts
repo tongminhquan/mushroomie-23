@@ -45,7 +45,38 @@ test('content security policy allows Google Ads measurement endpoints', async ()
   }
 })
 
-test('content security policy blocks the redundant Cloudflare Browser Insights beacon', async () => {
+test('content security policy allows GA4 collection endpoints', async () => {
+  assert.equal(typeof nextConfig.headers, 'function')
+
+  const headers = await nextConfig.headers!()
+  const globalHeaders = headers.find((entry) => entry.source === '/(.*)')
+  const policy = globalHeaders?.headers.find((header) => header.key === 'Content-Security-Policy')?.value
+  const connectSource = policy
+    ?.split(';')
+    .map((value) => value.trim())
+    .find((value) => value.startsWith('connect-src '))
+
+  assert.ok(connectSource)
+  for (const origin of [
+    'https://analytics.google.com',
+    'https://stats.g.doubleclick.net',
+  ]) {
+    assert.match(connectSource, new RegExp(origin.replaceAll('.', '\\.')))
+  }
+})
+
+test('permissions policy omits unsupported browsing topics directive', async () => {
+  assert.equal(typeof nextConfig.headers, 'function')
+
+  const headers = await nextConfig.headers!()
+  const globalHeaders = headers.find((entry) => entry.source === '/(.*)')
+  const policy = globalHeaders?.headers.find((header) => header.key === 'Permissions-Policy')?.value
+
+  assert.ok(policy)
+  assert.doesNotMatch(policy, /(?:^|,\s*)browsing-topics=/)
+})
+
+test('content security policy allows the Cloudflare Browser Insights endpoints', async () => {
   assert.equal(typeof nextConfig.headers, 'function')
 
   const headers = await nextConfig.headers!()
@@ -53,5 +84,17 @@ test('content security policy blocks the redundant Cloudflare Browser Insights b
   const policy = globalHeaders?.headers.find((header) => header.key === 'Content-Security-Policy')?.value
 
   assert.ok(policy)
-  assert.doesNotMatch(policy, /cloudflareinsights\.com/)
+  for (const [directive, origin] of [
+    ['script-src', 'https://static.cloudflareinsights.com'],
+    ['script-src-elem', 'https://static.cloudflareinsights.com'],
+    ['connect-src', 'https://cloudflareinsights.com'],
+  ] as const) {
+    const directiveValue = policy
+      .split(';')
+      .map((value) => value.trim())
+      .find((value) => value.startsWith(`${directive} `))
+
+    assert.ok(directiveValue, `${directive} is missing`)
+    assert.match(directiveValue, new RegExp(origin.replaceAll('.', '\\.')))
+  }
 })

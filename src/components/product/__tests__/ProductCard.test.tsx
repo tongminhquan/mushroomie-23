@@ -8,6 +8,18 @@ import { useVoucherStore } from '@/store/voucher'
 const sessionMock = vi.hoisted(() => vi.fn())
 
 vi.mock('next-auth/react', () => ({ useSession: sessionMock }))
+vi.mock('next/link', async () => {
+  const React = await import('react')
+  return {
+    default: (props: Record<string, unknown>) => {
+      const { prefetch, ...linkProps } = props
+      return React.createElement('a', {
+        ...linkProps,
+        'data-prefetch': String(prefetch),
+      })
+    },
+  }
+})
 vi.mock('next/image', async () => {
   const React = await import('react')
   return {
@@ -48,7 +60,11 @@ describe('ProductCard', () => {
 
     expect(frame).toHaveClass('aspect-[3/4]')
     expect(frame).toHaveAttribute('href', '/san-pham/vong-tay-nam')
-    expect(screen.getAllByRole('link').filter((link) => link.getAttribute('href') === '/san-pham/vong-tay-nam')).toHaveLength(2)
+    const productLinks = screen.getAllByRole('link').filter((link) => link.getAttribute('href') === '/san-pham/vong-tay-nam')
+    expect(productLinks).toHaveLength(2)
+    for (const link of productLinks) {
+      expect(link).toHaveAttribute('data-prefetch', 'false')
+    }
     expect(container).toHaveTextContent('Vòng tay')
     expect(screen.getByText('Xem nhanh')).toBeInTheDocument()
     expect(screen.getByText(/100\.000/)).toBeInTheDocument()

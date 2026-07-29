@@ -131,7 +131,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   // box-shadow buộc trình duyệt repaint mỗi khung hình và gây giật trên mobile.
   return (
     <article className="m-card m-glow group relative flex h-full flex-col overflow-hidden rounded-[24px] border-[1.5px] border-warm-border bg-white transition-colors duration-200 hover:border-pink">
-      <Link href={`/san-pham/${product.slug}`} onClick={handleSelectItem} className="m-card-media relative block aspect-[3/4] w-full shrink-0 overflow-hidden bg-secondary">
+      <Link href={`/san-pham/${product.slug}`} prefetch={false} onClick={handleSelectItem} className="m-card-media relative block aspect-[3/4] w-full shrink-0 overflow-hidden bg-secondary">
         <SafeImage
           src={imageUrl}
           alt={product.name}
@@ -176,7 +176,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.category.name}
           </p>
         )}
-        <Link href={`/san-pham/${product.slug}`} onClick={handleSelectItem} className="mb-3 block flex-1">
+        <Link href={`/san-pham/${product.slug}`} prefetch={false} onClick={handleSelectItem} className="mb-3 block flex-1">
           <h3 className="line-clamp-2 text-sm font-extrabold leading-snug text-text transition-colors group-hover:text-primary sm:text-[15px]">
             {product.name}
           </h3>
