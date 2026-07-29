@@ -83,4 +83,3 @@ Improve three related interface problems without changing commerce, authenticati
 - Push the verified commit to `main`.
 - Deploy with `deploy.sh`.
 - Verify PM2, health/database status, primary routes, and static CSS/JS MIME types.
-
