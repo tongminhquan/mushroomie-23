@@ -27,7 +27,7 @@
   --color-coral: #ff6b6b;
   --color-yellow: #ffe7a3;
   --color-kraft: #6f4528;
-  --color-text: #2b2b2b;
+  --color-text: var(--text-primary-theme);
 
   /* Accents */
   --color-accent-peach: #ffd6d6; /* Hồng nhạt */
@@ -42,7 +42,9 @@
   --color-neutral-300: #d3c7bf;
   --color-neutral-400: #746d68;
   --color-neutral-500: #66615d;
+  --color-neutral-600: #5f5955;
   --color-neutral-700: #4a4542;
+  --color-neutral-800: #36312e;
   --color-neutral-900: #2b2b2b;  /* Đen mềm */
 
   /* Typography */
@@ -106,6 +108,7 @@ html[data-theme="light"] {
   --game-positive: #16813a;
   --game-warning: #9a6a00;
   --game-overlay: rgb(255 247 242 / 0.92);
+  --wordpress-automation-hero: linear-gradient(135deg, #fff 0%, #fff7f2 58%, #ffd6d6 100%);
 }
 
 html[data-theme="dark"] {
@@ -132,6 +135,7 @@ html[data-theme="dark"] {
   --game-positive: #39e75f;
   --game-warning: #ffe14d;
   --game-overlay: rgb(7 7 17 / 0.92);
+  --wordpress-automation-hero: linear-gradient(135deg, #0a0a0a 0%, #111111 58%, #2b0b0b 100%);
   --color-admin-bg: #000000;
   --color-warm-border: #262626;
   --color-secondary: #000000;
@@ -141,7 +145,9 @@ html[data-theme="dark"] {
   --color-neutral-300: #404040;
   --color-neutral-400: #a3a3a3;
   --color-neutral-500: #a3a3a3;
+  --color-neutral-600: #b8b8b8;
   --color-neutral-700: #d4d4d4;
+  --color-neutral-800: #e5e5e5;
   --color-neutral-900: #fafafa;
   --color-primary-light: #2b0b0b;
   --shadow-card: var(--shadow-card-theme);
@@ -883,6 +889,20 @@ html[data-theme="dark"] .admin-theme-scope :is(
   [class~="text-neutral-700"]
 ) {
   color: var(--text-secondary-theme);
+}
+
+html[data-theme="dark"] .admin-theme-scope :is(
+  [class~="text-neutral-400"],
+  [class~="text-neutral-500"]
+) {
+  color: var(--text-muted-theme);
+}
+
+html[data-theme="dark"] .admin-theme-scope :is(
+  [class~="text-neutral-800"],
+  [class~="text-neutral-900"]
+) {
+  color: var(--text-primary-theme);
 }
 
 /* Only apply transitions to interactive elements, not all elements */

@@ -72,7 +72,7 @@ export default async function AdminDashboard() {
               {qa.emoji}
             </span>
             <span className="min-w-0">
-              <span className="block truncate text-sm font-bold text-[#2b2b2b]">{qa.label}</span>
+              <span className="block truncate text-sm font-bold text-theme-primary">{qa.label}</span>
               <span className="block truncate text-[11px] text-neutral-500">{qa.hint}</span>
             </span>
           </Link>

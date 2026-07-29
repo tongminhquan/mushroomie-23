@@ -139,19 +139,19 @@ export default function WordPressAutoPosterClient() {
   const isConfigured = Boolean(config?.configured)
 
   return (
-    <div className="min-h-screen bg-[#fff7f2] px-4 py-6 text-[#1d2327] md:px-6">
+    <div className="min-h-screen bg-theme-page px-4 py-6 text-theme-primary md:px-6">
       <div className="mx-auto max-w-[1480px] space-y-6">
         <section className="overflow-hidden rounded-lg border border-[#ead8cd] bg-white shadow-[0_18px_48px_rgba(91,48,35,0.10)]">
           <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="border-b border-[#f0dfd4] bg-[linear-gradient(135deg,#fff_0%,#fff7f2_58%,#ffd6d6_100%)] p-6 lg:border-b-0 lg:border-r">
+            <div className="border-b border-[#f0dfd4] bg-[var(--wordpress-automation-hero)] p-6 lg:border-b-0 lg:border-r">
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-white/80 px-3 py-1 text-xs font-extrabold uppercase tracking-[0.14em] text-primary">
                 <Sparkles size={14} />
                 WordPress automation
               </div>
-              <h1 className="mt-4 text-3xl font-bold leading-tight text-[#1d2327] md:text-4xl">
+              <h1 className="mt-4 text-3xl font-bold leading-tight text-theme-primary md:text-4xl">
                 Đăng bài tự động từ Excel và ZIP ảnh
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-[#50575e]">
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-theme-secondary">
                 Import bài SEO, ghép ảnh theo mã bài, kiểm tra preview và gửi bài sang WordPress qua REST API. Thiết kế theo luồng thao tác rõ ràng để hạn chế đăng nhầm.
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
@@ -200,7 +200,7 @@ export default function WordPressAutoPosterClient() {
               <button
                 type="button"
                 onClick={() => submit('test')}
-                className="inline-flex h-11 w-fit items-center justify-center gap-2 rounded-[4px] bg-white px-4 text-sm font-bold text-[#1d2327] transition hover:bg-[#ffe7a3] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-11 w-fit items-center justify-center gap-2 rounded-[4px] bg-theme-card px-4 text-sm font-bold text-theme-primary transition hover:bg-[#ffe7a3] disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={busy === 'test' || !isConfigured}
               >
                 <RefreshCw size={16} className={busy === 'test' ? 'animate-spin' : ''} />
@@ -223,8 +223,8 @@ export default function WordPressAutoPosterClient() {
                   <item.icon size={20} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.08em] text-[#8c8f94]">{item.label}</p>
-                  <p className="text-2xl font-bold text-[#1d2327]">{item.value}</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.08em] text-theme-muted">{item.label}</p>
+                  <p className="text-2xl font-bold text-theme-primary">{item.value}</p>
                 </div>
               </div>
             </AdminCard>
@@ -234,14 +234,14 @@ export default function WordPressAutoPosterClient() {
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
           <AdminCard className="overflow-hidden">
             <div className="border-b border-[#ead8cd] bg-white px-5 py-4">
-              <h2 className="text-xl font-bold text-[#1d2327]">Quy trình import</h2>
-              <p className="mt-1 text-sm text-[#646970]">Làm theo thứ tự: chọn file, preview, kiểm tra, sau đó mới đăng sang WordPress.</p>
+              <h2 className="text-xl font-bold text-theme-primary">Quy trình import</h2>
+              <p className="mt-1 text-sm text-theme-secondary">Làm theo thứ tự: chọn file, preview, kiểm tra, sau đó mới đăng sang WordPress.</p>
             </div>
 
             <form ref={formRef} onSubmit={onSubmit} className="space-y-5 p-5">
               <div className="grid gap-4 lg:grid-cols-2">
-                <label className="block rounded-lg border border-[#ead8cd] bg-[#fffaf7] p-4 transition hover:border-primary/40 hover:bg-white">
-                  <span className="flex items-center gap-2 text-sm font-bold text-[#1d2327]">
+                <label className="block rounded-lg border border-[#ead8cd] bg-theme-elevated p-4 transition hover:border-primary/40 hover:bg-theme-card">
+                  <span className="flex items-center gap-2 text-sm font-bold text-theme-primary">
                     <FileSpreadsheet size={18} className="text-primary" />
                     File Excel/CSV bài viết
                   </span>
@@ -252,13 +252,13 @@ export default function WordPressAutoPosterClient() {
                     className="mt-4 block w-full rounded-[4px] border border-[#c3c4c7] bg-white px-3 py-2 text-sm file:mr-3 file:rounded-[4px] file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-bold file:text-white"
                     required
                   />
-                  <span className="mt-2 block text-xs leading-5 text-[#646970]">
+                  <span className="mt-2 block text-xs leading-5 text-theme-secondary">
                     Hỗ trợ cột title/content hoặc Tiêu đề SEO/Nội dung HTML thuần.
                   </span>
                 </label>
 
-                <label className="block rounded-lg border border-[#ead8cd] bg-[#fffaf7] p-4 transition hover:border-primary/40 hover:bg-white">
-                  <span className="flex items-center gap-2 text-sm font-bold text-[#1d2327]">
+                <label className="block rounded-lg border border-[#ead8cd] bg-theme-elevated p-4 transition hover:border-primary/40 hover:bg-theme-card">
+                  <span className="flex items-center gap-2 text-sm font-bold text-theme-primary">
                     <Archive size={18} className="text-[#b9794b]" />
                     ZIP ảnh theo mã bài
                   </span>
@@ -268,7 +268,7 @@ export default function WordPressAutoPosterClient() {
                     accept=".zip"
                     className="mt-4 block w-full rounded-[4px] border border-[#c3c4c7] bg-white px-3 py-2 text-sm file:mr-3 file:rounded-[4px] file:border-0 file:bg-[#2b2b2b] file:px-3 file:py-2 file:text-sm file:font-bold file:text-white"
                   />
-                  <span className="mt-2 block text-xs leading-5 text-[#646970]">
+                  <span className="mt-2 block text-xs leading-5 text-theme-secondary">
                     Tên ảnh dạng ma_bai_bg.jpg, ma_bai_1.jpg, ma_bai_2.webp.
                   </span>
                 </label>
@@ -276,7 +276,7 @@ export default function WordPressAutoPosterClient() {
 
               <div className="grid gap-4 md:grid-cols-3">
                 <label className="block">
-                  <span className="mb-2 block text-sm font-bold text-[#1d2327]">Trạng thái mặc định</span>
+                  <span className="mb-2 block text-sm font-bold text-theme-primary">Trạng thái mặc định</span>
                   <select name="defaultStatus" defaultValue="draft" className="h-10 w-full rounded-[4px] border border-[#8c8f94] bg-white px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary">
                     <option value="draft">Nháp</option>
                     <option value="pending">Chờ duyệt</option>
@@ -285,7 +285,7 @@ export default function WordPressAutoPosterClient() {
                 </label>
 
                 <label className="block">
-                  <span className="mb-2 block text-sm font-bold text-[#1d2327]">Ảnh nội dung tối đa/bài</span>
+                  <span className="mb-2 block text-sm font-bold text-theme-primary">Ảnh nội dung tối đa/bài</span>
                   <input
                     name="maxImagesPerPost"
                     type="number"
@@ -296,7 +296,7 @@ export default function WordPressAutoPosterClient() {
                   />
                 </label>
 
-                <label className="flex items-center gap-3 rounded-lg border border-[#ead8cd] bg-white px-4 py-3 text-sm font-semibold text-[#1d2327]">
+                <label className="flex items-center gap-3 rounded-lg border border-[#ead8cd] bg-theme-card px-4 py-3 text-sm font-semibold text-theme-primary">
                   <input name="updateDuplicates" type="checkbox" value="true" defaultChecked className="h-4 w-4 accent-primary" />
                   Cập nhật bài trùng slug/tiêu đề
                 </label>
@@ -306,7 +306,7 @@ export default function WordPressAutoPosterClient() {
                 <button
                   type="submit"
                   disabled={busy !== null}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-[4px] border border-primary bg-white px-5 text-sm font-bold text-primary transition hover:bg-[#fff7f2] disabled:opacity-60"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-[4px] border border-primary bg-theme-card px-5 text-sm font-bold text-primary transition hover:bg-theme-subtle disabled:opacity-60"
                 >
                   <Upload size={18} />
                   {busy === 'preview' ? 'Đang đọc file...' : 'Preview import'}
@@ -328,7 +328,7 @@ export default function WordPressAutoPosterClient() {
             <AdminCard className="p-5">
               <div className="flex items-center gap-2">
                 <Wand2 size={20} className="text-primary" />
-                <h2 className="text-lg font-bold text-[#1d2327]">Các bước xử lý</h2>
+                <h2 className="text-lg font-bold text-theme-primary">Các bước xử lý</h2>
               </div>
               <div className="mt-4 space-y-3">
                 {[
@@ -337,9 +337,9 @@ export default function WordPressAutoPosterClient() {
                   'Preview toàn bộ bài trước khi gửi thật.',
                   'Gửi bài và Rank Math meta sang WordPress.',
                 ].map((step, index) => (
-                  <div key={step} className="flex gap-3 rounded-lg border border-[#ead8cd] bg-[#fffaf7] p-3">
+                  <div key={step} className="flex gap-3 rounded-lg border border-[#ead8cd] bg-theme-elevated p-3">
                     <span className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-white">{index + 1}</span>
-                    <p className="text-sm leading-6 text-[#50575e]">{step}</p>
+                    <p className="text-sm leading-6 text-theme-secondary">{step}</p>
                   </div>
                 ))}
               </div>
@@ -348,9 +348,9 @@ export default function WordPressAutoPosterClient() {
             <AdminCard className="p-5">
               <div className="flex items-center gap-2">
                 <ListChecks size={20} className="text-[#b9794b]" />
-                <h2 className="text-lg font-bold text-[#1d2327]">Plugin Rank Math</h2>
+                <h2 className="text-lg font-bold text-theme-primary">Plugin Rank Math</h2>
               </div>
-              <div className="mt-3 space-y-2 text-sm leading-6 text-[#50575e]">
+              <div className="mt-3 space-y-2 text-sm leading-6 text-theme-secondary">
                 <div>1. Cài plugin wordpress-auto-poster-rank-math-rest-meta.zip trên WordPress.</div>
                 <div>2. Kích hoạt plugin.</div>
                 <div>3. Import lại nếu SEO title/meta/focus keyword chưa vào Rank Math.</div>
@@ -369,7 +369,7 @@ WORDPRESS_USERNAME=admin-user
 WORDPRESS_APPLICATION_PASSWORD=xxxx xxxx xxxx xxxx`}
                 </pre>
                 {config?.missing?.length ? (
-                  <div className="mt-3 text-sm text-[#646970]">Đang thiếu: {config.missing.join(', ')}</div>
+                  <div className="mt-3 text-sm text-theme-secondary">Đang thiếu: {config.missing.join(', ')}</div>
                 ) : null}
               </AdminCard>
             )}
@@ -387,8 +387,8 @@ WORDPRESS_APPLICATION_PASSWORD=xxxx xxxx xxxx xxxx`}
           <AdminCard className="overflow-hidden">
             <div className="flex flex-col gap-3 border-b border-[#ead8cd] bg-white px-5 py-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className="text-xl font-bold text-[#1d2327]">Preview import</h2>
-                <p className="mt-1 text-sm text-[#646970]">
+                <h2 className="text-xl font-bold text-theme-primary">Preview import</h2>
+                <p className="mt-1 text-sm text-theme-secondary">
                   {preview.posts.length} bài, {preview.extractedImages} ảnh khớp mã bài, {preview.orphanImages.length} ảnh không khớp.
                 </p>
               </div>
@@ -398,7 +398,7 @@ WORDPRESS_APPLICATION_PASSWORD=xxxx xxxx xxxx xxxx`}
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[920px] text-sm">
-                <thead className="border-b border-[#dcdcde] bg-[#f6f7f7] text-left text-[11px] font-bold uppercase tracking-[0.06em] text-[#646970]">
+                <thead className="border-b border-[#dcdcde] bg-theme-subtle text-left text-[11px] font-bold uppercase tracking-[0.06em] text-theme-secondary">
                   <tr>
                     <th className="px-4 py-3">Dòng</th>
                     <th className="px-4 py-3">Tiêu đề</th>
@@ -410,14 +410,14 @@ WORDPRESS_APPLICATION_PASSWORD=xxxx xxxx xxxx xxxx`}
                 </thead>
                 <tbody className="m-admin-rows divide-y divide-[#f0f0f1]">
                   {preview.posts.map((post) => (
-                    <tr key={`${post.rowNumber}-${post.title}`} className="hover:bg-[#fff7f2]">
-                      <td className="px-4 py-3 text-[#646970]">{post.rowNumber}</td>
+                    <tr key={`${post.rowNumber}-${post.title}`} className="hover:bg-theme-subtle">
+                      <td className="px-4 py-3 text-theme-secondary">{post.rowNumber}</td>
                       <td className="px-4 py-3">
-                        <div className="font-semibold text-[#1d2327]">{post.title}</div>
-                        <div className="mt-1 text-xs text-[#646970]">{post.maBai || 'Không có mã bài'}</div>
+                        <div className="font-semibold text-theme-primary">{post.title}</div>
+                        <div className="mt-1 text-xs text-theme-secondary">{post.maBai || 'Không có mã bài'}</div>
                       </td>
                       <td className="px-4 py-3 font-mono text-xs text-[#b9794b]">{post.slug || 'Tự sinh bởi WordPress'}</td>
-                      <td className="px-4 py-3 text-xs text-[#50575e]">
+                      <td className="px-4 py-3 text-xs text-theme-secondary">
                         <div>{post.seoTitle || post.title}</div>
                         <div className="mt-1 line-clamp-1">{post.focusKeywords.join(', ') || 'Chưa có keyword'}</div>
                       </td>
@@ -442,15 +442,15 @@ WORDPRESS_APPLICATION_PASSWORD=xxxx xxxx xxxx xxxx`}
           <AdminCard className="overflow-hidden">
             <div className="flex flex-col gap-3 border-b border-[#ead8cd] bg-white px-5 py-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className="text-xl font-bold text-[#1d2327]">Kết quả đăng WordPress</h2>
-                <p className="mt-1 text-sm text-[#646970]">
+                <h2 className="text-xl font-bold text-theme-primary">Kết quả đăng WordPress</h2>
+                <p className="mt-1 text-sm text-theme-secondary">
                   Thành công {successCount}, lỗi {failedCount}, bỏ qua {skippedCount}.
                 </p>
               </div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[920px] text-sm">
-                <thead className="border-b border-[#dcdcde] bg-[#f6f7f7] text-left text-[11px] font-bold uppercase tracking-[0.06em] text-[#646970]">
+                <thead className="border-b border-[#dcdcde] bg-theme-subtle text-left text-[11px] font-bold uppercase tracking-[0.06em] text-theme-secondary">
                   <tr>
                     <th className="px-4 py-3">Dòng</th>
                     <th className="px-4 py-3">Tiêu đề</th>
@@ -461,9 +461,9 @@ WORDPRESS_APPLICATION_PASSWORD=xxxx xxxx xxxx xxxx`}
                 </thead>
                 <tbody className="divide-y divide-[#f0f0f1]">
                   {publish.results.map((result) => (
-                    <tr key={`${result.rowNumber}-${result.title}`} className="hover:bg-[#fff7f2]">
-                      <td className="px-4 py-3 text-[#646970]">{result.rowNumber}</td>
-                      <td className="px-4 py-3 font-semibold text-[#1d2327]">{result.title}</td>
+                    <tr key={`${result.rowNumber}-${result.title}`} className="hover:bg-theme-subtle">
+                      <td className="px-4 py-3 text-theme-secondary">{result.rowNumber}</td>
+                      <td className="px-4 py-3 font-semibold text-theme-primary">{result.title}</td>
                       <td className="px-4 py-3">
                         <AdminStatusBadge tone={result.status === 'success' ? 'success' : result.status === 'skipped' ? 'warning' : 'danger'}>
                           {result.action || result.status}
@@ -476,10 +476,10 @@ WORDPRESS_APPLICATION_PASSWORD=xxxx xxxx xxxx xxxx`}
                             Mở bài
                           </a>
                         ) : (
-                          <span className="text-[#646970]">Không có link</span>
+                          <span className="text-theme-secondary">Không có link</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm text-[#50575e]">{result.error || `ID ${result.wordpressId || ''}`}</td>
+                      <td className="px-4 py-3 text-sm text-theme-secondary">{result.error || `ID ${result.wordpressId || ''}`}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -489,11 +489,11 @@ WORDPRESS_APPLICATION_PASSWORD=xxxx xxxx xxxx xxxx`}
         )}
 
         <AdminCard className="p-5">
-          <div className="mb-3 flex items-center gap-2 text-lg font-bold text-[#1d2327]">
+          <div className="mb-3 flex items-center gap-2 text-lg font-bold text-theme-primary">
             <FileText size={20} />
             Cột hỗ trợ từ app gốc
           </div>
-          <div className="grid gap-3 text-sm leading-6 text-[#50575e] md:grid-cols-2">
+          <div className="grid gap-3 text-sm leading-6 text-theme-secondary md:grid-cols-2">
             <div>Tiêu đề SEO hoặc title dùng cho tiêu đề WordPress và Rank Math title.</div>
             <div>Nội dung HTML thuần hoặc content dùng cho nội dung bài viết.</div>
             <div>Mô tả Meta SEO dùng cho excerpt và Rank Math description.</div>

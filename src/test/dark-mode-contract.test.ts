@@ -4,6 +4,28 @@ import { describe, expect, it } from 'vitest'
 
 const root = process.cwd()
 const read = (file: string) => fs.readFileSync(path.join(root, file), 'utf8')
+const readHexToken = (css: string, token: string) => {
+  const value = css.match(new RegExp(`${token}:\\s*(#[0-9a-fA-F]{6})`))?.[1]
+  if (!value) throw new Error(`Missing hex token: ${token}`)
+  return value
+}
+const relativeLuminance = (hex: string) => {
+  const channels = hex
+    .slice(1)
+    .match(/.{2}/g)
+    ?.map((value) => Number.parseInt(value, 16) / 255)
+    .map((value) => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+
+  if (!channels || channels.length !== 3) throw new Error(`Invalid color: ${hex}`)
+  return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722
+}
+const contrastRatio = (foreground: string, background: string) => {
+  const foregroundLuminance = relativeLuminance(foreground)
+  const backgroundLuminance = relativeLuminance(background)
+  const lighter = Math.max(foregroundLuminance, backgroundLuminance)
+  const darker = Math.min(foregroundLuminance, backgroundLuminance)
+  return (lighter + 0.05) / (darker + 0.05)
+}
 const publicThemeFiles = [
   'src/components/cart/CartDrawer.tsx',
   'src/components/layout/PolicyLayout.tsx',
@@ -93,6 +115,94 @@ describe('sitewide dark-mode contract', () => {
     expect(css).toContain('transition-property: all')
     expect(css).not.toContain('.theme-transition *')
     expect(css).toContain('prefers-reduced-motion: reduce')
+  })
+
+  it('keeps legacy text aliases theme-aware instead of pinning dark ink in dark mode', () => {
+    const css = read('src/app/globals.css')
+    const darkTheme = css.slice(
+      css.indexOf('html[data-theme="dark"]'),
+      css.indexOf('/* Keep light-mode game text readable'),
+    )
+
+    expect(css).toContain('--color-text: var(--text-primary-theme)')
+    expect(darkTheme).toContain('--color-neutral-600: #b8b8b8')
+    expect(darkTheme).toContain('--color-neutral-800: #e5e5e5')
+  })
+
+  it('keeps all semantic dark text tiers above WCAG AA on page and card surfaces', () => {
+    const css = read('src/app/globals.css')
+    const darkTheme = css.slice(
+      css.indexOf('html[data-theme="dark"]'),
+      css.indexOf('/* Keep light-mode game text readable'),
+    )
+    const backgrounds = [
+      readHexToken(darkTheme, '--surface-page'),
+      readHexToken(darkTheme, '--surface-card'),
+    ]
+    const foregrounds = [
+      readHexToken(darkTheme, '--text-primary-theme'),
+      readHexToken(darkTheme, '--text-secondary-theme'),
+      readHexToken(darkTheme, '--text-muted-theme'),
+    ]
+
+    foregrounds.forEach((foreground) => {
+      backgrounds.forEach((background) => {
+        expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(4.5)
+      })
+    })
+  })
+
+  it('uses semantic heading text on the public voucher landing page', () => {
+    const page = read('src/app/(user)/voucher/page.tsx')
+
+    expect(page).not.toContain('text-text')
+    expect(page).toContain('text-theme-primary')
+    expect(page).toContain('text-theme-secondary')
+  })
+
+  it('does not pin admin quick-action labels to a light-theme text color', () => {
+    const adminPage = read('src/app/admin/page.tsx')
+
+    expect(adminPage).not.toContain('text-[#2b2b2b]')
+    expect(adminPage).toContain('text-theme-primary')
+  })
+
+  it('uses semantic text tiers throughout the WordPress import workspace', () => {
+    const wordpressPage = read('src/app/admin/wordpress/WordPressAutoPosterClient.tsx')
+
+    for (const legacyUtility of [
+      'text-[#1d2327]',
+      'text-[#50575e]',
+      'text-[#646970]',
+      'text-[#8c8f94]',
+      'bg-[#fffaf7]',
+      'bg-[#f6f7f7]',
+    ]) {
+      expect(wordpressPage).not.toContain(legacyUtility)
+    }
+    expect(wordpressPage).toContain('text-theme-primary')
+    expect(wordpressPage).toContain('text-theme-secondary')
+    expect(wordpressPage).toContain('text-theme-muted')
+    expect(wordpressPage).toContain('bg-[var(--wordpress-automation-hero)]')
+  })
+
+  it('covers every legacy admin neutral text tier in the dark compatibility layer', () => {
+    const css = read('src/app/globals.css')
+    const adminCompatibility = css.slice(
+      css.indexOf('html[data-theme="dark"] .admin-theme-scope'),
+      css.indexOf('/* Only apply transitions'),
+    )
+
+    for (const utility of [
+      'text-neutral-400',
+      'text-neutral-500',
+      'text-neutral-600',
+      'text-neutral-700',
+      'text-neutral-800',
+      'text-neutral-900',
+    ]) {
+      expect(adminCompatibility).toContain(`[class~="${utility}"]`)
+    }
   })
 
   it('places both theme controls in public navigation', () => {

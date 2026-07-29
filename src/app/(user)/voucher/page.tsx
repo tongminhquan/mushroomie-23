@@ -54,7 +54,7 @@ export default function VoucherLandingPage() {
         <span aria-hidden className="pointer-events-none absolute right-[10%] top-[20%] select-none text-xl opacity-25">🍄</span>
         <div className="brand-container py-14 text-center md:py-20">
           <span className="brand-kicker mb-3 inline-block">Ưu đãi Mushroomie</span>
-          <h1 className="font-heading text-4xl leading-tight text-text md:text-5xl">
+          <h1 className="font-heading text-4xl leading-tight text-theme-primary md:text-5xl">
             Voucher xinh từ Nhà Nấm
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-theme-secondary">
@@ -82,7 +82,7 @@ export default function VoucherLandingPage() {
         <section>
           <div className="mb-8 text-center">
             <span className="brand-kicker">Cách nhận voucher</span>
-            <h2 className="mt-2 font-heading text-2xl text-text md:text-3xl">3 bước đơn giản</h2>
+            <h2 className="mt-2 font-heading text-2xl text-theme-primary md:text-3xl">3 bước đơn giản</h2>
           </div>
           <div data-batch-reveal className="grid gap-5 md:grid-cols-3">
             {HOW_TO_STEPS.map((step, i) => (
@@ -95,7 +95,7 @@ export default function VoucherLandingPage() {
                 </div>
                 <div>
                   <p className="mb-1 text-[11px] font-extrabold uppercase tracking-[0.1em] text-theme-muted">Bước {i + 1}</p>
-                  <h3 className="font-heading text-lg text-text">{step.title}</h3>
+                  <h3 className="font-heading text-lg text-theme-primary">{step.title}</h3>
                   <p className="mt-1.5 text-sm leading-6 text-theme-secondary">{step.desc}</p>
                 </div>
               </div>
@@ -108,7 +108,7 @@ export default function VoucherLandingPage() {
           <div className="rounded-[22px] border border-theme-border bg-theme-card p-6 shadow-card md:p-8">
             <div className="mb-5 flex items-center gap-3">
               <Clock className="h-5 w-5 text-kraft" />
-              <h2 className="font-heading text-xl text-text">Điều kiện sử dụng</h2>
+              <h2 className="font-heading text-xl text-theme-primary">Điều kiện sử dụng</h2>
             </div>
             <ul className="space-y-3 text-sm leading-6 text-theme-secondary">
               {[
@@ -132,12 +132,12 @@ export default function VoucherLandingPage() {
         {/* FAQ */}
         <section className="mt-12">
           <div className="mb-6 text-center">
-            <h2 className="font-heading text-2xl text-text">Câu hỏi thường gặp</h2>
+            <h2 className="font-heading text-2xl text-theme-primary">Câu hỏi thường gặp</h2>
           </div>
           <div data-batch-reveal className="grid gap-4 md:grid-cols-2">
             {FAQ.map((item, i) => (
               <div key={i} className="rounded-[18px] border border-theme-border bg-theme-card p-5">
-                <p className="mb-1.5 text-sm font-extrabold text-text">{item.q}</p>
+                <p className="mb-1.5 text-sm font-extrabold text-theme-primary">{item.q}</p>
                 <p className="text-sm leading-6 text-theme-secondary">{item.a}</p>
               </div>
             ))}
@@ -146,7 +146,7 @@ export default function VoucherLandingPage() {
 
         {/* CTA bottom */}
         <section className="mt-12 rounded-[24px] border border-dashed border-theme-border-strong bg-theme-card p-8 text-center">
-          <p className="font-heading text-xl text-text">Sẵn sàng săn voucher chưa?</p>
+          <p className="font-heading text-xl text-theme-primary">Sẵn sàng săn voucher chưa?</p>
           <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-theme-secondary">
             Chơi mini game, đạt mốc điểm và nhận voucher về ví ngay. Nhanh tay trước khi hết hạn nhé 🍄
           </p>
