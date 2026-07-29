@@ -124,7 +124,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
         </div>
       </div>
 
-      <div className="theme-transition sticky top-0 border-b border-theme-border bg-theme-page/90 backdrop-blur-md">
+      <div className="theme-transition border-b border-theme-border bg-theme-page/90 backdrop-blur-md">
         <div className="brand-container flex h-[74px] items-center gap-3 md:h-[82px] md:gap-6">
           <button
             type="button"
