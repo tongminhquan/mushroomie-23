@@ -7,5 +7,9 @@ export const metadata: Metadata = {
 }
 
 export default function TetrisMiniGamePage() {
-  return <GamePageClient game="tetris" />
+  return (
+    <div className="mini-game-theme-scope">
+      <GamePageClient game="tetris" />
+    </div>
+  )
 }

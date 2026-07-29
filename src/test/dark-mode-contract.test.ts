@@ -82,6 +82,19 @@ describe('sitewide dark-mode contract', () => {
     expect(header).toContain('<ThemeToggle variant="segmented"')
   })
 
+  it('keeps both mini-game routes readable when a cached game bundle still emits legacy white text classes', () => {
+    const css = read('src/app/globals.css')
+    const tetrisPage = read('src/app/(user)/mini-game/tetris/page.tsx')
+    const blockBlastPage = read('src/app/(user)/mini-game/block-blast/page.tsx')
+
+    expect(tetrisPage).toContain('mini-game-theme-scope')
+    expect(blockBlastPage).toContain('mini-game-theme-scope')
+    expect(css).toContain('html[data-theme="light"] .mini-game-theme-scope')
+    expect(css).toContain('[class~="text-white"]')
+    expect(css).toContain('[class*="text-white/"]')
+    expect(css).toContain('[class*="bg-[#e41d1d]"]')
+  })
+
   it('themes the admin shell and exposes a persistent theme control', () => {
     const layout = read('src/app/admin/layout.tsx')
     const sidebar = read('src/components/layout/AdminSidebar.tsx')

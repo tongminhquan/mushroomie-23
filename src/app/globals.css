@@ -82,7 +82,7 @@
 
 :root,
 html[data-theme="light"] {
-  --mushroomie-static-revision: "20260729-dark-mode";
+  --mushroomie-static-revision: "20260729-mini-game-colors";
   --surface-page: #fff7f2;
   --surface-section: #fffaf6;
   --surface-card: #ffffff;
@@ -146,6 +146,19 @@ html[data-theme="dark"] {
   --color-primary-light: #451d1d;
   --shadow-card: var(--shadow-card-theme);
   --shadow-strong: var(--shadow-overlay-theme);
+}
+
+/* Keep light-mode game text readable while an older client chunk is replaced. */
+html[data-theme="light"] .mini-game-theme-scope [class~="text-white"] {
+  color: var(--text-primary-theme) !important;
+}
+
+html[data-theme="light"] .mini-game-theme-scope [class*="text-white/"] {
+  color: var(--text-secondary-theme) !important;
+}
+
+html[data-theme="light"] .mini-game-theme-scope [class*="bg-[#e41d1d]"] {
+  color: var(--primary-foreground) !important;
 }
 
 * {

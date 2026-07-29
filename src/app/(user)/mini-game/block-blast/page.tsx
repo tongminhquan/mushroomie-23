@@ -7,5 +7,9 @@ export const metadata: Metadata = {
 }
 
 export default function BlockBlastMiniGamePage() {
-  return <GamePageClient game="block-blast" />
+  return (
+    <div className="mini-game-theme-scope">
+      <GamePageClient game="block-blast" />
+    </div>
+  )
 }
