@@ -23,13 +23,13 @@ export default function HomeCustomCTA() {
           <div className="mt-8 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
             <Link
               href="/san-pham"
-              className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-7 text-sm font-bold text-primary shadow-card hover:-translate-y-0.5 hover:shadow-[0_12px_26px_rgba(0,0,0,0.18)] sm:min-h-[56px] sm:text-base transition-all"
+              className="theme-transition group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-7 text-sm font-bold text-primary shadow-card hover:-translate-y-0.5 hover:shadow-[0_12px_26px_rgba(0,0,0,0.18)] sm:min-h-[56px] sm:text-base"
             >
               Khám phá sản phẩm <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
             <Link
               href="/lien-he"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-white/60 bg-white/15 px-7 text-sm font-bold text-white hover:-translate-y-0.5 hover:bg-white/25 sm:min-h-[56px] sm:text-base transition-all"
+              className="theme-transition inline-flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-white/60 bg-white/15 px-7 text-sm font-bold text-white hover:-translate-y-0.5 hover:bg-white/25 sm:min-h-[56px] sm:text-base"
             >
               <MessageCircle size={18} /> Custom món riêng
             </Link>

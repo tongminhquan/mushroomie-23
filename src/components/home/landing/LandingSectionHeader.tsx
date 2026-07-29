@@ -20,12 +20,12 @@ export default function LandingSectionHeader({
       className,
     )}>
       <p className="mb-3 text-xs font-extrabold uppercase tracking-[0.1em] text-primary">{eyebrow}</p>
-      <h2 className="text-balance font-heading text-3xl leading-[1.12] text-text sm:text-4xl md:text-5xl">
+      <h2 className="text-balance font-heading text-3xl leading-[1.12] text-theme-primary sm:text-4xl md:text-5xl">
         {title}
       </h2>
       {description && (
         <p className={cn(
-          'mt-4 max-w-2xl text-sm leading-7 text-neutral-500 md:text-base',
+          'mt-4 max-w-2xl text-sm leading-7 text-theme-muted md:text-base',
           align === 'center' && 'mx-auto',
         )}>
           {description}

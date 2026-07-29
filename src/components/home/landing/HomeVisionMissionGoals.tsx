@@ -25,10 +25,7 @@ const directions = [
 
 export default function HomeVisionMissionGoals() {
   return (
-    <section
-      className="relative overflow-hidden py-16 md:py-24"
-      style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
-    >
+    <section className="relative overflow-hidden bg-theme-page py-16 text-theme-primary md:py-24">
       <span
         aria-hidden
         className="animate-float-soft pointer-events-none absolute right-[7%] top-[14%] text-3xl text-coral"
@@ -50,7 +47,7 @@ export default function HomeVisionMissionGoals() {
           {directions.map(({ icon: Icon, title, text, accent }, index) => (
             <article
               key={title}
-              className="group relative flex min-h-[280px] flex-col rounded-[22px] border-[1.5px] border-[#f0e0d6] bg-white p-6 shadow-card transition duration-200 hover:-translate-y-1 hover:shadow-hover md:p-7"
+              className="theme-transition group relative flex min-h-[280px] flex-col rounded-[22px] border-[1.5px] border-theme-border bg-theme-card p-6 shadow-card hover:-translate-y-1 hover:shadow-hover md:p-7"
             >
               <span className="absolute right-6 top-6 grid h-9 w-9 place-items-center rounded-full bg-primary font-heading text-sm text-white shadow-[0_8px_20px_rgba(201,20,20,0.3)] md:right-7 md:top-7">
                 0{index + 1}
@@ -58,8 +55,8 @@ export default function HomeVisionMissionGoals() {
               <div className={`mb-8 grid h-14 w-14 place-items-center rounded-2xl text-primary ${accent}`}>
                 <Icon size={26} />
               </div>
-              <h3 className="font-heading text-2xl leading-tight text-text">{title}</h3>
-              <p className="mt-3 text-sm leading-7 text-neutral-500">{text}</p>
+              <h3 className="font-heading text-2xl leading-tight text-theme-primary">{title}</h3>
+              <p className="mt-3 text-sm leading-7 text-theme-muted">{text}</p>
             </article>
           ))}
         </div>

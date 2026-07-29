@@ -23,14 +23,14 @@ export default function HomeBrandStory({ products }: { products: HomeProduct[] }
   )
 
   return (
-    <section className="bg-secondary py-16 md:py-24">
+    <section className="bg-theme-page py-16 text-theme-primary md:py-24">
       <BrandContainer>
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
           <div className="order-2 relative lg:order-1">
             <div
-              className="relative aspect-[5/4] overflow-hidden rounded-[24px] border-[1.5px] border-warm-border shadow-card"
+              className="relative aspect-[5/4] overflow-hidden rounded-[24px] border-[1.5px] border-theme-border shadow-card"
               style={{
-                background: 'repeating-linear-gradient(45deg, #fbf0e9, #fbf0e9 13px, #fff 13px, #fff 26px)',
+                background: 'repeating-linear-gradient(45deg, var(--surface-muted), var(--surface-muted) 13px, var(--surface-card) 13px, var(--surface-card) 26px)',
               }}
             >
               <SafeImage
@@ -52,7 +52,7 @@ export default function HomeBrandStory({ products }: { products: HomeProduct[] }
               {milestones.map(({ icon: Icon, label }, index) => (
                 <li
                   key={label}
-                  className="flex min-h-24 items-start gap-3 rounded-[18px] border-[1.5px] border-warm-border bg-white p-4 shadow-card hover-lift"
+                  className="theme-transition flex min-h-24 items-start gap-3 rounded-[18px] border-[1.5px] border-theme-border bg-theme-card p-4 shadow-card hover-lift"
                 >
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-pink text-primary">
                     <Icon size={18} />
@@ -61,7 +61,7 @@ export default function HomeBrandStory({ products }: { products: HomeProduct[] }
                     <span className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-accent-kraft">
                       Chặng {index + 1}
                     </span>
-                    <p className="mt-1 text-xs font-bold leading-5 text-text sm:text-sm">{label}</p>
+                    <p className="mt-1 text-xs font-bold leading-5 text-theme-primary sm:text-sm">{label}</p>
                   </div>
                 </li>
               ))}
@@ -74,7 +74,7 @@ export default function HomeBrandStory({ products }: { products: HomeProduct[] }
               title="Tụi mình bắt đầu từ một mong muốn rất nhỏ"
               description="Tạo ra những món phụ kiện đủ cá nhân để không bị trùng lặp, đủ gần gũi để người đeo thấy một phần của mình trong đó."
             />
-            <div className="space-y-4 text-sm leading-7 text-neutral-600 md:text-base">
+            <div className="space-y-4 text-sm leading-7 text-theme-secondary md:text-base">
               <p>
                 Mushroomie được xây dựng bởi những người trẻ 18 tuổi, từ niềm yêu thích các món handmade nhỏ xinh và mong muốn biến sự sáng tạo thành sản phẩm thật.
               </p>
@@ -87,7 +87,7 @@ export default function HomeBrandStory({ products }: { products: HomeProduct[] }
               {storyChips.map((chip) => (
                 <li
                   key={chip}
-                  className="rounded-full border-[1.5px] border-warm-border bg-white px-4 py-2 text-[13px] font-bold text-accent-kraft"
+                  className="theme-transition rounded-full border-[1.5px] border-theme-border bg-theme-card px-4 py-2 text-[13px] font-bold text-accent-kraft"
                 >
                   {chip}
                 </li>

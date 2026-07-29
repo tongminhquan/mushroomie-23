@@ -4,6 +4,23 @@ import { describe, expect, it } from 'vitest'
 
 const root = process.cwd()
 const read = (file: string) => fs.readFileSync(path.join(root, file), 'utf8')
+const publicThemeFiles = [
+  'src/components/cart/CartDrawer.tsx',
+  'src/components/layout/PolicyLayout.tsx',
+  'src/components/local/LocalLandingPage.tsx',
+  'src/components/product/ProductCard.tsx',
+  'src/components/product/AddToCartButton.tsx',
+  'src/app/(user)/tai-khoan/page.tsx',
+  'src/app/(user)/gio-hang/page.tsx',
+  'src/app/(user)/thanh-toan/page.tsx',
+  'src/app/(user)/san-pham/[slug]/page.tsx',
+  'src/app/(user)/tin-tuc/[slug]/page.tsx',
+  'src/components/minigame/MiniGameHub.tsx',
+  'src/components/minigame/GamePageClient.tsx',
+  'src/components/minigame/GameReadyOverlay.tsx',
+  'src/components/minigame/TetrisGame.tsx',
+  'src/components/minigame/BlockBlastGame.tsx',
+]
 
 describe('sitewide dark-mode contract', () => {
   it('boots theme before hydration without reading server cookies', () => {
@@ -42,5 +59,22 @@ describe('sitewide dark-mode contract', () => {
     const header = read('src/components/layout/Header.tsx')
     expect(header).toContain('<ThemeToggle variant="icon"')
     expect(header).toContain('<ThemeToggle variant="segmented"')
+  })
+
+  it.each(publicThemeFiles)('%s declares a reviewed semantic theme surface', (file) => {
+    expect(read(file)).toMatch(/bg-theme-(page|section|card|elevated|subtle|input)/)
+  })
+
+  it('uses the declared semantic border utility name', () => {
+    const reviewedFiles = [
+      ...publicThemeFiles,
+      'src/components/layout/Header.tsx',
+      'src/components/layout/MobileBottomNav.tsx',
+      'src/components/theme/ThemeToggle.tsx',
+    ]
+
+    reviewedFiles.forEach((file) => {
+      expect(read(file)).not.toMatch(/\bborder-theme\b(?!-border)/)
+    })
   })
 })

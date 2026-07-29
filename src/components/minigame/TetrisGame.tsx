@@ -710,7 +710,7 @@ export default function TetrisGame({
 
   return (
     <div
-      className={`tetris-game ${isFullscreen ? 'fullscreen-mode' : ''}`}
+      className={`tetris-game bg-theme-card ${isFullscreen ? 'fullscreen-mode' : ''}`}
       ref={containerRef}
       tabIndex={ready ? -1 : 0}
       aria-busy={ready && starting}
@@ -897,7 +897,7 @@ export default function TetrisGame({
         }
         .tetris-game-over-overlay {
           position: absolute; inset: 0; z-index: 4; border-radius: 14px;
-          background: rgba(5,5,16,0.92); backdrop-filter: blur(8px);
+          background: var(--game-overlay); backdrop-filter: blur(8px);
           display: flex; flex-direction: column; align-items: center; justify-content: center;
           gap: 12px; padding: 24px; text-align: center;
         }
@@ -906,8 +906,8 @@ export default function TetrisGame({
           font-weight: 900; text-shadow: 0 0 24px rgba(255,77,106,0.58);
         }
         .tetris-game-over-score {
-          color: #00e5ff; font-size: 22px; font-weight: 900;
-          text-shadow: 0 0 18px rgba(0,229,255,0.45);
+          color: var(--game-score); font-size: 22px; font-weight: 900;
+          text-shadow: 0 0 18px color-mix(in srgb, var(--game-score) 45%, transparent);
         }
         .tetris-game-over-button {
           min-height: 48px; min-width: 156px; margin-top: 8px; padding: 0 24px;
@@ -922,26 +922,26 @@ export default function TetrisGame({
 
         .tetris-sidebar { display: flex; flex-direction: column; gap: 10px; min-width: 160px; max-width: 180px; }
         .tetris-stat-card {
-          background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+          background: var(--surface-muted); border: 1px solid var(--border-default-theme);
           border-radius: 16px; padding: 14px 16px; backdrop-filter: blur(16px);
         }
-        .tetris-stat-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: rgba(255,255,255,0.4); margin-bottom: 4px; }
+        .tetris-stat-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--text-muted-theme); margin-bottom: 4px; }
         .tetris-stat-value { font-weight: 900; line-height: 1; }
-        .tetris-score-val { font-size: 30px; color: #00e5ff; text-shadow: 0 0 10px #00e5ff, 0 0 30px #00e5ff; transition: all .15s; }
-        .tetris-lines-val { font-size: 26px; color: #39e75f; text-shadow: 0 0 10px #39e75f, 0 0 30px #39e75f; }
-        .tetris-level-val { font-size: 26px; color: #ffe14d; text-shadow: 0 0 10px #ffe14d, 0 0 30px #ffe14d; }
+        .tetris-score-val { font-size: 30px; color: var(--game-score); text-shadow: 0 0 10px color-mix(in srgb, var(--game-score) 58%, transparent); transition: all .15s; }
+        .tetris-lines-val { font-size: 26px; color: var(--game-positive); text-shadow: 0 0 10px color-mix(in srgb, var(--game-positive) 58%, transparent); }
+        .tetris-level-val { font-size: 26px; color: var(--game-warning); text-shadow: 0 0 10px color-mix(in srgb, var(--game-warning) 58%, transparent); }
         .tetris-stat-row { display: flex; flex-direction: column; gap: 10px; }
         .tetris-stat-half { flex: unset; }
-        .tetris-progress { margin-top: 8px; height: 4px; border-radius: 4px; background: rgba(255,255,255,0.06); overflow: hidden; }
+        .tetris-progress { margin-top: 8px; height: 4px; border-radius: 4px; background: var(--border-default-theme); overflow: hidden; }
         .tetris-progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; background: linear-gradient(90deg, #00e5ff, #b44dff); box-shadow: 0 0 8px rgba(0,229,255,0.5); }
-        .tetris-next-canvas { border-radius: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); }
+        .tetris-next-canvas { border-radius: 8px; background: var(--surface-input); border: 1px solid var(--border-default-theme); }
         .tetris-key {
           display: inline-flex; align-items: center; justify-content: center;
           min-width: 40px; padding: 2px 6px; font-size: 10px; font-weight: 700;
           color: #00e5ff; background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2);
           border-radius: 5px; font-family: var(--font-body), Montserrat, monospace;
         }
-        .tetris-key-desc { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 500; }
+        .tetris-key-desc { font-size: 11px; color: var(--text-muted-theme); font-weight: 500; }
         .tetris-quick-actions { display: flex; gap: 4px; }
         .tetris-action-btn {
           flex: 1; padding: 6px; border-radius: 8px; font-size: 14px;
@@ -993,9 +993,9 @@ function MobileBtn({ onClick, children, label, accent, purple, wide }: {
   onClick: () => void; children: React.ReactNode; label: string;
   accent?: boolean; purple?: boolean; wide?: boolean;
 }) {
-  const bg     = accent ? 'rgba(228,29,29,0.12)' : purple ? 'rgba(180,77,255,0.1)' : 'rgba(255,255,255,0.06)'
-  const border = accent ? 'rgba(228,29,29,0.25)'  : purple ? 'rgba(180,77,255,0.2)' : 'rgba(255,255,255,0.1)'
-  const color  = accent ? '#ff4d6a'                : purple ? '#b44dff'               : '#ffffff'
+  const bg     = accent ? 'rgba(228,29,29,0.12)' : purple ? 'rgba(180,77,255,0.1)' : 'var(--surface-muted)'
+  const border = accent ? 'rgba(228,29,29,0.25)'  : purple ? 'rgba(180,77,255,0.2)' : 'var(--border-default-theme)'
+  const color  = accent ? '#e41d1d'                : purple ? '#9c3fe8'               : 'var(--text-primary-theme)'
   return (
     <button
       onClick={onClick}

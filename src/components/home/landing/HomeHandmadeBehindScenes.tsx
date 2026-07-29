@@ -14,7 +14,7 @@ const processSteps = [
 
 export default function HomeHandmadeBehindScenes({ products }: { products: HomeProduct[] }) {
   return (
-    <section className="paper-surface py-16 md:py-24">
+    <section className="paper-surface bg-theme-section py-16 text-theme-primary md:py-24">
       <BrandContainer>
         <LandingSectionHeader
           eyebrow="Hậu trường handmade"
@@ -32,11 +32,11 @@ export default function HomeHandmadeBehindScenes({ products }: { products: HomeP
             return (
               <article
                 key={label}
-                className={`group overflow-hidden rounded-[20px] border-[1.5px] border-[#f0e0d6] bg-white ${
+                className={`theme-transition group overflow-hidden rounded-[20px] border-[1.5px] border-theme-border bg-theme-card ${
                   index === 1 || index === 3 ? 'lg:translate-y-7' : ''
                 }`}
               >
-                <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
+                <div className="relative aspect-[4/3] overflow-hidden bg-theme-subtle">
                   <SafeImage
                     src={image}
                     alt={`${label} trong quy trình làm phụ kiện Mushroomie`}
@@ -52,8 +52,8 @@ export default function HomeHandmadeBehindScenes({ products }: { products: HomeP
                   <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary-light text-primary">
                     <Icon size={19} />
                   </div>
-                  <h3 className="mt-4 font-heading text-xl text-text">{label}</h3>
-                  <p className="mt-2 text-xs leading-5 text-neutral-500">{detail}</p>
+                  <h3 className="mt-4 font-heading text-xl text-theme-primary">{label}</h3>
+                  <p className="mt-2 text-xs leading-5 text-theme-muted">{detail}</p>
                 </div>
               </article>
             )

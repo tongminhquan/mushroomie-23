@@ -14,17 +14,17 @@ const milestones = [
 
 export default function HomeMiniGameCTA() {
   return (
-    <section className="bg-secondary py-16 md:py-24">
+    <section className="bg-theme-page py-16 text-theme-primary md:py-24">
       <BrandContainer>
-        <div className="overflow-hidden rounded-[28px] border-[1.5px] border-[#ece0d6] bg-white shadow-card">
+        <div className="overflow-hidden rounded-[28px] border-[1.5px] border-theme-border bg-theme-card shadow-card">
           <div className="grid gap-0 md:grid-cols-2">
             {/* Left — info */}
             <div className="p-8 md:p-10">
               <p className="mb-2 text-xs font-extrabold uppercase tracking-widest text-primary">🎮 Chơi & Nhận quà</p>
-              <h2 className="mb-4 font-heading text-2xl leading-tight text-text md:text-3xl">
+              <h2 className="mb-4 font-heading text-2xl leading-tight text-theme-primary md:text-3xl">
                 Chơi mini game cùng Mushroomie
               </h2>
-              <p className="mb-6 text-sm leading-7 text-neutral-600">
+              <p className="mb-6 text-sm leading-7 text-theme-secondary">
                 Ghi điểm đạt mốc để đổi voucher xinh — áp dụng ngay khi thanh toán. Càng chơi càng nhiều ưu đãi!
               </p>
               <div className="space-y-3">
@@ -32,12 +32,12 @@ export default function HomeMiniGameCTA() {
                   <Link
                     key={game.name}
                     href={game.href}
-                    className="flex items-center gap-3 rounded-2xl border-[1.5px] border-[#ece0d6] bg-secondary px-4 py-3 transition hover:border-primary hover:shadow-card"
+                    className="theme-transition flex items-center gap-3 rounded-2xl border-[1.5px] border-theme-border bg-theme-subtle px-4 py-3 hover:border-primary hover:shadow-card"
                   >
                     <span className="text-2xl">{game.emoji}</span>
                     <div className="flex-1">
-                      <p className="text-sm font-extrabold text-text">{game.name}</p>
-                      <p className="text-xs text-neutral-500">{game.desc}</p>
+                      <p className="text-sm font-extrabold text-theme-primary">{game.name}</p>
+                      <p className="text-xs text-theme-muted">{game.desc}</p>
                     </div>
                     <ArrowRight size={16} className="text-neutral-400" />
                   </Link>

@@ -103,7 +103,7 @@ export default function AddToCartButton({ product }: Props) {
 
         return (
           <div key={option.id}>
-            <label className="mb-2 block text-sm font-semibold text-neutral-700">
+            <label className="mb-2 block text-sm font-semibold text-theme-secondary">
               {option.option_name}
             </label>
             <div className="flex flex-wrap gap-2">
@@ -117,7 +117,7 @@ export default function AddToCartButton({ product }: Props) {
                   className={`m-press rounded-full border px-4 py-2 text-sm font-medium transition-all ${
                     selectedOptions[option.option_name] === value
                       ? 'border-primary bg-primary text-white'
-                      : 'border-warm-border bg-white text-neutral-700 hover:border-primary hover:text-primary'
+                      : 'border-theme-border bg-theme-card text-theme-secondary hover:border-primary hover:text-primary'
                   }`}
                 >
                   {value}
@@ -130,7 +130,7 @@ export default function AddToCartButton({ product }: Props) {
 
       {product.is_customizable && (
         <div>
-          <label className="mb-2 block text-sm font-semibold text-neutral-700">
+          <label className="mb-2 block text-sm font-semibold text-theme-secondary">
             Ghi chú cá nhân
           </label>
           <textarea
@@ -138,35 +138,35 @@ export default function AddToCartButton({ product }: Props) {
             onChange={(event) => setCustomNote(event.target.value)}
             placeholder="Ví dụ: tên muốn in, màu yêu thích hoặc lời nhắn riêng."
             rows={3}
-            className="w-full resize-none rounded-[20px] border border-warm-border bg-white px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+            className="theme-transition w-full resize-none rounded-[20px] border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-primary outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
           />
         </div>
       )}
 
       <div>
-        <label className="mb-2 block text-sm font-semibold text-neutral-700">Số lượng</label>
+        <label className="mb-2 block text-sm font-semibold text-theme-secondary">Số lượng</label>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="inline-flex items-center gap-3 rounded-full border border-warm-border bg-white px-2 py-2">
+          <div className="theme-transition inline-flex items-center gap-3 rounded-full border border-theme-border bg-theme-card px-2 py-2">
             <button
               type="button"
               aria-label="Giảm số lượng"
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="m-press grid h-9 w-9 place-items-center rounded-full border border-warm-border bg-secondary transition hover:border-primary hover:text-primary"
+              className="m-press grid h-9 w-9 place-items-center rounded-full border border-theme-border bg-theme-subtle transition hover:border-primary hover:text-primary"
             >
               <Minus size={16} />
             </button>
-            <span className="w-8 text-center text-lg font-bold text-neutral-900">{quantity}</span>
+            <span className="w-8 text-center text-lg font-bold text-theme-primary">{quantity}</span>
             <button
               type="button"
               aria-label="Tăng số lượng"
               onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-              className="m-press grid h-9 w-9 place-items-center rounded-full border border-warm-border bg-secondary transition hover:border-primary hover:text-primary"
+              className="m-press grid h-9 w-9 place-items-center rounded-full border border-theme-border bg-theme-subtle transition hover:border-primary hover:text-primary"
             >
               <Plus size={16} />
             </button>
           </div>
 
-          <span className={product.stock > 0 && product.stock <= 5 ? 'text-sm font-semibold text-primary' : 'text-sm text-neutral-500'}>
+          <span className={product.stock > 0 && product.stock <= 5 ? 'text-sm font-semibold text-primary' : 'text-sm text-theme-muted'}>
             {isOutOfStock
               ? 'Tạm hết hàng'
               : product.stock <= 5

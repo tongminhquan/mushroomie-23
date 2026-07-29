@@ -29,7 +29,7 @@ const values = [
 
 export default function HomeCoreValues() {
   return (
-    <section className="bg-white py-16 md:py-24">
+    <section className="bg-theme-section py-16 text-theme-primary md:py-24">
       <BrandContainer>
         <LandingSectionHeader
           eyebrow="Giá trị cốt lõi"
@@ -40,7 +40,7 @@ export default function HomeCoreValues() {
           {values.map(({ icon: Icon, sticker, title, text, color }, index) => (
             <article
               key={title}
-              className={`relative min-h-[320px] overflow-hidden rounded-[22px] border-[1.5px] border-[#f0e0d6] p-6 md:p-8 ${color}`}
+              className={`relative min-h-[320px] overflow-hidden rounded-[22px] border-[1.5px] border-theme-border p-6 md:p-8 ${color}`}
             >
               <div className="absolute right-5 top-5 font-heading text-6xl text-text/[0.06]">0{index + 1}</div>
               <div className="relative z-10">

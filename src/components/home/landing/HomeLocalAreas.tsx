@@ -25,13 +25,13 @@ const AREAS = [
 
 export default function HomeLocalAreas() {
   return (
-    <section className="brand-container my-12">
+    <section className="brand-container my-12 text-theme-primary">
       <div className="mb-5 text-center">
         <p className="brand-kicker justify-center">
           <MapPin size={14} /> Mushroomie tại khu vực của bạn
         </p>
-        <h2 className="mt-1 font-heading text-2xl text-neutral-900">Phụ kiện handmade Đồng Nai, Biên Hòa &amp; TP.HCM</h2>
-        <p className="mx-auto mt-1.5 max-w-xl text-sm text-neutral-500">
+        <h2 className="mt-1 font-heading text-2xl text-theme-primary">Phụ kiện handmade Đồng Nai, Biên Hòa &amp; TP.HCM</h2>
+        <p className="mx-auto mt-1.5 max-w-xl text-sm text-theme-muted">
           Đặt vòng tay, móc khóa, charm và quà tặng handmade cá nhân hóa — nhận đơn tại Đồng Nai và giao online đến TP.HCM.
         </p>
       </div>
@@ -40,11 +40,11 @@ export default function HomeLocalAreas() {
           <Link
             key={a.href}
             href={a.href}
-            className="group rounded-[18px] border-[1.5px] border-warm-border bg-white p-5 shadow-card transition-transform hover:-translate-y-1 motion-reduce:transform-none"
+            className="theme-transition group rounded-[18px] border-[1.5px] border-theme-border bg-theme-card p-5 shadow-card hover:-translate-y-1 motion-reduce:transform-none"
           >
             <div className="mb-2 text-2xl" aria-hidden>{a.emoji}</div>
-            <h3 className="font-heading text-base text-neutral-900 group-hover:text-primary">{a.label}</h3>
-            <p className="mt-1 text-xs leading-relaxed text-neutral-500">{a.description}</p>
+            <h3 className="font-heading text-base text-theme-primary group-hover:text-primary">{a.label}</h3>
+            <p className="mt-1 text-xs leading-relaxed text-theme-muted">{a.description}</p>
             <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-primary">
               Xem ngay <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
             </span>

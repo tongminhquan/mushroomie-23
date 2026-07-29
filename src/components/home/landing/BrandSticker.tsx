@@ -10,7 +10,7 @@ export default function BrandSticker({
   className?: string
 }) {
   const tones = {
-    cream: 'border-kraft/20 bg-secondary text-text',
+    cream: 'border-kraft/20 bg-theme-subtle text-theme-primary',
     pink: 'border-primary/10 bg-pink text-text',
     yellow: 'border-kraft/15 bg-yellow text-text',
     red: 'border-primary bg-primary text-white',

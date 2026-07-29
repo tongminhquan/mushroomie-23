@@ -21,8 +21,8 @@ export default async function PostCard({ post }: PostCardProps) {
 
   return (
     <Link href={`/tin-tuc/${post.slug}`} className="group block h-full">
-      <article className="m-card m-glow flex h-full flex-col overflow-hidden rounded-[24px] border-[1.5px] border-warm-border bg-white shadow-card transition-colors duration-200 hover:border-primary">
-        <div className="m-card-media relative aspect-[16/9] overflow-hidden bg-secondary">
+      <article className="theme-transition m-card m-glow flex h-full flex-col overflow-hidden rounded-[24px] border-[1.5px] border-theme-border bg-theme-card shadow-card hover:border-primary">
+        <div className="m-card-media relative aspect-[16/9] overflow-hidden bg-theme-subtle">
           <SafeImage
             src={featuredImageSrc}
             alt={post.title}
@@ -32,24 +32,24 @@ export default async function PostCard({ post }: PostCardProps) {
             sizes="(max-width: 768px) 100vw, 33vw"
           />
           {post.category && (
-            <span className="absolute left-4 top-4 rounded-full bg-white/92 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.08em] text-primary shadow-sm">
+            <span className="absolute left-4 top-4 rounded-full bg-theme-elevated/95 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.08em] text-primary shadow-sm">
               {post.category.name}
             </span>
           )}
         </div>
         <div className="flex flex-1 flex-col p-5">
-          <h3 className="line-clamp-2 font-heading text-xl leading-snug text-text transition-colors group-hover:text-primary">
+          <h3 className="line-clamp-2 font-heading text-xl leading-snug text-theme-primary transition-colors group-hover:text-primary">
             {post.title}
           </h3>
           {post.excerpt && (
-            <p className="mb-4 mt-3 line-clamp-3 text-sm leading-relaxed text-neutral-500">
+            <p className="mb-4 mt-3 line-clamp-3 text-sm leading-relaxed text-theme-muted">
               {post.excerpt}
             </p>
           )}
-          <div className="mt-auto flex items-center justify-between border-t border-warm-border pt-4">
+          <div className="mt-auto flex items-center justify-between border-t border-theme-border pt-4">
             {post.published_at ? (
               <span
-                className="flex items-center gap-1.5 text-xs text-neutral-500"
+                className="flex items-center gap-1.5 text-xs text-theme-muted"
                 suppressHydrationWarning
               >
                 <Calendar size={13} />

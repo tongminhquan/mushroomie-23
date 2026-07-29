@@ -20,8 +20,8 @@ export default function CheckoutStepper({ currentStep }: { currentStep: 1 | 2 | 
                   done
                     ? 'border-primary bg-primary text-white'
                     : active
-                    ? 'border-primary bg-white text-primary'
-                    : 'border-neutral-200 bg-white text-neutral-400'
+                    ? 'border-primary bg-theme-card text-primary'
+                    : 'border-theme-border bg-theme-card text-theme-muted'
                 }`}
               >
                 {done ? <Check size={16} /> : step.id}

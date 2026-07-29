@@ -67,7 +67,7 @@ export default function HomeCustomProcess({ products }: { products: HomeProduct[
           </div>
 
           <div className="relative mx-auto w-full max-w-xl">
-            <div className="relative aspect-square overflow-hidden rounded-[18px] border border-white/15 bg-secondary">
+            <div className="relative aspect-square overflow-hidden rounded-[18px] border border-white/15 bg-theme-subtle">
               <SafeImage
                 src={image}
                 alt="Mẫu phụ kiện có thể cá nhân hóa tại Mushroomie"
@@ -76,7 +76,7 @@ export default function HomeCustomProcess({ products }: { products: HomeProduct[
                 className="object-contain p-7 sm:p-10"
               />
             </div>
-            <div className="absolute -bottom-4 left-4 right-4 flex items-center gap-3 rounded-[14px] bg-white p-4 text-text shadow-strong sm:left-8 sm:right-8">
+            <div className="theme-transition absolute -bottom-4 left-4 right-4 flex items-center gap-3 rounded-[14px] border border-theme-border bg-theme-card p-4 text-theme-primary shadow-strong sm:left-8 sm:right-8">
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary-light text-primary">
                 <Check size={20} />
               </span>

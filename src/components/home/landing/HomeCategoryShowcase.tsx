@@ -7,10 +7,7 @@ import type { HomeCategory } from './types'
 
 export default function HomeCategoryShowcase({ categories }: { categories: HomeCategory[] }) {
   return (
-    <section
-      className="relative overflow-hidden bg-secondary py-16 md:py-24"
-      style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
-    >
+    <section className="relative overflow-hidden bg-theme-section py-16 text-theme-primary md:py-24">
       <span aria-hidden className="pointer-events-none absolute -left-6 top-16 hidden h-14 w-14 rounded-full bg-pink/60 blur-xl md:block" />
       <span aria-hidden className="pointer-events-none absolute right-4 top-28 hidden h-12 w-12 rounded-full bg-yellow/70 blur-xl md:block" />
 
@@ -27,11 +24,11 @@ export default function HomeCategoryShowcase({ categories }: { categories: HomeC
               <Link
                 key={category.id}
                 href={`/san-pham?category=${category.slug}`}
-                className="group flex min-h-[250px] flex-col rounded-[22px] border-[1.5px] border-warm-border bg-white p-5 shadow-card transition duration-200 hover:-translate-y-1 hover:shadow-hover sm:p-6"
+                className="theme-transition group flex min-h-[250px] flex-col rounded-[22px] border-[1.5px] border-theme-border bg-theme-card p-5 shadow-card hover:-translate-y-1 hover:shadow-hover sm:p-6"
               >
                 <div
                   className={`mb-6 grid aspect-square w-full place-items-center overflow-hidden rounded-[16px] ${
-                    index % 3 === 0 ? 'bg-pink' : index % 3 === 1 ? 'bg-yellow' : 'bg-[#ffece6]'
+                    index % 3 === 0 ? 'bg-pink' : index % 3 === 1 ? 'bg-yellow' : 'bg-theme-subtle'
                   }`}
                 >
                   <CategoryIcon
@@ -42,7 +39,7 @@ export default function HomeCategoryShowcase({ categories }: { categories: HomeC
                     fallbackClassName="text-primary transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
-                <h3 className="font-heading text-xl leading-tight text-text sm:text-2xl">{category.name}</h3>
+                <h3 className="font-heading text-xl leading-tight text-theme-primary sm:text-2xl">{category.name}</h3>
                 <span className="mt-auto inline-flex items-center gap-2 pt-4 text-xs font-extrabold uppercase tracking-[0.08em] text-accent-kraft transition-colors group-hover:text-primary sm:text-sm">
                   Khám phá <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
@@ -50,8 +47,8 @@ export default function HomeCategoryShowcase({ categories }: { categories: HomeC
             ))}
           </div>
         ) : (
-          <div className="rounded-[22px] border-[1.5px] border-warm-border bg-white p-8 text-center shadow-card">
-            <p className="text-sm text-neutral-500">Các danh mục đang được cập nhật.</p>
+          <div className="rounded-[22px] border-[1.5px] border-theme-border bg-theme-card p-8 text-center shadow-card">
+            <p className="text-sm text-theme-muted">Các danh mục đang được cập nhật.</p>
           </div>
         )}
 

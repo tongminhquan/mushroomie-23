@@ -102,6 +102,10 @@ html[data-theme="light"] {
   --shadow-overlay-theme: 0 22px 55px rgb(91 48 35 / 0.14);
   --theme-color: #fff7f2;
   --paper-grid-theme: rgb(185 121 75 / 0.035);
+  --game-score: #087f8f;
+  --game-positive: #16813a;
+  --game-warning: #9a6a00;
+  --game-overlay: rgb(255 247 242 / 0.92);
 }
 
 html[data-theme="dark"] {
@@ -124,6 +128,10 @@ html[data-theme="dark"] {
   --shadow-overlay-theme: 0 24px 62px rgb(0 0 0 / 0.42);
   --theme-color: #171313;
   --paper-grid-theme: rgb(255 214 214 / 0.045);
+  --game-score: #00e5ff;
+  --game-positive: #39e75f;
+  --game-warning: #ffe14d;
+  --game-overlay: rgb(7 7 17 / 0.92);
   --color-admin-bg: #171313;
   --color-warm-border: #4a3a34;
   --color-secondary: #171313;

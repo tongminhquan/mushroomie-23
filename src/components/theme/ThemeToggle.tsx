@@ -55,7 +55,7 @@ export default function ThemeToggle({
     return (
       <div className={cn('theme-transition flex items-center justify-between gap-3', className)}>
         <span className="text-sm font-bold text-theme-secondary">Giao diện</span>
-        <div className="grid grid-cols-2 rounded-xl border border-theme bg-theme-subtle p-1">
+        <div className="grid grid-cols-2 rounded-xl border border-theme-border bg-theme-subtle p-1">
           <button
             type="button"
             aria-label="Dùng giao diện sáng"
@@ -87,7 +87,7 @@ export default function ThemeToggle({
       title={dark ? 'Giao diện sáng' : 'Giao diện tối'}
       onClick={() => selectTheme(dark ? 'light' : 'dark')}
       className={cn(
-        'theme-transition grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-theme bg-theme-card text-theme-primary hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20',
+        'theme-transition grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-theme-border bg-theme-card text-theme-primary hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20',
         className,
       )}
     >

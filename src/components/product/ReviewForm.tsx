@@ -65,7 +65,7 @@ export default function ReviewForm({ productId, productName }: ReviewFormProps) 
     return (
       <div className="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-6 text-center">
         <p className="font-bold text-text">Cảm ơn bạn đã đánh giá!</p>
-        <p className="mt-1 text-sm text-neutral-500">
+        <p className="mt-1 text-sm text-theme-muted">
           Đánh giá sẽ hiển thị sau khi được kiểm duyệt.
         </p>
       </div>
@@ -73,13 +73,13 @@ export default function ReviewForm({ productId, productName }: ReviewFormProps) 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border-[1.5px] border-[#f0e0d6] bg-secondary/40 p-5">
-      <p className="text-sm font-semibold text-neutral-700">
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border-[1.5px] border-theme-border bg-theme-subtle p-5">
+      <p className="text-sm font-semibold text-theme-secondary">
         Viết đánh giá về <span className="text-primary">{productName}</span>
       </p>
 
       <div>
-        <p className="mb-2 text-sm font-medium text-neutral-600">Chọn số sao</p>
+        <p className="mb-2 text-sm font-medium text-theme-secondary">Chọn số sao</p>
         <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
@@ -102,23 +102,23 @@ export default function ReviewForm({ productId, productName }: ReviewFormProps) 
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-semibold text-neutral-700">Tên của bạn</label>
+        <label className="mb-1.5 block text-sm font-semibold text-theme-secondary">Tên của bạn</label>
         <input
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="Ví dụ: Nguyễn Văn A"
-          className="h-11 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+          className="h-11 w-full rounded-xl border border-theme-border bg-theme-input px-4 text-sm text-theme-primary outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
         />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-semibold text-neutral-700">Nội dung đánh giá</label>
+        <label className="mb-1.5 block text-sm font-semibold text-theme-secondary">Nội dung đánh giá</label>
         <textarea
           value={content}
           onChange={(event) => setContent(event.target.value)}
           rows={3}
           placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."
-          className="w-full resize-none rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+          className="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-primary outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
         />
       </div>
 

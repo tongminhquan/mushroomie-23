@@ -70,7 +70,7 @@ export function GiftWrapOptionContent({
   const feeLabel = !isReady ? '...' : fee === 0 ? 'Miễn phí' : `+${formatPrice(fee)}`
   const surfaceClass = embedded
     ? ''
-    : 'rounded-[18px] border-[1.5px] border-warm-border bg-white p-4'
+    : 'rounded-[18px] border-[1.5px] border-theme-border bg-theme-card p-4'
 
   return (
     <div className={`${surfaceClass} ${className}`}>
@@ -85,12 +85,12 @@ export function GiftWrapOptionContent({
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-2">
             <Gift size={18} className="text-primary" aria-hidden />
-            <span className="font-bold text-neutral-900">Gói quà tặng</span>
+            <span className="font-bold text-theme-primary">Gói quà tặng</span>
             <span className="rounded-full bg-primary-light px-2.5 py-0.5 text-xs font-extrabold text-primary">
               {feeLabel}
             </span>
           </span>
-          <span id={descriptionId} className="mt-1.5 block text-sm leading-6 text-neutral-600">
+          <span id={descriptionId} className="mt-1.5 block text-sm leading-6 text-theme-secondary">
             Hộp quà handmade kèm nơ, <strong className="font-semibold text-accent-kraft">tặng kèm thư viết tay miễn phí</strong>.
             {!compact && ' Phí tính một lần cho cả đơn hàng, dù bạn mua bao nhiêu món.'}
           </span>
@@ -98,10 +98,10 @@ export function GiftWrapOptionContent({
       </label>
 
       {giftWrap && showMessageField && (
-        <div className="mt-4 border-t border-warm-border pt-4">
-          <label htmlFor={messageId} className="mb-1.5 flex items-center gap-2 text-sm font-bold text-neutral-900">
+        <div className="mt-4 border-t border-theme-border pt-4">
+          <label htmlFor={messageId} className="mb-1.5 flex items-center gap-2 text-sm font-bold text-theme-primary">
             <PenLine size={16} className="text-primary" aria-hidden />
-            Lời nhắn thư tay <span className="font-normal text-neutral-500">(không bắt buộc)</span>
+            Lời nhắn thư tay <span className="font-normal text-theme-muted">(không bắt buộc)</span>
           </label>
           <textarea
             id={messageId}
@@ -110,16 +110,16 @@ export function GiftWrapOptionContent({
             rows={4}
             maxLength={MAX_GIFT_MESSAGE_LENGTH}
             placeholder="Mushroomie sẽ chép tay lời nhắn này lên thiệp gửi kèm quà..."
-            className="w-full rounded-xl border-[1.5px] border-warm-border px-4 py-3 text-sm leading-6 outline-none transition-colors focus:border-primary focus:ring-4 focus:ring-primary/10"
+            className="theme-transition w-full rounded-xl border-[1.5px] border-theme-border bg-theme-input px-4 py-3 text-sm leading-6 text-theme-primary outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
           />
-          <p className="mt-1.5 text-right text-xs text-neutral-500">
+          <p className="mt-1.5 text-right text-xs text-theme-muted">
             {giftMessage.length}/{MAX_GIFT_MESSAGE_LENGTH} ký tự
           </p>
         </div>
       )}
 
       {giftWrap && !showMessageField && (
-        <p className="mt-3 border-t border-warm-border pt-3 text-sm text-neutral-600">
+        <p className="mt-3 border-t border-theme-border pt-3 text-sm text-theme-secondary">
           ✍️ Bạn sẽ nhập lời nhắn thư tay ở bước thanh toán.
         </p>
       )}

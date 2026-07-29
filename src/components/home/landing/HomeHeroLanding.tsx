@@ -46,16 +46,15 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
 
   return (
     <section
-      className="relative overflow-hidden bg-secondary pt-3 md:pt-5"
-      style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
+      className="relative overflow-hidden bg-theme-page pt-3 text-theme-primary md:pt-5"
     >
       <Sparkles aria-hidden className="pointer-events-none absolute left-[6%] top-[14%] h-6 w-6 animate-float-soft text-coral/70" />
       <span aria-hidden className="pointer-events-none absolute right-[8%] top-[22%] h-4 w-4 animate-float-soft rounded-full bg-yellow" />
       <Sparkles aria-hidden className="pointer-events-none absolute bottom-[12%] right-[14%] h-5 w-5 animate-float-soft text-primary/40" />
 
-      <div className="brand-container relative overflow-hidden rounded-[24px] border-[1.5px] border-warm-border bg-white shadow-strong">
+      <div className="brand-container relative overflow-hidden rounded-[24px] border-[1.5px] border-theme-border bg-theme-card shadow-strong">
         <div
-          className="relative aspect-[4/3] overflow-hidden bg-secondary sm:h-[300px] sm:aspect-auto md:h-[540px]"
+          className="relative aspect-[4/3] overflow-hidden bg-theme-subtle sm:h-[300px] sm:aspect-auto md:h-[540px]"
           aria-roledescription="carousel"
           aria-label="Bộ sưu tập Mushroomie"
         >
@@ -63,7 +62,7 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
             aria-hidden
             className="pointer-events-none absolute inset-0"
             style={{
-              background: 'repeating-linear-gradient(45deg, #fbf0e9, #fbf0e9 13px, #fff 13px, #fff 26px)',
+              background: 'repeating-linear-gradient(45deg, var(--surface-muted), var(--surface-muted) 13px, var(--surface-card) 13px, var(--surface-card) 26px)',
               opacity: 0.5,
             }}
           />
@@ -83,18 +82,18 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
         </div>
       </div>
 
-      <div id="hero-proof-strip" className="brand-container relative grid grid-cols-2 rounded-b-[24px] border-x-[1.5px] border-b-[1.5px] border-warm-border bg-white sm:grid-cols-4">
+      <div id="hero-proof-strip" className="brand-container relative grid grid-cols-2 rounded-b-[24px] border-x-[1.5px] border-b-[1.5px] border-theme-border bg-theme-card sm:grid-cols-4">
         {proofItems.map(({ icon: Icon, label }, index) => (
           <div
             key={label}
             className={`flex min-h-20 items-center gap-3 px-4 py-3 hover-lift ${
-              index % 2 === 0 ? 'border-r border-warm-border' : ''
-            } ${index < 2 ? 'border-b border-warm-border sm:border-b-0' : ''} sm:border-r sm:last:border-r-0`}
+              index % 2 === 0 ? 'border-r border-theme-border' : ''
+            } ${index < 2 ? 'border-b border-theme-border sm:border-b-0' : ''} sm:border-r sm:last:border-r-0`}
           >
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[14px] bg-pink text-primary">
               <Icon size={18} />
             </span>
-            <span className="font-heading text-xs leading-5 text-text sm:text-sm">{label}</span>
+            <span className="font-heading text-xs leading-5 text-theme-primary sm:text-sm">{label}</span>
           </div>
         ))}
       </div>

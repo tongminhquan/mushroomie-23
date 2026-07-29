@@ -9,7 +9,7 @@ export default function HomeLatestPosts({ posts }: { posts: HomePost[] }) {
   if (posts.length === 0) return null
 
   return (
-    <section className="bg-white py-16 md:py-24">
+    <section className="bg-theme-section py-16 text-theme-primary md:py-24">
       <BrandContainer>
         <LandingSectionHeader
           eyebrow="Góc handmade"

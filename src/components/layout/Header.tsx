@@ -113,7 +113,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
   }, [hydrated, totalItems])
 
   return (
-    <header className="theme-transition relative z-50 border-b border-theme bg-theme-page text-theme-primary">
+    <header className="theme-transition relative z-50 border-b border-theme-border bg-theme-page text-theme-primary">
       <div className="hidden bg-text text-white md:block">
         <div className="brand-container flex h-9 items-center justify-between text-[11px] font-semibold">
           <p className="m-slogan-shimmer">Làm bằng tay, trao bằng tim</p>
@@ -124,7 +124,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
         </div>
       </div>
 
-      <div className="theme-transition sticky top-0 border-b border-theme bg-theme-page/90 backdrop-blur-md">
+      <div className="theme-transition sticky top-0 border-b border-theme-border bg-theme-page/90 backdrop-blur-md">
         <div className="brand-container flex h-[74px] items-center gap-3 md:h-[82px] md:gap-6">
           <button
             type="button"
@@ -132,7 +132,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
             aria-expanded={menuOpen}
             aria-controls="mobile-main-navigation"
             onClick={() => setMenuOpen((value) => !value)}
-            className="m-press grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-theme bg-theme-card text-theme-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 md:hidden"
+            className="m-press grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-theme-border bg-theme-card text-theme-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 md:hidden"
           >
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -160,7 +160,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                 onChange={(event) => setSearchQuery(event.target.value)}
                 aria-label="Tìm sản phẩm"
                 placeholder="Tìm vòng tay, móc khóa, charm..."
-                className="theme-transition h-11 w-full rounded-xl border border-theme bg-theme-input pl-11 pr-24 text-sm text-theme-primary outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+                className="theme-transition h-11 w-full rounded-xl border border-theme-border bg-theme-input pl-11 pr-24 text-sm text-theme-primary outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
               />
               <button
                 className="absolute right-1.5 top-1.5 h-8 rounded-lg bg-primary px-4 text-xs font-bold text-white hover:bg-primary-dark"
@@ -202,7 +202,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                 <ChevronDown size={14} />
               </Link>
               <div className="invisible absolute right-0 top-full w-52 translate-y-2 pt-2 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-                <div className="theme-transition rounded-xl border border-theme bg-theme-card p-2 text-theme-primary shadow-[var(--shadow-overlay-theme)]">
+                <div className="theme-transition rounded-xl border border-theme-border bg-theme-card p-2 text-theme-primary shadow-[var(--shadow-overlay-theme)]">
                   {session ? (
                     <>
                       <Link href="/tai-khoan" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Hồ sơ của tôi</Link>
@@ -215,7 +215,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                       )}
                       <button
                         onClick={() => signOut({ callbackUrl: '/' })}
-                        className="mt-1 w-full border-t border-theme px-3 pt-3 text-left text-sm font-semibold text-red-500"
+                        className="mt-1 w-full border-t border-theme-border px-3 pt-3 text-left text-sm font-semibold text-red-500"
                         type="button"
                       >
                         Đăng xuất
@@ -269,7 +269,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                 onChange={(event) => setSearchQuery(event.target.value)}
                 aria-label="Tìm sản phẩm"
                 placeholder="Tìm sản phẩm..."
-                className="theme-transition h-11 flex-1 rounded-xl border border-theme bg-theme-input px-4 text-sm text-theme-primary outline-none focus:border-primary"
+                className="theme-transition h-11 flex-1 rounded-xl border border-theme-border bg-theme-input px-4 text-sm text-theme-primary outline-none focus:border-primary"
               />
               <button className="rounded-xl bg-primary px-4 font-bold text-white" aria-label="Tìm kiếm" type="submit">
                 <Search size={18} />
@@ -288,7 +288,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
             </Link>
             {categories.length > 0 && (
               <div className="invisible absolute left-0 top-full z-30 w-60 translate-y-2 pt-2 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-                <div className="theme-transition rounded-xl border border-theme bg-theme-card p-2 text-theme-primary shadow-[var(--shadow-overlay-theme)]">
+                <div className="theme-transition rounded-xl border border-theme-border bg-theme-card p-2 text-theme-primary shadow-[var(--shadow-overlay-theme)]">
                   <Link href="/san-pham" className="block rounded-lg px-3 py-2.5 text-sm font-bold hover:bg-theme-subtle">Tất cả sản phẩm</Link>
                   {categories.map((category) => (
                     <Link
@@ -370,9 +370,9 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                   </Link>
                 )
               })}
-              <div className="my-3 border-t border-theme" />
+              <div className="my-3 border-t border-theme-border" />
               <ThemeToggle variant="segmented" className="rounded-xl bg-theme-subtle p-3" />
-              <div className="my-3 border-t border-theme" />
+              <div className="my-3 border-t border-theme-border" />
               <Link
                 href={session ? '/tai-khoan' : '/tai-khoan/dang-nhap'}
                 onClick={() => setMenuOpen(false)}

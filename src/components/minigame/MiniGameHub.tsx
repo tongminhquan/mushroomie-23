@@ -59,8 +59,8 @@ export default function MiniGameHub() {
   }, [])
 
   return (
-    <div className="min-h-[100dvh] bg-[#090916] text-white">
-      <section className="border-b border-white/10 bg-[radial-gradient(circle_at_top,rgba(228,29,29,0.2),transparent_42%)]">
+    <div className="min-h-[100dvh] bg-theme-page text-theme-primary">
+      <section className="border-b border-theme-border bg-theme-section">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-12 md:px-6 md:py-16">
           <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#e41d1d]/30 bg-[#e41d1d]/10 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#ff6b6b]">
             <Gamepad2 size={15} />
@@ -70,12 +70,12 @@ export default function MiniGameHub() {
             <h1 className="font-body text-4xl font-extrabold leading-tight tracking-normal md:text-6xl">
               Chọn game, ghi điểm và nhận voucher
             </h1>
-            <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-white/62 md:text-lg">
+            <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-theme-secondary md:text-lg">
               Mỗi game có màn hình bắt đầu riêng, bảng xếp hạng riêng và voucher tính theo điểm của một lượt chơi.
             </p>
           </div>
           {!session && (
-            <div className="max-w-xl rounded-2xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm font-semibold text-amber-100">
+            <div className="max-w-xl rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-theme-secondary">
               Đăng nhập để lưu điểm và nhận voucher sau mỗi lượt chơi đạt mốc.
             </div>
           )}
@@ -91,14 +91,14 @@ export default function MiniGameHub() {
           return (
             <article
               key={game}
-              className="flex min-h-[390px] flex-col rounded-2xl border border-white/10 bg-white/[0.045] p-5 shadow-[0_30px_90px_rgba(0,0,0,0.35)]"
+              className="theme-transition flex min-h-[390px] flex-col rounded-2xl border border-theme-border bg-theme-card p-5 shadow-card"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/65">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-theme-muted">
                     {config.controlMode}
                   </p>
-                  <h2 className="mt-2 font-body text-3xl font-extrabold tracking-normal text-white">
+                  <h2 className="mt-2 font-body text-3xl font-extrabold tracking-normal text-theme-primary">
                     {config.title}
                   </h2>
                 </div>
@@ -107,39 +107,39 @@ export default function MiniGameHub() {
                 </div>
               </div>
 
-              <p className="mt-4 text-sm font-medium leading-6 text-white/75">{config.startHint}</p>
+              <p className="mt-4 text-sm font-medium leading-6 text-theme-secondary">{config.startHint}</p>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-white/62">
+                <div className="rounded-2xl border border-theme-border bg-theme-subtle p-4">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-theme-muted">
                     <Trophy size={14} />
                     Điểm cao của bạn
                   </div>
-                  <div className="mt-3 text-3xl font-black text-white">{bestScore.toLocaleString('vi-VN')}</div>
+                  <div className="mt-3 text-3xl font-black text-theme-primary">{bestScore.toLocaleString('vi-VN')}</div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-white/62">
+                <div className="rounded-2xl border border-theme-border bg-theme-subtle p-4">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-theme-muted">
                     <Ticket size={14} />
                     Voucher
                   </div>
-                  <div className="mt-3 text-3xl font-black text-white">
+                  <div className="mt-3 text-3xl font-black text-theme-primary">
                     {config.voucherTiers.at(-1)?.percent ?? 0}%
                   </div>
                 </div>
               </div>
 
-              <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
-                <div className="mb-3 text-xs font-extrabold uppercase tracking-[0.16em] text-white/62">
+              <div className="mt-5 rounded-2xl border border-theme-border bg-theme-subtle p-4">
+                <div className="mb-3 text-xs font-extrabold uppercase tracking-[0.16em] text-theme-muted">
                   Top hôm nay
                 </div>
                 <div className="space-y-2">
                   {preview.length > 0 ? preview.map((item) => (
                     <div key={`${game}-${item.rank}-${item.name}`} className="flex items-center justify-between text-sm">
-                      <span className="font-semibold text-white/72">#{item.rank} {item.name}</span>
+                      <span className="font-semibold text-theme-secondary">#{item.rank} {item.name}</span>
                       <span className="font-black text-[#00e5ff]">{item.score.toLocaleString('vi-VN')}</span>
                     </div>
                   )) : (
-                    <p className="text-sm font-medium text-white/65">Chưa có điểm trong hôm nay.</p>
+                    <p className="text-sm font-medium text-theme-muted">Chưa có điểm trong hôm nay.</p>
                   )}
                 </div>
               </div>
@@ -158,15 +158,15 @@ export default function MiniGameHub() {
 
       {summary?.vouchers && summary.vouchers.length > 0 && (
         <section className="mx-auto max-w-6xl px-4 pb-12 md:px-6">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
-            <div className="mb-4 flex items-center gap-2 text-sm font-extrabold uppercase tracking-[0.16em] text-white/65">
+          <div className="rounded-2xl border border-theme-border bg-theme-card p-5">
+            <div className="mb-4 flex items-center gap-2 text-sm font-extrabold uppercase tracking-[0.16em] text-theme-muted">
               <Ticket size={16} />
               Voucher đang có
             </div>
             <div className="grid gap-3 md:grid-cols-3">
               {summary.vouchers.slice(0, 6).map((voucher) => (
-                <div key={voucher.id} className="rounded-xl border border-white/10 bg-black/20 p-4">
-                  <div className="text-xs font-bold uppercase tracking-[0.12em] text-white/62">
+                <div key={voucher.id} className="rounded-xl border border-theme-border bg-theme-subtle p-4">
+                  <div className="text-xs font-bold uppercase tracking-[0.12em] text-theme-muted">
                     Giảm {voucher.discount_percent}%
                   </div>
                   <div className="mt-2 font-mono text-sm font-black text-[#00e5ff]">{voucher.code}</div>

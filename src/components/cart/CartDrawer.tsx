@@ -42,14 +42,14 @@ function CartDrawerContent({ drawerState }: { drawerState: 'entering' | 'open' |
         aria-modal="true"
         aria-label="Giỏ hàng"
         data-drawer-state={drawerState}
-        className="m-drawer m-drawer-right fixed right-0 top-0 z-[110] flex h-full w-full max-w-md flex-col bg-secondary shadow-2xl"
+        className="theme-transition m-drawer m-drawer-right fixed right-0 top-0 z-[110] flex h-full w-full max-w-md flex-col bg-theme-section text-theme-primary shadow-2xl"
       >
-        <div className="flex items-center justify-between border-b border-neutral-200 bg-white p-5">
+        <div className="flex items-center justify-between border-b border-theme-border bg-theme-card p-5">
           <div className="flex items-center gap-2">
             <ShoppingBag size={20} className="text-primary" />
             <h2 className="font-heading font-bold text-lg">Giỏ hàng ({items.length})</h2>
           </div>
-          <button onClick={closeCart} aria-label="Đóng giỏ hàng" className="m-press grid h-10 w-10 place-items-center rounded-xl hover:bg-neutral-100">
+          <button onClick={closeCart} aria-label="Đóng giỏ hàng" className="m-press grid h-10 w-10 place-items-center rounded-xl hover:bg-theme-subtle">
             <X size={20} />
           </button>
         </div>
@@ -65,24 +65,24 @@ function CartDrawerContent({ drawerState }: { drawerState: 'entering' | 'open' |
           ) : (
             <div className="space-y-4">
               {items.map((item) => (
-                <div key={item.id} className="flex gap-3 rounded-[18px] border border-neutral-200 bg-white p-3 shadow-card">
-                  <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-secondary">
+                <div key={item.id} className="flex gap-3 rounded-[18px] border border-theme-border bg-theme-card p-3 shadow-card">
+                  <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-theme-subtle">
                     <Image src={getPublicImageUrl(item.image)} alt={item.name} fill sizes="80px" className="object-contain p-1" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm text-neutral-900 line-clamp-2 mb-1">{item.name}</h3>
+                    <h3 className="mb-1 line-clamp-2 text-sm font-semibold text-theme-primary">{item.name}</h3>
                     {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
-                      <p className="text-xs text-neutral-500 mb-1">
+                      <p className="mb-1 text-xs text-theme-muted">
                         {Object.entries(item.selectedOptions).map(([k, v]) => `${k}: ${v}`).join(', ')}
                       </p>
                     )}
                     <p className="font-bold text-primary text-sm">{formatPrice(item.price)}</p>
                     <div className="flex items-center gap-2 mt-2">
-                      <button aria-label="Giảm số lượng" onClick={() => updateQuantity(item.id, item.quantity - 1)} className="m-press grid h-7 w-7 place-items-center rounded-lg bg-neutral-100 hover:bg-neutral-200">
+                      <button aria-label="Giảm số lượng" onClick={() => updateQuantity(item.id, item.quantity - 1)} className="m-press grid h-7 w-7 place-items-center rounded-lg bg-theme-subtle hover:bg-theme-elevated">
                         <Minus size={12} />
                       </button>
                       <span className="text-sm font-semibold w-6 text-center">{item.quantity}</span>
-                      <button aria-label="Tăng số lượng" onClick={() => updateQuantity(item.id, item.quantity + 1)} className="m-press grid h-7 w-7 place-items-center rounded-lg bg-neutral-100 hover:bg-neutral-200">
+                      <button aria-label="Tăng số lượng" onClick={() => updateQuantity(item.id, item.quantity + 1)} className="m-press grid h-7 w-7 place-items-center rounded-lg bg-theme-subtle hover:bg-theme-elevated">
                         <Plus size={12} />
                       </button>
                       <button aria-label="Xóa sản phẩm" onClick={() => removeItem(item.id)} className="m-press ml-auto grid h-7 w-7 place-items-center rounded-lg hover:bg-red-50 hover:text-primary">
@@ -97,7 +97,7 @@ function CartDrawerContent({ drawerState }: { drawerState: 'entering' | 'open' |
         </div>
 
         {items.length > 0 && (
-          <div className="space-y-3 border-t border-neutral-200 bg-white p-5">
+          <div className="space-y-3 border-t border-theme-border bg-theme-card p-5">
             <GiftWrapOptionContent
               embedded
               compact
@@ -106,17 +106,17 @@ function CartDrawerContent({ drawerState }: { drawerState: 'entering' | 'open' |
               isReady={isGiftWrapReady}
             />
             <div className="flex items-center justify-between">
-              <span className="text-neutral-500">Tạm tính</span>
-              <span className="font-bold text-lg text-neutral-900">{formatPrice(getTotalPrice())}</span>
+              <span className="text-theme-muted">Tạm tính</span>
+              <span className="text-lg font-bold text-theme-primary">{formatPrice(getTotalPrice())}</span>
             </div>
             {giftWrap && giftWrapEnabled && (
               <div className="flex items-center justify-between text-sm">
-                <span className="text-neutral-500">Gói quà &amp; thư tay</span>
-                <span className="font-semibold text-neutral-900">{formatPrice(giftWrapFee)}</span>
+                <span className="text-theme-muted">Gói quà &amp; thư tay</span>
+                <span className="font-semibold text-theme-primary">{formatPrice(giftWrapFee)}</span>
               </div>
             )}
-            <div className="flex items-center justify-between border-t border-dashed border-neutral-200 pt-3">
-              <span className="font-bold text-neutral-900">Tổng trước vận chuyển</span>
+            <div className="flex items-center justify-between border-t border-dashed border-theme-border pt-3">
+              <span className="font-bold text-theme-primary">Tổng trước vận chuyển</span>
               <span className="font-heading text-xl text-primary">{formatPrice(estimatedTotal)}</span>
             </div>
             <Link href="/thanh-toan" onClick={closeCart}>

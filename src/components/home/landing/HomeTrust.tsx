@@ -25,7 +25,7 @@ export default function HomeTrust({ reviews }: { reviews: HomeReview[] }) {
   const hasReviews = reviews.length > 0
 
   return (
-    <section className="bg-pink/55 py-16 md:py-24">
+    <section className="bg-theme-section py-16 text-theme-primary md:py-24">
       <BrandContainer>
         <LandingSectionHeader
           eyebrow={hasReviews ? 'Khách kể thật' : 'Vì sao bạn sẽ thích'}
@@ -41,15 +41,15 @@ export default function HomeTrust({ reviews }: { reviews: HomeReview[] }) {
             {reviews.slice(0, 3).map((review, index) => (
               <figure
                 key={review.id}
-                className={`rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-6 shadow-card ${index === 1 ? 'md:-translate-y-4' : ''}`}
+                className={`theme-transition rounded-[18px] border-[1.5px] border-theme-border bg-theme-card p-6 shadow-card ${index === 1 ? 'md:-translate-y-4' : ''}`}
               >
                 <div className="mb-5 flex gap-1 text-primary" role="img" aria-label={`${review.rating} trên 5 sao`}>
                   {Array.from({ length: review.rating }, (_, star) => (
                     <Star key={star} size={16} fill="currentColor" />
                   ))}
                 </div>
-                <blockquote className="text-sm leading-7 text-neutral-700">“{review.content}”</blockquote>
-                <figcaption className="mt-5 border-t border-neutral-100 pt-4 text-sm font-extrabold text-text">
+                <blockquote className="text-sm leading-7 text-theme-secondary">“{review.content}”</blockquote>
+                <figcaption className="mt-5 border-t border-theme-border pt-4 text-sm font-extrabold text-theme-primary">
                   {review.name}
                 </figcaption>
               </figure>
@@ -58,12 +58,12 @@ export default function HomeTrust({ reviews }: { reviews: HomeReview[] }) {
         ) : (
           <div className="grid gap-4 md:grid-cols-3">
             {fallbackReasons.map(({ icon: Icon, title, text }) => (
-              <article key={title} className="rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-6">
+              <article key={title} className="theme-transition rounded-[18px] border-[1.5px] border-theme-border bg-theme-card p-6">
                 <div className="grid h-11 w-11 place-items-center rounded-lg bg-primary-light text-primary">
                   <Icon size={21} />
                 </div>
-                <h3 className="mt-5 font-heading text-xl text-text">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-neutral-500">{text}</p>
+                <h3 className="mt-5 font-heading text-xl text-theme-primary">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-theme-muted">{text}</p>
               </article>
             ))}
           </div>

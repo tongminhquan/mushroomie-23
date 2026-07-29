@@ -32,11 +32,10 @@ export default async function AccountPage() {
   }
 
   return (
-    <div className="bg-secondary min-h-[70vh]">
+    <div className="theme-transition min-h-[70vh] bg-theme-page text-theme-primary">
       {/* Cream hero */}
       <section
-        className="relative overflow-hidden border-b border-[#f0e0d6]"
-        style={{ background: 'radial-gradient(120% 130% at 85% 0%, #ffeee6, var(--color-secondary))' }}
+        className="relative overflow-hidden border-b border-theme-border bg-theme-section"
       >
         <span className="animate-float-soft pointer-events-none absolute right-[12%] top-[28%] text-2xl text-primary" aria-hidden>
           🍄
@@ -46,8 +45,8 @@ export default async function AccountPage() {
             <p className="text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-2">
               Tài khoản thành viên
             </p>
-            <h1 className="font-heading text-3xl sm:text-4xl text-neutral-800 mb-2">Tài khoản của tôi</h1>
-            <p className="text-neutral-500 text-sm sm:text-base">
+            <h1 className="mb-2 font-heading text-3xl text-theme-primary sm:text-4xl">Tài khoản của tôi</h1>
+            <p className="text-sm text-theme-muted sm:text-base">
               Chào, {user.name} ♡ — quản lý thông tin và đơn hàng của bạn tại Nhà Nấm nhỏ.
             </p>
           </AnimateOnScroll>
@@ -60,8 +59,7 @@ export default async function AccountPage() {
           <div className="col-span-1">
             <AnimateOnScroll animation="fade-right">
               <div
-                className="sticky top-24 overflow-hidden rounded-[20px] border-[1.5px] bg-white p-4 shadow-card sm:p-6"
-                style={{ borderColor: '#f0e0d6' }}
+                className="sticky top-24 overflow-hidden rounded-[20px] border-[1.5px] border-theme-border bg-theme-card p-4 shadow-card sm:p-6"
               >
                 <div className="mb-5 flex min-w-0 items-center gap-3 sm:mb-6 sm:gap-4">
                   <div className="shrink-0">
@@ -71,10 +69,10 @@ export default async function AccountPage() {
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h2 className="flex min-w-0 items-center gap-1.5 font-heading text-base leading-5 text-neutral-800">
+                    <h2 className="flex min-w-0 items-center gap-1.5 font-heading text-base leading-5 text-theme-primary">
                       <span className="truncate" title={user.name}>{user.name}</span>
                     {(user as any).google_id && (
-                      <span title="Tài khoản liên kết Google" className="flex shrink-0 items-center justify-center rounded-full border border-[#f0e0d6] bg-white p-0.5">
+                      <span title="Tài khoản liên kết Google" className="flex shrink-0 items-center justify-center rounded-full border border-theme-border bg-theme-elevated p-0.5">
                         <svg className="w-3 h-3" viewBox="0 0 24 24">
                           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -84,7 +82,7 @@ export default async function AccountPage() {
                       </span>
                     )}
                     </h2>
-                    <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-sm text-neutral-500">
+                    <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-sm text-theme-muted">
                       <span className="truncate" title={user.email}>{user.email}</span>
                       {(user as any).is_email_verified && <span title="Email đã xác minh" className="shrink-0 text-green-500"><Shield size={12} /></span>}
                     </div>
@@ -96,7 +94,7 @@ export default async function AccountPage() {
                   <UserIcon className="shrink-0" size={20} />
                   Thông tin cá nhân
                 </Link>
-                <Link href="/tai-khoan/don-hang" className="flex min-h-11 items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-600 transition-colors hover:bg-[#fff7f2] sm:gap-3 sm:px-4 sm:text-base">
+                <Link href="/tai-khoan/don-hang" className="flex min-h-11 items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2.5 text-[13px] font-medium text-theme-secondary transition-colors hover:bg-theme-subtle sm:gap-3 sm:px-4 sm:text-base">
                   <Package className="shrink-0" size={20} />
                   Đơn hàng của tôi
                   <span className="ml-auto shrink-0 rounded-full bg-[#ffece6] px-2 py-0.5 text-xs font-bold text-accent-kraft">
@@ -104,12 +102,12 @@ export default async function AccountPage() {
                   </span>
                 </Link>
                 {['super_admin', 'admin', 'viewer'].includes(user.role) && (
-                  <Link href="/admin" className="flex min-h-11 items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2.5 text-[13px] font-medium text-neutral-600 transition-colors hover:bg-[#fff7f2] sm:gap-3 sm:px-4 sm:text-base">
+                  <Link href="/admin" className="flex min-h-11 items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2.5 text-[13px] font-medium text-theme-secondary transition-colors hover:bg-theme-subtle sm:gap-3 sm:px-4 sm:text-base">
                     <Settings className="shrink-0" size={20} />
                     Quản trị viên
                   </Link>
                 )}
-                <div className="mt-3 border-t border-[#f0e0d6] pt-3 sm:mt-4 sm:pt-4">
+                <div className="mt-3 border-t border-theme-border pt-3 sm:mt-4 sm:pt-4">
                   <SignOutButton className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-bold text-primary transition-colors hover:bg-[#fdeceb] sm:gap-3 sm:px-4 sm:text-base" />
                 </div>
               </nav>
@@ -121,14 +119,13 @@ export default async function AccountPage() {
           <div className="col-span-1 md:col-span-2">
             <AnimateOnScroll animation="fade-up" delay={200}>
               <div
-                className="bg-white rounded-[22px] shadow-card border-[1.5px] p-6 sm:p-8"
-                style={{ borderColor: '#f0e0d6' }}
+                className="rounded-[22px] border-[1.5px] border-theme-border bg-theme-card p-6 shadow-card sm:p-8"
               >
               <div className="flex items-center gap-3 mb-6">
                 <span className="flex items-center justify-center w-10 h-10 rounded-xl text-lg" style={{ background: '#ffd6d6' }} aria-hidden>
                   👤
                 </span>
-                <h2 className="font-heading text-xl text-neutral-800">Thông tin cá nhân</h2>
+                <h2 className="font-heading text-xl text-theme-primary">Thông tin cá nhân</h2>
               </div>
 
               <EditProfileForm
