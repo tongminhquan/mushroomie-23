@@ -14,8 +14,6 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://mushroomie.io.vn/gioi-thieu' },
 }
 
-const LINE = '#f0e0d6'
-
 const timeline = [
   { year: '2018 · Tuổi 18', title: 'Niềm yêu thích đầu tiên', desc: 'Những hộp hạt cườm đủ màu, vài chiếc charm và mong muốn tạo ra phụ kiện mang dấu ấn riêng. Mushroomie bắt đầu chỉ từ niềm vui làm thủ công.', dot: '#c91414' },
   { year: '2020 · Những đơn đầu tiên', title: 'Từ bạn bè đến cộng đồng', desc: 'Những món quà tặng bạn bè được yêu thích, rồi lan tỏa. Mushroomie nhận đơn custom đầu tiên — mỗi đơn là một câu chuyện riêng.', dot: '#ff6b6b' },
@@ -44,23 +42,20 @@ export default async function AboutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-secondary pb-16">
+    <div className="min-h-screen bg-theme-page pb-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(aboutPageSchema()) }}
       />
       {/* Hero */}
-      <section
-        className="relative overflow-hidden text-center"
-        style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
-      >
+      <section className="relative overflow-hidden bg-theme-section text-center">
         <span aria-hidden className="pointer-events-none select-none absolute left-[12%] top-[30%] text-2xl text-coral animate-float-soft">❤</span>
         <span aria-hidden className="pointer-events-none select-none absolute right-[14%] top-[26%] text-xl text-accent-mint animate-float-soft" style={{ animationDelay: '1.2s' }}>★</span>
         <div className="relative max-w-3xl mx-auto px-6 pt-12 pb-12">
           <div className="text-5xl mb-4 animate-float-soft" aria-hidden>🍄</div>
           <span className="inline-block text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-3">Câu chuyện Mushroomie</span>
-          <h1 className="font-heading text-3xl md:text-5xl leading-[1.08] text-neutral-900 mb-4">Bắt đầu từ một góc bàn nhỏ &amp; tình yêu handmade</h1>
-          <p className="m-0 mx-auto max-w-lg text-[15px] md:text-base leading-relaxed text-neutral-500">
+          <h1 className="font-heading text-3xl md:text-5xl leading-[1.08] text-theme-primary mb-4">Bắt đầu từ một góc bàn nhỏ &amp; tình yêu handmade</h1>
+          <p className="m-0 mx-auto max-w-lg text-[15px] md:text-base leading-relaxed text-theme-secondary">
             Mỗi hạt cườm, mỗi chiếc charm đều mang một câu chuyện. Đây là câu chuyện của chúng mình — và sẽ sớm có cả bạn trong đó ♡
           </p>
         </div>
@@ -79,8 +74,8 @@ export default async function AboutPage() {
                   aria-hidden
                 >{m.emoji || ''}</span>
                 <div className="font-heading text-[13px] mb-1.5" style={{ color: m.dot }}>{m.year}</div>
-                <h2 className="font-heading text-lg text-neutral-900 mb-1.5">{m.title}</h2>
-                <p className="m-0 text-sm leading-relaxed text-neutral-500">{m.desc}</p>
+                <h2 className="font-heading text-lg text-theme-primary mb-1.5">{m.title}</h2>
+                <p className="m-0 text-sm leading-relaxed text-theme-secondary">{m.desc}</p>
               </div>
             </AnimateOnScroll>
           ))}
@@ -91,17 +86,17 @@ export default async function AboutPage() {
       <section className="max-w-4xl mx-auto px-4 sm:px-6 pt-12">
         <div className="grid gap-5 md:grid-cols-2">
           <AnimateOnScroll animation="fade-up">
-            <div className="h-full bg-white rounded-[24px] p-7 border-[1.5px] shadow-card" style={{ borderColor: LINE }}>
+            <div className="h-full rounded-[24px] border border-theme-border bg-theme-card p-7 shadow-card">
               <div className="text-2xl mb-2.5" aria-hidden>🌱</div>
-              <h2 className="font-heading text-xl text-neutral-900 mb-2">Tầm nhìn</h2>
-              <p className="m-0 text-sm leading-relaxed text-neutral-500">Trở thành thương hiệu phụ kiện handmade cá nhân hóa được Gen Z yêu thích nhất — nơi mỗi món đồ đều kể một câu chuyện.</p>
+              <h2 className="font-heading text-xl text-theme-primary mb-2">Tầm nhìn</h2>
+              <p className="m-0 text-sm leading-relaxed text-theme-secondary">Trở thành thương hiệu phụ kiện handmade cá nhân hóa được Gen Z yêu thích nhất — nơi mỗi món đồ đều kể một câu chuyện.</p>
             </div>
           </AnimateOnScroll>
           <AnimateOnScroll animation="fade-up" delay={120}>
-            <div className="h-full bg-white rounded-[24px] p-7 border-[1.5px] shadow-card" style={{ borderColor: LINE }}>
+            <div className="h-full rounded-[24px] border border-theme-border bg-theme-card p-7 shadow-card">
               <div className="text-2xl mb-2.5" aria-hidden>💌</div>
-              <h2 className="font-heading text-xl text-neutral-900 mb-2">Sứ mệnh</h2>
-              <p className="m-0 text-sm leading-relaxed text-neutral-500">Giúp mỗi bạn trẻ thể hiện cá tính &amp; cảm xúc qua phụ kiện thủ công, biến những chi tiết nhỏ thành niềm vui mỗi ngày.</p>
+              <h2 className="font-heading text-xl text-theme-primary mb-2">Sứ mệnh</h2>
+              <p className="m-0 text-sm leading-relaxed text-theme-secondary">Giúp mỗi bạn trẻ thể hiện cá tính &amp; cảm xúc qua phụ kiện thủ công, biến những chi tiết nhỏ thành niềm vui mỗi ngày.</p>
             </div>
           </AnimateOnScroll>
         </div>
@@ -112,16 +107,16 @@ export default async function AboutPage() {
         <AnimateOnScroll animation="fade-up">
           <div className="text-center mb-8">
             <span className="inline-block text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-2.5">Giá trị cốt lõi</span>
-            <h2 className="font-heading text-2xl md:text-3xl text-neutral-900">Ba điều chúng mình luôn giữ</h2>
+            <h2 className="font-heading text-2xl md:text-3xl text-theme-primary">Ba điều chúng mình luôn giữ</h2>
           </div>
         </AnimateOnScroll>
         <div className="grid gap-5 sm:grid-cols-3">
           <StaggerChildren animation="fade-up" staggerDelay={120}>
             {values.map((v) => (
-              <div key={v.title} className="text-center bg-white rounded-[24px] p-7 border-[1.5px] shadow-card" style={{ borderColor: LINE }}>
+              <div key={v.title} className="rounded-[24px] border border-theme-border bg-theme-card p-7 text-center shadow-card">
                 <span aria-hidden className="mx-auto mb-3.5 grid h-14 w-14 place-items-center rounded-[18px] text-2xl" style={{ background: v.chip }}>{v.icon}</span>
-                <h3 className="font-heading text-lg text-neutral-900 mb-1.5">{v.title}</h3>
-                <p className="m-0 text-[13.5px] leading-relaxed text-neutral-500">{v.desc}</p>
+                <h3 className="font-heading text-lg text-theme-primary mb-1.5">{v.title}</h3>
+                <p className="m-0 text-[13.5px] leading-relaxed text-theme-secondary">{v.desc}</p>
               </div>
             ))}
           </StaggerChildren>
@@ -133,7 +128,7 @@ export default async function AboutPage() {
         <section className="max-w-5xl mx-auto px-4 sm:px-6 pt-14">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-7">
             <AnimateOnScroll animation="fade-up">
-              <h2 className="font-heading text-2xl md:text-3xl text-neutral-900">Sản phẩm của chúng mình</h2>
+              <h2 className="font-heading text-2xl md:text-3xl text-theme-primary">Sản phẩm của chúng mình</h2>
             </AnimateOnScroll>
             <Link href="/san-pham" className="inline-flex items-center gap-2 text-sm font-extrabold text-primary hover:text-primary-dark">
               Tất cả sản phẩm <ArrowRight size={16} />
@@ -147,14 +142,13 @@ export default async function AboutPage() {
                   <Link
                     href={`/san-pham?category=${prod.slug}`}
                     key={prod.id ?? idx}
-                    className="flex h-full flex-col rounded-[24px] p-6 border-[1.5px] shadow-card transition hover:-translate-y-1 hover:shadow-hover bg-white"
-                    style={{ borderColor: LINE }}
+                    className="flex h-full flex-col rounded-[24px] border border-theme-border bg-theme-card p-6 shadow-card transition hover:-translate-y-1 hover:shadow-hover"
                   >
                     <div className="mb-4 grid h-14 w-14 shrink-0 place-items-center rounded-[16px]" style={{ background: catChips[prod.slug] || '#fff0ed' }}>
                       <CategoryIcon iconSrc={iconSrc} name={prod.name} size="md" imageClassName="max-h-8 max-w-8" />
                     </div>
-                    <h3 className="font-heading text-base text-neutral-900 leading-tight mb-2">{prod.name}</h3>
-                    <p className="text-[13px] leading-6 text-neutral-500 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
+                    <h3 className="font-heading text-base text-theme-primary leading-tight mb-2">{prod.name}</h3>
+                    <p className="text-[13px] leading-6 text-theme-secondary overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
                       {prod.description || 'Khám phá bộ sưu tập phụ kiện độc đáo từ Mushroomie.'}
                     </p>
                     <span className="mt-auto pt-4 text-xs font-extrabold uppercase tracking-[0.08em] text-primary">Xem chi tiết →</span>

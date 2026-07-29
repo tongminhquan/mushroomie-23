@@ -74,13 +74,13 @@ export default function ProfileCompletionGuard({ children }: { children: React.R
       <div className="fixed inset-0 z-[9999] bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4">
         {/* `animate-in fade-in zoom-in` là class chết: dự án không cài tailwindcss-animate
             và cũng không định nghĩa trong globals.css. .m-pop-in là utility có thật. */}
-        <div className="m-pop-in bg-white w-full max-w-md rounded-3xl shadow-2xl p-8">
+        <div className="m-pop-in w-full max-w-md rounded-3xl border border-theme-border bg-theme-card p-8 shadow-2xl">
           <div className="text-center mb-6 flex flex-col items-center">
             <div className="relative h-16 w-40 mb-4">
               <Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority />
             </div>
             <h2 className="font-heading text-xl font-bold text-primary mb-2">Bổ sung thông tin</h2>
-            <p className="text-stone-500 text-sm">
+            <p className="text-theme-secondary text-sm">
               Vì lý do bảo mật và để giao hàng, bạn cần bổ sung số điện thoại và địa chỉ trước khi tiếp tục.
             </p>
           </div>
@@ -93,26 +93,26 @@ export default function ProfileCompletionGuard({ children }: { children: React.R
             )}
             
             <div>
-              <label className="block text-sm font-semibold text-stone-700 mb-1">Số điện thoại <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-semibold text-theme-secondary mb-1">Số điện thoại <span className="text-red-500">*</span></label>
               <input 
                 type="tel" 
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 disabled={loading}
-                className="w-full px-4 py-3 rounded-xl border-2 border-stone-200 focus:border-primary focus:ring-4 focus:ring-primary/20 outline-none transition-all"
+                className="w-full px-4 py-3 rounded-xl border-2 border-theme-border bg-theme-input text-theme-primary focus:border-primary focus:ring-4 focus:ring-primary/20 outline-none transition-all"
                 placeholder="Ví dụ: 0912345678"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-stone-700 mb-1">Địa chỉ nhận hàng <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-semibold text-theme-secondary mb-1">Địa chỉ nhận hàng <span className="text-red-500">*</span></label>
               <textarea 
                 value={address}
                 onChange={e => setAddress(e.target.value)}
                 disabled={loading}
                 rows={3}
-                className="w-full px-4 py-3 rounded-xl border-2 border-stone-200 focus:border-primary focus:ring-4 focus:ring-primary/20 outline-none transition-all resize-none"
+                className="w-full px-4 py-3 rounded-xl border-2 border-theme-border bg-theme-input text-theme-primary focus:border-primary focus:ring-4 focus:ring-primary/20 outline-none transition-all resize-none"
                 placeholder="Số nhà, Tên đường, Phường/Xã, Quận/Huyện, Tỉnh/Thành phố"
                 required
               />

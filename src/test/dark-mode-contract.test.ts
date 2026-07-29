@@ -20,6 +20,27 @@ const publicThemeFiles = [
   'src/components/minigame/GameReadyOverlay.tsx',
   'src/components/minigame/TetrisGame.tsx',
   'src/components/minigame/BlockBlastGame.tsx',
+  'src/app/(user)/tai-khoan/dang-nhap/page.tsx',
+  'src/app/(user)/tai-khoan/dang-ky/page.tsx',
+  'src/app/(user)/tai-khoan/quen-mat-khau/page.tsx',
+  'src/app/(user)/tai-khoan/dat-lai-mat-khau/page.tsx',
+  'src/app/(user)/san-pham/page.tsx',
+  'src/app/(user)/tin-tuc/page.tsx',
+  'src/app/(user)/gioi-thieu/page.tsx',
+  'src/app/(user)/lien-he/page.tsx',
+  'src/app/(user)/danh-gia/page.tsx',
+  'src/app/(user)/tai-khoan/don-hang/page.tsx',
+  'src/app/(user)/tai-khoan/don-hang/[code]/page.tsx',
+  'src/app/(user)/tai-khoan/voucher/page.tsx',
+  'src/app/(user)/voucher/page.tsx',
+  'src/app/(user)/thanh-toan/xac-nhan/page.tsx',
+  'src/components/account/AvatarUpload.tsx',
+  'src/components/account/EditProfileForm.tsx',
+  'src/components/account/ReviewOrderModal.tsx',
+  'src/components/layout/ProfileCompletionGuard.tsx',
+  'src/components/layout/FloatingWidgets.tsx',
+  'src/components/product/CatalogSeoContent.tsx',
+  'src/components/product/TokenReviewForm.tsx',
 ]
 
 describe('sitewide dark-mode contract', () => {
@@ -59,6 +80,18 @@ describe('sitewide dark-mode contract', () => {
     const header = read('src/components/layout/Header.tsx')
     expect(header).toContain('<ThemeToggle variant="icon"')
     expect(header).toContain('<ThemeToggle variant="segmented"')
+  })
+
+  it('themes the admin shell and exposes a persistent theme control', () => {
+    const layout = read('src/app/admin/layout.tsx')
+    const sidebar = read('src/components/layout/AdminSidebar.tsx')
+    const adminUi = read('src/components/admin/AdminUI.tsx')
+
+    expect(layout).toContain('admin-theme-scope')
+    expect(layout).toContain('bg-theme-page')
+    expect(sidebar).toContain('<ThemeToggle variant="segmented"')
+    expect(sidebar).toContain('bg-theme-elevated')
+    expect(adminUi).toContain('bg-theme-card')
   })
 
   it.each(publicThemeFiles)('%s declares a reviewed semantic theme surface', (file) => {

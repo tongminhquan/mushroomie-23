@@ -38,10 +38,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
-    >
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-theme-page p-4 text-theme-primary">
       <span aria-hidden className="animate-float-soft pointer-events-none absolute left-[10%] top-[18%] text-3xl select-none" style={{ color: '#ffd6d6' }}>❤</span>
       <span aria-hidden className="animate-float-soft pointer-events-none absolute right-[12%] bottom-[16%] text-2xl select-none">🍄</span>
 
@@ -50,9 +47,9 @@ export default function ForgotPasswordPage() {
           <div className="relative h-20 w-48 mb-4"><Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority /></div>
           <span className="text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-2">Khôi phục tài khoản</span>
           <h1 className="font-heading text-2xl font-bold">Quên mật khẩu</h1>
-          <p className="text-neutral-500 text-sm mt-1">Nhập email của bạn để nhận link khôi phục</p>
+          <p className="mt-1 text-sm text-theme-muted">Nhập email của bạn để nhận link khôi phục</p>
         </div>
-        <div className="bg-white rounded-3xl shadow-card p-8 border-[1.5px]" style={{ borderColor: '#f0e0d6' }}>
+        <div className="rounded-3xl border-[1.5px] border-theme-border bg-theme-card p-8 shadow-card">
           {message ? (
             <div className="text-center">
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full text-2xl" style={{ background: '#ffece6' }}>✉️</div>
@@ -73,7 +70,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full px-4 py-3 border-[1.5px] border-[#e2d3c8] rounded-xl text-sm bg-[#fffdfb] focus:outline-none focus:border-primary transition-colors"
+                className="theme-transition w-full rounded-xl border-[1.5px] border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-primary outline-none focus:border-primary"
                   placeholder="email@example.com"
                 />
               </div>
@@ -83,7 +80,7 @@ export default function ForgotPasswordPage() {
               <Button type="submit" isLoading={isLoading} className="w-full" size="lg">
                 Gửi link khôi phục
               </Button>
-              <p className="text-center text-sm text-neutral-500 mt-4">
+              <p className="mt-4 text-center text-sm text-theme-muted">
                 <Link href="/tai-khoan/dang-nhap" className="text-primary font-semibold hover:underline">
                   Quay lại đăng nhập
                 </Link>

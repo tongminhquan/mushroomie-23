@@ -24,13 +24,13 @@ export function AdminPageHeader({
         <p className="mb-1 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.12em] text-primary">
           <span aria-hidden>🍄</span> Mushroomie admin
         </p>
-        <h1 className="font-heading text-2xl text-neutral-900 md:text-3xl">
+        <h1 className="font-heading text-2xl text-theme-primary md:text-3xl">
           {icon && <span className="mr-2" aria-hidden>{icon}</span>}
           {title}
         </h1>
         {/* Gạch chân kiểu băng dính washi */}
         <div className="mt-2 h-1.5 w-16 rounded-full bg-[linear-gradient(90deg,#e41d1d_0%,#ff6b6b_55%,#ffd6d6_100%)] opacity-80" aria-hidden />
-        {description && <p className="mt-2 text-sm text-neutral-500">{description}</p>}
+        {description && <p className="mt-2 text-sm text-theme-secondary">{description}</p>}
       </div>
       {action}
     </header>
@@ -50,7 +50,7 @@ export function AdminCard({
   return (
     <section
       className={cn(
-        'rounded-[16px] border-[1.5px] border-warm-border bg-white shadow-card',
+        'rounded-[16px] border border-theme-border bg-theme-card shadow-card',
         hover && 'transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-hover motion-reduce:transform-none motion-reduce:transition-none',
         className,
       )}
@@ -68,7 +68,7 @@ export function AdminStatusBadge({
   tone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info'
 }) {
   const tones = {
-    neutral: 'bg-[#fff7f2] text-[#8a5635] ring-[#ecd9c9]',
+    neutral: 'bg-theme-subtle text-accent-kraft ring-theme-border',
     success: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
     warning: 'bg-[#fff3d6] text-[#8a6a1f] ring-[#f0dc9e]',
     danger: 'bg-red-50 text-red-700 ring-red-200',
@@ -103,11 +103,11 @@ export function AdminEmptyState({
 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#fff7f2] text-2xl shadow-[inset_0_0_0_1.5px_#f0e0d6]" aria-hidden>
+      <div className="flex h-14 w-14 items-center justify-center rounded-full border border-theme-border bg-theme-subtle text-2xl" aria-hidden>
         {emoji}
       </div>
-      <p className="text-sm font-semibold text-neutral-600">{title}</p>
-      {hint && <p className="max-w-[420px] text-xs text-neutral-400">{hint}</p>}
+      <p className="text-sm font-semibold text-theme-secondary">{title}</p>
+      {hint && <p className="max-w-[420px] text-xs text-theme-muted">{hint}</p>}
       {action && <div className="mt-2">{action}</div>}
     </div>
   )

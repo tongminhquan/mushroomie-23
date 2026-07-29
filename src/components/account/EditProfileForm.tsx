@@ -63,27 +63,27 @@ export function EditProfileForm({
       <div className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-neutral-500 mb-1">Họ và tên</label>
-            <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-neutral-800 font-medium">
+            <label className="block text-sm font-medium text-theme-muted mb-1">Họ và tên</label>
+            <div className="p-3 bg-theme-subtle rounded-xl border border-theme-border text-theme-primary font-medium">
               {form.name}
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-500 mb-1">Email</label>
-            <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-neutral-800 font-medium">
+            <label className="block text-sm font-medium text-theme-muted mb-1">Email</label>
+            <div className="p-3 bg-theme-subtle rounded-xl border border-theme-border text-theme-primary font-medium">
               {initialEmail}
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-500 mb-1">Số điện thoại</label>
-            <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-neutral-800 font-medium">
-              {form.phone || <span className="text-neutral-400 italic font-normal">Chưa cập nhật</span>}
+            <label className="block text-sm font-medium text-theme-muted mb-1">Số điện thoại</label>
+            <div className="p-3 bg-theme-subtle rounded-xl border border-theme-border text-theme-primary font-medium">
+              {form.phone || <span className="text-theme-muted italic font-normal">Chưa cập nhật</span>}
             </div>
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-neutral-500 mb-1">Địa chỉ nhận hàng</label>
-            <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-neutral-800 font-medium">
-              {form.address || <span className="text-neutral-400 italic font-normal">Chưa cập nhật</span>}
+            <label className="block text-sm font-medium text-theme-muted mb-1">Địa chỉ nhận hàng</label>
+            <div className="p-3 bg-theme-subtle rounded-xl border border-theme-border text-theme-primary font-medium">
+              {form.address || <span className="text-theme-muted italic font-normal">Chưa cập nhật</span>}
             </div>
           </div>
         </div>
@@ -94,7 +94,7 @@ export function EditProfileForm({
           </div>
         )}
 
-        <div className="pt-6 mt-6 border-t border-neutral-100 flex justify-end">
+        <div className="pt-6 mt-6 border-t border-theme-border flex justify-end">
           <Button type="button" onClick={() => setIsEditing(true)} size="md">
             Chỉnh sửa thông tin
           </Button>
@@ -107,14 +107,14 @@ export function EditProfileForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-semibold text-neutral-700 mb-1">Họ và tên *</label>
+          <label className="block text-sm font-semibold text-theme-secondary mb-1">Họ và tên *</label>
           <input
             type="text"
             required
             value={form.name}
             onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-            className={`w-full px-4 py-3 border-2 rounded-xl text-sm focus:outline-none transition-colors ${
-              errors.name ? 'border-red-400 focus:border-red-400' : 'border-neutral-200 focus:border-primary'
+            className={`w-full px-4 py-3 border-2 rounded-xl bg-theme-input text-theme-primary text-sm focus:outline-none transition-colors ${
+              errors.name ? 'border-red-400 focus:border-red-400' : 'border-theme-border focus:border-primary'
             }`}
             placeholder="Nguyễn Văn A"
           />
@@ -122,24 +122,24 @@ export function EditProfileForm({
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-neutral-500 mb-1">Email (Không thể thay đổi)</label>
+          <label className="block text-sm font-semibold text-theme-muted mb-1">Email (Không thể thay đổi)</label>
           <input
             type="email"
             disabled
             value={initialEmail}
-            className="w-full px-4 py-3 border-2 border-neutral-100 bg-neutral-50 rounded-xl text-sm text-neutral-400 cursor-not-allowed"
+            className="w-full px-4 py-3 border-2 border-theme-border bg-theme-subtle rounded-xl text-sm text-theme-muted cursor-not-allowed"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-neutral-700 mb-1">Số điện thoại *</label>
+          <label className="block text-sm font-semibold text-theme-secondary mb-1">Số điện thoại *</label>
           <input
             type="tel"
             required
             value={form.phone}
             onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-            className={`w-full px-4 py-3 border-2 rounded-xl text-sm focus:outline-none transition-colors ${
-              errors.phone ? 'border-red-400 focus:border-red-400' : 'border-neutral-200 focus:border-primary'
+            className={`w-full px-4 py-3 border-2 rounded-xl bg-theme-input text-theme-primary text-sm focus:outline-none transition-colors ${
+              errors.phone ? 'border-red-400 focus:border-red-400' : 'border-theme-border focus:border-primary'
             }`}
             placeholder="0912345678"
           />
@@ -147,14 +147,14 @@ export function EditProfileForm({
         </div>
 
         <div className="sm:col-span-2">
-          <label className="block text-sm font-semibold text-neutral-700 mb-1">Địa chỉ nhận hàng *</label>
+          <label className="block text-sm font-semibold text-theme-secondary mb-1">Địa chỉ nhận hàng *</label>
           <textarea
             required
             rows={3}
             value={form.address}
             onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))}
-            className={`w-full px-4 py-3 border-2 rounded-xl text-sm focus:outline-none transition-colors ${
-              errors.address ? 'border-red-400 focus:border-red-400' : 'border-neutral-200 focus:border-primary'
+            className={`w-full px-4 py-3 border-2 rounded-xl bg-theme-input text-theme-primary text-sm focus:outline-none transition-colors ${
+              errors.address ? 'border-red-400 focus:border-red-400' : 'border-theme-border focus:border-primary'
             }`}
             placeholder="Số nhà, Tên đường, Phường/Xã, Quận/Huyện, Tỉnh/Thành phố"
           />
@@ -162,7 +162,7 @@ export function EditProfileForm({
         </div>
       </div>
 
-      <div className="pt-6 mt-6 border-t border-neutral-100 flex justify-end gap-3">
+      <div className="pt-6 mt-6 border-t border-theme-border flex justify-end gap-3">
         <Button
           type="button"
           variant="outline"

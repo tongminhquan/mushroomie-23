@@ -64,10 +64,7 @@ function ResetPasswordPageContent() {
   }
 
   return (
-    <div
-      className="min-h-screen bg-secondary flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
-    >
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-theme-page p-4 text-theme-primary">
       <span aria-hidden className="animate-float-soft pointer-events-none absolute left-[12%] top-[18%] text-2xl text-[#ffd6d6] select-none">❤</span>
       <span aria-hidden className="animate-float-soft pointer-events-none absolute right-[12%] bottom-[18%] text-2xl select-none">🍄</span>
 
@@ -76,9 +73,9 @@ function ResetPasswordPageContent() {
           <div className="relative h-20 w-48 mb-4"><Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority /></div>
           <span className="text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-2">Tài khoản Mushroomie</span>
           <h1 className="font-heading text-2xl">Đặt lại mật khẩu</h1>
-          <p className="text-neutral-500 text-sm mt-1">Vui lòng nhập mật khẩu mới của bạn</p>
+          <p className="mt-1 text-sm text-theme-muted">Vui lòng nhập mật khẩu mới của bạn</p>
         </div>
-        <div className="bg-white rounded-3xl shadow-card p-8 border-[1.5px]" style={{ borderColor: '#f0e0d6' }}>
+        <div className="rounded-3xl border-[1.5px] border-theme-border bg-theme-card p-8 shadow-card">
           {message ? (
             <div className="text-center">
               <div className="flex flex-col items-center gap-3 mb-6">
@@ -104,7 +101,7 @@ function ResetPasswordPageContent() {
                   onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
                   required
                   disabled={!token}
-                  className="w-full px-4 py-3 border-[1.5px] border-[#e2d3c8] rounded-xl text-sm bg-[#fffdfb] focus:outline-none focus:border-primary transition-colors disabled:bg-neutral-100 disabled:opacity-60"
+                  className="theme-transition w-full rounded-xl border-[1.5px] border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-primary outline-none focus:border-primary disabled:bg-theme-subtle disabled:opacity-60"
                   placeholder="Nhập mật khẩu mới"
                 />
               </div>
@@ -116,7 +113,7 @@ function ResetPasswordPageContent() {
                   onChange={(e) => setForm((p) => ({ ...p, confirmPassword: e.target.value }))}
                   required
                   disabled={!token}
-                  className="w-full px-4 py-3 border-[1.5px] border-[#e2d3c8] rounded-xl text-sm bg-[#fffdfb] focus:outline-none focus:border-primary transition-colors disabled:bg-neutral-100 disabled:opacity-60"
+                  className="theme-transition w-full rounded-xl border-[1.5px] border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-primary outline-none focus:border-primary disabled:bg-theme-subtle disabled:opacity-60"
                   placeholder="Nhập lại mật khẩu mới"
                 />
               </div>
@@ -129,7 +126,7 @@ function ResetPasswordPageContent() {
             </form>
           )}
         </div>
-        <p className="text-center text-xs text-neutral-500 mt-6">Làm bằng tay, trao bằng tim 🍄</p>
+        <p className="mt-6 text-center text-xs text-theme-muted">Làm bằng tay, trao bằng tim 🍄</p>
       </div>
     </div>
   )
@@ -137,7 +134,7 @@ function ResetPasswordPageContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-secondary py-16 text-center text-sm text-neutral-500">Đang tải trang đặt lại mật khẩu...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-theme-page py-16 text-center text-sm text-theme-muted">Đang tải trang đặt lại mật khẩu...</div>}>
       <ResetPasswordPageContent />
     </Suspense>
   )

@@ -195,17 +195,11 @@ export default async function ProductsPage({
   }
 
   return (
-    <div className="min-h-screen bg-secondary pb-16">
+    <div className="min-h-screen bg-theme-page pb-16">
       {itemListSchema && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(itemListSchema) }} />
       )}
-      <section
-        className="relative overflow-hidden border-b border-warm-border"
-        style={{
-          background:
-            'radial-gradient(120% 120% at 85% 0%, #ffeee6, var(--color-secondary))',
-        }}
-      >
+      <section className="relative overflow-hidden border-b border-theme-border bg-theme-section">
         <BrandContainer className="py-5 md:py-7">
           <Breadcrumb
             items={[
@@ -219,15 +213,15 @@ export default async function ProductsPage({
               <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.14em] text-primary">
                 {catalogSeo.eyebrow}
               </p>
-              <h1 className="text-balance font-heading text-3xl leading-tight text-neutral-900 md:text-5xl">
+              <h1 className="text-balance font-heading text-3xl leading-tight text-theme-primary md:text-5xl">
                 {title}
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-600 md:text-base">
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-theme-secondary md:text-base">
                 {description}
               </p>
 
               <div className="mt-5 flex flex-wrap items-center gap-2.5">
-                <span className="rounded-full border border-warm-border bg-white px-4 py-2 text-sm font-semibold text-neutral-700">
+                <span className="rounded-full border border-theme-border bg-theme-card px-4 py-2 text-sm font-semibold text-theme-secondary">
                   {total} sản phẩm sẵn sàng cá nhân hóa
                 </span>
                 {activeCategory && (
@@ -238,7 +232,7 @@ export default async function ProductsPage({
                 {searchKeyword && (
                   <Link
                     href={buildUrl({ search: undefined, page: undefined })}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-warm-border bg-white px-4 py-2 text-sm font-semibold text-neutral-700 transition-colors hover:border-primary hover:text-primary"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-theme-border bg-theme-card px-4 py-2 text-sm font-semibold text-theme-secondary transition-colors hover:border-primary hover:text-primary"
                   >
                     Xóa từ khóa
                     <X size={14} />
@@ -247,8 +241,8 @@ export default async function ProductsPage({
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-warm-border bg-white/90 p-5 shadow-card backdrop-blur">
-              <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-neutral-400">
+            <div className="rounded-[24px] border border-theme-border bg-theme-card p-5 shadow-card">
+              <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-theme-muted">
                 Sắp xếp nhanh
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -281,13 +275,13 @@ export default async function ProductsPage({
       <BrandContainer className="mt-8">
         <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
           <aside className="min-w-0">
-            <div className="sticky top-24 rounded-[24px] border border-warm-border bg-white p-5 shadow-card">
-              <div className="mb-4 flex items-center gap-2 border-b border-warm-border pb-3">
+            <div className="sticky top-24 rounded-[24px] border border-theme-border bg-theme-card p-5 shadow-card">
+              <div className="mb-4 flex items-center gap-2 border-b border-theme-border pb-3">
                 <SlidersHorizontal size={18} className="text-primary" />
-                <h2 className="text-sm font-extrabold text-text">Lọc sản phẩm</h2>
+                <h2 className="text-sm font-extrabold text-theme-primary">Lọc sản phẩm</h2>
               </div>
 
-              <h3 className="mb-2 text-xs font-extrabold uppercase tracking-[0.08em] text-neutral-400">
+              <h3 className="mb-2 text-xs font-extrabold uppercase tracking-[0.08em] text-theme-muted">
                 Danh mục
               </h3>
               <div className="flex gap-2 overflow-x-auto pb-2 lg:block lg:space-y-1.5 lg:overflow-visible">
@@ -296,7 +290,7 @@ export default async function ProductsPage({
                   className={`block shrink-0 rounded-full px-4 py-2 text-sm font-bold transition-colors ${
                     !categorySlug
                       ? 'bg-primary text-white'
-                      : 'text-neutral-700 hover:bg-primary-light hover:text-primary'
+                      : 'text-theme-secondary hover:bg-primary-light hover:text-primary'
                   }`}
                 >
                   Tất cả
@@ -308,7 +302,7 @@ export default async function ProductsPage({
                     className={`block shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                       categorySlug === category.slug
                         ? 'bg-primary text-white'
-                        : 'text-neutral-700 hover:bg-primary-light hover:text-primary'
+                        : 'text-theme-secondary hover:bg-primary-light hover:text-primary'
                     }`}
                   >
                     {category.name}
@@ -316,10 +310,10 @@ export default async function ProductsPage({
                 ))}
               </div>
 
-              <h3 className="mb-2 mt-6 text-xs font-extrabold uppercase tracking-[0.08em] text-neutral-400">
+              <h3 className="mb-2 mt-6 text-xs font-extrabold uppercase tracking-[0.08em] text-theme-muted">
                 Cách xem
               </h3>
-              <p className="rounded-[20px] bg-secondary px-4 py-3 text-sm leading-relaxed text-neutral-600">
+              <p className="rounded-[20px] bg-theme-subtle px-4 py-3 text-sm leading-relaxed text-theme-secondary">
                 Mỗi mẫu đều có thể được cá nhân hóa thêm khi bạn vào trang chi tiết sản phẩm.
               </p>
             </div>
@@ -328,11 +322,11 @@ export default async function ProductsPage({
           <section className="min-w-0" aria-label="Danh sách sản phẩm">
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold text-neutral-700">
+                <p className="text-sm font-semibold text-theme-secondary">
                   Hiển thị {products.length} trên tổng {total} sản phẩm
                 </p>
                 {totalPages > 1 && (
-                  <p className="mt-1 text-xs uppercase tracking-[0.08em] text-neutral-400">
+                  <p className="mt-1 text-xs uppercase tracking-[0.08em] text-theme-muted">
                     Trang {page} / {totalPages}
                   </p>
                 )}
@@ -370,7 +364,7 @@ export default async function ProductsPage({
                     className={`grid h-11 w-11 place-items-center rounded-full text-sm font-extrabold ${
                       pageNumber === page
                         ? 'bg-primary text-white'
-                        : 'border border-warm-border bg-white text-text hover:border-primary hover:text-primary'
+                        : 'border border-theme-border bg-theme-card text-theme-primary hover:border-primary hover:text-primary'
                     }`}
                   >
                     {pageNumber}

@@ -245,10 +245,10 @@ function ConfirmPageContent() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center bg-secondary">
+      <div className="flex min-h-[60vh] items-center justify-center bg-theme-page">
         <div className="text-center">
           <RefreshCw className="mx-auto mb-4 animate-spin text-primary" size={32} />
-          <p className="text-neutral-500">Đang tải thông tin thanh toán...</p>
+          <p className="text-theme-secondary">Đang tải thông tin thanh toán...</p>
         </div>
       </div>
     )
@@ -256,12 +256,12 @@ function ConfirmPageContent() {
 
   if (paymentStatus?.status === 'PAID') {
     return (
-      <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-8 text-center shadow-strong">
+      <div className="min-h-screen bg-theme-page flex items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-[18px] border border-theme-border bg-theme-card p-8 text-center shadow-strong">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h1 className="mb-2 font-heading text-2xl text-neutral-900">Thanh toán thành công</h1>
-          <p className="text-neutral-500 mb-2">Mã đơn hàng: <strong>#{orderCode}</strong></p>
-          <p className="mb-6 text-sm text-neutral-500">Mushroomie đã nhận được thanh toán và sẽ bắt đầu làm sản phẩm cho bạn.</p>
+          <h1 className="mb-2 font-heading text-2xl text-theme-primary">Thanh toán thành công</h1>
+          <p className="text-theme-secondary mb-2">Mã đơn hàng: <strong>#{orderCode}</strong></p>
+          <p className="mb-6 text-sm text-theme-secondary">Mushroomie đã nhận được thanh toán và sẽ bắt đầu làm sản phẩm cho bạn.</p>
           <div className="space-y-3">
             <Link href={`/tai-khoan/don-hang/${orderCode}?accessToken=${encodeURIComponent(accessToken)}`}>
               <Button className="w-full">Xem chi tiết đơn hàng</Button>
@@ -277,12 +277,12 @@ function ConfirmPageContent() {
 
   if (orderInfo?.payment_method === 'cod') {
     return (
-      <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-8 text-center shadow-strong">
+      <div className="min-h-screen bg-theme-page flex items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-[18px] border border-theme-border bg-theme-card p-8 text-center shadow-strong">
           <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-          <h1 className="mb-2 font-heading text-2xl text-neutral-900">Đặt hàng thành công</h1>
-          <p className="text-neutral-500 mb-2">Mã đơn hàng: <strong>#{orderCode}</strong></p>
-          <p className="mb-6 text-sm text-neutral-500">Mushroomie sẽ liên hệ và giao hàng đến bạn trong thời gian sớm nhất. Bạn thanh toán khi nhận hàng.</p>
+          <h1 className="mb-2 font-heading text-2xl text-theme-primary">Đặt hàng thành công</h1>
+          <p className="text-theme-secondary mb-2">Mã đơn hàng: <strong>#{orderCode}</strong></p>
+          <p className="mb-6 text-sm text-theme-secondary">Mushroomie sẽ liên hệ và giao hàng đến bạn trong thời gian sớm nhất. Bạn thanh toán khi nhận hàng.</p>
           <div className="space-y-3">
             <Link href={`/tai-khoan/don-hang/${orderCode}?accessToken=${encodeURIComponent(accessToken)}`}>
               <Button className="w-full">Xem chi tiết đơn hàng</Button>
@@ -298,11 +298,11 @@ function ConfirmPageContent() {
 
   if (paymentStatus?.status === 'EXPIRED') {
     return (
-      <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white p-8 text-center shadow-strong">
+      <div className="min-h-screen bg-theme-page flex items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-[18px] border border-theme-border bg-theme-card p-8 text-center shadow-strong">
           <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h1 className="font-heading text-2xl font-bold text-neutral-900 mb-2">Đã hết hạn thanh toán</h1>
-          <p className="text-neutral-500 mb-6">Thời gian thanh toán đã hết hạn. Vui lòng đặt lại đơn hàng.</p>
+          <h1 className="font-heading text-2xl font-bold text-theme-primary mb-2">Đã hết hạn thanh toán</h1>
+          <p className="text-theme-secondary mb-6">Thời gian thanh toán đã hết hạn. Vui lòng đặt lại đơn hàng.</p>
           <Link href="/san-pham"><Button className="w-full">Đặt hàng mới</Button></Link>
         </div>
       </div>
@@ -310,10 +310,10 @@ function ConfirmPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-secondary py-6 md:py-10">
+    <div className="min-h-screen bg-theme-page py-6 md:py-10">
       <div className="max-w-xl mx-auto px-4">
         <CheckoutStepper currentStep={3} />
-        <div className="overflow-hidden rounded-[18px] border-[1.5px] border-[#f0e0d6] bg-white shadow-strong">
+        <div className="overflow-hidden rounded-[18px] border border-theme-border bg-theme-card shadow-strong">
           {/* Header */}
           <div className="bg-primary p-6 text-center text-white">
             <Landmark className="mx-auto mb-3" size={28} />
@@ -330,7 +330,7 @@ function ConfirmPageContent() {
                   <div className="mx-auto w-[280px] h-[280px] rounded-2xl border-4 border-primary-light bg-neutral-50 flex items-center justify-center">
                     <div className="text-center">
                       <RefreshCw size={24} className="animate-spin text-primary mx-auto mb-2" />
-                      <p className="text-xs text-neutral-500">Đang tạo mã QR...</p>
+                      <p className="text-xs text-theme-muted">Đang tạo mã QR...</p>
                     </div>
                   </div>
                 )}
@@ -360,7 +360,7 @@ function ConfirmPageContent() {
                 )}
 
                 {qrStatus === 'loaded' && (
-                  <p className="text-xs text-neutral-500 mt-2">Quét QR bằng app ngân hàng để chuyển tiền</p>
+                  <p className="text-xs text-theme-muted mt-2">Quét QR bằng app ngân hàng để chuyển tiền</p>
                 )}
               </div>
             ) : payment ? (
@@ -375,19 +375,19 @@ function ConfirmPageContent() {
             {payment && (
               <div className="bg-neutral-50 rounded-2xl p-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-neutral-500">Ngân hàng</span>
+                  <span className="text-theme-muted">Ngân hàng</span>
                   <span className="font-bold">{payment.bank_name}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-neutral-500">Số tài khoản</span>
+                  <span className="text-theme-muted">Số tài khoản</span>
                   <strong className="font-mono text-primary text-base">{payment.bank_account}</strong>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-neutral-500">Chủ tài khoản</span>
+                  <span className="text-theme-muted">Chủ tài khoản</span>
                   <span className="font-bold uppercase">{payment.account_name}</span>
                 </div>
-                <div className="flex justify-between text-sm border-t border-neutral-200 pt-2">
-                  <span className="text-neutral-500">Số tiền</span>
+                <div className="flex justify-between text-sm border-t border-theme-border pt-2">
+                  <span className="text-theme-muted">Số tiền</span>
                   <span className="font-bold text-primary text-lg">{formatPrice(Number(payment.amount))}</span>
                 </div>
                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mt-2">
@@ -406,14 +406,14 @@ function ConfirmPageContent() {
             )}
 
             {/* Auto-checking */}
-            <div className="flex items-center justify-center gap-2 text-xs text-neutral-400">
+            <div className="flex items-center justify-center gap-2 text-xs text-theme-muted">
               <RefreshCw size={12} className={polling ? 'animate-spin' : ''} />
               Hệ thống tự động kiểm tra thanh toán mỗi 5 giây
             </div>
 
-            <div className="rounded-[18px] border border-pink bg-secondary px-5 py-4">
+            <div className="rounded-[18px] border border-theme-border bg-theme-subtle px-5 py-4">
               <p className="mb-2 text-sm font-extrabold text-primary">Lưu ý quan trọng</p>
-              <ul className="space-y-1.5 text-sm leading-6 text-neutral-700">
+              <ul className="space-y-1.5 text-sm leading-6 text-theme-secondary">
                 <li>Chuyển đúng số tiền và nội dung bên trên.</li>
                 <li>Đơn hàng tự động xác nhận sau 1-5 phút.</li>
                 <li>Không đóng trang này trước khi chuyển khoản.</li>
@@ -429,7 +429,7 @@ function ConfirmPageContent() {
 
 export default function ConfirmPage() {
   return (
-    <Suspense fallback={<div className="brand-container py-16 text-center text-sm text-neutral-500">Đang tải thông tin thanh toán...</div>}>
+    <Suspense fallback={<div className="brand-container py-16 text-center text-sm text-theme-muted">Đang tải thông tin thanh toán...</div>}>
       <ConfirmPageContent />
     </Suspense>
   )

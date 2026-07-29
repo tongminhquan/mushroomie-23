@@ -824,6 +824,54 @@ html[data-theme="dark"] .prose {
   --tw-prose-td-borders: var(--border-default-theme);
 }
 
+/*
+ * Admin still contains legacy utility classes across many CRUD screens.
+ * Keep this compatibility layer scoped to the authenticated admin shell so
+ * older cards inherit the active theme without changing brand-white buttons
+ * on the public storefront.
+ */
+html[data-theme="dark"] .admin-theme-scope [class~="bg-white"] {
+  background-color: var(--surface-card);
+}
+
+html[data-theme="dark"] .admin-theme-scope :is(
+  [class~="bg-white/70"],
+  [class~="bg-white/75"],
+  [class~="bg-white/80"],
+  [class~="bg-white/90"],
+  [class~="bg-white/92"],
+  [class~="bg-white/94"],
+  [class~="bg-white/95"]
+) {
+  background-color: color-mix(in srgb, var(--surface-card) 92%, transparent);
+}
+
+html[data-theme="dark"] .admin-theme-scope :is(
+  [class~="bg-[#fff7f2]"],
+  [class~="bg-[#fffaf6]"],
+  [class~="bg-[#fffdfb]"],
+  [class~="bg-gray-100"]
+) {
+  background-color: var(--surface-muted);
+}
+
+html[data-theme="dark"] .admin-theme-scope :is(
+  [class~="border-[#ead8cd]"],
+  [class~="border-[#f0dfd4]"],
+  [class~="border-[#f0e0d6]"],
+  [class~="border-gray-200"]
+) {
+  border-color: var(--border-default-theme);
+}
+
+html[data-theme="dark"] .admin-theme-scope :is(
+  [class~="text-gray-700"],
+  [class~="text-neutral-600"],
+  [class~="text-neutral-700"]
+) {
+  color: var(--text-secondary-theme);
+}
+
 /* Only apply transitions to interactive elements, not all elements */
 a, button, input, textarea, select,
 [role="button"], [tabindex],

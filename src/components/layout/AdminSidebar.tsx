@@ -30,6 +30,7 @@ import {
   X,
 } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import ThemeToggle from '@/components/theme/ThemeToggle'
 
 interface AdminNavItem {
   href: string
@@ -44,8 +45,7 @@ interface AdminNavGroup {
   items: AdminNavItem[]
 }
 
-const sidebarSurface =
-  'bg-[radial-gradient(circle_at_15%_0%,rgba(255,214,214,0.75),transparent_28%),linear-gradient(180deg,#fffaf6_0%,#fff7f2_52%,#fff_100%)]'
+const sidebarSurface = 'bg-theme-elevated'
 
 const navGroups: AdminNavGroup[] = [
   {
@@ -118,7 +118,7 @@ export default function AdminSidebar() {
   return (
     <>
       <button
-        className="fixed left-4 top-3 z-40 grid h-11 w-11 place-items-center rounded-2xl border border-warm-border bg-white text-neutral-900 shadow-[0_12px_28px_rgba(91,48,35,0.12)] transition active:scale-95 md:hidden"
+        className="fixed left-4 top-3 z-40 grid h-11 w-11 place-items-center rounded-2xl border border-theme-border bg-theme-card text-theme-primary shadow-[0_12px_28px_rgba(91,48,35,0.12)] transition active:scale-95 md:hidden"
         onClick={() => setIsOpen(true)}
         aria-label="Mở menu admin"
         aria-expanded={isOpen}
@@ -141,7 +141,7 @@ export default function AdminSidebar() {
         className={cn(
           // transition-all animate cả box-shadow/width mỗi khung hình; giới hạn còn transform
           // để chạy trên compositor, và dùng chung easing với các drawer khác.
-          'fixed inset-y-0 left-0 z-50 isolate flex h-[100dvh] flex-shrink-0 transform flex-col overflow-visible border-r border-[#ead8cd] shadow-[16px_0_40px_rgba(91,48,35,0.10)] m-drawer motion-reduce:transition-none md:relative md:translate-x-0 md:shadow-none',
+          'fixed inset-y-0 left-0 z-50 isolate flex h-[100dvh] flex-shrink-0 transform flex-col overflow-visible border-r border-theme-border shadow-[16px_0_40px_rgba(91,48,35,0.10)] m-drawer motion-reduce:transition-none md:relative md:translate-x-0 md:shadow-none',
           sidebarSurface,
           isOpen ? 'translate-x-0' : '-translate-x-full',
           isCollapsed ? 'w-[78px]' : 'w-[274px]',
@@ -155,7 +155,7 @@ export default function AdminSidebar() {
         )}
         <div
           className={cn(
-            'relative z-10 flex h-[86px] flex-shrink-0 items-center border-b border-[#f0dfd4]',
+            'relative z-10 flex h-[86px] flex-shrink-0 items-center border-b border-theme-border',
             isCollapsed ? 'justify-center' : 'justify-between px-4',
           )}
         >
@@ -168,11 +168,11 @@ export default function AdminSidebar() {
           >
             <div
               className={cn(
-                'relative grid flex-shrink-0 place-items-center border border-white bg-white shadow-[0_12px_26px_rgba(185,121,75,0.16)] transition group-hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0',
+                'relative grid flex-shrink-0 place-items-center border border-theme-border bg-theme-card shadow-[0_12px_26px_rgba(185,121,75,0.16)] transition group-hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0',
                 isCollapsed ? 'h-14 w-14 rounded-[24px]' : 'h-12 w-12 rounded-[18px]',
               )}
             >
-              <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-primary" aria-hidden />
+              <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-theme-border bg-primary" aria-hidden />
               <Image src="/logo.webp" alt="Mushroomie" width={44} height={44} className="h-10 w-10 object-contain" priority />
             </div>
             {!isCollapsed && (
@@ -187,7 +187,7 @@ export default function AdminSidebar() {
 
           {!isCollapsed && (
             <button
-              className="hidden h-10 w-10 items-center justify-center rounded-2xl border border-warm-border bg-white text-accent-kraft shadow-sm transition hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 md:flex"
+              className="hidden h-10 w-10 items-center justify-center rounded-2xl border border-theme-border bg-theme-card text-accent-kraft shadow-sm transition hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 md:flex"
               onClick={() => setIsCollapsed(true)}
               aria-label="Thu gọn menu"
               type="button"
@@ -197,7 +197,7 @@ export default function AdminSidebar() {
           )}
 
           <button
-            className="mr-2 grid h-11 w-11 place-items-center rounded-xl text-neutral-500 transition-colors hover:bg-white hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 md:hidden"
+            className="mr-2 grid h-11 w-11 place-items-center rounded-xl text-theme-secondary transition-colors hover:bg-theme-card hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 md:hidden"
             onClick={() => setIsOpen(false)}
             aria-label="Đóng menu admin"
             type="button"
@@ -212,7 +212,7 @@ export default function AdminSidebar() {
               onClick={() => setIsCollapsed(false)}
               title="Mở rộng menu"
               aria-label="Mở rộng menu"
-              className="mb-4 hidden h-12 w-full items-center justify-center rounded-[20px] border border-[#ead8cd] bg-white/92 text-accent-kraft shadow-[0_10px_22px_rgba(91,48,35,0.08)] transition hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 motion-reduce:transition-none motion-reduce:hover:translate-y-0 md:flex"
+              className="mb-4 hidden h-12 w-full items-center justify-center rounded-[20px] border border-theme-border bg-theme-card text-accent-kraft shadow-[0_10px_22px_rgba(91,48,35,0.08)] transition hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 motion-reduce:transition-none motion-reduce:hover:translate-y-0 md:flex"
               type="button"
             >
               <ChevronRight size={20} className="flex-shrink-0" />
@@ -228,11 +228,11 @@ export default function AdminSidebar() {
               )}
               {!isCollapsed && (
                 <div className="mb-2 flex items-center gap-2 px-3">
-                  <span className="h-px flex-1 bg-[#ead8cd]" />
+                  <span className="h-px flex-1 bg-theme-border" />
                   <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-accent-kraft/80">
                     {group.label}
                   </p>
-                  <span className="h-px flex-1 bg-[#ead8cd]" />
+                  <span className="h-px flex-1 bg-theme-border" />
                 </div>
               )}
               <div className={cn('space-y-1.5', isCollapsed && 'flex flex-col items-center')}>
@@ -255,8 +255,8 @@ export default function AdminSidebar() {
                             ? 'bg-primary text-white shadow-[0_16px_34px_rgba(228,29,29,0.28)] ring-4 ring-primary/10'
                             : 'bg-primary text-white shadow-[0_14px_30px_rgba(228,29,29,0.24)]'
                           : isCollapsed
-                            ? 'border border-[#ead8cd] bg-white/94 text-accent-kraft shadow-[0_10px_24px_rgba(91,48,35,0.08)] hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary hover:shadow-[0_14px_28px_rgba(91,48,35,0.12)] motion-reduce:hover:translate-y-0'
-                            : 'text-neutral-600 hover:-translate-y-0.5 hover:bg-white/90 hover:text-primary hover:shadow-[0_10px_24px_rgba(91,48,35,0.08)] motion-reduce:hover:translate-y-0',
+                            ? 'border border-theme-border bg-theme-card text-accent-kraft shadow-[0_10px_24px_rgba(91,48,35,0.08)] hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary hover:shadow-[0_14px_28px_rgba(91,48,35,0.12)] motion-reduce:hover:translate-y-0'
+                            : 'text-theme-secondary hover:-translate-y-0.5 hover:bg-theme-card hover:text-primary hover:shadow-[0_10px_24px_rgba(91,48,35,0.08)] motion-reduce:hover:translate-y-0',
                       )}
                     >
                       {active && !isCollapsed && (
@@ -275,8 +275,8 @@ export default function AdminSidebar() {
                           active
                             ? 'bg-white/18 text-white'
                             : isCollapsed
-                              ? 'bg-[#fff7f2] text-accent-kraft shadow-[inset_0_0_0_1px_rgba(236,224,214,0.9)] group-hover:bg-white group-hover:text-primary'
-                              : 'bg-white text-accent-kraft shadow-[inset_0_0_0_1px_rgba(236,224,214,0.9)] group-hover:text-primary',
+                              ? 'bg-theme-subtle text-accent-kraft shadow-[inset_0_0_0_1px_var(--border-default)] group-hover:bg-theme-card group-hover:text-primary'
+                              : 'bg-theme-card text-accent-kraft shadow-[inset_0_0_0_1px_var(--border-default)] group-hover:text-primary',
                         )}
                       >
                         <item.icon size={isCollapsed ? 21 : 17} strokeWidth={2.2} />
@@ -297,7 +297,7 @@ export default function AdminSidebar() {
                         )}
                       />
                       {isCollapsed && (
-                        <span className="pointer-events-none absolute left-[calc(100%+12px)] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-2xl border border-warm-border bg-white px-3 py-2 text-xs font-bold text-neutral-700 opacity-0 shadow-[0_12px_28px_rgba(91,48,35,0.14)] transition motion-reduce:transition-none group-hover:opacity-100 group-focus-visible:opacity-100">
+                        <span className="pointer-events-none absolute left-[calc(100%+12px)] top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-2xl border border-theme-border bg-theme-card px-3 py-2 text-xs font-bold text-theme-secondary opacity-0 shadow-[0_12px_28px_rgba(91,48,35,0.14)] transition motion-reduce:transition-none group-hover:opacity-100 group-focus-visible:opacity-100">
                           {item.label}
                         </span>
                       )}
@@ -311,29 +311,30 @@ export default function AdminSidebar() {
 
         <div
           className={cn(
-            'relative z-10 border-t border-[#ead8cd] bg-white/80 backdrop-blur',
+            'relative z-10 border-t border-theme-border bg-theme-elevated',
             isCollapsed ? 'p-3.5' : 'p-3',
           )}
         >
           {!isCollapsed && (
-            <div className="mb-3 rounded-[20px] border border-[#f0dfd4] bg-[#fff7f2] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+            <div className="mb-3 rounded-[20px] border border-theme-border bg-theme-subtle p-3">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-primary">Studio Mushroomie</p>
-              <p className="mt-1 text-xs font-medium leading-relaxed text-neutral-500">Quản lý cửa hàng thủ công, đơn hàng và nội dung.</p>
+              <p className="mt-1 text-xs font-medium leading-relaxed text-theme-secondary">Quản lý cửa hàng thủ công, đơn hàng và nội dung.</p>
             </div>
           )}
+          {!isCollapsed && <ThemeToggle variant="segmented" className="mb-3 rounded-[18px] border border-theme-border bg-theme-card p-2" />}
           <div className={cn(isCollapsed ? 'space-y-2.5' : 'space-y-1.5')}>
             <Link
               href="/"
               target="_blank"
               title="Xem website"
               className={cn(
-                'group relative flex items-center gap-3 py-2.5 text-sm font-semibold text-neutral-500 transition-all hover:bg-white hover:text-primary hover:shadow-[0_10px_24px_rgba(91,48,35,0.08)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 motion-reduce:transition-none',
-                isCollapsed ? 'h-12 justify-center rounded-[20px] border border-[#ead8cd] bg-white/92 px-0 shadow-[0_10px_22px_rgba(91,48,35,0.08)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0' : 'rounded-[18px] px-3.5',
+                'group relative flex items-center gap-3 py-2.5 text-sm font-semibold text-theme-secondary transition-all hover:bg-theme-card hover:text-primary hover:shadow-[0_10px_24px_rgba(91,48,35,0.08)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 motion-reduce:transition-none',
+                isCollapsed ? 'h-12 justify-center rounded-[20px] border border-theme-border bg-theme-card px-0 shadow-[0_10px_22px_rgba(91,48,35,0.08)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0' : 'rounded-[18px] px-3.5',
               )}
             >
               <span
                 className={cn(
-                  'grid flex-shrink-0 place-items-center bg-white text-accent-kraft shadow-[inset_0_0_0_1px_rgba(236,224,214,0.9)] group-hover:text-primary',
+                  'grid flex-shrink-0 place-items-center bg-theme-card text-accent-kraft shadow-[inset_0_0_0_1px_var(--border-default)] group-hover:text-primary',
                   isCollapsed ? 'h-9 w-9 rounded-[16px]' : 'h-8 w-8 rounded-[14px]',
                 )}
               >
@@ -345,14 +346,14 @@ export default function AdminSidebar() {
               onClick={() => signOut({ callbackUrl: '/' })}
               title="Đăng xuất"
               className={cn(
-                'group flex w-full items-center gap-3 py-2.5 text-sm font-semibold text-neutral-500 transition-all hover:bg-[#fff0ed] hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 motion-reduce:transition-none',
-                isCollapsed ? 'h-12 justify-center rounded-[20px] border border-[#ead8cd] bg-white/92 px-0 shadow-[0_10px_22px_rgba(91,48,35,0.08)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0' : 'rounded-[18px] px-3.5',
+                'group flex w-full items-center gap-3 py-2.5 text-sm font-semibold text-theme-secondary transition-all hover:bg-theme-subtle hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 motion-reduce:transition-none',
+                isCollapsed ? 'h-12 justify-center rounded-[20px] border border-theme-border bg-theme-card px-0 shadow-[0_10px_22px_rgba(91,48,35,0.08)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0' : 'rounded-[18px] px-3.5',
               )}
               type="button"
             >
               <span
                 className={cn(
-                  'grid flex-shrink-0 place-items-center bg-white text-accent-kraft shadow-[inset_0_0_0_1px_rgba(236,224,214,0.9)] group-hover:text-primary',
+                  'grid flex-shrink-0 place-items-center bg-theme-card text-accent-kraft shadow-[inset_0_0_0_1px_var(--border-default)] group-hover:text-primary',
                   isCollapsed ? 'h-9 w-9 rounded-[16px]' : 'h-8 w-8 rounded-[14px]',
                 )}
               >

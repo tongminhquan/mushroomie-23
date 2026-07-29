@@ -15,10 +15,10 @@ export const dynamic = 'force-dynamic'
 
 function Notice({ title, body }: { title: string; body: string }) {
   return (
-    <div className="rounded-[18px] border-[1.5px] border-warm-border bg-white p-6 text-center">
+    <div className="rounded-[18px] border border-theme-border bg-theme-card p-6 text-center">
       <div className="text-4xl" aria-hidden>🍄</div>
-      <h1 className="mt-3 font-heading text-xl text-neutral-900">{title}</h1>
-      <p className="mt-2 text-sm leading-relaxed text-neutral-600">{body}</p>
+      <h1 className="mt-3 font-heading text-xl text-theme-primary">{title}</h1>
+      <p className="mt-2 text-sm leading-relaxed text-theme-secondary">{body}</p>
       <Link
         href="/san-pham"
         className="mt-5 inline-block rounded-full bg-primary px-6 py-3 text-sm font-bold text-white"
@@ -98,10 +98,10 @@ export default async function ReviewByTokenPage({
       <div className="py-10">
         <div className="mx-auto max-w-lg">
           <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-primary">Đơn {order.order_code}</p>
-          <h1 className="mt-2 font-heading text-2xl text-neutral-900 md:text-3xl">
+          <h1 className="mt-2 font-heading text-2xl text-theme-primary md:text-3xl">
             {order.customer_name.trim() || 'Bạn'} thấy sản phẩm thế nào?
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+          <p className="mt-2 text-sm leading-relaxed text-theme-secondary">
             Mushroomie làm thủ công từng món nên rất mong nghe cảm nhận thật của bạn. Đánh giá sẽ hiển thị sau khi
             được duyệt.
           </p>

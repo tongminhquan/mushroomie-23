@@ -140,7 +140,7 @@ export default function CartPage() {
             </section>
 
             <aside
-              className="h-fit min-w-0 rounded-[22px] border-[1.5px] border-theme-border bg-theme-card p-5 shadow-card"
+              className="min-w-0 h-fit rounded-[22px] border-[1.5px] border-theme-border bg-theme-card p-5 shadow-card"
             >
               <div className="mb-4 flex items-center gap-2">
                 <PackageCheck size={20} className="text-primary" />

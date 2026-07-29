@@ -86,10 +86,7 @@ export default function RegisterPage() {
   ]
 
   return (
-    <div
-      className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden"
-      style={{ background: 'radial-gradient(120% 120% at 50% 0%, #ffeee6, var(--color-secondary))' }}
-    >
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-theme-page p-4 text-theme-primary">
       {/* Decorative floating emoji */}
       <span className="animate-float-soft pointer-events-none absolute left-[8%] top-[18%] text-3xl text-coral/80 select-none" aria-hidden>❤</span>
       <span className="animate-float-soft pointer-events-none absolute right-[10%] bottom-[16%] text-2xl text-pink select-none" aria-hidden>🍄</span>
@@ -99,15 +96,15 @@ export default function RegisterPage() {
           <div className="relative h-20 w-48 mb-4"><Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority /></div>
           <span className="text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-2">Nhà Nấm nhỏ ♡</span>
           <h1 className="font-heading text-2xl font-bold">Tạo tài khoản Mushroomie</h1>
-          <p className="text-neutral-500 text-sm mt-1">Tham gia cộng đồng phụ kiện handmade!</p>
+          <p className="mt-1 text-sm text-theme-muted">Tham gia cộng đồng phụ kiện handmade!</p>
         </div>
-        <div className="bg-white rounded-[24px] shadow-card border-[1.5px] p-8" style={{ borderColor: '#f0e0d6' }}>
+        <div className="rounded-[24px] border-[1.5px] border-theme-border bg-theme-card p-8 shadow-card">
           {/* Nút đăng ký bằng Google */}
           <button
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isGoogleLoading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 border-[1.5px] border-[#e2d3c8] rounded-xl text-sm font-semibold bg-[#fffdfb] hover:border-primary hover:bg-primary-light transition-all disabled:opacity-60 disabled:cursor-not-allowed mb-5"
+            className="theme-transition mb-5 flex w-full items-center justify-center gap-3 rounded-xl border-[1.5px] border-theme-border bg-theme-input px-4 py-3 text-sm font-semibold text-theme-primary hover:border-primary hover:bg-theme-subtle disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isGoogleLoading ? (
               <span className="w-5 h-5 border-2 border-neutral-400 border-t-transparent rounded-full animate-spin" />
@@ -125,22 +122,22 @@ export default function RegisterPage() {
 
           {/* Đường phân cách */}
           <div className="flex items-center gap-3 mb-5">
-            <div className="flex-1 h-px bg-[#f0e0d6]" />
-            <span className="text-xs text-neutral-400 font-semibold uppercase tracking-wide">hoặc đăng ký bằng email</span>
-            <div className="flex-1 h-px bg-[#f0e0d6]" />
+            <div className="h-px flex-1 bg-theme-border" />
+            <span className="text-xs font-semibold uppercase tracking-wide text-theme-muted">hoặc đăng ký bằng email</span>
+            <div className="h-px flex-1 bg-theme-border" />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {fields.map((field) => (
               <div key={field.name}>
-                <label className="block text-sm font-semibold mb-1.5 text-neutral-700">{field.label}</label>
+                <label className="mb-1.5 block text-sm font-semibold text-theme-secondary">{field.label}</label>
                 <input
                   type={field.type}
                   value={(form as any)[field.name]}
                   onChange={(e) => setForm((p) => ({ ...p, [field.name]: e.target.value }))}
                   required={field.required}
-                  className={`w-full px-4 py-3 border-[1.5px] rounded-xl text-sm bg-[#fffdfb] focus:outline-none transition-colors ${
-                    errors[field.name] ? 'border-red-400 focus:border-red-400' : 'border-[#e2d3c8] focus:border-primary'
+                  className={`theme-transition w-full rounded-xl border-[1.5px] bg-theme-input px-4 py-3 text-sm text-theme-primary outline-none ${
+                    errors[field.name] ? 'border-red-400 focus:border-red-400' : 'border-theme-border focus:border-primary'
                   }`}
                   placeholder={field.placeholder}
                 />
@@ -149,8 +146,8 @@ export default function RegisterPage() {
                 )}
               </div>
             ))}
-            <div className="rounded-xl border border-[#f0e0d6] bg-[#fffaf7] p-4">
-              <label className="mb-1.5 block text-sm font-semibold text-neutral-700">Mã xác minh email</label>
+            <div className="rounded-xl border border-theme-border bg-theme-subtle p-4">
+              <label className="mb-1.5 block text-sm font-semibold text-theme-secondary">Mã xác minh email</label>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -160,7 +157,7 @@ export default function RegisterPage() {
                   onChange={(event) => setOtp(event.target.value.replace(/\D/g, '').slice(0, 6))}
                   disabled={!otpSent}
                   placeholder="6 chữ số"
-                  className="min-w-0 flex-1 rounded-xl border-[1.5px] border-[#e2d3c8] bg-white px-4 py-3 text-center font-bold tracking-[0.25em] outline-none focus:border-primary disabled:bg-neutral-100"
+                  className="theme-transition min-w-0 flex-1 rounded-xl border-[1.5px] border-theme-border bg-theme-input px-4 py-3 text-center font-bold tracking-[0.25em] text-theme-primary outline-none focus:border-primary disabled:bg-theme-subtle"
                 />
                 <button
                   type="button"
@@ -172,11 +169,11 @@ export default function RegisterPage() {
                 </button>
               </div>
               {errors.otp && <p className="mt-2 text-xs text-red-500">{errors.otp[0]}</p>}
-              {otpSent && !errors.otp && <p className="mt-2 text-xs text-neutral-500">Mã có hiệu lực 5 phút. Hãy kiểm tra cả Spam/Quảng cáo.</p>}
+              {otpSent && !errors.otp && <p className="mt-2 text-xs text-theme-muted">Mã có hiệu lực 5 phút. Hãy kiểm tra cả Spam/Quảng cáo.</p>}
             </div>
             <Button type="submit" isLoading={isLoading} className="w-full rounded-full font-bold shadow-[0_8px_20px_rgba(201,20,20,0.3)]" size="lg">Tạo tài khoản</Button>
           </form>
-          <p className="text-center text-sm text-neutral-500 mt-5">
+          <p className="mt-5 text-center text-sm text-theme-muted">
             Đã có tài khoản?{' '}
             <Link href="/tai-khoan/dang-nhap" className="text-primary font-semibold hover:underline">Đăng nhập</Link>
           </p>
