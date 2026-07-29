@@ -37,4 +37,10 @@ describe('sitewide dark-mode contract', () => {
     expect(css).not.toContain('.theme-transition *')
     expect(css).toContain('prefers-reduced-motion: reduce')
   })
+
+  it('places both theme controls in public navigation', () => {
+    const header = read('src/components/layout/Header.tsx')
+    expect(header).toContain('<ThemeToggle variant="icon"')
+    expect(header).toContain('<ThemeToggle variant="segmented"')
+  })
 })

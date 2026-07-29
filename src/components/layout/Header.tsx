@@ -14,6 +14,7 @@ import {
   User,
   X,
 } from 'lucide-react'
+import ThemeToggle from '@/components/theme/ThemeToggle'
 import SafeImage from '@/components/ui/SafeImage'
 import { useCartStore } from '@/store/cart'
 
@@ -112,7 +113,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
   }, [hydrated, totalItems])
 
   return (
-    <header className="relative z-50 border-b border-warm-border bg-secondary">
+    <header className="theme-transition relative z-50 border-b border-theme bg-theme-page text-theme-primary">
       <div className="hidden bg-text text-white md:block">
         <div className="brand-container flex h-9 items-center justify-between text-[11px] font-semibold">
           <p className="m-slogan-shimmer">Làm bằng tay, trao bằng tim</p>
@@ -123,7 +124,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
         </div>
       </div>
 
-      <div className="sticky top-0 border-b border-warm-border bg-secondary/92 backdrop-blur-md">
+      <div className="theme-transition sticky top-0 border-b border-theme bg-theme-page/90 backdrop-blur-md">
         <div className="brand-container flex h-[74px] items-center gap-3 md:h-[82px] md:gap-6">
           <button
             type="button"
@@ -131,7 +132,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
             aria-expanded={menuOpen}
             aria-controls="mobile-main-navigation"
             onClick={() => setMenuOpen((value) => !value)}
-            className="m-press grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-neutral-200 text-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 md:hidden"
+            className="m-press grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-theme bg-theme-card text-theme-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 md:hidden"
           >
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -159,7 +160,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                 onChange={(event) => setSearchQuery(event.target.value)}
                 aria-label="Tìm sản phẩm"
                 placeholder="Tìm vòng tay, móc khóa, charm..."
-                className="h-11 w-full rounded-xl border border-neutral-200 bg-white/70 pl-11 pr-24 text-sm outline-none transition focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
+                className="theme-transition h-11 w-full rounded-xl border border-theme bg-theme-input pl-11 pr-24 text-sm text-theme-primary outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
               />
               <button
                 className="absolute right-1.5 top-1.5 h-8 rounded-lg bg-primary px-4 text-xs font-bold text-white hover:bg-primary-dark"
@@ -177,35 +178,36 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
               aria-expanded={searchOpen}
               aria-controls="mobile-product-search"
               onClick={() => setSearchOpen((value) => !value)}
-              className="m-press grid h-11 w-11 place-items-center rounded-xl text-text hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 md:hidden"
+              className="m-press grid h-11 w-11 place-items-center rounded-xl text-theme-primary hover:bg-theme-subtle focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 md:hidden"
             >
               <Search size={20} />
             </button>
             <Link
               href="/tai-khoan/don-hang"
               aria-label="Đơn hàng"
-              className="hidden h-10 items-center gap-2 rounded-xl px-3 text-sm font-bold text-text hover:bg-neutral-100 lg:flex"
+              className="hidden h-10 items-center gap-2 rounded-xl px-3 text-sm font-bold text-theme-primary hover:bg-theme-subtle lg:flex"
             >
               <ClipboardList size={19} className="text-primary" />
               Đơn hàng
             </Link>
+            <ThemeToggle variant="icon" className="hidden md:grid" />
             <div className="group relative hidden md:block">
               <Link
                 href={session ? '/tai-khoan' : '/tai-khoan/dang-nhap'}
                 aria-haspopup="menu"
-                className="flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-bold text-text hover:bg-neutral-100"
+                className="flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-bold text-theme-primary hover:bg-theme-subtle"
               >
                 <User size={19} className="text-primary" />
                 <span className="max-w-24 truncate">{session?.user?.name?.split(' ')[0] || 'Tài khoản'}</span>
                 <ChevronDown size={14} />
               </Link>
               <div className="invisible absolute right-0 top-full w-52 translate-y-2 pt-2 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-                <div className="rounded-xl border border-neutral-200 bg-white p-2 shadow-strong">
+                <div className="theme-transition rounded-xl border border-theme bg-theme-card p-2 text-theme-primary shadow-[var(--shadow-overlay-theme)]">
                   {session ? (
                     <>
-                      <Link href="/tai-khoan" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-neutral-100">Hồ sơ của tôi</Link>
-                      <Link href="/tai-khoan/don-hang" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-neutral-100">Đơn hàng của tôi</Link>
-                      <Link href="/tai-khoan/voucher" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-neutral-100">Voucher của tôi</Link>
+                      <Link href="/tai-khoan" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Hồ sơ của tôi</Link>
+                      <Link href="/tai-khoan/don-hang" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Đơn hàng của tôi</Link>
+                      <Link href="/tai-khoan/voucher" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Voucher của tôi</Link>
                       {isAdmin && (
                         <Link href="/admin" className="block rounded-lg px-3 py-2 text-sm font-semibold text-primary hover:bg-primary-light">
                           Trang quản trị
@@ -213,7 +215,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                       )}
                       <button
                         onClick={() => signOut({ callbackUrl: '/' })}
-                        className="mt-1 w-full border-t border-neutral-100 px-3 pt-3 text-left text-sm font-semibold text-red-600"
+                        className="mt-1 w-full border-t border-theme px-3 pt-3 text-left text-sm font-semibold text-red-500"
                         type="button"
                       >
                         Đăng xuất
@@ -221,8 +223,8 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                     </>
                   ) : (
                     <>
-                      <Link href="/tai-khoan/dang-nhap" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-neutral-100">Đăng nhập</Link>
-                      <Link href="/tai-khoan/dang-ky" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-neutral-100">Tạo tài khoản</Link>
+                      <Link href="/tai-khoan/dang-nhap" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Đăng nhập</Link>
+                      <Link href="/tai-khoan/dang-ky" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Tạo tài khoản</Link>
                     </>
                   )}
                 </div>
@@ -267,7 +269,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                 onChange={(event) => setSearchQuery(event.target.value)}
                 aria-label="Tìm sản phẩm"
                 placeholder="Tìm sản phẩm..."
-                className="h-11 flex-1 rounded-xl border border-neutral-200 px-4 text-sm outline-none focus:border-primary"
+                className="theme-transition h-11 flex-1 rounded-xl border border-theme bg-theme-input px-4 text-sm text-theme-primary outline-none focus:border-primary"
               />
               <button className="rounded-xl bg-primary px-4 font-bold text-white" aria-label="Tìm kiếm" type="submit">
                 <Search size={18} />
@@ -277,7 +279,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
         )}
       </div>
 
-      <nav aria-label="Điều hướng chính" className="hidden bg-secondary md:block">
+      <nav aria-label="Điều hướng chính" className="theme-transition hidden bg-theme-page md:block">
         <div className="brand-container flex h-12 items-center gap-1">
           <div className="group relative mr-2 h-full">
             <Link href="/san-pham" className="flex h-full items-center gap-2 border-b-2 border-primary px-3 text-sm font-extrabold text-primary">
@@ -286,13 +288,13 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
             </Link>
             {categories.length > 0 && (
               <div className="invisible absolute left-0 top-full z-30 w-60 translate-y-2 pt-2 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-                <div className="rounded-xl border border-neutral-200 bg-white p-2 shadow-strong">
-                  <Link href="/san-pham" className="block rounded-lg px-3 py-2.5 text-sm font-bold hover:bg-neutral-100">Tất cả sản phẩm</Link>
+                <div className="theme-transition rounded-xl border border-theme bg-theme-card p-2 text-theme-primary shadow-[var(--shadow-overlay-theme)]">
+                  <Link href="/san-pham" className="block rounded-lg px-3 py-2.5 text-sm font-bold hover:bg-theme-subtle">Tất cả sản phẩm</Link>
                   {categories.map((category) => (
                     <Link
                       key={category.href}
                       href={category.href}
-                      className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-primary-light hover:text-primary"
+                      className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-theme-secondary hover:bg-primary-light hover:text-primary"
                     >
                       {category.label}
                     </Link>
@@ -315,7 +317,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                 className={`flex h-full items-center border-b-2 px-3 text-sm font-bold transition ${
                   active
                     ? 'border-primary text-primary'
-                    : 'm-underline border-transparent text-neutral-700 hover:text-primary'
+                    : 'm-underline border-transparent text-theme-secondary hover:text-primary'
                 }`}
               >
                 {link.label}
@@ -337,7 +339,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
           <nav
             id="mobile-main-navigation"
             data-drawer-state={menu.state}
-            className="m-drawer m-drawer-left h-[100dvh] w-[84%] max-w-sm overflow-y-auto bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl"
+            className="theme-transition m-drawer m-drawer-left h-[100dvh] w-[84%] max-w-sm overflow-y-auto bg-theme-card p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] text-theme-primary shadow-[var(--shadow-overlay-theme)]"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-6 flex items-center justify-between">
@@ -345,7 +347,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
               <button
                 aria-label="Đóng menu"
                 onClick={() => setMenuOpen(false)}
-                className="grid h-11 w-11 place-items-center rounded-xl bg-neutral-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20"
+                className="grid h-11 w-11 place-items-center rounded-xl bg-theme-subtle focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20"
                 type="button"
               >
                 <X size={20} />
@@ -361,14 +363,16 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                     href={link.href}
                     onClick={() => setMenuOpen(false)}
                     className={`block rounded-xl px-4 py-3 text-sm font-extrabold transition ${
-                      active ? 'bg-primary-light text-primary' : 'text-text hover:bg-primary-light hover:text-primary'
+                      active ? 'bg-primary-light text-primary' : 'text-theme-primary hover:bg-primary-light hover:text-primary'
                     }`}
                   >
                     {link.label}
                   </Link>
                 )
               })}
-              <div className="my-3 border-t border-neutral-200" />
+              <div className="my-3 border-t border-theme" />
+              <ThemeToggle variant="segmented" className="rounded-xl bg-theme-subtle p-3" />
+              <div className="my-3 border-t border-theme" />
               <Link
                 href={session ? '/tai-khoan' : '/tai-khoan/dang-nhap'}
                 onClick={() => setMenuOpen(false)}
