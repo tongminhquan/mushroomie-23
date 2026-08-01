@@ -30,3 +30,7 @@ này đều nhận được, không cần cài lại từng lần.
 
 Kiểm tra nhanh khi nghi server hỏng: `npx -y chrome-devtools-mcp@latest --help` phải in ra danh
 sách cờ, và `/usr/local/bin/chrome-for-testing --version` phải trả về "Google Chrome for Testing".
+
+## Imported Claude Cowork project instructions
+
+Code base website Mushroomie
