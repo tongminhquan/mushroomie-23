@@ -75,7 +75,7 @@ npm exec prisma db push
 echo "Đang build Next.js app trong thư mục staging..."
 rm -rf "$BUILD_DIR" "$RELEASE_DIR"
 npm run prebuild
-NODE_OPTIONS="--max-old-space-size=1024" NEXT_DIST_DIR="$BUILD_DIR" npm exec next build --webpack
+NODE_OPTIONS="--max-old-space-size=1024" NEXT_DIST_DIR="$BUILD_DIR" npm exec -- next build --webpack
 
 # Chuẩn bị release hoàn chỉnh trước khi thay bản đang chạy.
 echo "Chuẩn bị standalone release..."

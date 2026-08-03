@@ -158,7 +158,7 @@ test('deploy keeps the production build within the VM memory budget', () => {
   const deploy = source('deploy.sh')
   const prebuildIndex = deploy.indexOf('npm run prebuild')
   const nextBuildIndex = deploy.indexOf(
-    'NODE_OPTIONS="--max-old-space-size=1024" NEXT_DIST_DIR="$BUILD_DIR" npm exec next build --webpack',
+    'NODE_OPTIONS="--max-old-space-size=1024" NEXT_DIST_DIR="$BUILD_DIR" npm exec -- next build --webpack',
   )
 
   assert.ok(prebuildIndex > -1)
