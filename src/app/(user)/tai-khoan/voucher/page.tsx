@@ -81,14 +81,14 @@ export default function VoucherWalletPage() {
       {/* Hero */}
       <div className="text-center pt-2 pb-1">
         <span aria-hidden className="animate-float-soft mr-1 text-lg align-middle pointer-events-none">🎁</span>
-        <span className="text-xs font-extrabold tracking-[0.14em] uppercase text-primary">Ví voucher</span>
-        <h1 className="font-heading text-3xl md:text-4xl text-text mt-2">Voucher của tôi</h1>
+        <span className="text-xs font-extrabold tracking-[0.14em] uppercase text-theme-accent">Ví voucher</span>
+        <h1 className="font-heading text-3xl md:text-4xl text-theme-primary mt-2">Voucher của tôi</h1>
         <p className="text-sm text-theme-secondary mt-2">Săn ưu đãi xinh — áp dụng ngay khi thanh toán ♡</p>
       </div>
 
       {/* Redeem Form */}
       <div className="rounded-[20px] border border-theme-border bg-theme-card p-5 shadow-card">
-        <h2 className="text-sm font-bold mb-3 flex items-center gap-2 text-text">
+        <h2 className="text-sm font-bold mb-3 flex items-center gap-2 text-theme-primary">
           <span className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: '#ffd6d6' }}>
             <Ticket size={16} className="text-primary" />
           </span>
@@ -150,7 +150,7 @@ export default function VoucherWalletPage() {
             >
               {/* Stub */}
               <div
-                className={`w-28 flex-shrink-0 flex flex-col items-center justify-center p-3 text-center ${activeTab === 'AVAILABLE' ? 'text-white' : 'text-accent-kraft'}`}
+                className={`w-28 flex-shrink-0 flex flex-col items-center justify-center p-3 text-center ${activeTab === 'AVAILABLE' ? 'text-white' : 'text-theme-kraft'}`}
                 style={
                   activeTab === 'AVAILABLE'
                     ? { borderRight: '2px dashed rgba(255,255,255,0.45)' }
@@ -176,11 +176,11 @@ export default function VoucherWalletPage() {
               {/* Body */}
               <div className="flex-1 p-4 min-w-0">
                 <div className="flex justify-between items-start gap-2 mb-1">
-                  <span className={`font-mono font-bold text-lg break-all ${activeTab === 'AVAILABLE' ? 'text-white' : 'text-text'}`}>{uv.voucher.code}</span>
+                  <span className={`font-mono font-bold text-lg break-all ${activeTab === 'AVAILABLE' ? 'text-white' : 'text-theme-primary'}`}>{uv.voucher.code}</span>
                   {activeTab === 'USED' && <span className="flex-shrink-0 text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md flex items-center gap-1"><CheckCircle2 size={12}/>Đã dùng</span>}
                   {activeTab === 'EXPIRED' && <span className="flex-shrink-0 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md flex items-center gap-1"><XCircle size={12}/>Hết hạn</span>}
                 </div>
-                <div className={`font-heading text-base mb-1 ${activeTab === 'AVAILABLE' ? 'text-white' : 'text-primary'}`}>
+                <div className={`font-heading text-base mb-1 ${activeTab === 'AVAILABLE' ? 'text-white' : 'text-theme-accent'}`}>
                   Giảm {uv.voucher.discountType === 'PERCENT' ? `${uv.voucher.discountValue}%` : formatPrice(Number(uv.voucher.discountValue))}
                 </div>
                 <div className={`text-xs mb-2 ${activeTab === 'AVAILABLE' ? 'text-white/90' : 'text-theme-secondary'}`}>
@@ -196,7 +196,7 @@ export default function VoucherWalletPage() {
         ) : (
           <div className="col-span-full flex flex-col items-center justify-center rounded-[24px] border border-dashed border-theme-border-strong bg-theme-card py-12 text-center">
             <span aria-hidden className="animate-float-soft text-4xl mb-3 pointer-events-none">🍄</span>
-            <p className="font-heading text-lg text-text mb-1">Bạn chưa có voucher nào ở đây</p>
+            <p className="font-heading text-lg text-theme-primary mb-1">Bạn chưa có voucher nào ở đây</p>
             <p className="text-sm text-theme-secondary max-w-xs">Chơi mini game để nhận voucher xinh, hoặc nhập mã ưu đãi từ fanpage nhé!</p>
           </div>
         )}

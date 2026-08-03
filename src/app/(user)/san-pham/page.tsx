@@ -210,7 +210,7 @@ export default async function ProductsPage({
 
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
             <div>
-              <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.14em] text-primary">
+              <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.14em] text-theme-accent">
                 {catalogSeo.eyebrow}
               </p>
               <h1 className="text-balance font-heading text-3xl leading-tight text-theme-primary md:text-5xl">
@@ -232,7 +232,7 @@ export default async function ProductsPage({
                 {searchKeyword && (
                   <Link
                     href={buildUrl({ search: undefined, page: undefined })}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-theme-border bg-theme-card px-4 py-2 text-sm font-semibold text-theme-secondary transition-colors hover:border-primary hover:text-primary"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-theme-border bg-theme-card px-4 py-2 text-sm font-semibold text-theme-secondary transition-colors hover:border-primary hover:text-theme-accent"
                   >
                     Xóa từ khóa
                     <X size={14} />
@@ -259,7 +259,7 @@ export default async function ProductsPage({
                       className={`rounded-full px-4 py-2 text-sm font-bold transition-colors ${
                         isActive
                           ? 'bg-primary text-white'
-                          : 'bg-primary-light text-primary hover:bg-primary hover:text-white'
+                          : 'bg-primary-light text-theme-accent hover:bg-primary hover:text-white'
                       }`}
                     >
                       {option.label}
@@ -277,7 +277,7 @@ export default async function ProductsPage({
           <aside className="min-w-0">
             <div className="sticky top-24 rounded-[24px] border border-theme-border bg-theme-card p-5 shadow-card">
               <div className="mb-4 flex items-center gap-2 border-b border-theme-border pb-3">
-                <SlidersHorizontal size={18} className="text-primary" />
+                <SlidersHorizontal size={18} className="text-theme-accent" />
                 <h2 className="text-sm font-extrabold text-theme-primary">Lọc sản phẩm</h2>
               </div>
 
@@ -290,7 +290,7 @@ export default async function ProductsPage({
                   className={`block shrink-0 rounded-full px-4 py-2 text-sm font-bold transition-colors ${
                     !categorySlug
                       ? 'bg-primary text-white'
-                      : 'text-theme-secondary hover:bg-primary-light hover:text-primary'
+                      : 'text-theme-secondary hover:bg-primary-light hover:text-theme-accent'
                   }`}
                 >
                   Tất cả
@@ -302,7 +302,7 @@ export default async function ProductsPage({
                     className={`block shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                       categorySlug === category.slug
                         ? 'bg-primary text-white'
-                        : 'text-theme-secondary hover:bg-primary-light hover:text-primary'
+                        : 'text-theme-secondary hover:bg-primary-light hover:text-theme-accent'
                     }`}
                   >
                     {category.name}
@@ -364,7 +364,7 @@ export default async function ProductsPage({
                     className={`grid h-11 w-11 place-items-center rounded-full text-sm font-extrabold ${
                       pageNumber === page
                         ? 'bg-primary text-white'
-                        : 'border border-theme-border bg-theme-card text-theme-primary hover:border-primary hover:text-primary'
+                        : 'border border-theme-border bg-theme-card text-theme-primary hover:border-primary hover:text-theme-accent'
                     }`}
                   >
                     {pageNumber}

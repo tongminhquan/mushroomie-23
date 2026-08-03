@@ -112,22 +112,73 @@ describe('sitewide dark-mode contract', () => {
     expect(darkTheme).not.toContain('#171313')
     expect(theme).toContain("dark: '#000000'")
     expect(css).toContain('.theme-transition')
-    expect(css).toContain('transition-property: all')
+    expect(css).toContain('transition-property: color, background-color, border-color, opacity, transform, box-shadow')
+    expect(css).not.toContain('transition-property: all')
     expect(css).not.toContain('.theme-transition *')
     expect(css).toContain('prefers-reduced-motion: reduce')
   })
 
-  it('keeps the dual-use text token dark for surfaces and remaps only text utilities in dark mode', () => {
+  it('separates static brand ink from theme-aware foregrounds', () => {
     const css = read('src/app/globals.css')
     const darkTheme = css.slice(
       css.indexOf('html[data-theme="dark"]'),
       css.indexOf('/* Keep light-mode game text readable'),
     )
+    const coreValues = read('src/components/home/landing/HomeCoreValues.tsx')
 
     expect(css).toContain('--color-text: #2b2b2b')
-    expect(css).toContain('html[data-theme="dark"] [class~="text-text"]')
+    expect(css).toContain('--color-brand-ink: #2b2b2b')
+    expect(css).toContain('--color-brand-ink-muted: #4a4542')
+    expect(css).not.toContain('html[data-theme="dark"] [class~="text-text"]')
+    expect(coreValues).toContain("headingColor: 'text-brand-ink'")
+    expect(coreValues).toContain("bodyColor: 'text-brand-ink-muted'")
+    expect(coreValues).toContain("headingColor: 'text-theme-primary'")
     expect(darkTheme).toContain('--color-neutral-600: #b8b8b8')
     expect(darkTheme).toContain('--color-neutral-800: #e5e5e5')
+  })
+
+  it('keeps static pastel ink and dark theme accents above WCAG AA', () => {
+    const css = read('src/app/globals.css')
+    const darkTheme = css.slice(
+      css.indexOf('html[data-theme="dark"]'),
+      css.indexOf('/* Keep light-mode game text readable'),
+    )
+    const pastelBackgrounds = [
+      readHexToken(css, '--color-yellow'),
+      readHexToken(css, '--color-pink'),
+    ]
+    const pastelForegrounds = [
+      readHexToken(css, '--color-brand-ink'),
+      readHexToken(css, '--color-brand-ink-muted'),
+    ]
+
+    pastelForegrounds.forEach((foreground) => {
+      pastelBackgrounds.forEach((background) => {
+        expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(4.5)
+      })
+    })
+
+    const darkAccent = readHexToken(darkTheme, '--primary-content')
+    for (const background of [
+      readHexToken(darkTheme, '--surface-page'),
+      readHexToken(darkTheme, '--surface-card'),
+      readHexToken(darkTheme, '--color-primary-light'),
+    ]) {
+      expect(contrastRatio(darkAccent, background)).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it('does not let the dark form baseline override component error and focus states', () => {
+    const css = read('src/app/globals.css')
+    const formBaseline = css.slice(
+      css.indexOf('html[data-theme="dark"] :where(input, textarea, select)'),
+      css.indexOf('html[data-theme="dark"] .prose'),
+    )
+
+    expect(formBaseline).toContain('color-scheme: dark')
+    expect(formBaseline).not.toContain('background-color:')
+    expect(formBaseline).not.toContain('border-color:')
+    expect(formBaseline).not.toContain('color: var(--text-primary-theme)')
   })
 
   it('keeps the site footer on an explicit black surface in both themes', () => {

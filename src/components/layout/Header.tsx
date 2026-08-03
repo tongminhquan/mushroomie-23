@@ -46,6 +46,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
   // Thanh tìm kiếm mobile: fade ngắn 150ms, không trượt cả chiều cao (xem .m-drawer-top).
   const search = useDrawerTransition(searchOpen, 150)
   const [searchQuery, setSearchQuery] = useState('')
+  const [compactMounted, setCompactMounted] = useState(false)
   const [compactVisible, setCompactVisible] = useState(false)
   const compactSentinelRef = useRef<HTMLSpanElement>(null)
 
@@ -78,12 +79,28 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
     const sentinel = compactSentinelRef.current
     if (!sentinel || typeof IntersectionObserver === 'undefined') return
 
+    let showFrame: number | undefined
     const observer = new IntersectionObserver(([entry]) => {
-      setCompactVisible(!entry.isIntersecting && entry.boundingClientRect.top < 0)
+      const shouldShow = !entry.isIntersecting && entry.boundingClientRect.top < 0
+
+      if (shouldShow) {
+        // Không SSR hàng chục node của header phụ đang nằm ngoài màn hình. Mount
+        // một frame ở trạng thái ẩn để transition vào vẫn chạy ở lần cuộn đầu.
+        setCompactMounted(true)
+        showFrame = window.requestAnimationFrame(() => setCompactVisible(true))
+        return
+      }
+
+      if (showFrame !== undefined) window.cancelAnimationFrame(showFrame)
+      showFrame = undefined
+      setCompactVisible(false)
     })
 
     observer.observe(sentinel)
-    return () => observer.disconnect()
+    return () => {
+      if (showFrame !== undefined) window.cancelAnimationFrame(showFrame)
+      observer.disconnect()
+    }
   }, [])
 
   const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
@@ -135,13 +152,13 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
           <p className="m-slogan-shimmer">Làm bằng tay, trao bằng tim</p>
           <div className="flex items-center gap-5 text-white/70">
             <a href="tel:+84947192590" className="hover:text-white">0947 192 590</a>
-            <Link href="/chinh-sach-doi-tra" className="hover:text-white">Đổi trả & bảo hành</Link>
+            <Link href="/chinh-sach-doi-tra" prefetch={false} className="hover:text-white">Đổi trả & bảo hành</Link>
           </div>
         </div>
       </div>
 
       <div className="theme-transition border-b border-theme-border bg-theme-page/90 backdrop-blur-md">
-        <div className="brand-container flex h-[74px] items-center gap-3 md:h-[82px] md:gap-6">
+        <div className="brand-container flex h-[74px] items-center gap-2 sm:gap-3 md:h-[82px] md:gap-6">
           <button
             type="button"
             aria-label={menuOpen ? 'Đóng menu' : 'Mở menu'}
@@ -153,16 +170,16 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
 
-          <Link href="/" className="m-press relative h-11 w-28 shrink-0 md:h-14 md:w-36" aria-label="Mushroomie - Trang chủ">
+          <Link href="/" prefetch={false} className="m-press relative h-11 w-24 shrink-0 sm:w-28 md:h-14 md:w-36" aria-label="Mushroomie - Trang chủ">
             <SafeImage
               src="/logo.webp"
               fallbackSrc="/logo.webp"
               alt="Mushroomie"
-              fill
+              width={144}
+              height={56}
               loading="eager"
               fetchPriority="low"
-              sizes="144px"
-              className="object-contain"
+              className="h-full w-full object-contain"
             />
           </Link>
 
@@ -187,7 +204,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
             </div>
           </form>
 
-          <div className="ml-auto flex items-center gap-1.5 md:gap-2">
+          <div className="ml-auto flex items-center gap-0.5 sm:gap-1.5 md:gap-2">
             <button
               type="button"
               aria-label="Mở tìm kiếm"
@@ -200,20 +217,22 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
             </button>
             <Link
               href="/tai-khoan/don-hang"
+              prefetch={false}
               aria-label="Đơn hàng"
               className="hidden h-10 items-center gap-2 rounded-xl px-3 text-sm font-bold text-theme-primary hover:bg-theme-subtle lg:flex"
             >
-              <ClipboardList size={19} className="text-primary" />
+              <ClipboardList size={19} className="text-theme-accent" />
               Đơn hàng
             </Link>
-            <ThemeToggle variant="icon" className="hidden md:grid" />
+            <ThemeToggle variant="icon" />
             <div className="group relative hidden md:block">
               <Link
                 href={session ? '/tai-khoan' : '/tai-khoan/dang-nhap'}
+                prefetch={false}
                 aria-haspopup="menu"
                 className="flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-bold text-theme-primary hover:bg-theme-subtle"
               >
-                <User size={19} className="text-primary" />
+                <User size={19} className="text-theme-accent" />
                 <span className="max-w-24 truncate">{session?.user?.name?.split(' ')[0] || 'Tài khoản'}</span>
                 <ChevronDown size={14} />
               </Link>
@@ -221,11 +240,11 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                 <div className="theme-transition rounded-xl border border-theme-border bg-theme-card p-2 text-theme-primary shadow-[var(--shadow-overlay-theme)]">
                   {session ? (
                     <>
-                      <Link href="/tai-khoan" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Hồ sơ của tôi</Link>
-                      <Link href="/tai-khoan/don-hang" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Đơn hàng của tôi</Link>
-                      <Link href="/tai-khoan/voucher" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Voucher của tôi</Link>
+                      <Link href="/tai-khoan" prefetch={false} className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Hồ sơ của tôi</Link>
+                      <Link href="/tai-khoan/don-hang" prefetch={false} className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Đơn hàng của tôi</Link>
+                      <Link href="/tai-khoan/voucher" prefetch={false} className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Voucher của tôi</Link>
                       {isAdmin && (
-                        <Link href="/admin" className="block rounded-lg px-3 py-2 text-sm font-semibold text-primary hover:bg-primary-light">
+                        <Link href="/admin" prefetch={false} className="block rounded-lg px-3 py-2 text-sm font-semibold text-theme-accent hover:bg-primary-light">
                           Trang quản trị
                         </Link>
                       )}
@@ -239,8 +258,8 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                     </>
                   ) : (
                     <>
-                      <Link href="/tai-khoan/dang-nhap" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Đăng nhập</Link>
-                      <Link href="/tai-khoan/dang-ky" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Tạo tài khoản</Link>
+                      <Link href="/tai-khoan/dang-nhap" prefetch={false} className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Đăng nhập</Link>
+                      <Link href="/tai-khoan/dang-ky" prefetch={false} className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-theme-subtle">Tạo tài khoản</Link>
                     </>
                   )}
                 </div>
@@ -258,7 +277,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
               {totalItems > 0 && (
                 <span
                   key={`badge-${cartBump}`}
-                  className={`absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-md bg-yellow px-1 text-[10px] font-black text-text ring-2 ring-white${
+                  className={`absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-md bg-yellow px-1 text-[10px] font-black text-brand-ink ring-2 ring-white${
                     cartBump > 0 ? ' m-badge-pop' : ''
                   }`}
                 >
@@ -298,19 +317,20 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
       <nav aria-label="Điều hướng chính" className="theme-transition hidden bg-theme-page md:block">
         <div className="brand-container flex h-12 items-center gap-1">
           <div className="group relative mr-2 h-full">
-            <Link href="/san-pham" className="flex h-full items-center gap-2 border-b-2 border-primary px-3 text-sm font-extrabold text-primary">
+            <Link href="/san-pham" prefetch={false} className="flex h-full items-center gap-2 border-b-2 border-primary px-3 text-sm font-extrabold text-theme-accent">
               <Menu size={17} />
               Danh mục
             </Link>
             {categories.length > 0 && (
               <div className="invisible absolute left-0 top-full z-30 w-60 translate-y-2 pt-2 opacity-0 transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
                 <div className="theme-transition rounded-xl border border-theme-border bg-theme-card p-2 text-theme-primary shadow-[var(--shadow-overlay-theme)]">
-                  <Link href="/san-pham" className="block rounded-lg px-3 py-2.5 text-sm font-bold hover:bg-theme-subtle">Tất cả sản phẩm</Link>
+                  <Link href="/san-pham" prefetch={false} className="block rounded-lg px-3 py-2.5 text-sm font-bold hover:bg-theme-subtle">Tất cả sản phẩm</Link>
                   {categories.map((category) => (
                     <Link
                       key={category.href}
                       href={category.href}
-                      className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-theme-secondary hover:bg-primary-light hover:text-primary"
+                      prefetch={false}
+                      className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-theme-secondary hover:bg-primary-light hover:text-theme-accent"
                     >
                       {category.label}
                     </Link>
@@ -326,14 +346,15 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
               <Link
                 key={link.href}
                 href={link.href}
+                prefetch={false}
                 aria-current={active ? 'page' : undefined}
                 /* m-underline chỉ gắn cho mục KHÔNG active: mục đang mở đã có sẵn
                    border-bottom màu đỏ, thêm gạch chân chạy vào nữa sẽ thành hai vạch
                    chồng lên nhau. */
                 className={`flex h-full items-center border-b-2 px-3 text-sm font-bold transition ${
                   active
-                    ? 'border-primary text-primary'
-                    : 'm-underline border-transparent text-theme-secondary hover:text-primary'
+                    ? 'border-primary text-theme-accent'
+                    : 'm-underline border-transparent text-theme-secondary hover:text-theme-accent'
                 }`}
               >
                 {link.label}
@@ -379,7 +400,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                     href={link.href}
                     onClick={() => setMenuOpen(false)}
                     className={`block rounded-xl px-4 py-3 text-sm font-extrabold transition ${
-                      active ? 'bg-primary-light text-primary' : 'text-theme-primary hover:bg-primary-light hover:text-primary'
+                      active ? 'bg-primary-light text-theme-accent' : 'text-theme-primary hover:bg-primary-light hover:text-theme-accent'
                     }`}
                   >
                     {link.label}
@@ -403,7 +424,7 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
                 Voucher của tôi
               </Link>
               {isAdmin && (
-                <Link href="/admin" onClick={() => setMenuOpen(false)} className="block rounded-xl px-4 py-3 text-sm font-bold text-primary">
+                <Link href="/admin" onClick={() => setMenuOpen(false)} className="block rounded-xl px-4 py-3 text-sm font-bold text-theme-accent">
                   Trang quản trị
                 </Link>
               )}
@@ -429,20 +450,22 @@ export default function Header({ categories }: { categories: CategoryLink[] }) {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
       />
     </header>
-    <CompactHeader
-      visible={compactVisible}
-      pathname={pathname}
-      searchQuery={searchQuery}
-      totalItems={totalItems}
-      cartBump={cartBump}
-      accountHref={session ? '/tai-khoan' : '/tai-khoan/dang-nhap'}
-      accountLabel={session?.user?.name?.split(' ')[0] || 'Tài khoản'}
-      menuOpen={menuOpen}
-      onMenuToggle={() => setMenuOpen((value) => !value)}
-      onSearchQueryChange={setSearchQuery}
-      onSubmitSearch={submitSearch}
-      onCartToggle={toggleCart}
-    />
+    {compactMounted && (
+      <CompactHeader
+        visible={compactVisible}
+        pathname={pathname}
+        searchQuery={searchQuery}
+        totalItems={totalItems}
+        cartBump={cartBump}
+        accountHref={session ? '/tai-khoan' : '/tai-khoan/dang-nhap'}
+        accountLabel={session?.user?.name?.split(' ')[0] || 'Tài khoản'}
+        menuOpen={menuOpen}
+        onMenuToggle={() => setMenuOpen((value) => !value)}
+        onSearchQueryChange={setSearchQuery}
+        onSubmitSearch={submitSearch}
+        onCartToggle={toggleCart}
+      />
+    )}
     </>
   )
 }

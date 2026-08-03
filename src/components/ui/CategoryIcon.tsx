@@ -50,7 +50,6 @@ export default function CategoryIcon({
         alt={name}
         width={classes.pixels}
         height={classes.pixels}
-        sizes={`${classes.pixels}px`}
         className={`block shrink-0 object-contain ${classes.image} ${imageClassName || ''}`}
         onError={() => setHasError(true)}
       />

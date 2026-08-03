@@ -43,7 +43,7 @@ export default function HomeBrandStory({ products }: { products: HomeProduct[] }
               <BrandSticker tone="yellow" className="absolute left-4 top-4 rotate-[-5deg] animate-float-soft">
                 Bắt đầu ở tuổi 18
               </BrandSticker>
-              <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[11px] font-bold uppercase tracking-[0.12em] text-accent-kraft">
+              <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[11px] font-bold uppercase tracking-[0.12em] text-theme-kraft">
                 ảnh hậu trường handmade · packaging
               </span>
             </div>
@@ -58,7 +58,7 @@ export default function HomeBrandStory({ products }: { products: HomeProduct[] }
                     <Icon size={18} />
                   </span>
                   <div>
-                    <span className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-accent-kraft">
+                    <span className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-theme-kraft">
                       Chặng {index + 1}
                     </span>
                     <p className="mt-1 text-xs font-bold leading-5 text-theme-primary sm:text-sm">{label}</p>
@@ -87,7 +87,7 @@ export default function HomeBrandStory({ products }: { products: HomeProduct[] }
               {storyChips.map((chip) => (
                 <li
                   key={chip}
-                  className="theme-transition rounded-full border-[1.5px] border-theme-border bg-theme-card px-4 py-2 text-[13px] font-bold text-accent-kraft"
+                  className="theme-transition rounded-full border-[1.5px] border-theme-border bg-theme-card px-4 py-2 text-[13px] font-bold text-theme-kraft"
                 >
                   {chip}
                 </li>

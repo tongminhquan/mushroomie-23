@@ -11,8 +11,8 @@ export default function BrandBadge({
 }) {
   const tones = {
     red: 'bg-primary text-white',
-    pink: 'bg-pink text-text',
-    yellow: 'bg-yellow text-text',
+    pink: 'bg-pink text-brand-ink',
+    yellow: 'bg-yellow text-brand-ink',
     kraft: 'bg-kraft text-white',
     neutral: 'border border-theme-border bg-theme-subtle text-theme-secondary',
   }

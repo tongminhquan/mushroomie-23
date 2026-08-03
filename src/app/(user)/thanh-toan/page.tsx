@@ -336,7 +336,7 @@ export default function CheckoutPage() {
 
               {/* Gift wrap + handwritten letter */}
               <section className="rounded-[18px] border-[1.5px] border-theme-border bg-theme-card p-5 shadow-card md:p-7">
-                <h2 className="mb-4 font-heading text-xl text-text">Gói quà &amp; thư tay</h2>
+                <h2 className="mb-4 font-heading text-xl text-theme-primary">Gói quà &amp; thư tay</h2>
                 {giftWrapNotice && (
                   <div className="mb-4">
                     <GiftWrapFeeNotice
@@ -356,7 +356,7 @@ export default function CheckoutPage() {
 
               {/* Payment method */}
               <section className="rounded-[18px] border-[1.5px] border-theme-border bg-theme-card p-5 shadow-card md:p-7">
-                <h2 className="mb-4 font-heading text-xl text-text">Phương thức thanh toán</h2>
+                <h2 className="mb-4 font-heading text-xl text-theme-primary">Phương thức thanh toán</h2>
                 <div className="space-y-3">
                   {/* Bank Transfer */}
                   <button type="button"

@@ -304,7 +304,7 @@ export default async function ProductDetailPage({
               )}
             </div>
 
-            <h1 className="mt-4 text-balance font-heading text-3xl leading-[1.08] text-text md:text-5xl">
+            <h1 className="mt-4 text-balance font-heading text-3xl leading-[1.08] text-theme-primary md:text-5xl">
               {product.name}
             </h1>
 
@@ -388,7 +388,7 @@ export default async function ProductDetailPage({
           )}
 
           <section data-reveal className="rounded-[28px] border border-theme-border bg-theme-card p-6 shadow-card sm:p-8">
-            <h2 className="font-heading text-2xl text-text">Đánh giá</h2>
+            <h2 className="font-heading text-2xl text-theme-primary">Đánh giá</h2>
 
             {reviewCount > 0 ? (
               <>
@@ -405,7 +405,7 @@ export default async function ProductDetailPage({
                       className="border-b border-theme-border pb-5 last:border-0 last:pb-0"
                     >
                       <div className="mb-2 flex items-center justify-between gap-3">
-                        <span className="text-sm font-semibold text-text">{review.name}</span>
+                        <span className="text-sm font-semibold text-theme-primary">{review.name}</span>
                         <div className="flex items-center gap-1 text-[#d4a100]">
                           {Array.from({ length: 5 }, (_, index) => (
                             <Star
@@ -428,7 +428,7 @@ export default async function ProductDetailPage({
             )}
 
             <div className="mt-8 border-t border-theme-border pt-6">
-              <h3 className="mb-4 text-sm font-semibold text-text">Viết đánh giá của bạn</h3>
+              <h3 className="mb-4 text-sm font-semibold text-theme-primary">Viết đánh giá của bạn</h3>
               <ReviewForm productId={product.id} productName={product.name} />
             </div>
           </section>

@@ -61,7 +61,7 @@ export default function ThemeToggle({
             aria-label="Dùng giao diện sáng"
             aria-pressed={theme === 'light'}
             onClick={() => selectTheme('light')}
-            className="theme-transition min-h-10 rounded-lg px-3 text-xs font-bold text-theme-muted aria-pressed:bg-theme-card aria-pressed:text-primary"
+            className="theme-transition min-h-10 rounded-lg px-3 text-xs font-bold text-theme-muted aria-pressed:bg-theme-card aria-pressed:text-theme-accent"
           >
             Sáng
           </button>
@@ -70,7 +70,7 @@ export default function ThemeToggle({
             aria-label="Dùng giao diện tối"
             aria-pressed={theme === 'dark'}
             onClick={() => selectTheme('dark')}
-            className="theme-transition min-h-10 rounded-lg px-3 text-xs font-bold text-theme-muted aria-pressed:bg-theme-card aria-pressed:text-primary"
+            className="theme-transition min-h-10 rounded-lg px-3 text-xs font-bold text-theme-muted aria-pressed:bg-theme-card aria-pressed:text-theme-accent"
           >
             Tối
           </button>
@@ -87,7 +87,7 @@ export default function ThemeToggle({
       title={dark ? 'Giao diện sáng' : 'Giao diện tối'}
       onClick={() => selectTheme(dark ? 'light' : 'dark')}
       className={cn(
-        'theme-transition grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-theme-border bg-theme-card text-theme-primary hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20',
+        'theme-transition grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-theme-border bg-theme-card text-theme-primary hover:border-primary/40 hover:text-theme-accent focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20',
         className,
       )}
     >

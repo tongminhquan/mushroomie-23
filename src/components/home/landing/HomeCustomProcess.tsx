@@ -48,8 +48,8 @@ export default function HomeCustomProcess({ products }: { products: HomeProduct[
             <ol className="mt-9 grid gap-3 md:grid-cols-3">
               {steps.map(({ icon: Icon, title, text }, index) => (
                 <li key={title} className="relative rounded-[16px] border border-white/12 bg-white/[0.06] p-5 hover-lift">
-                  <span className="absolute right-4 top-4 font-heading text-3xl text-white/10">0{index + 1}</span>
-                  <div className="grid h-11 w-11 place-items-center rounded-lg bg-yellow text-text">
+                  <span aria-hidden="true" className="absolute right-4 top-4 font-heading text-3xl text-white/40">0{index + 1}</span>
+                  <div className="grid h-11 w-11 place-items-center rounded-lg bg-yellow text-brand-ink">
                     <Icon size={21} />
                   </div>
                   <h3 className="mt-5 text-base font-extrabold">{title}</h3>
@@ -77,7 +77,7 @@ export default function HomeCustomProcess({ products }: { products: HomeProduct[
               />
             </div>
             <div className="theme-transition absolute -bottom-4 left-4 right-4 flex items-center gap-3 rounded-[14px] border border-theme-border bg-theme-card p-4 text-theme-primary shadow-strong sm:left-8 sm:right-8">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary-light text-primary">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary-light text-theme-accent">
                 <Check size={20} />
               </span>
               <p className="text-xs font-bold leading-5 sm:text-sm">

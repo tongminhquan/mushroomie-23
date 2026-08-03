@@ -148,12 +148,12 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
           {product.is_customizable && (
-            <span className="inline-flex min-h-7 items-center rounded-lg bg-yellow px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-text">
+            <span className="inline-flex min-h-7 items-center rounded-lg bg-yellow px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-brand-ink">
               Cá nhân hóa
             </span>
           )}
           {!product.is_customizable && !isOutOfStock && (
-            <span className="inline-flex min-h-7 items-center rounded-lg bg-pink px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-text">
+            <span className="inline-flex min-h-7 items-center rounded-lg bg-pink px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-brand-ink">
               Handmade
             </span>
           )}
@@ -172,19 +172,19 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       <div className="flex flex-1 flex-col p-3.5 sm:p-4">
         {product.category && (
-          <p className="mb-1.5 text-[10px] font-extrabold uppercase tracking-[0.08em] text-kraft">
+          <p className="mb-1.5 text-[10px] font-extrabold uppercase tracking-[0.08em] text-theme-kraft">
             {product.category.name}
           </p>
         )}
         <Link href={`/san-pham/${product.slug}`} prefetch={false} onClick={handleSelectItem} className="mb-3 block flex-1">
-          <h3 className="line-clamp-2 text-sm font-extrabold leading-snug text-theme-primary transition-colors group-hover:text-primary sm:text-[15px]">
+          <h3 className="line-clamp-2 text-sm font-extrabold leading-snug text-theme-primary transition-colors group-hover:text-theme-accent sm:text-[15px]">
             {product.name}
           </h3>
         </Link>
 
         <div className="mt-auto flex flex-col gap-1">
           {bestVoucher && bestDiscount > 0 && (
-            <div className="mb-1 text-[11px] font-bold text-primary">
+            <div className="mb-1 text-[11px] font-bold text-theme-accent">
               <span className="rounded bg-primary/10 px-1.5 py-0.5">
                 Rẻ hơn với voucher giảm{' '}
                 {bestVoucher.discountType === 'PERCENT'
@@ -194,7 +194,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
           <div className="flex flex-wrap items-baseline gap-2 tabular-nums">
-            <strong className="text-xl text-primary">{formatPrice(displayPrice)}</strong>
+            <strong className="text-xl text-theme-accent">{formatPrice(displayPrice)}</strong>
             {originalPrice && originalPrice > displayPrice && (
               <span className="text-xs text-theme-muted line-through">{formatPrice(originalPrice)}</span>
             )}
@@ -204,7 +204,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             disabled={isOutOfStock}
             className={`mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-3 text-xs font-extrabold transition duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 active:translate-y-px ${
               added
-                ? 'bg-yellow text-text'
+                ? 'bg-yellow text-brand-ink'
                 : isOutOfStock
                   ? 'cursor-not-allowed bg-theme-subtle text-theme-muted'
                   : 'bg-primary text-white hover:bg-primary-dark'

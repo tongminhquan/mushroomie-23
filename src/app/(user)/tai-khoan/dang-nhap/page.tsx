@@ -45,7 +45,7 @@ function LoginPageContent() {
       <div className="relative w-full max-w-md">
         <div className="text-center mb-8 flex flex-col items-center">
           <div className="relative h-20 w-48 mb-4"><Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority /></div>
-          <span className="text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-2">Ghé Nhà Nấm nhỏ</span>
+          <span className="text-xs font-extrabold tracking-[0.14em] uppercase text-theme-accent mb-2">Ghé Nhà Nấm nhỏ</span>
           <h1 className="font-heading text-3xl font-bold">Đăng nhập Mushroomie</h1>
           <p className="mt-2 text-sm text-theme-muted">Chào mừng bạn trở lại! ♡</p>
         </div>
@@ -80,9 +80,12 @@ function LoginPageContent() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold mb-1">Email</label>
+              <label htmlFor="login-email" className="block text-sm font-semibold mb-1">Email</label>
               <input
+                id="login-email"
+                name="email"
                 type="email"
+                autoComplete="username"
                 value={form.email}
                 onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                 required
@@ -92,13 +95,16 @@ function LoginPageContent() {
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-semibold">Mật khẩu</label>
-                <Link href="/tai-khoan/quen-mat-khau" className="text-sm text-primary font-semibold hover:underline">
+                <label htmlFor="login-password" className="block text-sm font-semibold">Mật khẩu</label>
+                <Link href="/tai-khoan/quen-mat-khau" className="text-sm text-theme-accent font-semibold hover:underline">
                   Quên mật khẩu?
                 </Link>
               </div>
               <input
+                id="login-password"
+                name="password"
                 type="password"
+                autoComplete="current-password"
                 value={form.password}
                 onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
                 required
@@ -115,7 +121,7 @@ function LoginPageContent() {
           </form>
           <p className="mt-5 text-center text-sm text-theme-muted">
             Chưa có tài khoản?{' '}
-            <Link href="/tai-khoan/dang-ky" className="text-primary font-semibold hover:underline">Đăng ký ngay</Link>
+            <Link href="/tai-khoan/dang-ky" className="text-theme-accent font-semibold hover:underline">Đăng ký ngay</Link>
           </p>
         </div>
         <p className="mt-6 text-center text-xs text-theme-muted">Làm bằng tay, trao bằng tim 🍄</p>

@@ -43,9 +43,9 @@ export default function HomeLocalAreas() {
             className="theme-transition group rounded-[18px] border-[1.5px] border-theme-border bg-theme-card p-5 shadow-card hover:-translate-y-1 motion-reduce:transform-none"
           >
             <div className="mb-2 text-2xl" aria-hidden>{a.emoji}</div>
-            <h3 className="font-heading text-base text-theme-primary group-hover:text-primary">{a.label}</h3>
+            <h3 className="font-heading text-base text-theme-primary group-hover:text-theme-accent">{a.label}</h3>
             <p className="mt-1 text-xs leading-relaxed text-theme-muted">{a.description}</p>
-            <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-primary">
+            <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-theme-accent">
               Xem ngay <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
             </span>
           </Link>

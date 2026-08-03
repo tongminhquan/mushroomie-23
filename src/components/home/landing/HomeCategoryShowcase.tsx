@@ -36,11 +36,11 @@ export default function HomeCategoryShowcase({ categories }: { categories: HomeC
                     name={category.name}
                     size="xl"
                     imageClassName="max-h-24 max-w-24 transition-transform duration-300 group-hover:scale-105"
-                    fallbackClassName="text-primary transition-transform duration-300 group-hover:scale-105"
+                    fallbackClassName="text-theme-accent transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
                 <h3 className="font-heading text-xl leading-tight text-theme-primary sm:text-2xl">{category.name}</h3>
-                <span className="mt-auto inline-flex items-center gap-2 pt-4 text-xs font-extrabold uppercase tracking-[0.08em] text-accent-kraft transition-colors group-hover:text-primary sm:text-sm">
+                <span className="mt-auto inline-flex items-center gap-2 pt-4 text-xs font-extrabold uppercase tracking-[0.08em] text-theme-kraft transition-colors group-hover:text-theme-accent sm:text-sm">
                   Khám phá <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
               </Link>

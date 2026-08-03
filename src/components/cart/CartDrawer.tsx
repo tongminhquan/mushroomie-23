@@ -58,7 +58,7 @@ function CartDrawerContent({ drawerState }: { drawerState: 'entering' | 'open' |
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <div className="mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-pink text-primary"><ShoppingBag size={28} /></div>
-              <p className="mb-2 font-heading text-xl text-text">Giỏ hàng đang trống</p>
+              <p className="mb-2 font-heading text-xl text-theme-primary">Giỏ hàng đang trống</p>
               <p className="mb-6 max-w-xs text-sm leading-6 text-neutral-500">Chọn một món nhỏ hợp gu rồi quay lại đây nhé.</p>
               <Link href="/san-pham" onClick={closeCart}><Button size="sm">Khám phá sản phẩm</Button></Link>
             </div>

@@ -11,7 +11,7 @@ export default function HomeFinalCTA() {
 
       <BrandContainer>
         <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-4 text-xs font-extrabold uppercase tracking-widest text-primary">Món riêng của bạn</p>
+          <p className="mb-4 text-xs font-extrabold uppercase tracking-widest text-theme-accent">Món riêng của bạn</p>
           <h2 className="mb-5 font-heading text-3xl leading-tight text-theme-primary sm:text-4xl md:text-5xl">
             Tạo món phụ kiện của riêng bạn ngay hôm nay
           </h2>
@@ -27,7 +27,7 @@ export default function HomeFinalCTA() {
             </Link>
             <Link
               href="/san-pham?customizable=true"
-              className="inline-flex min-h-12 items-center gap-2 rounded-full border-[1.5px] border-primary px-7 text-sm font-extrabold text-primary transition hover:bg-pink/50"
+              className="inline-flex min-h-12 items-center gap-2 rounded-full border-[1.5px] border-primary px-7 text-sm font-extrabold text-theme-accent transition hover:bg-pink/50"
             >
               ✨ Custom món riêng
             </Link>

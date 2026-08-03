@@ -20,7 +20,7 @@ export default function HomeMiniGameCTA() {
           <div className="grid gap-0 md:grid-cols-2">
             {/* Left — info */}
             <div className="p-8 md:p-10">
-              <p className="mb-2 text-xs font-extrabold uppercase tracking-widest text-primary">🎮 Chơi & Nhận quà</p>
+              <p className="mb-2 text-xs font-extrabold uppercase tracking-widest text-theme-accent">🎮 Chơi & Nhận quà</p>
               <h2 className="mb-4 font-heading text-2xl leading-tight text-theme-primary md:text-3xl">
                 Chơi mini game cùng Mushroomie
               </h2>

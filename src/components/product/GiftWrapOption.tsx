@@ -84,14 +84,14 @@ export function GiftWrapOptionContent({
         />
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-2">
-            <Gift size={18} className="text-primary" aria-hidden />
+            <Gift size={18} className="text-theme-accent" aria-hidden />
             <span className="font-bold text-theme-primary">Gói quà tặng</span>
-            <span className="rounded-full bg-primary-light px-2.5 py-0.5 text-xs font-extrabold text-primary">
+            <span className="rounded-full bg-primary-light px-2.5 py-0.5 text-xs font-extrabold text-theme-accent">
               {feeLabel}
             </span>
           </span>
           <span id={descriptionId} className="mt-1.5 block text-sm leading-6 text-theme-secondary">
-            Hộp quà handmade kèm nơ, <strong className="font-semibold text-accent-kraft">tặng kèm thư viết tay miễn phí</strong>.
+            Hộp quà handmade kèm nơ, <strong className="font-semibold text-theme-kraft">tặng kèm thư viết tay miễn phí</strong>.
             {!compact && ' Phí tính một lần cho cả đơn hàng, dù bạn mua bao nhiêu món.'}
           </span>
         </span>
@@ -100,7 +100,7 @@ export function GiftWrapOptionContent({
       {giftWrap && showMessageField && (
         <div className="mt-4 border-t border-theme-border pt-4">
           <label htmlFor={messageId} className="mb-1.5 flex items-center gap-2 text-sm font-bold text-theme-primary">
-            <PenLine size={16} className="text-primary" aria-hidden />
+            <PenLine size={16} className="text-theme-accent" aria-hidden />
             Lời nhắn thư tay <span className="font-normal text-theme-muted">(không bắt buộc)</span>
           </label>
           <textarea

@@ -44,7 +44,7 @@ export default function MobileBottomNav() {
                 aria-label={`${item.name}${item.badge ? `, ${item.badge} sản phẩm` : ''}`}
                 className="m-press group relative flex min-h-14 min-w-16 flex-col items-center justify-center gap-0.5 rounded-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20"
               >
-                <div className={`rounded-xl p-1.5 transition duration-200 ${isActive ? 'bg-primary-light text-primary' : 'text-theme-muted group-hover:bg-theme-card group-hover:text-primary'}`}>
+                <div className={`rounded-xl p-1.5 transition duration-200 ${isActive ? 'bg-primary-light text-theme-accent' : 'text-theme-muted group-hover:bg-theme-card group-hover:text-theme-accent'}`}>
                   <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
                   {item.badge !== undefined && item.badge > 0 && (
                     <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white shadow-sm">
@@ -52,7 +52,7 @@ export default function MobileBottomNav() {
                     </span>
                   )}
                 </div>
-                <span className={`text-[11px] font-bold transition-colors ${isActive ? 'text-primary' : 'text-theme-muted group-hover:text-primary'}`}>{item.name}</span>
+                <span className={`text-[11px] font-bold transition-colors ${isActive ? 'text-theme-accent' : 'text-theme-muted group-hover:text-theme-accent'}`}>{item.name}</span>
               </button>
             )
           }
@@ -61,13 +61,14 @@ export default function MobileBottomNav() {
             <Link
               key={index}
               href={item.href}
+              prefetch={false}
               aria-current={isActive ? 'page' : undefined}
               className="m-press group flex min-h-14 min-w-16 flex-col items-center justify-center gap-0.5 rounded-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20"
             >
-              <div className={`rounded-xl p-1.5 transition duration-200 ${isActive ? 'bg-primary-light text-primary' : 'text-theme-muted group-hover:bg-theme-card group-hover:text-primary'}`}>
+              <div className={`rounded-xl p-1.5 transition duration-200 ${isActive ? 'bg-primary-light text-theme-accent' : 'text-theme-muted group-hover:bg-theme-card group-hover:text-theme-accent'}`}>
                 <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
               </div>
-              <span className={`text-[11px] font-bold transition-colors ${isActive ? 'text-primary' : 'text-theme-muted group-hover:text-primary'}`}>{item.name}</span>
+              <span className={`text-[11px] font-bold transition-colors ${isActive ? 'text-theme-accent' : 'text-theme-muted group-hover:text-theme-accent'}`}>{item.name}</span>
             </Link>
           )
         })}

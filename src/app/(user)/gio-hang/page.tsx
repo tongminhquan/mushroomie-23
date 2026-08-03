@@ -35,7 +35,7 @@ export default function CartPage() {
     <div className="theme-transition min-h-screen bg-theme-page py-8 text-theme-primary md:py-12">
       <div className="brand-container max-w-5xl">
         <CheckoutStepper currentStep={1} />
-        <h1 className="mb-2 font-heading text-3xl text-text md:text-4xl sr-only">Giỏ hàng</h1>
+        <h1 className="mb-2 font-heading text-3xl text-theme-primary md:text-4xl sr-only">Giỏ hàng</h1>
 
         {items.length === 0 ? (
           <section
@@ -44,7 +44,7 @@ export default function CartPage() {
             <div className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl text-primary" style={{ background: '#ffd6d6' }}>
               <ShoppingBag size={28} />
             </div>
-            <h2 className="mb-2 font-heading text-2xl text-text">Giỏ hàng đang trống</h2>
+            <h2 className="mb-2 font-heading text-2xl text-theme-primary">Giỏ hàng đang trống</h2>
             <p className="mx-auto mb-6 max-w-md text-sm leading-6 text-theme-muted">
               Chọn một món phụ kiện hợp gu rồi quay lại đây để hoàn tất đơn hàng.
             </p>
@@ -61,7 +61,7 @@ export default function CartPage() {
                 <span className="grid h-9 w-9 place-items-center rounded-xl text-base" style={{ background: '#ffece6' }} aria-hidden>
                   🛒
                 </span>
-                <h2 className="font-heading text-xl text-text">
+                <h2 className="font-heading text-xl text-theme-primary">
                   Giỏ hàng ({items.reduce((sum, item) => sum + item.quantity, 0)} món)
                 </h2>
               </div>
@@ -87,7 +87,7 @@ export default function CartPage() {
                           {Object.entries(item.selectedOptions).map(([key, value]) => (
                             <span
                               key={key}
-                              className="rounded-full border border-theme-border bg-theme-subtle px-2.5 py-0.5 text-[11px] font-semibold text-accent-kraft"
+                              className="rounded-full border border-theme-border bg-theme-subtle px-2.5 py-0.5 text-[11px] font-semibold text-theme-kraft"
                             >
                               {key}: {value}
                             </span>
@@ -101,7 +101,7 @@ export default function CartPage() {
                             type="button"
                             aria-label="Giảm số lượng"
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="grid h-9 w-9 place-items-center font-bold text-primary hover:bg-theme-subtle"
+                            className="grid h-11 w-11 place-items-center font-bold text-theme-accent hover:bg-theme-subtle"
                           >
                             <Minus size={14} />
                           </button>
@@ -110,17 +110,17 @@ export default function CartPage() {
                             type="button"
                             aria-label="Tăng số lượng"
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="grid h-9 w-9 place-items-center bg-theme-subtle font-bold text-primary hover:bg-theme-elevated"
+                            className="grid h-11 w-11 place-items-center bg-theme-subtle font-bold text-theme-accent hover:bg-theme-elevated"
                           >
                             <Plus size={14} />
                           </button>
                         </div>
-                        <span className="ml-auto font-heading text-base text-primary">{formatPrice(item.price * item.quantity)}</span>
+                        <span className="ml-auto font-heading text-base text-theme-accent">{formatPrice(item.price * item.quantity)}</span>
                         <button
                           type="button"
                           aria-label="Xóa sản phẩm"
                           onClick={() => removeItem(item.id)}
-                          className="grid h-9 w-9 place-items-center rounded-lg text-neutral-500 hover:bg-red-50 hover:text-primary"
+                          className="grid h-11 w-11 place-items-center rounded-lg text-theme-muted hover:bg-red-50 hover:text-primary"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -143,8 +143,8 @@ export default function CartPage() {
               className="min-w-0 h-fit rounded-[22px] border-[1.5px] border-theme-border bg-theme-card p-5 shadow-card"
             >
               <div className="mb-4 flex items-center gap-2">
-                <PackageCheck size={20} className="text-primary" />
-                <h2 className="font-heading text-xl text-text">Tóm tắt đơn hàng</h2>
+                <PackageCheck size={20} className="text-theme-accent" />
+                <h2 className="font-heading text-xl text-theme-primary">Tóm tắt đơn hàng</h2>
               </div>
               {shippingFeeNotice && (
                 <div className="mb-4">
@@ -182,8 +182,8 @@ export default function CartPage() {
                   </div>
                 )}
                 <div className="flex items-baseline justify-between border-t border-dashed border-theme-border pt-3 text-sm">
-                  <span className="font-bold text-text">Tổng dự kiến</span>
-                  <span className="font-heading text-2xl text-primary">{formatPrice(estimatedTotal)}</span>
+                  <span className="font-bold text-theme-primary">Tổng dự kiến</span>
+                  <span className="font-heading text-2xl text-theme-accent">{formatPrice(estimatedTotal)}</span>
                 </div>
               </div>
               <Link href="/thanh-toan" className="mt-5 block">
@@ -192,7 +192,7 @@ export default function CartPage() {
               <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-theme-muted" aria-hidden>
                 <span>🔒</span>Thanh toán an toàn &amp; bảo mật
               </div>
-              <Link href="/san-pham" className="mt-3 block text-center text-sm font-bold text-primary hover:underline">
+              <Link href="/san-pham" className="mt-3 flex min-h-11 items-center justify-center text-sm font-bold text-theme-accent hover:underline">
                 Tiếp tục mua sắm
               </Link>
             </aside>

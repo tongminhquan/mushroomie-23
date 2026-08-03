@@ -41,7 +41,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
       {/* Breadcrumb hiển thị */}
       <nav aria-label="Breadcrumb" className="brand-container pt-5 text-sm text-theme-muted">
         <ol className="flex flex-wrap items-center gap-1.5">
-          <li><Link href="/" className="hover:text-primary">Trang chủ</Link></li>
+          <li><Link href="/" className="hover:text-theme-accent">Trang chủ</Link></li>
           <li aria-hidden>/</li>
           <li className="font-semibold text-theme-secondary">{page.crumb}</li>
         </ol>
@@ -67,7 +67,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
             </Link>
             <Link
               href="/lien-he"
-              className="theme-transition inline-flex items-center gap-2 rounded-full border-[1.5px] border-theme-border bg-theme-card px-5 py-3 text-sm font-bold text-theme-secondary hover:border-primary hover:text-primary"
+              className="theme-transition inline-flex items-center gap-2 rounded-full border-[1.5px] border-theme-border bg-theme-card px-5 py-3 text-sm font-bold text-theme-secondary hover:border-primary hover:text-theme-accent"
             >
               <MessageCircle size={16} /> Nhắn tin tư vấn
             </Link>
@@ -88,7 +88,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
         <div className="grid gap-5 rounded-[18px] border-[1.5px] border-theme-border bg-theme-card p-5 shadow-card sm:p-6 lg:grid-cols-[1.5fr_0.75fr_0.75fr]">
           <div>
             <h2 id="local-contact-heading" className="flex items-center gap-2 font-heading text-base text-theme-primary">
-              <MapPin size={17} className="text-primary" /> {BRAND.name} tại Đồng Nai
+              <MapPin size={17} className="text-theme-accent" /> {BRAND.name} tại Đồng Nai
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-theme-secondary">
               {BRAND.formattedAddress}
@@ -112,14 +112,14 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
               href={BRAND.directionsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-primary hover:underline"
+              className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-theme-accent hover:underline"
             >
               Xem vị trí trên bản đồ <ArrowRight size={14} className="ml-1" />
             </a>
           </div>
           <div>
             <h2 className="flex items-center gap-2 font-heading text-base text-theme-primary">
-              <Clock size={17} className="text-primary" /> Giờ phản hồi
+              <Clock size={17} className="text-theme-accent" /> Giờ phản hồi
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-theme-secondary">
               {BRAND.openingHours.opens}–{BRAND.openingHours.closes} mỗi ngày, từ thứ Hai đến Chủ nhật.
@@ -127,11 +127,11 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
           </div>
           <div>
             <h2 className="flex items-center gap-2 font-heading text-base text-theme-primary">
-              <Phone size={17} className="text-primary" /> Tư vấn đặt hàng
+              <Phone size={17} className="text-theme-accent" /> Tư vấn đặt hàng
             </h2>
             <a
               href={`tel:${BRAND.phoneE164}`}
-              className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-theme-secondary hover:text-primary"
+              className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-theme-secondary hover:text-theme-accent"
             >
               {BRAND.phoneDisplay}
             </a>
@@ -156,7 +156,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
       {page.intentSections && page.intentSections.length > 0 && (
         <section data-reveal className="brand-container mt-9" aria-labelledby="local-intent-heading">
           <div className="border-y border-theme-border py-7 sm:py-8">
-            <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-primary">Tư vấn trước khi đặt</p>
+            <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-theme-accent">Tư vấn trước khi đặt</p>
             <h2 id="local-intent-heading" className="mt-2 max-w-3xl font-heading text-xl text-theme-primary md:text-2xl">
               Thông tin giúp bạn chọn đúng sản phẩm
             </h2>
@@ -209,7 +209,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
       <section data-reveal className="brand-container mt-8">
         <div className="rounded-[18px] border-[1.5px] border-yellow/70 bg-theme-subtle p-5 sm:p-6">
           <h2 className="flex items-center gap-2 font-heading text-lg text-theme-primary">
-            <Sparkles size={18} className="text-primary" /> Đặt hàng &amp; giao đến {page.area}
+            <Sparkles size={18} className="text-theme-accent" /> Đặt hàng &amp; giao đến {page.area}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-theme-secondary">{deliveryNote(page.area, page.onlineOnly)}</p>
           <p className="mt-2 text-sm leading-relaxed text-theme-secondary">{areaDelivery.summary}</p>
@@ -241,7 +241,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
             <Link
               key={l.href + l.label}
               href={l.href}
-              className="theme-transition inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-theme-border bg-theme-card px-4 py-2 text-sm font-semibold text-theme-secondary hover:border-primary hover:text-primary"
+              className="theme-transition inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-theme-border bg-theme-card px-4 py-2 text-sm font-semibold text-theme-secondary hover:border-primary hover:text-theme-accent"
             >
               {l.label} <ArrowRight size={14} />
             </Link>
@@ -260,8 +260,8 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
                 href={`/${r.slug}`}
                 className="group rounded-[16px] border-[1.5px] border-theme-border bg-theme-card p-4 shadow-card transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
               >
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-primary"><MapPin size={12} /> {r.area}</span>
-                <p className="mt-1 font-heading text-sm leading-snug text-theme-primary group-hover:text-primary">{r.crumb}</p>
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-theme-accent"><MapPin size={12} /> {r.area}</span>
+                <p className="mt-1 font-heading text-sm leading-snug text-theme-primary group-hover:text-theme-accent">{r.crumb}</p>
               </Link>
             ))}
           </div>
@@ -277,7 +277,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
             <details key={faq.question} className="group py-4">
               <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 font-bold text-theme-primary marker:content-none">
                 {faq.question}
-                <span className="shrink-0 text-xl font-normal text-primary transition-transform group-open:rotate-45" aria-hidden>+</span>
+                <span className="shrink-0 text-xl font-normal text-theme-accent transition-transform group-open:rotate-45" aria-hidden>+</span>
               </summary>
               <p className="max-w-3xl pb-1 pr-8 text-sm leading-relaxed text-theme-secondary">{faq.answer}</p>
             </details>

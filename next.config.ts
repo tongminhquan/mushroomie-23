@@ -42,7 +42,9 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react', 'date-fns'],
-    inlineCss: true,
+    // Giữ CSS thành asset cacheable. `inlineCss` lặp toàn bộ stylesheet một lần
+    // trong <style> và một lần trong RSC payload; globals.css hiện đủ lớn để sự
+    // trùng lặp đó làm chậm parse/hydration trên mobile.
     serverActions: { allowedOrigins: serverActionOrigins },
   },
   async redirects() {
@@ -77,12 +79,6 @@ const nextConfig: NextConfig = {
         source,
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' }],
       })),
-      {
-        source: '/_next/static/:path*',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-        ],
-      },
       {
         source: '/uploads/:path*',
         headers: [

@@ -49,7 +49,7 @@ export default function HomeHandmadeBehindScenes({ products }: { products: HomeP
                   </span>
                 </div>
                 <div className="p-5">
-                  <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary-light text-primary">
+                  <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary-light text-theme-accent">
                     <Icon size={19} />
                   </div>
                   <h3 className="mt-4 font-heading text-xl text-theme-primary">{label}</h3>

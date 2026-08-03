@@ -12,7 +12,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((
 ) => {
   const variants = {
     primary: 'bg-primary text-white shadow-[0_10px_24px_rgba(228,29,29,0.22)] hover:bg-primary-dark hover:-translate-y-0.5',
-    secondary: 'bg-pink text-text hover:bg-primary hover:text-white',
+    secondary: 'bg-pink text-brand-ink hover:bg-primary hover:text-white',
     outline: 'border-[1.5px] border-primary bg-theme-card text-primary hover:bg-primary hover:text-white',
     ghost: 'text-primary hover:bg-primary-light',
   }

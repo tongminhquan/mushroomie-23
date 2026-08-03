@@ -43,13 +43,23 @@ export default function ScrollReveal() {
       { threshold: 0.08, rootMargin: '0px 0px -40px 0px' },
     )
 
+    // Đọc toàn bộ layout trước, rồi mới ghi class/dataset. Xen kẽ
+    // `classList.add()` và `getBoundingClientRect()` cho từng phần tử buộc trình
+    // duyệt tính lại layout nhiều lần khi trang có nhiều section.
+    const viewportHeight = window.innerHeight
+    const visibleTargets = new Set(
+      targets.filter((el) => {
+        const rect = el.getBoundingClientRect()
+        return rect.top < viewportHeight && rect.bottom > 0
+      }),
+    )
+
     for (const el of targets) {
       el.classList.add('m-reveal')
 
       // Phần tử đã nằm trong khung nhìn ngay lúc tải thì hiện luôn — nếu ẩn rồi mới
       // trượt lên sẽ thành một cú giật ngay khi mở trang, và làm hỏng LCP.
-      const rect = el.getBoundingClientRect()
-      if (rect.top < window.innerHeight && rect.bottom > 0) {
+      if (visibleTargets.has(el)) {
         el.dataset.mReveal = 'shown'
         continue
       }

@@ -106,7 +106,7 @@ export default async function BlogPage({
     `rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
       active
         ? 'border-primary bg-primary text-white'
-        : 'border-theme-border bg-theme-card text-theme-secondary hover:border-primary hover:text-primary'
+        : 'border-theme-border bg-theme-card text-theme-secondary hover:border-primary hover:text-theme-accent'
     }`
 
   const buildUrl = (params: Partial<Record<'category' | 'page', string | undefined>>) => {
@@ -140,7 +140,7 @@ export default async function BlogPage({
               aria-hidden
               className="pointer-events-none absolute right-[10%] top-[18%] h-4 w-4 rounded-full bg-primary/15"
             />
-            <span className="mb-3 inline-flex rounded-full border border-theme-border bg-theme-card px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-primary shadow-sm">
+            <span className="mb-3 inline-flex rounded-full border border-theme-border bg-theme-card px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-theme-accent shadow-sm">
               Blog &amp; câu chuyện thương hiệu
             </span>
             <h1 className="font-heading text-3xl leading-tight text-theme-primary md:text-5xl">
@@ -217,7 +217,7 @@ export default async function BlogPage({
                 className={`grid h-10 w-10 place-items-center rounded-full border text-sm font-bold transition-colors ${
                   pageNumber === page
                     ? 'border-primary bg-primary text-white'
-                    : 'border-theme-border bg-theme-card text-theme-secondary hover:border-primary hover:text-primary'
+                    : 'border-theme-border bg-theme-card text-theme-secondary hover:border-primary hover:text-theme-accent'
                 }`}
               >
                 {pageNumber}

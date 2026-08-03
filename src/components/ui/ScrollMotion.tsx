@@ -33,6 +33,8 @@ export default function ScrollMotion({ scroller }: { scroller?: string } = {}) {
 
     let cleanup: (() => void) | undefined
     let cancelled = false
+    let proximityObserver: IntersectionObserver | undefined
+    let releaseProximityWait: (() => void) | undefined
 
     const run = async () => {
       // Tầng 1: không dựng gì cả khi người dùng yêu cầu giảm chuyển động.
@@ -42,11 +44,40 @@ export default function ScrollMotion({ scroller }: { scroller?: string } = {}) {
       // phần tử nằm ngoài vùng cuộn (sidebar admin chẳng hạn), nơi mốc start/end vô nghĩa.
       const root: ParentNode = scroller ? (document.querySelector(scroller) ?? document) : document
 
-      const hasWork =
+      const immediateWork =
         root.querySelector('[data-parallax]') ||
-        root.querySelector('[data-scroll-progress]') ||
-        root.querySelector('[data-batch-reveal]')
-      if (!hasWork) return
+        root.querySelector('[data-scroll-progress]')
+      const firstBatch = root.querySelector<HTMLElement>('[data-batch-reveal]')
+      if (!immediateWork && !firstBatch) return
+
+      // Homepage chỉ có batch reveal ở rất xa dưới fold. Không tải ~34KB GSAP và
+      // đo toàn bộ card ngay khi hydrate; chờ tới lúc người dùng cuộn gần lưới.
+      if (!immediateWork && firstBatch && 'IntersectionObserver' in window) {
+        await new Promise<void>((resolve) => {
+          let settled = false
+          const finish = () => {
+            if (settled) return
+            settled = true
+            proximityObserver?.disconnect()
+            proximityObserver = undefined
+            releaseProximityWait = undefined
+            resolve()
+          }
+
+          const observerRoot = scroller
+            ? document.querySelector<Element>(scroller)
+            : null
+          proximityObserver = new IntersectionObserver(
+            (entries) => {
+              if (entries.some((entry) => entry.isIntersecting)) finish()
+            },
+            { root: observerRoot, rootMargin: '600px 0px' },
+          )
+          releaseProximityWait = finish
+          proximityObserver.observe(firstBatch)
+        })
+        if (cancelled) return
+      }
 
       const [{ gsap }, { ScrollTrigger }] = await Promise.all([
         import('gsap'),
@@ -151,6 +182,8 @@ export default function ScrollMotion({ scroller }: { scroller?: string } = {}) {
 
     return () => {
       cancelled = true
+      releaseProximityWait?.()
+      proximityObserver?.disconnect()
       cleanup?.()
     }
   }, [scroller])

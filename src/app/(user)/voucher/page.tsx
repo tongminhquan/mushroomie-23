@@ -10,17 +10,17 @@ export const metadata: Metadata = {
 
 const HOW_TO_STEPS = [
   {
-    icon: <Gamepad2 className="h-6 w-6 text-primary" />,
+    icon: <Gamepad2 className="h-6 w-6 text-theme-accent" />,
     title: 'Chơi mini game',
     desc: 'Vào trang Mini Game, chơi Tetris hoặc Block Blast. Đạt mốc điểm quy định để nhận voucher tự động về ví.',
   },
   {
-    icon: <Tag className="h-6 w-6 text-kraft" />,
+    icon: <Tag className="h-6 w-6 text-theme-kraft" />,
     title: 'Nhập mã khuyến mãi',
     desc: 'Đến trang "Voucher của tôi" → nhập mã do Mushroomie gửi qua email hoặc fanpage để kích hoạt vào ví.',
   },
   {
-    icon: <ShoppingBag className="h-6 w-6 text-primary" />,
+    icon: <ShoppingBag className="h-6 w-6 text-theme-accent" />,
     title: 'Áp dụng khi thanh toán',
     desc: 'Tại bước Thanh toán, chọn voucher từ danh sách ví và xác nhận để trừ ngay vào tổng đơn hàng.',
   },
@@ -69,7 +69,7 @@ export default function VoucherLandingPage() {
             </Link>
             <Link
               href="/tai-khoan/voucher"
-              className="inline-flex items-center gap-2 rounded-full border border-theme-border bg-theme-card px-7 py-3.5 text-sm font-extrabold text-theme-primary transition hover:border-primary hover:text-primary"
+              className="inline-flex items-center gap-2 rounded-full border border-theme-border bg-theme-card px-7 py-3.5 text-sm font-extrabold text-theme-primary transition hover:border-primary hover:text-theme-accent"
             >
               Voucher của tôi
             </Link>
@@ -107,7 +107,7 @@ export default function VoucherLandingPage() {
         <section className="mt-12">
           <div className="rounded-[22px] border border-theme-border bg-theme-card p-6 shadow-card md:p-8">
             <div className="mb-5 flex items-center gap-3">
-              <Clock className="h-5 w-5 text-kraft" />
+              <Clock className="h-5 w-5 text-theme-kraft" />
               <h2 className="font-heading text-xl text-theme-primary">Điều kiện sử dụng</h2>
             </div>
             <ul className="space-y-3 text-sm leading-6 text-theme-secondary">
@@ -119,7 +119,7 @@ export default function VoucherLandingPage() {
                 'Mushroomie có quyền thu hồi voucher phát sinh do lỗi kỹ thuật hoặc gian lận.',
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-2.5">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-extrabold text-primary">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-extrabold text-theme-accent">
                     {i + 1}
                   </span>
                   {item}
@@ -159,7 +159,7 @@ export default function VoucherLandingPage() {
             </Link>
             <Link
               href="/san-pham"
-              className="inline-flex items-center gap-2 rounded-full border border-theme-border bg-theme-card px-7 py-3.5 text-sm font-extrabold text-theme-primary transition hover:border-primary hover:text-primary"
+              className="inline-flex items-center gap-2 rounded-full border border-theme-border bg-theme-card px-7 py-3.5 text-sm font-extrabold text-theme-primary transition hover:border-primary hover:text-theme-accent"
             >
               <ShoppingBag size={17} /> Xem sản phẩm
             </Link>

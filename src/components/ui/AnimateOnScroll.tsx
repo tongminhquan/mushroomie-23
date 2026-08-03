@@ -20,12 +20,18 @@ export default function AnimateOnScroll({
   once = true,
 }: AnimateOnScrollProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const [isVisible, setIsVisible] = useState(false)
+  // SSR và hydration phải luôn hiển thị nội dung. Chỉ ẩn phần tử đã xác nhận nằm
+  // ngoài viewport sau khi JavaScript chạy; nếu observer/hydration lỗi, trang vẫn đọc được.
+  const [isVisible, setIsVisible] = useState(true)
   const reduced = useReducedMotion()
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
+    if (reduced) {
+      setIsVisible(true)
+      return
+    }
 
     // If already in viewport on mount, show immediately (no flash of invisible content)
     const rect = el.getBoundingClientRect()
@@ -33,6 +39,8 @@ export default function AnimateOnScroll({
       setIsVisible(true)
       return
     }
+
+    setIsVisible(false)
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -48,14 +56,13 @@ export default function AnimateOnScroll({
 
     observer.observe(el)
     return () => observer.disconnect()
-  }, [once])
+  }, [once, reduced])
 
-  // Tầng 2 khi người dùng bật giảm chuyển động: bỏ toàn bộ phần dịch chuyển, chỉ
-  // giữ một nhịp fade ngắn. Vẫn có transition để nội dung không "nhảy" đột ngột,
-  // nhưng không còn cảm giác tự di chuyển gây chóng mặt.
+  // Khi người dùng bật giảm chuyển động, nội dung giữ trạng thái ổn định và không
+  // chạy cả dịch chuyển lẫn fade.
   const baseStyles: React.CSSProperties = {
     transitionProperty: reduced ? 'opacity' : 'opacity, transform',
-    transitionDuration: reduced ? '150ms' : `${duration}ms`,
+    transitionDuration: reduced ? '0ms' : `${duration}ms`,
     transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
     transitionDelay: reduced ? '0ms' : `${delay}ms`,
   }

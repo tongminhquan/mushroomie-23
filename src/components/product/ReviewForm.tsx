@@ -64,7 +64,7 @@ export default function ReviewForm({ productId, productName }: ReviewFormProps) 
   if (status === 'success') {
     return (
       <div className="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-6 text-center">
-        <p className="font-bold text-text">Cảm ơn bạn đã đánh giá!</p>
+        <p className="font-bold text-theme-primary">Cảm ơn bạn đã đánh giá!</p>
         <p className="mt-1 text-sm text-theme-muted">
           Đánh giá sẽ hiển thị sau khi được kiểm duyệt.
         </p>

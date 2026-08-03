@@ -28,6 +28,8 @@
   --color-yellow: #ffe7a3;
   --color-kraft: #6f4528;
   --color-text: #2b2b2b;
+  --color-brand-ink: #2b2b2b;
+  --color-brand-ink-muted: #4a4542;
 
   /* Accents */
   --color-accent-peach: #ffd6d6; /* Hồng nhạt */
@@ -76,6 +78,8 @@
   --color-theme-primary: var(--text-primary-theme);
   --color-theme-secondary: var(--text-secondary-theme);
   --color-theme-muted: var(--text-muted-theme);
+  --color-theme-accent: var(--primary-content);
+  --color-theme-kraft: var(--kraft-content-theme);
   --color-theme-border: var(--border-default-theme);
   --color-theme-border-strong: var(--border-strong-theme);
   --radius-card: 24px;
@@ -100,6 +104,7 @@ html[data-theme="light"] {
   --primary-control-hover: #b91515;
   --primary-content: #c91414;
   --primary-foreground: #fff7f2;
+  --kraft-content-theme: #8a5635;
   --shadow-card-theme: 0 8px 24px rgb(91 48 35 / 0.07);
   --shadow-overlay-theme: 0 22px 55px rgb(91 48 35 / 0.14);
   --theme-color: #fff7f2;
@@ -127,6 +132,7 @@ html[data-theme="dark"] {
   --primary-control-hover: #e02424;
   --primary-content: #ff7b7b;
   --primary-foreground: #fff7f2;
+  --kraft-content-theme: #d9a17b;
   --shadow-card-theme: 0 10px 28px rgb(0 0 0 / 0.26);
   --shadow-overlay-theme: 0 24px 62px rgb(0 0 0 / 0.42);
   --theme-color: #000000;
@@ -154,10 +160,8 @@ html[data-theme="dark"] {
   --shadow-strong: var(--shadow-overlay-theme);
 }
 
-/* `text` is also used as a dark brand surface. Remap only its text utility. */
-html[data-theme="dark"] [class~="text-text"] {
-  color: var(--text-primary-theme);
-}
+/* `text` remains a static brand surface. Theme-aware copy uses `text-theme-*`,
+   while copy on fixed pink/yellow surfaces uses `text-brand-ink*`. */
 
 /* Keep light-mode game text readable while an older client chunk is replaced. */
 html[data-theme="light"] .mini-game-theme-scope [class~="text-white"] {
@@ -222,7 +226,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--color-primary);
+  color: var(--primary-content);
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -532,17 +536,6 @@ body {
   transition-duration: 200ms;
 }
 
-/* --- Vào trang: chạy ở mọi route qua src/app/template.tsx ---
-   Chỉ dịch 10px: đủ để cảm nhận trang vừa đổi, không đủ để gây khó chịu khi điều
-   hướng liên tục trong admin. Dùng `both` để giữ trạng thái cuối. */
-@keyframes m-page-enter {
-  from { opacity: 0; transform: translate3d(0, 10px, 0); }
-  to   { opacity: 1; transform: translate3d(0, 0, 0); }
-}
-.m-page-enter {
-  animation: m-page-enter 320ms var(--m-ease-out) both;
-}
-
 /* --- Parallax: lớp nền trôi chậm hơn nội dung khi cuộn.
    GSAP ghi trực tiếp vào transform; khai báo will-change để trình duyệt tách lớp
    sẵn thay vì tạo layer giữa chừng (nguyên nhân gây giật khung hình đầu). --- */
@@ -813,22 +806,18 @@ body {
 
 /* ========== Smooth Transitions (scoped) ========== */
 .theme-transition {
-  transition-property: all;
+  /* Không dùng `all`: các thay đổi width/height/position vô tình sẽ bị nội suy và
+     buộc layout lại. Danh sách này bao phủ theme, hover lift và shadow hiện có. */
+  transition-property: color, background-color, border-color, opacity, transform, box-shadow;
   transition-duration: 150ms;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-html[data-theme="dark"] input,
-html[data-theme="dark"] textarea,
-html[data-theme="dark"] select {
+html[data-theme="dark"] :where(input, textarea, select) {
   color-scheme: dark;
-  background-color: var(--surface-input);
-  color: var(--text-primary-theme);
-  border-color: var(--border-default-theme);
 }
 
-html[data-theme="dark"] input::placeholder,
-html[data-theme="dark"] textarea::placeholder {
+html[data-theme="dark"] :where(input::placeholder, textarea::placeholder) {
   color: var(--text-muted-theme);
 }
 
@@ -1026,13 +1015,6 @@ a, button, input, textarea, select,
   /* Slogan: bỏ ánh sáng quét, giữ lại chữ đọc được (gradient đứng yên vẫn hiện màu). */
   .m-slogan-shimmer {
     animation: none !important;
-  }
-
-  /* Vào trang: giữ lại một nhịp fade rất ngắn thay vì trượt lên — bỏ hẳn sẽ khiến
-     trang "nháy" đột ngột mỗi lần điều hướng. */
-  .m-page-enter {
-    animation: none !important;
-    transition: opacity 120ms linear;
   }
 
   /* Hộp thoại mount mới: bỏ phần phóng to, giữ một nhịp fade để mắt kịp bắt được nó

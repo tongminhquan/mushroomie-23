@@ -49,14 +49,27 @@ test('scroll reveal never hides content without JavaScript', () => {
   assert.match(reveal, /getBoundingClientRect/)
 })
 
-test('GSAP is dynamically imported so only the homepage pays for it', () => {
-  const hero = read('src/components/home/landing/HeroProofMotion.tsx')
+test('legacy AnimateOnScroll keeps SSR content visible before observers run', () => {
+  const animate = read('src/components/ui/AnimateOnScroll.tsx')
 
-  assert.match(hero, /await import\('gsap'\)/, 'GSAP phải được nạp động')
-  assert.doesNotMatch(hero, /^import .*from 'gsap'/m, 'GSAP không được import tĩnh')
-  // gsap.matchMedia tự hoàn tác khi người dùng đổi thiết lập giữa chừng.
-  assert.match(hero, /gsap\.matchMedia\(\)/)
-  assert.match(hero, /prefers-reduced-motion: reduce/)
+  assert.match(animate, /useState\(true\)/, 'SSR không được xuất nội dung opacity 0')
+  assert.match(animate, /setIsVisible\(false\)/, 'chỉ được ẩn sau khi đã đo viewport ở client')
+  assert.ok(
+    animate.indexOf('getBoundingClientRect') < animate.indexOf('setIsVisible(false)'),
+    'phải đo geometry trước khi ẩn phần tử ngoài viewport',
+  )
+})
+
+test('the above-the-fold proof strip does not wait for client-side motion', () => {
+  const hero = read('src/components/home/landing/HomeHeroLanding.tsx')
+
+  assert.doesNotMatch(hero, /HeroProofMotion/, 'dải trust bị animation client trì hoãn LCP')
+  assert.doesNotMatch(hero, /import\('gsap'\)/, 'hero không được chờ tải GSAP mới hiển thị')
+  assert.equal(
+    fs.existsSync(path.join(ROOT, 'src/components/home/landing/HeroProofMotion.tsx')),
+    false,
+    'component animation hero không còn được sử dụng phải được xóa',
+  )
 })
 
 test('no other module imports GSAP statically', () => {
@@ -105,12 +118,23 @@ test('ScrollTrigger cleans up and refreshes after images load', () => {
   assert.doesNotMatch(motion, /markers:\s*true/, 'markers dev còn sót lại trong production')
 })
 
-test('page transition uses template.tsx and ships no JS', () => {
-  const template = read('src/app/template.tsx')
-  assert.doesNotMatch(template, /'use client'/, 'template thành client component → tốn JS mọi trang')
-  assert.match(template, /m-page-enter/)
-  // template remount mỗi lần điều hướng; layout thì không, nên hiệu ứng sẽ chỉ chạy một lần.
-  assert.match(CSS, /@keyframes m-page-enter/)
+test('below-fold batch motion defers GSAP until it nears the viewport', () => {
+  const motion = read('src/components/ui/ScrollMotion.tsx')
+  const proximityIndex = motion.indexOf("rootMargin: '600px 0px'")
+  const importIndex = motion.indexOf("import('gsap')")
+
+  assert.ok(proximityIndex > -1, 'batch reveal thiếu proximity gate')
+  assert.ok(proximityIndex < importIndex, 'phải chờ gần viewport trước khi tải GSAP')
+  assert.match(motion, /releaseProximityWait\?\.\(\)/, 'observer chờ phải được giải phóng khi unmount')
+})
+
+test('page content is never hidden by a route-wide entrance animation', () => {
+  assert.equal(
+    fs.existsSync(path.join(ROOT, 'src/app/template.tsx')),
+    false,
+    'template toàn cục làm remount mọi route và trì hoãn LCP',
+  )
+  assert.doesNotMatch(CSS, /m-page-enter/, 'không được đặt opacity 0 lên toàn bộ nội dung trang')
 })
 
 test('batch reveal never hides what the user can already see', () => {

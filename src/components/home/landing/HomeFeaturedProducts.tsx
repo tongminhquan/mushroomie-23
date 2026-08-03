@@ -10,7 +10,7 @@ export default function HomeFeaturedProducts({ products }: { products: HomeProdu
 
   return (
     <section className="relative overflow-hidden bg-theme-section py-16 text-theme-primary md:py-24">
-      <Sparkles aria-hidden className="pointer-events-none absolute left-[6%] top-24 hidden h-7 w-7 text-primary/70 md:block" />
+      <Sparkles aria-hidden className="pointer-events-none absolute left-[6%] top-24 hidden h-7 w-7 text-theme-accent/70 md:block" />
       <Gift aria-hidden className="pointer-events-none absolute right-[7%] top-32 hidden h-7 w-7 text-kraft/70 md:block" />
 
       <BrandContainer className="relative">

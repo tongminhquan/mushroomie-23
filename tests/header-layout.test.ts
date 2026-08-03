@@ -21,6 +21,8 @@ test('a dedicated compact header appears after the full header leaves the viewpo
   assert.match(HEADER, /import CompactHeader from '@\/components\/layout\/CompactHeader'/)
   assert.match(HEADER, /new IntersectionObserver/)
   assert.match(HEADER, /compactSentinelRef/)
+  assert.match(HEADER, /compactMounted/)
+  assert.match(HEADER, /\{compactMounted && \(/)
   assert.match(HEADER, /<CompactHeader/)
 })
 
@@ -42,4 +44,9 @@ test('compact header keeps all primary navigation actions available', () => {
   assert.match(COMPACT_HEADER, /translate-y-0 opacity-100/)
   assert.match(COMPACT_HEADER, /-translate-y-full/)
   assert.doesNotMatch(COMPACT_HEADER, /transition-all/)
+})
+
+test('mobile header exposes the light and dark theme toggle without opening the drawer', () => {
+  assert.match(HEADER, /<ThemeToggle variant="icon" \/>/)
+  assert.doesNotMatch(HEADER, /<ThemeToggle variant="icon" className="hidden md:grid"/)
 })

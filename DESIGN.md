@@ -26,6 +26,8 @@ Mushroomie is a youth-focused handmade accessories shop. The interface should fe
 
 Avoid large single-color red surfaces. Use red as a strong accent supported by cream, white, pink, yellow, kraft, and soft black.
 
+Fixed pink/yellow brand surfaces always use the static `brand-ink` pair (`#2b2b2b` / `#4a4542`). Theme surfaces use `theme-primary`, `theme-secondary`, `theme-accent`, and `theme-kraft`; do not remap static pastel ink when dark mode is active.
+
 ## Typography
 
 - Display and section headings: Paytone One.

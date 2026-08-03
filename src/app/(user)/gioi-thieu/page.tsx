@@ -53,7 +53,7 @@ export default async function AboutPage() {
         <span aria-hidden className="pointer-events-none select-none absolute right-[14%] top-[26%] text-xl text-accent-mint animate-float-soft" style={{ animationDelay: '1.2s' }}>★</span>
         <div className="relative max-w-3xl mx-auto px-6 pt-12 pb-12">
           <div className="text-5xl mb-4 animate-float-soft" aria-hidden>🍄</div>
-          <span className="inline-block text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-3">Câu chuyện Mushroomie</span>
+          <span className="inline-block text-xs font-extrabold tracking-[0.14em] uppercase text-theme-accent mb-3">Câu chuyện Mushroomie</span>
           <h1 className="font-heading text-3xl md:text-5xl leading-[1.08] text-theme-primary mb-4">Bắt đầu từ một góc bàn nhỏ &amp; tình yêu handmade</h1>
           <p className="m-0 mx-auto max-w-lg text-[15px] md:text-base leading-relaxed text-theme-secondary">
             Mỗi hạt cườm, mỗi chiếc charm đều mang một câu chuyện. Đây là câu chuyện của chúng mình — và sẽ sớm có cả bạn trong đó ♡
@@ -73,7 +73,7 @@ export default async function AboutPage() {
                   style={{ background: m.dot, border: '4px solid var(--color-secondary)', boxShadow: `0 0 0 2px ${m.dot}` }}
                   aria-hidden
                 >{m.emoji || ''}</span>
-                <div className="font-heading text-[13px] mb-1.5" style={{ color: m.dot }}>{m.year}</div>
+                <div className="font-heading text-[13px] mb-1.5" style={{ color: m.dot === '#c91414' ? 'var(--primary-content)' : m.dot }}>{m.year}</div>
                 <h2 className="font-heading text-lg text-theme-primary mb-1.5">{m.title}</h2>
                 <p className="m-0 text-sm leading-relaxed text-theme-secondary">{m.desc}</p>
               </div>
@@ -106,7 +106,7 @@ export default async function AboutPage() {
       <section className="max-w-5xl mx-auto px-4 sm:px-6 pt-14">
         <AnimateOnScroll animation="fade-up">
           <div className="text-center mb-8">
-            <span className="inline-block text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-2.5">Giá trị cốt lõi</span>
+            <span className="inline-block text-xs font-extrabold tracking-[0.14em] uppercase text-theme-accent mb-2.5">Giá trị cốt lõi</span>
             <h2 className="font-heading text-2xl md:text-3xl text-theme-primary">Ba điều chúng mình luôn giữ</h2>
           </div>
         </AnimateOnScroll>
@@ -130,7 +130,7 @@ export default async function AboutPage() {
             <AnimateOnScroll animation="fade-up">
               <h2 className="font-heading text-2xl md:text-3xl text-theme-primary">Sản phẩm của chúng mình</h2>
             </AnimateOnScroll>
-            <Link href="/san-pham" className="inline-flex items-center gap-2 text-sm font-extrabold text-primary hover:text-primary-dark">
+            <Link href="/san-pham" className="inline-flex items-center gap-2 text-sm font-extrabold text-theme-accent hover:text-theme-accent">
               Tất cả sản phẩm <ArrowRight size={16} />
             </Link>
           </div>
@@ -151,7 +151,7 @@ export default async function AboutPage() {
                     <p className="text-[13px] leading-6 text-theme-secondary overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
                       {prod.description || 'Khám phá bộ sưu tập phụ kiện độc đáo từ Mushroomie.'}
                     </p>
-                    <span className="mt-auto pt-4 text-xs font-extrabold uppercase tracking-[0.08em] text-primary">Xem chi tiết →</span>
+                    <span className="mt-auto pt-4 text-xs font-extrabold uppercase tracking-[0.08em] text-theme-accent">Xem chi tiết →</span>
                   </Link>
                 )
               })}

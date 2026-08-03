@@ -43,7 +43,7 @@ export default function HomeTrust({ reviews }: { reviews: HomeReview[] }) {
                 key={review.id}
                 className={`theme-transition rounded-[18px] border-[1.5px] border-theme-border bg-theme-card p-6 shadow-card ${index === 1 ? 'md:-translate-y-4' : ''}`}
               >
-                <div className="mb-5 flex gap-1 text-primary" role="img" aria-label={`${review.rating} trên 5 sao`}>
+                <div className="mb-5 flex gap-1 text-theme-accent" role="img" aria-label={`${review.rating} trên 5 sao`}>
                   {Array.from({ length: review.rating }, (_, star) => (
                     <Star key={star} size={16} fill="currentColor" />
                   ))}
@@ -59,7 +59,7 @@ export default function HomeTrust({ reviews }: { reviews: HomeReview[] }) {
           <div className="grid gap-4 md:grid-cols-3">
             {fallbackReasons.map(({ icon: Icon, title, text }) => (
               <article key={title} className="theme-transition rounded-[18px] border-[1.5px] border-theme-border bg-theme-card p-6">
-                <div className="grid h-11 w-11 place-items-center rounded-lg bg-primary-light text-primary">
+                <div className="grid h-11 w-11 place-items-center rounded-lg bg-primary-light text-theme-accent">
                   <Icon size={21} />
                 </div>
                 <h3 className="mt-5 font-heading text-xl text-theme-primary">{title}</h3>

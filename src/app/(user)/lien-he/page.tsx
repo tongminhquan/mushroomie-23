@@ -24,7 +24,7 @@ const socials = [
 const infoItems = [
   { emoji: '📍', chip: '#ffd6d6', label: 'Địa chỉ', value: <>{BRAND.formattedAddress}</> },
   { emoji: '✉️', chip: '#ffe7a3', label: 'Email', value: <SafeEmail email={BRAND.email} /> },
-  { emoji: '☎️', chip: '#ffece6', label: 'Hotline / Zalo', value: <a href={`tel:${BRAND.phoneE164}`} className="hover:text-primary">{BRAND.phoneDisplay}</a> },
+  { emoji: '☎️', chip: '#ffece6', label: 'Hotline / Zalo', value: <a href={`tel:${BRAND.phoneE164}`} className="hover:text-theme-accent">{BRAND.phoneDisplay}</a> },
 ]
 
 export default function ContactPage() {
@@ -50,7 +50,7 @@ export default function ContactPage() {
 
   const inputCls = (hasError: boolean) =>
     `w-full rounded-xl border px-4 py-3 text-sm text-theme-primary outline-none transition-colors bg-theme-input ${
-      hasError ? 'border-red-400' : 'border-theme-border-strong focus:border-primary focus:ring-4 focus:ring-primary/10'
+      hasError ? 'border-red-400 focus:border-red-400' : 'border-theme-border-strong focus:border-primary focus:ring-4 focus:ring-primary/10'
     }`
 
   return (
@@ -61,7 +61,7 @@ export default function ContactPage() {
         <span aria-hidden className="pointer-events-none select-none absolute right-[15%] top-[28%] text-xl text-accent-mint animate-float-soft" style={{ animationDelay: '1.2s' }}>★</span>
         <div className="relative max-w-2xl mx-auto px-6 pt-12 pb-10">
           <div className="text-5xl mb-3 animate-float-soft" aria-hidden>🍄</div>
-          <span className="inline-block text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-3">Liên hệ</span>
+          <span className="inline-block text-xs font-extrabold tracking-[0.14em] uppercase text-theme-accent mb-3">Liên hệ</span>
           <h1 className="font-heading text-3xl md:text-[44px] leading-tight text-theme-primary mb-3">Ghé Nhà Nấm nhỏ ♡</h1>
           <p className="m-0 mx-auto max-w-md text-[15px] leading-relaxed text-theme-secondary">
             Có câu hỏi, muốn custom đặc biệt hay chỉ muốn nói &ldquo;hi&rdquo;? Nhắn cho chúng mình nhé! {BRAND.name} ở{' '}
@@ -70,7 +70,7 @@ export default function ContactPage() {
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
             <a
               href={`tel:${BRAND.phoneE164}`}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-card transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-card transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
             >
               📞 Gọi {BRAND.phoneDisplay}
             </a>
@@ -78,7 +78,7 @@ export default function ContactPage() {
               href={BRAND.socials.facebook.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-primary bg-theme-card px-5 py-2.5 text-sm font-bold text-primary transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-primary bg-theme-card px-5 py-2.5 text-sm font-bold text-theme-accent transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
             >
               💬 Nhắn tin tư vấn
             </a>
@@ -86,7 +86,7 @@ export default function ContactPage() {
               href={BRAND.socials.shopee.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-theme-border bg-theme-card px-5 py-2.5 text-sm font-bold text-theme-secondary transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-theme-border bg-theme-card px-5 py-2.5 text-sm font-bold text-theme-secondary transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
             >
               🛒 Mua trên Shopee
             </a>
@@ -103,7 +103,6 @@ export default function ContactPage() {
               href={s.url}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`${s.name} của ${BRAND.name}`}
               className="hover-lift block rounded-[20px] border border-theme-border bg-theme-card p-5 text-center shadow-card"
             >
               <span
@@ -137,32 +136,36 @@ export default function ContactPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label htmlFor="ct-name" className="block text-xs font-semibold mb-1.5 text-theme-secondary">Họ tên</label>
-                    <input id="ct-name" type="text" required value={form.name}
+                    <input id="ct-name" name="name" type="text" autoComplete="name" required value={form.name}
                       onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                      aria-invalid={!!errors.name} aria-describedby={errors.name ? 'ct-name-error' : undefined}
                       placeholder="Tên của bạn…" className={inputCls(!!errors.name)} />
-                    {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name[0]}</p>}
+                    {errors.name && <p id="ct-name-error" role="alert" className="text-red-500 text-xs mt-1">{errors.name[0]}</p>}
                   </div>
                   <div>
                     <label htmlFor="ct-phone" className="block text-xs font-semibold mb-1.5 text-theme-secondary">Số điện thoại</label>
-                    <input id="ct-phone" type="tel" value={form.phone}
+                    <input id="ct-phone" name="phone" type="tel" autoComplete="tel" value={form.phone}
                       onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                      aria-invalid={!!errors.phone} aria-describedby={errors.phone ? 'ct-phone-error' : undefined}
                       placeholder="09xx xxx xxx" className={inputCls(!!errors.phone)} />
-                    {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone[0]}</p>}
+                    {errors.phone && <p id="ct-phone-error" role="alert" className="text-red-500 text-xs mt-1">{errors.phone[0]}</p>}
                   </div>
                   <div className="sm:col-span-2">
                     <label htmlFor="ct-email" className="block text-xs font-semibold mb-1.5 text-theme-secondary">Email</label>
-                    <input id="ct-email" type="email" required value={form.email}
+                    <input id="ct-email" name="email" type="email" autoComplete="email" required value={form.email}
                       onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                      aria-invalid={!!errors.email} aria-describedby={errors.email ? 'ct-email-error' : undefined}
                       placeholder="ban@email.com" className={inputCls(!!errors.email)} />
-                    {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email[0]}</p>}
+                    {errors.email && <p id="ct-email-error" role="alert" className="text-red-500 text-xs mt-1">{errors.email[0]}</p>}
                   </div>
                   <div className="sm:col-span-2">
                     <label htmlFor="ct-message" className="block text-xs font-semibold mb-1.5 text-theme-secondary">Nội dung</label>
-                    <textarea id="ct-message" required rows={4} value={form.message}
+                    <textarea id="ct-message" name="message" autoComplete="off" required rows={4} value={form.message}
                       onChange={(e) => setForm((p) => ({ ...p, message: e.target.value }))}
+                      aria-invalid={!!errors.message} aria-describedby={errors.message ? 'ct-message-error' : undefined}
                       placeholder="Mình muốn custom một chiếc vòng tay tặng bạn thân…"
                       className={`${inputCls(!!errors.message)} resize-none`} />
-                    {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message[0]}</p>}
+                    {errors.message && <p id="ct-message-error" role="alert" className="text-red-500 text-xs mt-1">{errors.message[0]}</p>}
                   </div>
                 </div>
 
@@ -198,14 +201,14 @@ export default function ContactPage() {
             </div>
 
             <div className="rounded-[18px] p-4 bg-primary-light">
-              <h3 className="font-heading text-primary mb-1.5">🎨 Tự thiết kế phụ kiện?</h3>
+              <h3 className="font-heading text-theme-accent mb-1.5">🎨 Tự thiết kế phụ kiện?</h3>
               <p className="text-sm text-theme-secondary leading-relaxed">Cho mình biết ý tưởng của bạn — {BRAND.name} tư vấn miễn phí và giúp bạn tạo chiếc phụ kiện độc nhất vô nhị.</p>
             </div>
 
             <div className="flex items-center gap-3 rounded-[18px] border border-dashed border-theme-border-strong bg-theme-subtle p-4">
               <span aria-hidden className="text-xl">🕘</span>
               <div className="text-[12.5px] text-theme-secondary leading-snug">
-                <strong className="text-accent-kraft">Giờ phản hồi:</strong> 8:00–21:00 mỗi ngày (T2–CN). Thường rep trong vài giờ ♡
+                <strong className="text-theme-kraft">Giờ phản hồi:</strong> 8:00–21:00 mỗi ngày (T2–CN). Thường rep trong vài giờ ♡
               </div>
             </div>
           </div>
@@ -218,7 +221,7 @@ export default function ContactPage() {
           <div className="overflow-hidden rounded-[20px] border border-theme-border bg-theme-card p-2 shadow-card">
             <div className="p-4 sm:p-5">
               <h2 className="flex items-center gap-2 font-heading text-xl text-theme-primary">
-                <MapPin size={20} className="text-primary" /> Đường đến {BRAND.name}
+                <MapPin size={20} className="text-theme-accent" /> Đường đến {BRAND.name}
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-theme-secondary">
                 {BRAND.name} ở {BRAND.formattedAddress}. Trước khi đến, bạn hãy mở bản đồ và đi theo chỉ dẫn đến đúng ghim tại địa chỉ này.
@@ -239,7 +242,7 @@ export default function ContactPage() {
                 href={BRAND.directionsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-primary hover:underline"
+                className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-theme-accent hover:underline"
               >
                 <Navigation size={17} /> Mở chỉ đường trên Google Maps
               </a>
@@ -273,7 +276,7 @@ export default function ContactPage() {
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="inline-flex min-h-11 items-center rounded-full border border-theme-border bg-theme-subtle px-4 py-2 text-[13px] font-semibold text-theme-secondary transition-colors hover:border-primary hover:text-primary"
+                  className="inline-flex min-h-11 items-center rounded-full border border-theme-border bg-theme-subtle px-4 py-2 text-[13px] font-semibold text-theme-secondary transition-colors hover:border-primary hover:text-theme-accent"
                 >
                   {l.label}
                 </Link>

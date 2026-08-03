@@ -7,7 +7,6 @@ import {
 } from 'lucide-react'
 import HomeBannerImage from './HomeBannerImage'
 import HomeHeroControls from './HomeHeroControls'
-import HeroProofMotion from './HeroProofMotion'
 import type { HomeBanner } from './types'
 
 const fallbackSlide: HomeBanner = {
@@ -97,8 +96,6 @@ export default function HomeHeroLanding({ banners }: { banners: HomeBanner[] }) 
           </div>
         ))}
       </div>
-
-      <HeroProofMotion targetId="hero-proof-strip" />
     </section>
   )
 }
