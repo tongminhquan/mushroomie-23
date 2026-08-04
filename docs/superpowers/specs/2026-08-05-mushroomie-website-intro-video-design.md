@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-05
 
-**Status:** Approved creative direction; awaiting written-spec review
+**Status:** Approved by the user on 2026-08-05; ready for implementation
 
 **Format:** 60-second, 16:9, Vietnamese brand explainer
 
