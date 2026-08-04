@@ -413,7 +413,7 @@ Listen to scenes 1, 6, and 9. Required: consistent young female Vietnamese voice
 - Test: "src/tests/audio.test.ts"
 
 **Interfaces:**
-- Consumes: Remotion-bundled FFmpeg.
+- Consumes: full FFmpeg 9 discovered from `FFMPEG_PATH`, the Gyan.FFmpeg Winget package, or `PATH`; the reduced Remotion FFmpeg build omits the required synthesis filters.
 - Produces: 60-second 48 kHz stereo music and three 48 kHz stereo effects.
 
 - [ ] **Step 1: Write failing job-definition tests**
@@ -422,7 +422,7 @@ Export AUDIO_OUTPUTS and buildAudioJobs(). Assert keys are music/whoosh/pop/shim
 
 - [ ] **Step 2: Implement four exact FFmpeg synthesis jobs**
 
-Use spawnSync with "npx.cmd remotion ffmpeg" on Windows:
+Use direct `spawnSync` with the discovered full FFmpeg binary on Windows:
 - brand-bed.wav: 60 s, 48 kHz stereo, quiet A-minor/F/C/G pad, 108 BPM pulse, low-pass, room echo, 1.5 s fade-in/out.
 - whoosh.wav: 0.45 s pink noise, high-pass, triangular volume envelope.
 - pop.wav: 0.16 s 620 Hz + 920 Hz tones with exponential decay.
