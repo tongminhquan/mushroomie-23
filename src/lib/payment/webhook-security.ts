@@ -1,4 +1,4 @@
-const SENSITIVE_KEYS = /signature|secret|token|authorization|account(number)?|bank(sub)?acc/i
+const SENSITIVE_KEYS = /signature|secret|token|authorization|account(number)?|bank(?:[_-]?sub)?[_-]?acc(?:ount)?(?:[_-]?id)?|sub[_-]?acc(?:ount)?(?:[_-]?id)?/i
 const SENSITIVE_HEADER_KEYS = new Set([
   'authorization',
   'x-api-key',
@@ -39,7 +39,11 @@ export function sanitizeWebhookHeaders(headers: Headers) {
 
 export function extractOrderCodes(content: string, prefix: string): string[] {
   const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const matches = content.toUpperCase().match(new RegExp(`${escapedPrefix}[\\-\\s]*[A-Z0-9]+`, 'g')) || []
+  const pattern = new RegExp(
+    `(?:^|[^A-Z0-9])(${escapedPrefix}[\\-\\s]+[A-Z0-9]+)(?=$|[^A-Z0-9])`,
+    'g',
+  )
+  const matches = [...content.toUpperCase().matchAll(pattern)].map((match) => match[1])
 
   return [...new Set(matches.map((match) => {
     const cleanMatch = match.replace(/[\-\s]/g, '')

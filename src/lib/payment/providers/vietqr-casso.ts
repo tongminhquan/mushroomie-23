@@ -30,7 +30,13 @@ function normalizeCassoTransaction(data: any): WebhookTransaction {
     transactionCode: String(data?.reference || data?.tid || data?.id || ''),
     amount: Number(data?.amount || 0),
     transferContent: String(data?.description || data?.memo || ''),
-    receivingAccount: String(data?.accountNumber || data?.bankSubAccId || ''),
+    receivingAccount: String(
+      data?.accountNumber
+      || data?.bank_sub_acc_id
+      || data?.subAccId
+      || data?.bankSubAccId
+      || '',
+    ),
   }
 }
 

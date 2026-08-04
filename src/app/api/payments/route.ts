@@ -12,6 +12,8 @@ const paymentSchema = z.object({
   accessToken: z.string().max(1000).optional(),
 })
 
+class PaymentOrderStateChangedError extends Error {}
+
 export async function POST(request: NextRequest) {
   try {
     const rateLimit = await checkRateLimit(request, 'payment-create', { limit: 20, windowMs: 15 * 60 * 1000 })
@@ -50,51 +52,90 @@ export async function POST(request: NextRequest) {
     if (order.payment_status === 'PAID') {
       return NextResponse.json({ error: 'Order is already paid' }, { status: 409 })
     }
+    if (
+      order.order_status !== 'PENDING_PAYMENT'
+      || order.payment_status !== 'PENDING'
+      || !order.inventory_reserved_at
+    ) {
+      return NextResponse.json({ error: 'Order is no longer awaiting payment' }, { status: 409 })
+    }
     if (order.payment) {
       // Return existing payment
       return NextResponse.json(order.payment)
     }
 
     const expireMinutes = Number(process.env.PAYMENT_EXPIRE_MINUTES || 30)
-    const expiresAt = new Date(Date.now() + expireMinutes * 60 * 1000)
 
     const provider = getPaymentProvider()
-    const result = await provider.createPayment({
-      orderId,
-      orderCode: order.order_code,
-      amount: Number(order.total),
-      customerEmail: order.customer_email,
-      customerName: order.customer_name,
-      expiresAt,
+
+    const outcome = await prisma.$transaction(async (tx) => {
+      // This conditional update obtains the same order-row lock as reservation
+      // expiry. Keep it for QR generation too: creating the provider payload
+      // before this claim could produce a QR for a reservation the expiry job
+      // has just cancelled.
+      const claimed = await tx.order.updateMany({
+        where: {
+          id: orderId,
+          order_status: 'PENDING_PAYMENT',
+          payment_status: 'PENDING',
+          inventory_reserved_at: { not: null },
+        },
+        data: { updated_at: new Date() },
+      })
+      if (claimed.count !== 1) {
+        throw new PaymentOrderStateChangedError('Order is no longer awaiting payment')
+      }
+
+      const existingPayment = await tx.payment.findUnique({ where: { order_id: orderId } })
+      if (existingPayment) return { payment: existingPayment, created: false }
+
+      // Start the payment lifetime only after the order-row claim succeeds. A
+      // blocked transaction must not emit a QR that is already expired.
+      const expiresAt = new Date(Date.now() + expireMinutes * 60 * 1000)
+
+      // The currently configured Casso/VietQR provider generates this payload
+      // locally. Keeping it after the order claim ensures no QR is created for
+      // an order whose reservation has already been released.
+      const result = await provider.createPayment({
+        orderId,
+        orderCode: order.order_code,
+        amount: Number(order.total),
+        customerEmail: order.customer_email,
+        customerName: order.customer_name,
+        expiresAt,
+      })
+
+      try {
+        const payment = await tx.payment.create({
+          data: {
+            order_id: orderId,
+            provider: provider.providerKey,
+            bank_name: result.bankName,
+            bank_account: result.bankAccount,
+            account_name: result.accountName,
+            amount: order.total,
+            currency: 'VND',
+            transfer_content: result.transferContent,
+            qr_code_url: result.qrCodeUrl,
+            qr_code_payload: result.qrCodePayload,
+            status: 'PENDING',
+            expires_at: expiresAt,
+          },
+        })
+        return { payment, created: true }
+      } catch (error) {
+        if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') throw error
+        const payment = await tx.payment.findUnique({ where: { order_id: orderId } })
+        if (!payment) throw error
+        return { payment, created: false }
+      }
     })
 
-    let payment
-    try {
-      payment = await prisma.payment.create({
-        data: {
-          order_id: orderId,
-          provider: provider.providerKey,
-          bank_name: result.bankName,
-          bank_account: result.bankAccount,
-          account_name: result.accountName,
-          amount: order.total,
-          currency: 'VND',
-          transfer_content: result.transferContent,
-          qr_code_url: result.qrCodeUrl,
-          qr_code_payload: result.qrCodePayload,
-          status: 'PENDING',
-          expires_at: expiresAt,
-        },
-      })
-    } catch (error) {
-      if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') throw error
-      payment = await prisma.payment.findUnique({ where: { order_id: orderId } })
-      if (!payment) throw error
-      return NextResponse.json(payment)
-    }
-
-    return NextResponse.json(payment, { status: 201 })
+    return NextResponse.json(outcome.payment, { status: outcome.created ? 201 : 200 })
   } catch (error) {
+    if (error instanceof PaymentOrderStateChangedError) {
+      return NextResponse.json({ error: 'Order is no longer awaiting payment' }, { status: 409 })
+    }
     console.error('[PAYMENT CREATE]', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }

@@ -3,7 +3,10 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { verifyOrderAccessToken } from '@/lib/order-access'
 import { checkRateLimit } from '@/lib/security'
-import { cancelOrderAndReleaseInventory } from '@/lib/order-inventory'
+import {
+  expirePendingOrderReservation,
+  ReservationExpiryConflictError,
+} from '@/lib/order-inventory'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -50,22 +53,23 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       status === 'PENDING'
       && order.order_status === 'PENDING_PAYMENT'
       && order.payment_status === 'PENDING'
+      && order.inventory_reserved_at
       && payment?.expires_at
       && new Date(payment.expires_at) < new Date()
     ) {
-      await prisma.$transaction(async (tx) => {
-        const expired = await tx.payment.updateMany({
-          where: { id: payment.id, status: 'PENDING' },
-          data: { status: 'EXPIRED' },
-        })
-        if (expired.count === 1) {
-          await cancelOrderAndReleaseInventory(tx, {
-            orderId: order.id,
-            changedBy: 'SYSTEM',
-            note: 'Payment expired; inventory released',
-          })
+      try {
+        await prisma.$transaction((tx) => expirePendingOrderReservation(tx, {
+          orderId: order.id,
+          expectedPaymentId: payment.id,
+          now: new Date(),
+          changedBy: 'SYSTEM',
+          note: 'Payment expired; inventory released',
+        }))
+      } catch (error) {
+        if (!(error instanceof ReservationExpiryConflictError)) {
+          throw error
         }
-      })
+      }
 
       // The webhook may have won the PENDING -> PAID compare-and-set while
       // this request was waiting. Always re-read the authoritative state.

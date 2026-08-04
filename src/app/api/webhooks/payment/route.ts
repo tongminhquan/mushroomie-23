@@ -48,6 +48,17 @@ function normalizeBankAccount(value: string | undefined) {
   return (value || '').replace(/[\s.-]/g, '').toUpperCase()
 }
 
+function normalizeTransactionCode(value: string | null | undefined) {
+  return (value || '').trim().toUpperCase()
+}
+
+function hasCoherentPaidOrder(order: { order_status: string; payment_status: string }) {
+  return (
+    order.payment_status === 'PAID'
+    && ['PROCESSING', 'MAKING', 'PACKING', 'SHIPPING', 'COMPLETED'].includes(order.order_status)
+  )
+}
+
 function toAuditPayload(value: unknown): object {
   const redacted = redactWebhookPayload(value)
   if (redacted !== null && typeof redacted === 'object') return redacted as object
@@ -55,14 +66,20 @@ function toAuditPayload(value: unknown): object {
 }
 
 function stableEventKey(providerKey: string, transaction: WebhookTransaction) {
-  const sourceId = transaction.eventId.trim() || transaction.transactionCode.trim()
+  const transactionCode = normalizeTransactionCode(transaction.transactionCode)
+  const eventId = transaction.eventId.trim()
+  const sourceType = transactionCode ? 'tx' : 'event'
+  const sourceId = transactionCode || eventId
   if (!sourceId) return null
 
-  const directKey = `${providerKey}:${sourceId}`
+  // A provider may retry one bank transaction under a different webhook event
+  // id. Keying primarily by the bank transaction code prevents that one
+  // transaction from being applied to two different orders concurrently.
+  const directKey = `${providerKey}:${sourceType}:${sourceId}`
   if (directKey.length <= 191) return directKey
 
-  const digest = createHash('sha256').update(sourceId).digest('hex')
-  return `${providerKey}:sha256:${digest}`
+  const digest = createHash('sha256').update(`${sourceType}:${sourceId}`).digest('hex')
+  return `${providerKey}:${sourceType}:sha256:${digest}`
 }
 
 function invalidEventKey(providerKey: string, rawPayload: unknown) {
@@ -209,7 +226,22 @@ async function processVerifiedTransaction(
 
   const configuredBankAccount = normalizeBankAccount(process.env.BANK_ACCOUNT_NUMBER)
   const receivingAccount = normalizeBankAccount(transaction.receivingAccount)
-  if (configuredBankAccount && receivingAccount && receivingAccount !== configuredBankAccount) {
+  if (!configuredBankAccount) {
+    await prisma.paymentWebhookEvent.updateMany({
+      where: { id: stored.event.id, status: { in: [...RETRYABLE_EVENT_STATUSES] } },
+      data: {
+        status: 'FAILED',
+        processed_at: null,
+        error_message: 'Receiving bank account is not configured',
+      },
+    })
+    throw new Error('BANK_ACCOUNT_NUMBER is not configured')
+  }
+  if (configuredBankAccount && !receivingAccount) {
+    await markEventIgnored(stored.event.id, 'Receiving account missing or mismatched')
+    return { didTransition: false }
+  }
+  if (configuredBankAccount && receivingAccount !== configuredBankAccount) {
     await markEventIgnored(stored.event.id, 'Receiving account mismatch')
     return { didTransition: false }
   }
@@ -236,7 +268,8 @@ async function processVerifiedTransaction(
     return { didTransition: false }
   }
 
-  if (!transaction.transactionCode.trim()) {
+  const transactionCode = normalizeTransactionCode(transaction.transactionCode)
+  if (!transactionCode) {
     await markEventIgnored(stored.event.id, 'Missing transaction code', payment)
     return { didTransition: false }
   }
@@ -246,7 +279,7 @@ async function processVerifiedTransaction(
     return { didTransition: false }
   }
 
-  if (transaction.amount < Number(payment.amount)) {
+  if (transaction.amount !== Number(payment.amount)) {
     await markEventIgnored(
       stored.event.id,
       `Amount mismatch: received ${transaction.amount}, expected ${payment.amount}`,
@@ -256,7 +289,10 @@ async function processVerifiedTransaction(
   }
 
   if (payment.status === 'PAID') {
-    if (payment.transaction_code === transaction.transactionCode) {
+    if (
+      normalizeTransactionCode(payment.transaction_code) === transactionCode
+      && hasCoherentPaidOrder(payment.order)
+    ) {
       await prisma.paymentWebhookEvent.update({
         where: { id: stored.event.id },
         data: {
@@ -269,7 +305,11 @@ async function processVerifiedTransaction(
         },
       })
     } else {
-      await markEventIgnored(stored.event.id, 'Payment is already linked to another transaction', payment)
+      await markEventIgnored(
+        stored.event.id,
+        'Payment is already paid but requires manual reconciliation',
+        payment,
+      )
     }
     return { didTransition: false }
   }
@@ -278,6 +318,7 @@ async function processVerifiedTransaction(
     payment.status !== 'PENDING'
     || payment.order.order_status !== 'PENDING_PAYMENT'
     || payment.order.payment_status !== 'PENDING'
+    || !payment.order.inventory_reserved_at
   ) {
     await markEventIgnored(
       stored.event.id,
@@ -290,15 +331,44 @@ async function processVerifiedTransaction(
   const now = new Date()
   try {
     const didTransition = await prisma.$transaction(async (tx) => {
+      // Every competing state-changing path takes the order row first:
+      // webhook confirmation, QR creation, and reservation expiry. Keeping
+      // that lock order (order -> payment) prevents an expiry/payment webhook
+      // deadlock from turning a valid transfer into an expired order.
+      const orderClaimed = await tx.order.updateMany({
+        where: {
+          id: payment.order_id,
+          order_status: 'PENDING_PAYMENT',
+          payment_status: 'PENDING',
+          inventory_reserved_at: { not: null },
+        },
+        data: { updated_at: now },
+      })
+      if (orderClaimed.count !== 1) {
+        throw new PaymentStateChangedError('Order state changed before confirmation')
+      }
+
       const claimed = await tx.paymentWebhookEvent.updateMany({
         where: { id: stored.event.id, status: { in: [...RETRYABLE_EVENT_STATUSES] } },
         data: { status: 'PROCESSING', error_message: null },
       })
       if (claimed.count !== 1) throw new WebhookBusyError('Webhook processing claim lost')
 
+      const currentPayment = await tx.payment.findUnique({ where: { id: payment.id } })
+      if (
+        !currentPayment
+        || currentPayment.order_id !== payment.order_id
+        || currentPayment.provider !== context.providerKey
+        || currentPayment.status !== 'PENDING'
+        || Number(currentPayment.amount) !== transaction.amount
+      ) {
+        throw new PaymentStateChangedError('Payment state changed before confirmation')
+      }
+
       const duplicateTransaction = await tx.payment.findFirst({
         where: {
-          transaction_code: transaction.transactionCode,
+          provider: context.providerKey,
+          transaction_code: transactionCode,
           id: { not: payment.id },
         },
         select: { id: true },
@@ -317,10 +387,15 @@ async function processVerifiedTransaction(
       }
 
       const paid = await tx.payment.updateMany({
-        where: { id: payment.id, status: 'PENDING' },
+        where: {
+          id: payment.id,
+          order_id: payment.order_id,
+          provider: context.providerKey,
+          status: 'PENDING',
+        },
         data: {
           status: 'PAID',
-          transaction_code: transaction.transactionCode,
+          transaction_code: transactionCode,
           paid_at: now,
         },
       })
@@ -331,6 +406,7 @@ async function processVerifiedTransaction(
           id: payment.order_id,
           order_status: 'PENDING_PAYMENT',
           payment_status: 'PENDING',
+          inventory_reserved_at: { not: null },
         },
         data: {
           payment_status: 'PAID',
@@ -345,7 +421,7 @@ async function processVerifiedTransaction(
           old_status: payment.order.order_status,
           new_status: 'PROCESSING',
           changed_by: 'PAYMENT_WEBHOOK',
-          note: `Thanh toán xác nhận | GD: ${transaction.transactionCode} | Provider: ${context.providerKey}`,
+          note: `Thanh toán xác nhận | GD: ${transactionCode} | Provider: ${context.providerKey}`,
         },
       })
 
@@ -356,9 +432,7 @@ async function processVerifiedTransaction(
           processed_at: now,
           payment_id: payment.id,
           order_id: payment.order_id,
-          message: transaction.amount > Number(payment.amount)
-            ? 'Payment processed with an overpayment'
-            : 'Payment processed',
+          message: 'Payment processed',
           error_message: null,
         },
       })
@@ -367,7 +441,7 @@ async function processVerifiedTransaction(
     })
 
     if (didTransition) {
-      console.info(`[WEBHOOK] Payment PAID: ${payment.order.order_code} | ${transaction.transactionCode}`)
+      console.info(`[WEBHOOK] Payment PAID: ${payment.order.order_code} | ${transactionCode}`)
       sendOrderEmail(payment.order_id, 'payment_success').catch((error) =>
         console.error('[WEBHOOK] Email error:', error),
       )
@@ -389,7 +463,11 @@ async function processVerifiedTransaction(
         where: { id: payment.id },
         include: { order: true },
       })
-      if (currentPayment?.status === 'PAID' && currentPayment.transaction_code === transaction.transactionCode) {
+      if (
+        currentPayment?.status === 'PAID'
+        && normalizeTransactionCode(currentPayment.transaction_code) === transactionCode
+        && hasCoherentPaidOrder(currentPayment.order)
+      ) {
         await prisma.paymentWebhookEvent.update({
           where: { id: stored.event.id },
           data: {
@@ -412,7 +490,7 @@ async function processVerifiedTransaction(
     }
 
     await prisma.paymentWebhookEvent.updateMany({
-      where: { id: stored.event.id, status: { not: 'PROCESSED' } },
+      where: { id: stored.event.id, status: { in: [...RETRYABLE_EVENT_STATUSES, 'PROCESSING'] } },
       data: { status: 'FAILED', processed_at: null, error_message: String(error) },
     }).catch(() => {})
     throw error

@@ -37,12 +37,16 @@ test('webhook audit redacts nested secrets, headers and oversized content', () =
   const redacted = redactWebhookPayload({
     signature: 'sig',
     nested: { authorization: 'Bearer secret', safe: 'ok' },
+    bank_sub_acc_id: '123456789',
+    subAccId: '123456789',
     long: 'x'.repeat(600),
     items: Array.from({ length: 25 }, (_, index) => index),
   }) as Record<string, unknown>
 
   assert.equal(redacted.signature, '[redacted]')
   assert.deepEqual(redacted.nested, { authorization: '[redacted]', safe: 'ok' })
+  assert.equal(redacted.bank_sub_acc_id, '[redacted]')
+  assert.equal(redacted.subAccId, '[redacted]')
   assert.match(String(redacted.long), /\[truncated\]$/)
   assert.equal((redacted.items as unknown[]).length, 20)
 
@@ -70,6 +74,12 @@ test('webhook order code extraction normalizes separators, case and duplicates',
     ['MUSHROOMIE-ABC123', 'MUSHROOMIE-XYZ9'],
   )
   assert.deepEqual(extractOrderCodes('PAY SHOP.X-ABC1', 'SHOP.X'), ['SHOP.X-ABC1'])
+})
+
+test('webhook order code extraction requires a delimited canonical token', () => {
+  assert.deepEqual(extractOrderCodes('PAY NOTMSH-99', 'MSH'), [])
+  assert.deepEqual(extractOrderCodes('PAY MSH99', 'MSH'), [])
+  assert.deepEqual(extractOrderCodes('PAY MSH-99 OR MSH 100', 'MSH'), ['MSH-99', 'MSH-100'])
 })
 
 test('Casso webhook verification is fail-closed and validates configured token', async () => {

@@ -80,8 +80,8 @@ describe('payment providers', () => {
       body: JSON.stringify({
         error: 0,
         data: [
-          { id: 9, tid: 'TX-9', amount: 125_000, description: 'MSH-42', bankSubAccId: '123456789' },
-          { id: 10, tid: 'TX-10', amount: 90_000, description: 'MSH-43', bankSubAccId: '123456789' },
+          { id: 9, tid: 'TX-9', amount: 125_000, description: 'MSH-42', bank_sub_acc_id: '123456789' },
+          { id: 10, tid: 'TX-10', amount: 90_000, description: 'MSH-43', subAccId: '123456789' },
         ],
       }),
     })

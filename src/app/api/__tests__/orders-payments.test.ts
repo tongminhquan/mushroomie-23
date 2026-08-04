@@ -10,6 +10,8 @@ const mocks = vi.hoisted(() => ({
   paymentCreate: vi.fn(),
   transaction: vi.fn(),
   txOrderCreate: vi.fn(),
+  txOrderUpdateMany: vi.fn(),
+  txPaymentFindUnique: vi.fn(),
   txHistoryCreate: vi.fn(),
   txSettingFindMany: vi.fn(),
   txProductUpdateMany: vi.fn(),
@@ -88,6 +90,8 @@ describe('order and payment route contracts', () => {
       options: [{ option_name: 'color', option_type: 'select', option_values: '["đỏ","vàng"]' }],
     }])
     mocks.txOrderCreate.mockResolvedValue({ id: 99, order_code: 'MSH-99', items: [] })
+    mocks.txOrderUpdateMany.mockResolvedValue({ count: 1 })
+    mocks.txPaymentFindUnique.mockResolvedValue(null)
     mocks.txHistoryCreate.mockResolvedValue({})
     mocks.txSettingFindMany.mockResolvedValue([
       { key: 'default_shipping_fee', value: '30000' },
@@ -102,7 +106,8 @@ describe('order and payment route contracts', () => {
     mocks.transaction.mockImplementation(async (argument: unknown) => {
       if (typeof argument !== 'function') return Promise.all(argument as Promise<unknown>[])
       return argument({
-        order: { create: mocks.txOrderCreate },
+        order: { create: mocks.txOrderCreate, updateMany: mocks.txOrderUpdateMany },
+        payment: { findUnique: mocks.txPaymentFindUnique, create: mocks.paymentCreate },
         orderStatusHistory: { create: mocks.txHistoryCreate },
         setting: { findMany: mocks.txSettingFindMany },
         product: { updateMany: mocks.txProductUpdateMany },
@@ -165,7 +170,8 @@ describe('order and payment route contracts', () => {
 
   it('requires an owner, admin, or valid guest token before creating payment', async () => {
     mocks.orderFindUnique.mockResolvedValue({
-      id: 99, order_code: 'MSH-99', user_id: 7, payment_method: 'bank_transfer', payment_status: 'PENDING', payment: null,
+      id: 99, order_code: 'MSH-99', user_id: 7, payment_method: 'bank_transfer', payment_status: 'PENDING',
+      order_status: 'PENDING_PAYMENT', inventory_reserved_at: new Date('2026-07-19T12:00:00Z'), payment: null,
     })
 
     const response = await createPayment(jsonRequest('/api/payments', { orderId: 99 }))
@@ -177,6 +183,7 @@ describe('order and payment route contracts', () => {
     mocks.verifyOrderAccessToken.mockReturnValue(true)
     mocks.orderFindUnique.mockResolvedValue({
       id: 99, order_code: 'MSH-99', user_id: null, payment_method: 'bank_transfer', payment_status: 'PENDING',
+      order_status: 'PENDING_PAYMENT', inventory_reserved_at: new Date('2026-07-19T12:00:00Z'),
       payment: { id: 5, status: 'PENDING' },
     })
 
@@ -197,6 +204,8 @@ describe('order and payment route contracts', () => {
       customer_name: 'Nguyễn An',
       payment_method: 'bank_transfer',
       payment_status: 'PENDING',
+      order_status: 'PENDING_PAYMENT',
+      inventory_reserved_at: new Date('2026-07-19T12:00:00Z'),
       payment: null,
     })
     mocks.providerCreatePayment.mockResolvedValue({
@@ -207,7 +216,58 @@ describe('order and payment route contracts', () => {
 
     const response = await createPayment(jsonRequest('/api/payments', { orderId: 99 }))
     expect(response.status).toBe(201)
+    expect(mocks.txOrderUpdateMany.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.providerCreatePayment.mock.invocationCallOrder[0],
+    )
     expect(mocks.providerCreatePayment).toHaveBeenCalledWith(expect.objectContaining({ orderId: 99, orderCode: 'MSH-99', amount: 230_000 }))
     expect(mocks.paymentCreate).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ order_id: 99, amount: 230_000, status: 'PENDING' }) }))
+  })
+
+  it('rejects payment creation for a cancelled or released order', async () => {
+    mocks.auth.mockResolvedValue({ user: { id: '7', role: 'user' } })
+    mocks.orderFindUnique.mockResolvedValue({
+      id: 99,
+      order_code: 'MSH-99',
+      user_id: 7,
+      payment_method: 'bank_transfer',
+      payment_status: 'PENDING',
+      order_status: 'CANCELLED',
+      inventory_reserved_at: null,
+      payment: null,
+    })
+
+    const response = await createPayment(jsonRequest('/api/payments', { orderId: 99 }))
+
+    expect(response.status).toBe(409)
+    expect(mocks.providerCreatePayment).not.toHaveBeenCalled()
+    expect(mocks.paymentCreate).not.toHaveBeenCalled()
+  })
+
+  it('does not create a payment when expiry wins the transactional order claim', async () => {
+    mocks.auth.mockResolvedValue({ user: { id: '7', role: 'user' } })
+    mocks.orderFindUnique.mockResolvedValue({
+      id: 99,
+      order_code: 'MSH-99',
+      user_id: 7,
+      total: 230_000,
+      customer_email: 'buyer@example.com',
+      customer_name: 'Nguyá»…n An',
+      payment_method: 'bank_transfer',
+      payment_status: 'PENDING',
+      order_status: 'PENDING_PAYMENT',
+      inventory_reserved_at: new Date('2026-07-19T12:00:00Z'),
+      payment: null,
+    })
+    mocks.providerCreatePayment.mockResolvedValue({
+      transferContent: 'MSH-99', bankName: 'VCB', bankAccount: '123', accountName: 'MUSHROOMIE', bankBin: '970436',
+      qrCodeUrl: 'https://img.vietqr.io/qr.png', qrCodePayload: '{}',
+    })
+    mocks.txOrderUpdateMany.mockResolvedValue({ count: 0 })
+
+    const response = await createPayment(jsonRequest('/api/payments', { orderId: 99 }))
+
+    expect(response.status).toBe(409)
+    expect(mocks.providerCreatePayment).not.toHaveBeenCalled()
+    expect(mocks.paymentCreate).not.toHaveBeenCalled()
   })
 })
