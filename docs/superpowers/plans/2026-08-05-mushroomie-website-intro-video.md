@@ -237,7 +237,7 @@ export const NARRATION = [
   {scene: 'features', text: 'Không chỉ mua sắm, bạn còn có thể khám phá câu chuyện thương hiệu, bài viết, voucher và mini game thú vị.', rate: '+15%', audio: 'audio/voice/scene-06.mp3'},
   {scene: 'shopping-flow', text: 'Giao diện rõ ràng giúp bạn xem sản phẩm, thêm vào giỏ và đặt hàng nhanh chóng trên mọi thiết bị.', rate: '+8%', audio: 'audio/voice/scene-07.mp3'},
   {scene: 'slogan', text: 'Mushroomie — làm bằng tay, trao bằng tim.', rate: '-8%', audio: 'audio/voice/scene-08.mp3'},
-  {scene: 'cta', text: 'Khám phá ngay tại mushroomie.io.vn.', rate: '-5%', audio: 'audio/voice/scene-09.mp3'},
+  {scene: 'cta', text: 'Khám phá ngay tại mushroomie.io.vn.', rate: '+55%', audio: 'audio/voice/scene-09.mp3'},
 ] as const;
 ~~~
 

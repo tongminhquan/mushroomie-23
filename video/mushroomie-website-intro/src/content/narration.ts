@@ -59,7 +59,7 @@ export const NARRATION = [
   {
     scene: 'cta',
     text: 'Khám phá ngay tại mushroomie.io.vn.',
-    rate: '-5%',
+    rate: '+55%',
     audio: 'audio/voice/scene-09.mp3',
   },
 ] as const satisfies readonly NarrationRecord[];
