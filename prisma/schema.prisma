@@ -431,7 +431,7 @@ model PaymentWebhookEvent {
   sanitized_headers Json?
   signature         String?   @db.Text
   status            String    @default("RECEIVED")
-  // RECEIVED | VERIFIED | PROCESSED | FAILED | IGNORED
+  // RECEIVED | VERIFIED | PROCESSING | PROCESSED | FAILED | IGNORED
   message           String?   @db.Text
   error_message     String?   @db.Text
   ip_address        String?

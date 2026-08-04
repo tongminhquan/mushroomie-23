@@ -4,6 +4,7 @@ const SENSITIVE_HEADER_KEYS = new Set([
   'x-api-key',
   'api-key',
   'x-webhook-secret',
+  'secure-token',
   'x-casso-signature',
   'x-sepay-signature',
   'cookie',

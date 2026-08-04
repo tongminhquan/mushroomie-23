@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   orderUpdateMany: vi.fn(),
   orderFindUniqueOrThrow: vi.fn(),
   paymentUpdateMany: vi.fn(),
+  paymentFindUnique: vi.fn(),
   productUpdate: vi.fn(),
   voucherUpdateMany: vi.fn(),
   historyCreate: vi.fn(),
@@ -33,7 +34,10 @@ vi.mock('@/lib/prisma', () => ({
       findUnique: mocks.orderFindUnique,
       update: mocks.orderUpdate,
     },
-    payment: { updateMany: mocks.paymentUpdateMany },
+    payment: {
+      updateMany: mocks.paymentUpdateMany,
+      findUnique: mocks.paymentFindUnique,
+    },
     userVoucher: { updateMany: mocks.voucherUpdateMany },
     orderStatusHistory: { create: mocks.historyCreate },
     user: { findUnique: mocks.userFindUnique },
@@ -86,6 +90,7 @@ describe('order detail, payment status, and review contracts', () => {
     mocks.orderUpdateMany.mockResolvedValue({ count: 1 })
     mocks.orderFindUniqueOrThrow.mockResolvedValue({ ...order, order_status: 'CANCELLED' })
     mocks.paymentUpdateMany.mockResolvedValue({ count: 1 })
+    mocks.paymentFindUnique.mockResolvedValue(null)
     mocks.productUpdate.mockResolvedValue({})
     mocks.voucherUpdateMany.mockResolvedValue({ count: 1 })
     mocks.historyCreate.mockResolvedValue({})
@@ -152,12 +157,20 @@ describe('order detail, payment status, and review contracts', () => {
     mocks.verifyOrderAccessToken.mockReturnValue(true)
     mocks.orderFindFirst.mockResolvedValue({
       ...order,
+      order_status: 'PENDING_PAYMENT',
       payment: {
         id: 4,
         status: 'PENDING',
         expires_at: new Date('2026-07-19T11:59:00Z'),
         paid_at: null,
       },
+    })
+    mocks.paymentFindUnique.mockResolvedValue({
+      id: 4,
+      status: 'EXPIRED',
+      expires_at: new Date('2026-07-19T11:59:00Z'),
+      paid_at: null,
+      order: { order_status: 'CANCELLED', payment_status: 'PENDING' },
     })
 
     const response = await getPaymentStatus(
@@ -175,6 +188,46 @@ describe('order detail, payment status, and review contracts', () => {
       where: { orderId: 99, status: 'USED' },
       data: { status: 'AVAILABLE', orderId: null, usedAt: null },
     })
+  })
+
+  it('reports PAID when the webhook wins the expiry compare-and-set race', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-07-19T12:00:00Z'))
+    mocks.verifyOrderAccessToken.mockReturnValue(true)
+    mocks.orderFindFirst.mockResolvedValue({
+      ...order,
+      order_status: 'PENDING_PAYMENT',
+      payment: {
+        id: 4,
+        status: 'PENDING',
+        expires_at: new Date('2026-07-19T11:59:00Z'),
+        paid_at: null,
+      },
+    })
+    mocks.paymentUpdateMany.mockResolvedValue({ count: 0 })
+    mocks.paymentFindUnique.mockResolvedValue({
+      id: 4,
+      status: 'PAID',
+      expires_at: new Date('2026-07-19T11:59:00Z'),
+      paid_at: new Date('2026-07-19T12:00:00Z'),
+      order: { order_status: 'PROCESSING', payment_status: 'PAID' },
+    })
+
+    const response = await getPaymentStatus(
+      request('/api/orders/99/payment-status?accessToken=signed'),
+      params(),
+    )
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject({
+      status: 'PAID',
+      orderStatus: 'PROCESSING',
+      paymentStatus: 'PAID',
+      paidAt: '2026-07-19T12:00:00.000Z',
+    })
+    expect(mocks.voucherUpdateMany).not.toHaveBeenCalled()
+    expect(mocks.orderUpdateMany).not.toHaveBeenCalled()
+    expect(mocks.historyCreate).not.toHaveBeenCalled()
   })
 
   it('lets an admin cancel an order, release its voucher, record history, and notify the customer', async () => {

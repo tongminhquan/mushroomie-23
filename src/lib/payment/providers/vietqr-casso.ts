@@ -1,7 +1,38 @@
 import crypto from 'crypto'
-import { IPaymentProvider, CreatePaymentInput, PaymentResult, WebhookVerifyResult, PaymentStatus } from '../types'
+import { IPaymentProvider, CreatePaymentInput, PaymentResult, WebhookTransaction, WebhookVerifyResult, PaymentStatus } from '../types'
 import { buildVietQRUrl, buildVietQRPayload } from '../qr-generator'
 import { timingSafeStringEqual } from '@/lib/security'
+
+function sortObjectByKey(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortObjectByKey)
+  if (!value || typeof value !== 'object') return value
+
+  return Object.fromEntries(
+    Object.keys(value as Record<string, unknown>)
+      .sort()
+      .map((key) => [key, sortObjectByKey((value as Record<string, unknown>)[key])]),
+  )
+}
+
+function verifyCassoV2Signature(payload: unknown, signatureHeader: string, secret: string) {
+  const match = signatureHeader.match(/^t=(\d+),v1=([a-f0-9]+)$/i)
+  if (!match || !secret) return false
+
+  const [, timestamp, receivedSignature] = match
+  const message = `${timestamp}.${JSON.stringify(sortObjectByKey(payload))}`
+  const expectedSignature = crypto.createHmac('sha512', secret).update(message).digest('hex')
+  return timingSafeStringEqual(receivedSignature.toLowerCase(), expectedSignature)
+}
+
+function normalizeCassoTransaction(data: any): WebhookTransaction {
+  return {
+    eventId: String(data?.id || data?.tid || data?.reference || ''),
+    transactionCode: String(data?.reference || data?.tid || data?.id || ''),
+    amount: Number(data?.amount || 0),
+    transferContent: String(data?.description || data?.memo || ''),
+    receivingAccount: String(data?.accountNumber || data?.bankSubAccId || ''),
+  }
+}
 
 /**
  * VietQR + Casso Webhook Provider
@@ -93,25 +124,26 @@ export class VietQRCassoProvider implements IPaymentProvider {
     // Fail-closed: nếu webhook secret chưa được cấu hình thì luôn coi là KHÔNG hợp lệ
     // (tránh trường hợp so sánh "" === "" cho phép giả mạo webhook đã thanh toán).
     const secureToken = request.headers.get('Secure-Token') || request.headers.get('secure-token') || ''
-    const isValid = this.webhookSecret.length > 0 && timingSafeStringEqual(secureToken, this.webhookSecret)
+    const cassoV2Signature = request.headers.get('X-Casso-Signature') || ''
+    const payloadHasNoError = payload?.error === undefined || Number(payload.error) === 0
+    const isValid = payloadHasNoError && this.webhookSecret.length > 0 && (
+      cassoV2Signature
+        ? verifyCassoV2Signature(payload, cassoV2Signature, this.webhookSecret)
+        : timingSafeStringEqual(secureToken, this.webhookSecret)
+    )
 
     // Casso payload structure:
     // { id, tid, bankSubAccId, amount, description, when, bookingDate, ... }
-    const data = payload?.data?.[0] || payload
-
-    const eventId = String(data?.id || data?.tid || Date.now())
-    const transactionCode = String(data?.tid || data?.id || '')
-    const amount = Number(data?.amount || 0)
-    const transferContent = String(data?.description || data?.memo || '')
+    const transactionData = Array.isArray(payload?.data) ? payload.data : [payload?.data || payload]
+    const transactions = transactionData.map(normalizeCassoTransaction)
+    const firstTransaction = transactions[0] || normalizeCassoTransaction(null)
 
     return {
       isValid,
-      eventId,
-      transactionCode,
-      amount,
-      transferContent,
+      ...firstTransaction,
+      transactions,
       rawPayload: payload,
-      signature: secureToken || '',
+      signature: cassoV2Signature || secureToken || '',
     }
   }
 

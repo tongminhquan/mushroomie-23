@@ -56,6 +56,14 @@ test('webhook audit redacts nested secrets, headers and oversized content', () =
   assert.equal(headers['content-type'], 'application/json')
 })
 
+test('webhook audit redacts the Casso secure-token header', () => {
+  const headers = sanitizeWebhookHeaders(new Headers({
+    'Secure-Token': 'casso-production-secret',
+  }))
+
+  assert.equal(headers['secure-token'], '[REDACTED]')
+})
+
 test('webhook order code extraction normalizes separators, case and duplicates', () => {
   assert.deepEqual(
     extractOrderCodes('payment mushroomie abc123 and MUSHROOMIE-ABC123, MUSHROOMIE XYZ9', 'MUSHROOMIE'),

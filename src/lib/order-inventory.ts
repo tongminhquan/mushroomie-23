@@ -63,11 +63,16 @@ export async function releaseExpiredOrderReservations() {
   for (const order of candidates) {
     if (order.payment?.expires_at && order.payment.expires_at > now) continue
     const didRelease = await prisma.$transaction(async (tx) => {
-      if (order.payment?.status === 'PENDING') {
-        await tx.payment.updateMany({
+      if (order.payment) {
+        if (order.payment.status !== 'PENDING') return false
+
+        const expired = await tx.payment.updateMany({
           where: { id: order.payment.id, status: 'PENDING' },
           data: { status: 'EXPIRED' },
         })
+        // A payment webhook may have won the PENDING -> PAID transition
+        // after the candidate snapshot was read. Never cancel that order.
+        if (expired.count !== 1) return false
       }
       return cancelOrderAndReleaseInventory(tx, {
         orderId: order.id,

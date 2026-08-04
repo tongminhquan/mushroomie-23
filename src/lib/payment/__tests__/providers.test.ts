@@ -72,6 +72,82 @@ describe('payment providers', () => {
     await expect(provider.verifyWebhookSignature(new Request('https://example.test', { method: 'POST', body: '{bad' }))).resolves.toMatchObject({ isValid: false, rawPayload: null })
   })
 
+  it('preserves every transaction from a legacy Casso webhook batch', async () => {
+    const provider = new VietQRCassoProvider()
+    const request = new Request('https://example.test/webhook', {
+      method: 'POST',
+      headers: { 'Secure-Token': 'webhook-secret' },
+      body: JSON.stringify({
+        error: 0,
+        data: [
+          { id: 9, tid: 'TX-9', amount: 125_000, description: 'MSH-42', bankSubAccId: '123456789' },
+          { id: 10, tid: 'TX-10', amount: 90_000, description: 'MSH-43', bankSubAccId: '123456789' },
+        ],
+      }),
+    })
+
+    const result = await provider.verifyWebhookSignature(request)
+
+    expect(result.isValid).toBe(true)
+    expect(result.transactions).toEqual([
+      {
+        eventId: '9',
+        transactionCode: 'TX-9',
+        amount: 125_000,
+        transferContent: 'MSH-42',
+        receivingAccount: '123456789',
+      },
+      {
+        eventId: '10',
+        transactionCode: 'TX-10',
+        amount: 90_000,
+        transferContent: 'MSH-43',
+        receivingAccount: '123456789',
+      },
+    ])
+  })
+
+  it('validates and normalizes Casso Webhook V2 using the official SHA-512 algorithm', async () => {
+    vi.stubEnv('PAYMENT_WEBHOOK_SECRET', 'g3oZ950pJQ4k6REhOPGkx37RsXgWz9QJ9RCAZ7i0yagLF32XQZtemQ6r3JIo4MCr')
+    const provider = new VietQRCassoProvider()
+    const body = JSON.stringify({
+      error: 0,
+      data: {
+        id: 218897,
+        reference: 'FT24364030863634',
+        description: 'hoi lai 100 bao mun dua',
+        amount: 16_775_000,
+        runningBalance: 16_775_000,
+        transactionDateTime: '2024-12-23 07:00:00',
+        accountNumber: '123456789',
+        bankName: 'MBBank',
+        bankAbbreviation: 'MBB',
+        virtualAccountNumber: '',
+        virtualAccountName: '',
+        counterAccountName: '',
+        counterAccountNumber: '',
+        counterAccountBankId: '',
+        counterAccountBankName: '',
+      },
+    })
+    const request = new Request('https://example.test/webhook', {
+      method: 'POST',
+      headers: {
+        'X-Casso-Signature': 't=1734924830020,v1=b3d9438862f167b4e441451b46adaff01f4aaa0c05fa86df1803b7452616c449b9f69837be23b76f79862b346c8bc90a4f1152397a886d4ec24e857cdf6ad08f',
+      },
+      body,
+    })
+
+    await expect(provider.verifyWebhookSignature(request)).resolves.toMatchObject({
+      isValid: true,
+      eventId: '218897',
+      transactionCode: 'FT24364030863634',
+      amount: 16_775_000,
+      transferContent: 'hoi lai 100 bao mun dua',
+      receivingAccount: '123456789',
+    })
+  })
+
   it('maps Casso transaction lookup failures and matches to pending/paid statuses', async () => {
     const provider = new VietQRCassoProvider()
     vi.stubEnv('PAYMENT_API_KEY', 'test-key')

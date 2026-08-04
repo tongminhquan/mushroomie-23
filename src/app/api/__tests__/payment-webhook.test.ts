@@ -4,18 +4,23 @@ const mocks = vi.hoisted(() => ({
   verifyWebhookSignature: vi.fn(),
   eventCreate: vi.fn(),
   eventFindFirst: vi.fn(),
+  eventFindUnique: vi.fn(),
   eventUpdate: vi.fn(),
+  eventUpdateMany: vi.fn(),
   paymentFindFirst: vi.fn(),
+  paymentFindUnique: vi.fn(),
   paymentUpdate: vi.fn(),
   voucherUpdateMany: vi.fn(),
   transaction: vi.fn(),
   txPaymentUpdate: vi.fn(),
+  txPaymentFindFirst: vi.fn(),
   txPaymentUpdateMany: vi.fn(),
   txOrderUpdate: vi.fn(),
   txOrderFindUnique: vi.fn(),
   txOrderUpdateMany: vi.fn(),
   txHistoryCreate: vi.fn(),
   txEventUpdate: vi.fn(),
+  txEventUpdateMany: vi.fn(),
   sendOrderEmail: vi.fn(),
 }))
 
@@ -31,9 +36,15 @@ vi.mock('@/lib/prisma', () => ({
     paymentWebhookEvent: {
       create: mocks.eventCreate,
       findFirst: mocks.eventFindFirst,
+      findUnique: mocks.eventFindUnique,
       update: mocks.eventUpdate,
+      updateMany: mocks.eventUpdateMany,
     },
-    payment: { findFirst: mocks.paymentFindFirst, update: mocks.paymentUpdate },
+    payment: {
+      findFirst: mocks.paymentFindFirst,
+      findUnique: mocks.paymentFindUnique,
+      update: mocks.paymentUpdate,
+    },
     userVoucher: { updateMany: mocks.voucherUpdateMany },
     $transaction: mocks.transaction,
   },
@@ -47,6 +58,7 @@ const verified = {
   transactionCode: 'TX-100',
   amount: 230_000,
   transferContent: 'MUSHROOMIE-99',
+  receivingAccount: '123456789',
   signature: 'provider-signature',
   rawPayload: { transaction: 'TX-100', token: 'secret-token', nested: { signature: 'secret-signature' } },
 }
@@ -55,8 +67,15 @@ const payment = {
   id: 4,
   order_id: 99,
   amount: 230_000,
+  status: 'PENDING',
+  transaction_code: null,
   expires_at: new Date('2026-07-19T12:05:00Z'),
-  order: { id: 99, order_code: 'MUSHROOMIE-99', order_status: 'PENDING_PAYMENT' },
+  order: {
+    id: 99,
+    order_code: 'MUSHROOMIE-99',
+    order_status: 'PENDING_PAYMENT',
+    payment_status: 'PENDING',
+  },
 }
 
 function webhookRequest() {
@@ -74,16 +93,22 @@ function webhookRequest() {
 
 describe('payment webhook route', () => {
   beforeEach(() => {
+    vi.unstubAllEnvs()
+    vi.stubEnv('BANK_ACCOUNT_NUMBER', '123456789')
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-07-19T12:00:00Z'))
     mocks.verifyWebhookSignature.mockResolvedValue(verified)
     mocks.eventCreate.mockResolvedValue({ id: 20 })
     mocks.eventFindFirst.mockResolvedValue(null)
+    mocks.eventFindUnique.mockResolvedValue(null)
     mocks.eventUpdate.mockResolvedValue({})
+    mocks.eventUpdateMany.mockResolvedValue({ count: 1 })
     mocks.paymentFindFirst.mockResolvedValue(payment)
+    mocks.paymentFindUnique.mockResolvedValue(payment)
     mocks.paymentUpdate.mockResolvedValue({})
     mocks.voucherUpdateMany.mockResolvedValue({ count: 1 })
     mocks.txPaymentUpdate.mockResolvedValue({})
+    mocks.txPaymentFindFirst.mockResolvedValue(null)
     mocks.txPaymentUpdateMany.mockResolvedValue({ count: 1 })
     mocks.txOrderUpdate.mockResolvedValue({})
     mocks.txOrderFindUnique.mockResolvedValue({
@@ -94,11 +119,13 @@ describe('payment webhook route', () => {
     mocks.txOrderUpdateMany.mockResolvedValue({ count: 1 })
     mocks.txHistoryCreate.mockResolvedValue({})
     mocks.txEventUpdate.mockResolvedValue({})
+    mocks.txEventUpdateMany.mockResolvedValue({ count: 1 })
     mocks.sendOrderEmail.mockResolvedValue(undefined)
     mocks.transaction.mockImplementation(async (argument: unknown) => {
       if (typeof argument !== 'function') return Promise.all(argument as Promise<unknown>[])
       return argument({
         payment: {
+          findFirst: mocks.txPaymentFindFirst,
           update: mocks.txPaymentUpdate,
           updateMany: mocks.txPaymentUpdateMany,
         },
@@ -110,7 +137,10 @@ describe('payment webhook route', () => {
         product: { update: vi.fn() },
         userVoucher: { updateMany: mocks.voucherUpdateMany },
         orderStatusHistory: { create: mocks.txHistoryCreate },
-        paymentWebhookEvent: { update: mocks.txEventUpdate },
+        paymentWebhookEvent: {
+          update: mocks.txEventUpdate,
+          updateMany: mocks.txEventUpdateMany,
+        },
       })
     })
   })
@@ -130,18 +160,56 @@ describe('payment webhook route', () => {
     expect(mocks.paymentFindFirst).not.toHaveBeenCalled()
   })
 
-  it('acknowledges a provider event that is already stored without processing it again', async () => {
+  it('acknowledges an already processed provider event without processing it again', async () => {
     mocks.eventCreate.mockRejectedValue({ code: 'P2002' })
+    mocks.eventFindUnique.mockResolvedValue({
+      id: 20,
+      status: 'PROCESSED',
+      processed_at: new Date('2026-07-19T11:58:00Z'),
+    })
 
     const response = await POST(webhookRequest())
 
     expect(response.status).toBe(200)
-    expect(await response.json()).toEqual({ ok: true })
+    expect(await response.json()).toEqual({ success: true, ok: true })
+    expect(mocks.eventFindUnique).toHaveBeenCalledWith({ where: { event_id: 'test-bank:evt-1' } })
     expect(mocks.paymentFindFirst).not.toHaveBeenCalled()
     expect(mocks.transaction).not.toHaveBeenCalled()
   })
 
-  it('marks an underpayment failed without changing the payment or order', async () => {
+  it('reclaims a failed provider event and processes the retry', async () => {
+    mocks.eventCreate.mockRejectedValue({ code: 'P2002' })
+    mocks.eventFindUnique.mockResolvedValue({
+      id: 20,
+      status: 'FAILED',
+      processed_at: null,
+    })
+
+    const response = await POST(webhookRequest())
+
+    expect(response.status).toBe(200)
+    expect(mocks.txEventUpdateMany).toHaveBeenCalledWith({
+      where: { id: 20, status: { in: ['RECEIVED', 'VERIFIED', 'FAILED'] } },
+      data: { status: 'PROCESSING', error_message: null },
+    })
+    expect(mocks.paymentFindFirst).toHaveBeenCalledTimes(1)
+    expect(mocks.transaction).toHaveBeenCalledTimes(1)
+  })
+
+  it('returns a retryable response while the same event is being processed', async () => {
+    mocks.eventCreate.mockRejectedValue({ code: 'P2002' })
+    mocks.eventFindUnique.mockResolvedValue({ id: 20, status: 'PROCESSING' })
+
+    const response = await POST(webhookRequest())
+
+    expect(response.status).toBe(503)
+    expect(response.headers.get('retry-after')).toBe('5')
+    expect(await response.json()).toMatchObject({ success: false })
+    expect(mocks.paymentFindFirst).not.toHaveBeenCalled()
+    expect(mocks.transaction).not.toHaveBeenCalled()
+  })
+
+  it('marks an underpayment for reconciliation without changing the payment or order', async () => {
     mocks.verifyWebhookSignature.mockResolvedValue({ ...verified, amount: 229_999 })
 
     const response = await POST(webhookRequest())
@@ -150,7 +218,7 @@ describe('payment webhook route', () => {
     expect(mocks.eventUpdate).toHaveBeenCalledWith({
       where: { id: 20 },
       data: expect.objectContaining({
-        status: 'FAILED',
+        status: 'IGNORED',
         payment_id: 4,
         order_id: 99,
         error_message: 'Amount mismatch: received 229999, expected 230000',
@@ -159,7 +227,73 @@ describe('payment webhook route', () => {
     expect(mocks.transaction).not.toHaveBeenCalled()
   })
 
-  it('expires a late payment and releases only its reserved voucher', async () => {
+  it('rejects an empty transfer description without querying an arbitrary pending payment', async () => {
+    mocks.verifyWebhookSignature.mockResolvedValue({ ...verified, transferContent: '   ' })
+
+    const response = await POST(webhookRequest())
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ success: true, ok: true })
+    expect(mocks.paymentFindFirst).not.toHaveBeenCalled()
+    expect(mocks.eventUpdate).toHaveBeenCalledWith({
+      where: { id: 20 },
+      data: expect.objectContaining({
+        status: 'IGNORED',
+        error_message: 'Missing transfer content',
+      }),
+    })
+    expect(mocks.transaction).not.toHaveBeenCalled()
+  })
+
+  it('extracts the default MSH order code and matches it exactly', async () => {
+    mocks.verifyWebhookSignature.mockResolvedValue({
+      ...verified,
+      transferContent: 'Thanh toan MSH 99',
+    })
+    mocks.paymentFindFirst.mockResolvedValue({
+      ...payment,
+      order: { ...payment.order, order_code: 'MSH-99' },
+    })
+
+    const response = await POST(webhookRequest())
+
+    expect(response.status).toBe(200)
+    expect(mocks.paymentFindFirst).toHaveBeenCalledWith({
+      where: {
+        provider: 'test-bank',
+        OR: [
+          { transfer_content: 'MSH-99' },
+          { order: { order_code: 'MSH-99' } },
+        ],
+      },
+      include: { order: true },
+    })
+  })
+
+  it('rejects a webhook for a different receiving bank account without exposing either account', async () => {
+    mocks.verifyWebhookSignature.mockResolvedValue({
+      ...verified,
+      receivingAccount: '987654321',
+    })
+
+    const response = await POST(webhookRequest())
+
+    expect(response.status).toBe(200)
+    expect(mocks.paymentFindFirst).not.toHaveBeenCalled()
+    expect(mocks.eventUpdate).toHaveBeenCalledWith({
+      where: { id: 20 },
+      data: {
+        status: 'IGNORED',
+        error_message: 'Receiving account mismatch',
+      },
+    })
+    const auditUpdate = JSON.stringify(mocks.eventUpdate.mock.calls)
+    expect(auditUpdate).not.toContain('123456789')
+    expect(auditUpdate).not.toContain('987654321')
+    expect(mocks.transaction).not.toHaveBeenCalled()
+  })
+
+  it('confirms money received after the displayed expiry while the reservation is still pending', async () => {
     mocks.paymentFindFirst.mockResolvedValue({ ...payment, expires_at: new Date('2026-07-19T11:59:00Z') })
 
     const response = await POST(webhookRequest())
@@ -167,27 +301,128 @@ describe('payment webhook route', () => {
     expect(response.status).toBe(200)
     expect(mocks.txPaymentUpdateMany).toHaveBeenCalledWith({
       where: { id: 4, status: 'PENDING' },
-      data: { status: 'EXPIRED' },
+      data: {
+        status: 'PAID',
+        transaction_code: 'TX-100',
+        paid_at: new Date('2026-07-19T12:00:00Z'),
+      },
     })
-    expect(mocks.voucherUpdateMany).toHaveBeenCalledWith({
-      where: { orderId: 99, status: 'USED' },
-      data: { status: 'AVAILABLE', orderId: null, usedAt: null },
-    })
+    expect(mocks.voucherUpdateMany).not.toHaveBeenCalled()
     expect(mocks.txEventUpdate).toHaveBeenCalledWith({ where: { id: 20 }, data: expect.objectContaining({
-      status: 'FAILED', error_message: 'Payment expired', payment_id: 4, order_id: 99,
+      status: 'PROCESSED', payment_id: 4, order_id: 99,
     }) })
+  })
+
+  it('does not resurrect an order that was already expired and cancelled', async () => {
+    mocks.paymentFindFirst.mockResolvedValue({
+      ...payment,
+      status: 'EXPIRED',
+      order: {
+        ...payment.order,
+        order_status: 'CANCELLED',
+        payment_status: 'PENDING',
+      },
+    })
+
+    const response = await POST(webhookRequest())
+
+    expect(response.status).toBe(200)
+    expect(mocks.transaction).not.toHaveBeenCalled()
+    expect(mocks.eventUpdate).toHaveBeenCalledWith({
+      where: { id: 20 },
+      data: expect.objectContaining({
+        status: 'IGNORED',
+        payment_id: 4,
+        order_id: 99,
+        error_message: expect.stringContaining('manual reconciliation'),
+      }),
+    })
+    expect(mocks.sendOrderEmail).not.toHaveBeenCalled()
+  })
+
+  it('does not resurrect an order when expiry wins the payment compare-and-set race', async () => {
+    mocks.txPaymentUpdateMany.mockResolvedValue({ count: 0 })
+    mocks.paymentFindUnique.mockResolvedValue({
+      ...payment,
+      status: 'EXPIRED',
+      order: {
+        ...payment.order,
+        order_status: 'CANCELLED',
+        payment_status: 'PENDING',
+      },
+    })
+
+    const response = await POST(webhookRequest())
+
+    expect(response.status).toBe(200)
+    expect(mocks.txOrderUpdateMany).not.toHaveBeenCalled()
+    expect(mocks.txHistoryCreate).not.toHaveBeenCalled()
+    expect(mocks.eventUpdate).toHaveBeenCalledWith({
+      where: { id: 20 },
+      data: expect.objectContaining({
+        status: 'IGNORED',
+        error_message: 'Payment or order state changed; manual reconciliation required',
+      }),
+    })
+    expect(mocks.sendOrderEmail).not.toHaveBeenCalled()
+  })
+
+  it('processes every transaction in a verified provider batch', async () => {
+    const secondTransaction = {
+      eventId: 'evt-2',
+      transactionCode: 'TX-200',
+      amount: 180_000,
+      transferContent: 'MSH-100',
+      receivingAccount: '123456789',
+    }
+    const secondPayment = {
+      ...payment,
+      id: 5,
+      order_id: 100,
+      amount: 180_000,
+      order: {
+        ...payment.order,
+        id: 100,
+        order_code: 'MSH-100',
+      },
+    }
+    mocks.verifyWebhookSignature.mockResolvedValue({
+      ...verified,
+      transactions: [verified, secondTransaction],
+    })
+    mocks.eventCreate
+      .mockResolvedValueOnce({ id: 20, status: 'VERIFIED' })
+      .mockResolvedValueOnce({ id: 21, status: 'VERIFIED' })
+    mocks.paymentFindFirst.mockImplementation(async (query: any) => (
+      query.where.OR[0].transfer_content === 'MSH-100' ? secondPayment : payment
+    ))
+
+    const response = await POST(webhookRequest())
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ success: true, ok: true })
+    expect(mocks.eventCreate).toHaveBeenCalledTimes(2)
+    expect(mocks.paymentFindFirst).toHaveBeenCalledTimes(2)
+    expect(mocks.transaction).toHaveBeenCalledTimes(2)
+    expect(mocks.txPaymentUpdateMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: 5, status: 'PENDING' },
+      data: expect.objectContaining({ transaction_code: 'TX-200' }),
+    }))
+    expect(mocks.sendOrderEmail).toHaveBeenCalledWith(99, 'payment_success')
+    expect(mocks.sendOrderEmail).toHaveBeenCalledWith(100, 'payment_success')
   })
 
   it('atomically confirms a valid payment, advances the order, audits it, and sends email', async () => {
     const response = await POST(webhookRequest())
 
     expect(response.status).toBe(200)
-    expect(mocks.txPaymentUpdate).toHaveBeenCalledWith({ where: { id: 4 }, data: {
+    expect(mocks.txPaymentUpdateMany).toHaveBeenCalledWith({ where: { id: 4, status: 'PENDING' }, data: {
       status: 'PAID', transaction_code: 'TX-100', paid_at: new Date('2026-07-19T12:00:00Z'),
     } })
-    expect(mocks.txOrderUpdate).toHaveBeenCalledWith({ where: { id: 99 }, data: {
-      payment_status: 'PAID', order_status: 'PROCESSING',
-    } })
+    expect(mocks.txOrderUpdateMany).toHaveBeenCalledWith({
+      where: { id: 99, order_status: 'PENDING_PAYMENT', payment_status: 'PENDING' },
+      data: { payment_status: 'PAID', order_status: 'PROCESSING' },
+    })
     expect(mocks.txHistoryCreate).toHaveBeenCalledWith({ data: expect.objectContaining({
       order_id: 99,
       old_status: 'PENDING_PAYMENT',

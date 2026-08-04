@@ -21,12 +21,17 @@ export interface PaymentResult {
   bankBin: string
 }
 
-export interface WebhookVerifyResult {
-  isValid: boolean
+export interface WebhookTransaction {
   eventId: string
   transactionCode: string
   amount: number
   transferContent: string
+  receivingAccount?: string
+}
+
+export interface WebhookVerifyResult extends WebhookTransaction {
+  isValid: boolean
+  transactions?: WebhookTransaction[]
   rawPayload: unknown
   signature?: string
 }

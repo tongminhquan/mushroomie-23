@@ -40,9 +40,19 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const payment = order.payment
     let status = payment?.status || 'PENDING'
+    let orderStatus = order.order_status
+    let paymentStatus = order.payment_status
+    let expiresAt = payment?.expires_at
+    let paidAt = payment?.paid_at
 
     // Check expiry
-    if (status === 'PENDING' && payment?.expires_at && new Date(payment.expires_at) < new Date()) {
+    if (
+      status === 'PENDING'
+      && order.order_status === 'PENDING_PAYMENT'
+      && order.payment_status === 'PENDING'
+      && payment?.expires_at
+      && new Date(payment.expires_at) < new Date()
+    ) {
       await prisma.$transaction(async (tx) => {
         const expired = await tx.payment.updateMany({
           where: { id: payment.id, status: 'PENDING' },
@@ -56,15 +66,28 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           })
         }
       })
-      status = 'EXPIRED'
+
+      // The webhook may have won the PENDING -> PAID compare-and-set while
+      // this request was waiting. Always re-read the authoritative state.
+      const currentPayment = await prisma.payment.findUnique({
+        where: { id: payment.id },
+        include: { order: true },
+      })
+      if (currentPayment) {
+        status = currentPayment.status
+        orderStatus = currentPayment.order.order_status
+        paymentStatus = currentPayment.order.payment_status
+        expiresAt = currentPayment.expires_at
+        paidAt = currentPayment.paid_at
+      }
     }
 
     return NextResponse.json({
       status,
-      orderStatus: order.order_status,
-      paymentStatus: order.payment_status,
-      expiresAt: payment?.expires_at,
-      paidAt: payment?.paid_at,
+      orderStatus,
+      paymentStatus,
+      expiresAt,
+      paidAt,
     })
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
