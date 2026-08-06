@@ -10,7 +10,7 @@ const scriptPath = fileURLToPath(import.meta.url);
 const scriptDirectory = path.dirname(scriptPath);
 const videoRoot = path.resolve(scriptDirectory, '..');
 
-export const EDGE_VOICE = 'vi-VN-HoaiMyNeural';
+export const EDGE_VOICE = 'vi-VN-NamMinhNeural';
 
 export const buildVoiceJobs = () =>
   NARRATION.map((record) => {

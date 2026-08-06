@@ -10,16 +10,16 @@ import {SCENES, sceneDuration} from '../content/scenes';
 import {VIDEO_CONFIG} from '../config';
 
 describe('Vietnamese voice-over contract', () => {
-  it('uses the approved Vietnamese female neural voice', () => {
-    expect(EDGE_VOICE).toBe('vi-VN-HoaiMyNeural');
+  it('uses the approved Vietnamese male neural voice', () => {
+    expect(EDGE_VOICE).toBe('vi-VN-NamMinhNeural');
     expect(buildVoiceJobs()).toHaveLength(9);
   });
 
   it('binds negative rates to the option for argparse compatibility', () => {
     const [hook] = buildVoiceJobs();
     const args = buildEdgeTtsArgs(hook);
-    expect(args).toContain('--rate=-3%');
-    expect(args).not.toContain('-3%');
+    expect(args).toContain('--rate=+5%');
+    expect(args).not.toContain('+5%');
   });
 
   it('invokes FFprobe through Node instead of a Windows cmd shim', () => {
@@ -52,7 +52,7 @@ describe('Vietnamese voice-over contract', () => {
   });
 
   it('uses the measured CTA rate that preserves the full spoken domain', () => {
-    expect(NARRATION[8].rate).toBe('+65%');
+    expect(NARRATION[8].rate).toBe('+75%');
   });
 
   it('gives every narration window at least three seconds', () => {
