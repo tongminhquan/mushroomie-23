@@ -19,7 +19,7 @@ export const ASSETS = {
   },
   screenshots: {
     homeDesktop: 'screenshots/home-desktop.png',
-    homeMobile: 'screenshots/home-mobile.jpg',
+    homeMobile: 'screenshots/home-mobile.png',
     productsDesktop: 'screenshots/products-desktop.png',
     newsDesktop: 'screenshots/news-desktop.png',
     miniGameDesktop: 'screenshots/mini-game-desktop.png',

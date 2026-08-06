@@ -19,7 +19,17 @@ export const MobileFrame: React.FC<MobileFrameProps> = ({ src, style }) => {
       position: 'relative',
       ...style
     }}>
-
+      <div style={{
+         position: 'absolute',
+         top: 10,
+         left: '50%',
+         transform: 'translateX(-50%)',
+         width: 80,
+         height: 20,
+         backgroundColor: '#111519',
+         borderRadius: 12,
+         zIndex: 10
+      }} />
       <Img src={staticFile(src)} style={{ width: '100%', height: 'auto', display: 'block' }} />
     </div>
   );

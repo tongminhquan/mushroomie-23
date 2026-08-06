@@ -18,11 +18,12 @@ export const FeatureTile: React.FC<FeatureTileProps> = ({ icon, title, subtitle,
       boxSizing: 'border-box',
       padding: 20,
       display: 'flex',
-      flexDirection: 'column',
-      gap: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 16,
       ...style
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
         <span style={{fontSize: 38}}>{icon}</span>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span style={{fontFamily: THEME.fonts.heading, fontSize: 23, color: THEME.colors.cream, lineHeight: 1.14}}>{title}</span>
@@ -30,7 +31,7 @@ export const FeatureTile: React.FC<FeatureTileProps> = ({ icon, title, subtitle,
         </div>
       </div>
       {screenshot && (
-        <div style={{ flex: 1, overflow: 'hidden', borderRadius: THEME.radii.small, backgroundColor: '#1a1f25', position: 'relative' }}>
+        <div style={{ width: 280, height: '100%', overflow: 'hidden', borderRadius: THEME.radii.small, backgroundColor: '#1a1f25', position: 'relative' }}>
           <div style={{ width: '200%', transform: 'scale(0.5)', transformOrigin: 'top left' }}>
             <BrowserFrame src={screenshot} />
           </div>

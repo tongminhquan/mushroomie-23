@@ -12,31 +12,31 @@ export const CAPTURE_MANIFEST = [
   {
     route: '/',
     width: 1440,
-    height: 900,
+    height: 2500,
     destination: 'screenshots/home-desktop.png',
   },
   {
     route: '/',
     width: 390,
-    height: 844,
+    height: 2000,
     destination: 'screenshots/home-mobile.png',
   },
   {
     route: '/san-pham',
     width: 1440,
-    height: 900,
+    height: 2500,
     destination: 'screenshots/products-desktop.png',
   },
   {
     route: '/tin-tuc',
     width: 1440,
-    height: 900,
+    height: 2500,
     destination: 'screenshots/news-desktop.png',
   },
   {
     route: '/mini-game',
     width: 1440,
-    height: 900,
+    height: 2500,
     destination: 'screenshots/mini-game-desktop.png',
   },
 ];
