@@ -30,8 +30,10 @@ export const FeatureTile: React.FC<FeatureTileProps> = ({ icon, title, subtitle,
         </div>
       </div>
       {screenshot && (
-        <div style={{ flex: 1, overflow: 'hidden', borderRadius: THEME.radii.small }}>
-          <BrowserFrame src={screenshot} />
+        <div style={{ flex: 1, overflow: 'hidden', borderRadius: THEME.radii.small, backgroundColor: '#1a1f25', position: 'relative' }}>
+          <div style={{ width: '200%', transform: 'scale(0.5)', transformOrigin: 'top left' }}>
+            <BrowserFrame src={screenshot} />
+          </div>
         </div>
       )}
     </div>

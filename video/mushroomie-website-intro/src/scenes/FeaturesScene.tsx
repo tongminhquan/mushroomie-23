@@ -13,9 +13,9 @@ export const FeaturesScene = () => {
     easing: Easing.out(Easing.quad),
   });
   const features = [
-    {title: 'Câu chuyện thương hiệu', subtitle: 'Khám phá hành trình', icon: '📖', delay: -4},
+    {title: 'Câu chuyện thương hiệu', subtitle: 'Khám phá hành trình', icon: '📖', screenshot: ASSETS.screenshots.homeDesktop, delay: -4},
     {title: 'Bài viết mới', subtitle: 'Góc chia sẻ', icon: '📰', screenshot: ASSETS.screenshots.newsDesktop, delay: 10},
-    {title: 'Voucher dành riêng', subtitle: 'Ưu đãi hấp dẫn', icon: '🎫', delay: 24},
+    {title: 'Voucher dành riêng', subtitle: 'Ưu đãi hấp dẫn', icon: '🎫', screenshot: ASSETS.screenshots.productsDesktop, delay: 24},
     {title: 'Mini game thú vị', subtitle: 'Chơi và nhận quà', icon: '🎮', screenshot: ASSETS.screenshots.miniGameDesktop, delay: 38},
   ];
 
