@@ -10,8 +10,8 @@ export const THEME = {
     backgroundRaised: '#0c1519',
   },
   fonts: {
-    heading: 'Paytone One',
-    body: 'Montserrat',
+    heading: "'Segoe UI Black', 'Segoe UI', Arial, sans-serif",
+    body: "'Segoe UI', Arial, sans-serif",
   },
   safe: {x: 96, y: 96},
   radii: {card: 28, small: 18},
