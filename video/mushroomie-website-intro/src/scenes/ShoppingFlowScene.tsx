@@ -3,14 +3,14 @@ import {THEME} from '../content/theme';
 import {ASSETS} from '../lib/assets';
 import {SceneShell} from '../components/SceneShell';
 import {enter} from '../lib/motion';
-import {BrowserFrame} from '../components/BrowserFrame';
+import {MobileFrame} from '../components/MobileFrame';
 
 export const ShoppingFlowScene = () => {
   const frame = useCurrentFrame();
   const steps = [
-    {label: 'Xem sản phẩm', image: ASSETS.products.braceletGreen},
-    {label: 'Thêm vào giỏ', image: ASSETS.products.keychainsPastel},
-    {label: 'Đặt hàng', image: ASSETS.products.necklaceFlowers},
+    {label: 'Xem sản phẩm', icon: '📱'},
+    {label: 'Thêm vào giỏ', icon: '🛒'},
+    {label: 'Đặt hàng', icon: '📦'},
   ];
   const mobileOpacity = enter(frame, 104, 20);
   const mobileY = interpolate(frame, [104, 124], [38, 0], {
@@ -60,16 +60,15 @@ export const ShoppingFlowScene = () => {
                     border: `2px solid ${index === 0 ? THEME.colors.brand : 'transparent'}`,
                   }}
                 >
-                  <Img
-                    src={staticFile(step.image)}
+                  <div
                     style={{
-                      width: 150,
-                      height: 150,
-                      borderRadius: THEME.radii.small,
-                      objectFit: 'cover',
+                      fontSize: 80,
                       marginBottom: 18,
+                      lineHeight: 1,
                     }}
-                  />
+                  >
+                    {step.icon}
+                  </div>
                   <h3
                     style={{
                       fontFamily: THEME.fonts.heading,
@@ -125,7 +124,7 @@ export const ShoppingFlowScene = () => {
           >
             Mọi thiết bị
           </div>
-          <BrowserFrame src={ASSETS.screenshots.homeMobile} style={{width: 250, height: 355}} />
+          <MobileFrame src={ASSETS.screenshots.homeMobile} style={{width: 260, height: 500}} />
         </div>
       </AbsoluteFill>
     </SceneShell>

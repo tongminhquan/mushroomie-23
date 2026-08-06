@@ -18,8 +18,8 @@ describe('Vietnamese voice-over contract', () => {
   it('binds negative rates to the option for argparse compatibility', () => {
     const [hook] = buildVoiceJobs();
     const args = buildEdgeTtsArgs(hook);
-    expect(args).toContain('--rate=-5%');
-    expect(args).not.toContain('-5%');
+    expect(args).toContain('--rate=-3%');
+    expect(args).not.toContain('-3%');
   });
 
   it('invokes FFprobe through Node instead of a Windows cmd shim', () => {
@@ -52,7 +52,7 @@ describe('Vietnamese voice-over contract', () => {
   });
 
   it('uses the measured CTA rate that preserves the full spoken domain', () => {
-    expect(NARRATION[8].rate).toBe('+55%');
+    expect(NARRATION[8].rate).toBe('+65%');
   });
 
   it('gives every narration window at least three seconds', () => {

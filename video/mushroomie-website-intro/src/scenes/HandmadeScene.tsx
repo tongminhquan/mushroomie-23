@@ -54,15 +54,17 @@ export const HandmadeScene = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'space-between',
+                justifyContent: 'center',
+                gap: 24,
                 opacity: stepOpacity,
                 transform: `translateY(${stepY}px)`,
                 border: `2px solid ${THEME.colors.kraft}`
               }}>
-                <Img src={staticFile(step.image)} style={{width: 320, height: 320, borderRadius: THEME.radii.small, objectFit: 'cover'}} />
+                <Img src={staticFile(step.image)} style={{width: 260, height: 260, borderRadius: THEME.radii.small, objectFit: 'cover'}} />
                 <h3 style={{
                   fontFamily: THEME.fonts.heading,
                   fontSize: 30,
+                  lineHeight: 1.2,
                   color: THEME.colors.yellow,
                   margin: 0,
                   textAlign: 'center'
