@@ -5,8 +5,8 @@ import {seededUnit} from '../lib/seed';
 
 describe('shared presentation helpers', () => {
   it('selects captions by global millisecond and clears after the video', () => {
-    expect(activeCaptionAt(5500)?.text).toContain('Mushroomie');
-    expect(activeCaptionAt(60500)).toBeNull();
+    expect(activeCaptionAt(42000)?.text).toContain('mushroomie.io.vn');
+    expect(activeCaptionAt(43000)).toBeNull();
   });
 
   it('preserves copy while marking approved emphasis', () => {

@@ -24,7 +24,7 @@ describe('approved content contract', () => {
       expect(SCENES[index].from).toBe(SCENES[index - 1].to + 1);
     }
 
-    expect(SCENES.at(-1)?.to).toBe(1799);
+    expect(SCENES.at(-1)?.to).toBe(1289);
   });
 
   it('aligns narration and captions to the nine scene windows', () => {
@@ -32,15 +32,15 @@ describe('approved content contract', () => {
     expect(NARRATION.map(({scene}) => scene)).toEqual(sceneIds);
     expect(captions).toHaveLength(9);
     expect(captions.map(({startMs, endMs}) => [startMs, endMs])).toEqual([
-      [0, 5000],
-      [5000, 11000],
-      [11000, 18000],
-      [18000, 27000],
-      [27000, 36000],
-      [36000, 44000],
-      [44000, 52000],
-      [52000, 57000],
-      [57000, 60000],
+      [0, 4000],
+      [4000, 8800],
+      [8800, 13800],
+      [13800, 19700],
+      [19700, 25500],
+      [25500, 31400],
+      [31400, 36300],
+      [36300, 40200],
+      [40200, 43000],
     ]);
   });
 

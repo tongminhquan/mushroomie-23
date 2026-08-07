@@ -2,28 +2,29 @@ import {describe, expect, it} from 'vitest';
 import {SCENES, sceneDuration} from '../content/scenes';
 
 describe('scene registry', () => {
-  it('maps all nine scenes with correct durations', () => {
+  it('maps all nine scenes onto the approved 43-second timeline', () => {
     const expectedDurations: Record<string, number> = {
-      hook: 150,
-      website: 180,
-      products: 210,
-      custom: 270,
-      handmade: 270,
-      features: 240,
-      'shopping-flow': 240,
-      slogan: 150,
-      cta: 90,
+      hook: 120,
+      website: 144,
+      products: 150,
+      custom: 177,
+      handmade: 174,
+      features: 177,
+      'shopping-flow': 147,
+      slogan: 117,
+      cta: 84,
     };
+
+    expect(SCENES).toHaveLength(9);
     for (const scene of SCENES) {
       expect(sceneDuration(scene)).toBe(expectedDurations[scene.id]);
     }
-  });
 
-  it('covers the full 1800-frame timeline continuously', () => {
     expect(SCENES[0].from).toBe(0);
-    for (let i = 1; i < SCENES.length; i++) {
-      expect(SCENES[i].from).toBe(SCENES[i - 1].to + 1);
+    for (let index = 1; index < SCENES.length; index++) {
+      expect(SCENES[index].from).toBe(SCENES[index - 1].to + 1);
     }
-    expect(SCENES[SCENES.length - 1].to).toBe(1799);
+    expect(SCENES.at(-1)?.to).toBe(1289);
+    expect(SCENES.reduce((sum, scene) => sum + sceneDuration(scene), 0)).toBe(1290);
   });
 });

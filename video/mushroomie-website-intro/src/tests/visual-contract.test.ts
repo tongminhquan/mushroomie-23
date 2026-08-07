@@ -5,6 +5,13 @@ const source = (relativePath: string) =>
   readFileSync(new URL(relativePath, import.meta.url), 'utf8');
 
 describe('visual presentation contracts', () => {
+  it('drives progress from the shared composition config', () => {
+    const progress = source('../components/ProgressLine.tsx');
+
+    expect(progress).toContain("import { VIDEO_CONFIG } from '../config';");
+    expect(progress).not.toContain('durationInFrames: 1800');
+  });
+
   it('uses transform-only motion for the ambient beads, progress line, and handmade path', () => {
     const ambient = source('../components/AmbientBackground.tsx');
     const progress = source('../components/ProgressLine.tsx');

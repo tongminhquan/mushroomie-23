@@ -8,7 +8,7 @@ describe('video contract', () => {
       width: 1920,
       height: 1080,
       fps: 30,
-      durationInFrames: 1800,
+      durationInFrames: 1290,
     });
   });
 });

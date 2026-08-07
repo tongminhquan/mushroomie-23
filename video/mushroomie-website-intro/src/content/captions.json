@@ -2,63 +2,63 @@
   {
     "text": "Một món phụ kiện nhỏ có thể kể câu chuyện rất riêng của bạn.",
     "startMs": 0,
-    "endMs": 5000,
+    "endMs": 4000,
     "timestampMs": null,
     "confidence": null
   },
   {
     "text": "Mushroomie là không gian dành cho vòng tay, charm, móc khóa và phụ kiện handmade cá nhân hóa.",
-    "startMs": 5000,
-    "endMs": 11000,
+    "startMs": 4000,
+    "endMs": 8800,
     "timestampMs": null,
     "confidence": null
   },
   {
     "text": "Từ những thiết kế có sẵn đến sản phẩm custom, bạn dễ dàng khám phá phong cách phù hợp ngay trên website.",
-    "startMs": 11000,
-    "endMs": 18000,
+    "startMs": 8800,
+    "endMs": 13800,
     "timestampMs": null,
     "confidence": null
   },
   {
     "text": "Chọn màu sắc, hạt và charm bạn yêu thích. Mushroomie biến từng ý tưởng thành món phụ kiện mang dấu ấn riêng.",
-    "startMs": 18000,
-    "endMs": 27000,
+    "startMs": 13800,
+    "endMs": 19700,
     "timestampMs": null,
     "confidence": null
   },
   {
     "text": "Mỗi sản phẩm được làm thủ công, chăm chút từ khâu chọn vật liệu, phối chi tiết đến hoàn thiện và đóng gói.",
-    "startMs": 27000,
-    "endMs": 36000,
+    "startMs": 19700,
+    "endMs": 25500,
     "timestampMs": null,
     "confidence": null
   },
   {
     "text": "Không chỉ mua sắm, bạn còn có thể khám phá câu chuyện thương hiệu, bài viết, voucher và mini game thú vị.",
-    "startMs": 36000,
-    "endMs": 44000,
+    "startMs": 25500,
+    "endMs": 31400,
     "timestampMs": null,
     "confidence": null
   },
   {
     "text": "Giao diện rõ ràng giúp bạn xem sản phẩm, thêm vào giỏ và đặt hàng nhanh chóng trên mọi thiết bị.",
-    "startMs": 44000,
-    "endMs": 52000,
+    "startMs": 31400,
+    "endMs": 36300,
     "timestampMs": null,
     "confidence": null
   },
   {
     "text": "Mushroomie — làm bằng tay, trao bằng tim.",
-    "startMs": 52000,
-    "endMs": 57000,
+    "startMs": 36300,
+    "endMs": 40200,
     "timestampMs": null,
     "confidence": null
   },
   {
     "text": "Khám phá ngay tại mushroomie.io.vn.",
-    "startMs": 57000,
-    "endMs": 60000,
+    "startMs": 40200,
+    "endMs": 43000,
     "timestampMs": null,
     "confidence": null
   }
