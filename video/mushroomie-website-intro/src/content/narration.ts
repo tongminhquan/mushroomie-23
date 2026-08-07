@@ -73,7 +73,7 @@ export const NARRATION = [
   },
   {
     scene: 'slogan',
-    text: 'Mát-shrù-mi... Làm bằng tay — trao bằng tim.',
+    text: 'Mát-shrù-mi! Làm bằng tay, trao bằng tim.',
     rate: '+12%',
     pitch: '+8Hz',
     volume: '+6%',
