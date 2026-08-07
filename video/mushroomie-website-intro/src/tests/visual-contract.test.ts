@@ -43,8 +43,23 @@ describe('visual presentation contracts', () => {
     expect(shopping).not.toContain('bottom: THEME.safe.y');
     expect(audio).toContain('durationInFrames={sceneDuration(scene)}');
     expect(captions).toContain('fontSize: 38');
-    expect(captions).toContain('maxHeight: 38 * 1.35 * 2 + 24');
-    expect(captions).toContain('paddingBottom: 108');
+    expect(captions).toContain('maxHeight: THEME.caption.maxHeight');
+    expect(captions).toContain('paddingBottom: THEME.caption.bottom');
+  });
+
+  it('keeps the website mockup above the caption corridor', () => {
+    const theme = source('../content/theme.ts');
+    const website = source('../scenes/WebsiteScene.tsx');
+    const captions = source('../components/CaptionTrack.tsx');
+
+    expect(theme).toContain(
+      'caption: {bottom: 108, maxHeight: 128, clearance: 28}',
+    );
+    expect(captions).toContain('paddingBottom: THEME.caption.bottom');
+    expect(captions).toContain('maxHeight: THEME.caption.maxHeight');
+    expect(website).toContain('height: 650');
+    expect(website).toContain("overflow: 'hidden'");
+    expect(website).toContain('THEME.caption.clearance');
   });
 
   it('settles the domain and CTA during the short final scene', () => {

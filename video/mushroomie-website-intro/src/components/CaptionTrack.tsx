@@ -30,7 +30,7 @@ export const CaptionTrack: React.FC = () => {
     <AbsoluteFill style={{ 
       justifyContent: 'flex-end', 
       alignItems: 'center', 
-      paddingBottom: 108,
+      paddingBottom: THEME.caption.bottom,
       pointerEvents: 'none'
     }}>
       <div style={{
@@ -40,7 +40,7 @@ export const CaptionTrack: React.FC = () => {
         color: 'white',
         textAlign: 'center',
         maxWidth: 1300,
-        maxHeight: 38 * 1.35 * 2 + 24,
+        maxHeight: THEME.caption.maxHeight,
         overflow: 'hidden',
         lineHeight: 1.35,
         backgroundColor: 'rgba(7, 16, 20, 0.72)',
