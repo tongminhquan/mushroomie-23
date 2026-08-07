@@ -10,6 +10,8 @@
 
 **Brand line:** “Làm bằng tay, trao bằng tim”
 
+> **Implementation note (2026-08-05):** The final render uses `Segoe UI Black` for headings and `Segoe UI` for body/captions. They are installed on the render machine and were verified to cover the full Vietnamese copy, including the exact slogan. The planned Paytone One/Montserrat browser font loader was not retained because Chromium's direct `FontFace.load()` did not settle during long multi-tab rendering. Layout, scale, color, and motion preserve the intended display/body hierarchy without risking broken Vietnamese glyphs or a failed master render.
+
 ## 1. Objective
 
 Create a polished one-minute video that introduces the overall Mushroomie website and communicates three ideas clearly:

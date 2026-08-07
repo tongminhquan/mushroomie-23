@@ -8,6 +8,13 @@
 
 **Tech Stack:** Node.js 24, npm 11, TypeScript 5, React 19, Remotion 4.0.506, Vitest 4, @remotion/media, @remotion/fonts, @remotion/captions, Microsoft Edge headless capture, Edge TTS in a project-local Python virtual environment, and FFmpeg/FFprobe 9.
 
+## Final implementation record (2026-08-05)
+
+- The approved 1,800-frame/60-second 16:9 composition, local visuals, Vietnamese voice-over, animated captions, slogan, and CTA were rendered successfully.
+- Direct `@remotion/fonts` loading proved unstable in this Windows headless Chromium renderer: `FontFace.load()` could remain pending past Remotion's 58-second effective timeout, even when supplied a WOFF2 data URL. The release therefore uses the locally installed, Vietnamese-complete stacks `Segoe UI Black` (headings) and `Segoe UI` (body/captions), rather than allowing per-glyph fallbacks or a render-time font failure.
+- Final encoding converts the Remotion master's full-range JPEG pixel data to delivery-safe limited-range `yuv420p`, uses H.264/AAC stereo, fast-start MP4 layout, and loudness normalization near -16 LUFS.
+- Generated media remains under `artifacts/mushroomie-brand-video/` and is not committed. The final verification record is `verification.json` in that directory.
+
 ## Global Constraints
 
 - Composition: exactly 1920×1080, 30 fps, and 1,800 frames before encoding.
