@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button'
 import Link from 'next/link'
 import CheckoutStepper from '@/components/checkout/CheckoutStepper'
 import { trackAnalyticsEventOnce } from '@/lib/analytics'
+import { createPaidPurchaseAnalyticsEvents } from '@/lib/checkout-analytics'
 
 interface Payment {
   status: string
@@ -172,14 +173,13 @@ function ConfirmPageContent() {
   }, [timeLeft])
 
   useEffect(() => {
-    const isCompleted = paymentStatus?.status === 'PAID' || orderInfo?.payment_method === 'cod'
-    if (!isCompleted || !orderCode) return
+    if (!orderInfo) return
 
-    const value = Number(payment?.amount || orderInfo?.total || 0)
-    trackAnalyticsEventOnce(`purchase_${orderCode}`, 'purchase', {
-      transaction_id: orderCode,
-      currency: 'VND',
-      value,
+    const paidEvents = createPaidPurchaseAnalyticsEvents({
+      orderCode,
+      providerPaymentStatus: paymentStatus?.status,
+      orderPaymentStatus: paymentStatus?.paymentStatus,
+      value: Number(orderInfo.total),
       items: orderInfo?.items?.map((item) => ({
         item_id: item.product_id ? String(item.product_id) : item.product_name || 'unknown',
         item_name: item.product_name || 'Sản phẩm Mushroomie',
@@ -187,7 +187,11 @@ function ConfirmPageContent() {
         quantity: Number(item.quantity || 1),
       })) || [],
     })
-  }, [orderCode, orderInfo, payment?.amount, paymentStatus?.status])
+
+    for (const paidEvent of paidEvents) {
+      trackAnalyticsEventOnce(paidEvent.key, paidEvent.event, paidEvent.params)
+    }
+  }, [orderCode, orderInfo, paymentStatus?.paymentStatus, paymentStatus?.status])
 
   // Compute QR image candidates. Direct VietQR is fastest; /api/qr is kept as fallback.
   const qrImageUrls = useMemo(() => {
