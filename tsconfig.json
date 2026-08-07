@@ -40,6 +40,7 @@
   ],
   "exclude": [
     "node_modules",
+    "video/mushroomie-website-intro",
     "cpanel-deploy",
     "deploy-temp",
     "test-v3-extract",

@@ -3,7 +3,7 @@
 - **Ngày triển khai:** 2026-08-07
 - **Phạm vi:** checkout funnel, GA4 Purchase và Google Ads Purchase conversion
 - **Nhánh:** `main`
-- **Trạng thái:** Chuẩn bị triển khai production
+- **Trạng thái:** Đang triển khai production
 
 ## Vấn đề
 
@@ -54,4 +54,10 @@ Nếu health check, PM2, route chính hoặc static asset không đạt, dùng r
 
 ## Kết quả production
 
-Sẽ được cập nhật ngay sau khi deploy và chạy đầy đủ kiểm tra route, health, PM2, CSS/JS MIME, logo, favicon, uploads và QR endpoint.
+### Lần chạy 1
+
+Deploy dừng an toàn trước bước thay release vì root `tsconfig.json` quét subproject độc lập `video/mushroomie-website-intro`, trong khi `npm ci` của website không cài dependency Remotion của subproject. Release cũ không bị thay thế; PM2 vẫn online và health check vẫn báo database `ok`.
+
+Đã bổ sung `video/mushroomie-website-intro` vào `exclude` của root TypeScript. Root typecheck sau sửa đạt và `tsc --listFilesOnly` xác nhận không còn file video nào bị đưa vào chương trình TypeScript của website. Subproject video tiếp tục dùng `tsconfig.json` và dependency riêng.
+
+Kết quả retry và kiểm tra route, health, PM2, CSS/JS MIME, logo, favicon, uploads và QR endpoint sẽ được cập nhật sau khi hoàn tất.
