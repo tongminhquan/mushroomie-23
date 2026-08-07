@@ -3,7 +3,7 @@
 - **Ngày triển khai:** 2026-08-07
 - **Phạm vi:** checkout funnel, GA4 Purchase và Google Ads Purchase conversion
 - **Nhánh:** `main`
-- **Trạng thái:** Đang triển khai production
+- **Trạng thái:** Đã triển khai và xác minh production
 
 ## Vấn đề
 
@@ -60,4 +60,36 @@ Deploy dừng an toàn trước bước thay release vì root `tsconfig.json` qu
 
 Đã bổ sung `video/mushroomie-website-intro` vào `exclude` của root TypeScript. Root typecheck sau sửa đạt và `tsc --listFilesOnly` xác nhận không còn file video nào bị đưa vào chương trình TypeScript của website. Subproject video tiếp tục dùng `tsconfig.json` và dependency riêng.
 
-Kết quả retry và kiểm tra route, health, PM2, CSS/JS MIME, logo, favicon, uploads và QR endpoint sẽ được cập nhật sau khi hoàn tất.
+### Backup trước deploy
+
+- Uploads: `backups/uploads/uploads-2026-08-07-162026.tar.gz` — 28 MB.
+- Database: `backups/db/mysql-2026-08-07-162026.sql.gz` — 119 KB.
+
+### Retry thành công
+
+- Runtime code commit: `a4601d8`.
+- Production `npm ci`: PASS; npm audit báo 1 lỗ hổng moderate và 4 lỗ hổng high, chưa tự động sửa để tránh breaking change ngoài phạm vi.
+- Prisma Client generation: PASS.
+- Production typecheck: PASS.
+- Production tests: PASS — Vitest 354/354 và legacy 290/290, tổng 644 test.
+- `prisma db push`: PASS; database đã đồng bộ sẵn với schema, không có schema change cần áp dụng.
+- Next.js production build: PASS — compile, TypeScript và static generation hoàn tất 143/143 route theo dữ liệu production.
+- Standalone release activation: PASS.
+- `mushroomie_pm2`: online sau restart; process list đã được `pm2 save`.
+
+### Xác minh production qua domain
+
+| Hạng mục | Kết quả |
+| --- | --- |
+| `/`, `/san-pham`, `/tin-tuc`, `/mini-game`, `/thanh-toan`, `/voucher`, `/lien-he`, `/gio-hang`, `/tai-khoan/dang-nhap` | PASS — HTTP 200 |
+| `/admin` khi chưa đăng nhập | PASS — HTTP 307 về `/tai-khoan/dang-nhap` |
+| `/api/health` | PASS — HTTP 200, service `mushroomie`, database `ok` |
+| Hai CSS và sáu JavaScript chunk lấy từ HTML trang chủ | PASS — HTTP 200, lần lượt `text/css` và `application/javascript` |
+| `/logo.webp` và `/favicon.ico` | PASS — HTTP 200, đúng MIME ảnh |
+| Một file thật trong `/uploads/` | PASS — HTTP 200 `image/webp` |
+| `/api/qr` với URL VietQR allowlisted | PASS — HTTP 200 `image/png`, 62.212 byte |
+| PM2 | PASS — process online tại runtime code commit `a4601d8` |
+
+Error log PM2 có các dòng Server Action/Auth.js probing và lỗi kết nối database lịch sử, nhưng file log được sửa lần cuối lúc `08:40 UTC`, trước PID release mới khởi động lúc `16:32 UTC`; không có error-log entry mới từ release này tại thời điểm xác minh.
+
+Không tạo giao dịch PAID giả trên production để tránh phát sinh đơn hàng, doanh thu hoặc dữ liệu quảng cáo không có thật. Hành vi paid-only và chống phát Purchase ở bước tạo đơn được xác minh bằng regression/integration tests trong release.
