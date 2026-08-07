@@ -158,7 +158,7 @@ git commit -m "test: add deterministic performance evidence parser"
 **Interfaces:**
 
 - `PostCardProps` gains `priority?: boolean`, defaulting to `false`.
-- A priority card emits `priority`, `loading="eager"`, and `fetchPriority="high"`.
+- A priority card emits `loading="eager"` and `fetchPriority="high"` without the deprecated Next 16 `priority` prop or a competing preload.
 - A normal card emits `loading="lazy"` and `fetchPriority="auto"`.
 - The listing gives priority only to index zero on page one.
 
@@ -181,7 +181,6 @@ Expected: FAIL because `PostCard` does not accept or emit the priority contract.
 Add `priority?: boolean` to the props, default it to false, and pass these props to `SafeImage`:
 
 ```tsx
-priority={priority}
 loading={priority ? 'eager' : 'lazy'}
 fetchPriority={priority ? 'high' : 'auto'}
 quality={70}

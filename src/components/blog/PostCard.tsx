@@ -5,6 +5,7 @@ import SafeImage from '@/components/ui/SafeImage'
 import { resolveImageUrlForRender } from '@/lib/server-image'
 
 interface PostCardProps {
+  priority?: boolean
   post: {
     id: number
     title: string
@@ -16,7 +17,7 @@ interface PostCardProps {
   }
 }
 
-export default async function PostCard({ post }: PostCardProps) {
+export default async function PostCard({ post, priority = false }: PostCardProps) {
   const featuredImageSrc = await resolveImageUrlForRender(post.featured_image, 'post')
 
   return (
@@ -29,7 +30,10 @@ export default async function PostCard({ post }: PostCardProps) {
             fill
             imageKind="post"
             className="object-cover"
-            sizes="(max-width: 768px) 100vw, 33vw"
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : 'auto'}
+            quality={70}
+            sizes="(max-width: 767px) calc(100vw - 32px), (max-width: 1023px) calc(50vw - 36px), 33vw"
           />
           {post.category && (
             <span className="absolute left-4 top-4 rounded-full bg-theme-elevated/95 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.08em] text-primary shadow-sm">
