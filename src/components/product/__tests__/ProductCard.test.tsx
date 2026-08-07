@@ -6,8 +6,10 @@ import { useCartStore } from '@/store/cart'
 import { useVoucherStore } from '@/store/voucher'
 
 const sessionMock = vi.hoisted(() => vi.fn())
+const analyticsMock = vi.hoisted(() => vi.fn())
 
 vi.mock('next-auth/react', () => ({ useSession: sessionMock }))
+vi.mock('@/lib/analytics', () => ({ trackAnalyticsEvent: analyticsMock }))
 vi.mock('next/link', async () => {
   const React = await import('react')
   return {
@@ -79,9 +81,31 @@ describe('ProductCard', () => {
     fireEvent.click(button)
     expect(useCartStore.getState().items[0]).toMatchObject({ productId: 42, price: 100_000, quantity: 1 })
     expect(useCartStore.getState().isOpen).toBe(false)
+    expect(analyticsMock).toHaveBeenCalledWith('add_to_cart', expect.objectContaining({
+      currency: 'VND',
+      value: 100_000,
+    }))
 
     act(() => { vi.advanceTimersByTime(600) })
     expect(useCartStore.getState().isOpen).toBe(true)
+  })
+
+  it('keeps select-item analytics on both product-detail links', () => {
+    render(<ProductCard product={product} />)
+    const productLinks = screen
+      .getAllByRole('link')
+      .filter((link) => link.getAttribute('href') === '/san-pham/vong-tay-nam')
+
+    for (const link of productLinks) {
+      link.addEventListener('click', (event) => event.preventDefault())
+      fireEvent.click(link)
+    }
+
+    expect(analyticsMock).toHaveBeenCalledTimes(2)
+    expect(analyticsMock).toHaveBeenLastCalledWith('select_item', expect.objectContaining({
+      item_list_name: 'Vòng tay',
+      items: [expect.objectContaining({ item_id: '42', price: 100_000 })],
+    }))
   })
 
   it('disables cart action for an out-of-stock product', () => {

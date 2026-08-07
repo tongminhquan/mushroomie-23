@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import test from 'node:test'
 import { resolve } from 'node:path'
 import { formatDate } from '../src/lib/utils'
@@ -17,6 +17,26 @@ const productCardSource = readFileSync(
   resolve(process.cwd(), 'src', 'components', 'product', 'ProductCard.tsx'),
   'utf8',
 )
+const productCardActionsPath = resolve(
+  process.cwd(),
+  'src',
+  'components',
+  'product',
+  'ProductCardActions.tsx',
+)
+const productCardActionsSource = existsSync(productCardActionsPath)
+  ? readFileSync(productCardActionsPath, 'utf8')
+  : ''
+const productCardLinkPath = resolve(
+  process.cwd(),
+  'src',
+  'components',
+  'product',
+  'ProductCardLink.tsx',
+)
+const productCardLinkSource = existsSync(productCardLinkPath)
+  ? readFileSync(productCardLinkPath, 'utf8')
+  : ''
 const categoryIconSource = readFileSync(
   resolve(process.cwd(), 'src', 'components', 'ui', 'CategoryIcon.tsx'),
   'utf8',
@@ -72,6 +92,13 @@ test('homepage hero does not inject image preloads while its route is prefetched
 test('interactive product cards do not pull tailwind-merge through presentational wrappers', () => {
   assert.doesNotMatch(productCardSource, /BrandBadge/)
   assert.doesNotMatch(productCardSource, /PriceText/)
+})
+
+test('product cards server render presentation and isolate browser actions', () => {
+  assert.doesNotMatch(productCardSource, /^['"]use client['"]/)
+  assert.doesNotMatch(productCardSource, /next-auth\/react|@\/store\/cart|@\/store\/voucher/)
+  assert.match(productCardActionsSource, /^['"]use client['"]/)
+  assert.match(productCardLinkSource, /^['"]use client['"]/)
 })
 
 test('homepage category icons do not pull tailwind-merge into the initial client bundle', () => {

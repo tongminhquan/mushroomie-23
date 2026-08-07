@@ -1,15 +1,9 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { Check, Eye, ShoppingBag } from 'lucide-react'
+import { Eye } from 'lucide-react'
+import ProductCardActions from '@/components/product/ProductCardActions'
+import ProductCardLink from '@/components/product/ProductCardLink'
 import SafeImage from '@/components/ui/SafeImage'
-import { useCartStore } from '@/store/cart'
-import { useVoucherStore } from '@/store/voucher'
-import { useSession } from 'next-auth/react'
-import { formatPrice, getPublicImageUrl } from '@/lib/utils'
-import { trackAnalyticsEvent } from '@/lib/analytics'
 import { resolveDisplayPrice } from '@/lib/product-price'
+import { formatPrice, getPublicImageUrl } from '@/lib/utils'
 
 interface ProductCardProps {
   product: {
@@ -27,103 +21,23 @@ interface ProductCardProps {
   }
 }
 
-interface WalletVoucher {
-  status: string
-  voucher: {
-    discountType: string
-    discountValue: number | string
-    maxDiscount?: number | string | null
-    minOrderValue?: number | string | null
-  }
-}
-
 export default function ProductCard({ product }: ProductCardProps) {
-  const { addItem, openCart } = useCartStore()
-  const { data: session } = useSession()
-  const { vouchers, fetchVouchers } = useVoucherStore()
-  const [added, setAdded] = useState(false)
-
-  const imageUrl = getPublicImageUrl(product.featured_image || product.images?.[0]?.image_url, 'product')
+  const imageUrl = getPublicImageUrl(
+    product.featured_image || product.images?.[0]?.image_url,
+    'product',
+  )
   const isOutOfStock = product.stock !== undefined && product.stock <= 0
   const { price: displayPrice, originalPrice, isOnSale: hasSale } = resolveDisplayPrice(
     product.price,
     product.sale_price,
   )
-
-  useEffect(() => {
-    if (session?.user) {
-      fetchVouchers()
-    }
-  }, [fetchVouchers, session])
-
-  let bestDiscount = 0
-  let bestVoucher: WalletVoucher['voucher'] | null = null
-
-  if (session?.user) {
-    const available = (vouchers as WalletVoucher[]).filter((voucher) => voucher.status === 'AVAILABLE')
-
-    for (const userVoucher of available) {
-      const voucher = userVoucher.voucher
-      if (voucher.minOrderValue && displayPrice < Number(voucher.minOrderValue)) continue
-
-      let discount = 0
-      if (voucher.discountType === 'PERCENT') {
-        discount = (displayPrice * Number(voucher.discountValue)) / 100
-        if (voucher.maxDiscount && discount > Number(voucher.maxDiscount)) {
-          discount = Number(voucher.maxDiscount)
-        }
-      } else {
-        discount = Number(voucher.discountValue)
-      }
-
-      if (discount > bestDiscount) {
-        bestDiscount = discount
-        bestVoucher = voucher
-      }
-    }
-  }
-
-  const handleAddToCart = (event: React.MouseEvent) => {
-    event.preventDefault()
-    event.stopPropagation()
-    if (isOutOfStock) return
-
-    addItem({
-      productId: product.id,
-      name: product.name,
-      price: displayPrice,
-      image: imageUrl,
-      quantity: 1,
-    })
-    trackAnalyticsEvent('add_to_cart', {
-      currency: 'VND',
-      value: displayPrice,
-      items: [{
-        item_id: String(product.id),
-        item_name: product.name,
-        item_category: product.category?.name,
-        price: displayPrice,
-        quantity: 1,
-      }],
-    })
-
-    setAdded(true)
-    window.setTimeout(() => {
-      setAdded(false)
-      openCart()
-    }, 600)
-  }
-
-  const handleSelectItem = () => {
-    trackAnalyticsEvent('select_item', {
-      item_list_name: product.category?.name || 'Tất cả sản phẩm',
-      items: [{
-        item_id: String(product.id),
-        item_name: product.name,
-        item_category: product.category?.name,
-        price: displayPrice,
-      }],
-    })
+  const productHref = `/san-pham/${product.slug}`
+  const analyticsProps = {
+    href: productHref,
+    itemId: product.id,
+    itemName: product.name,
+    categoryName: product.category?.name,
+    price: displayPrice,
   }
 
   // m-card: nâng thẻ + phóng ảnh bằng transform (chạy trên compositor).
@@ -131,7 +45,10 @@ export default function ProductCard({ product }: ProductCardProps) {
   // box-shadow buộc trình duyệt repaint mỗi khung hình và gây giật trên mobile.
   return (
     <article className="theme-transition m-card m-glow group relative flex h-full flex-col overflow-hidden rounded-[24px] border-[1.5px] border-theme-border bg-theme-card hover:border-pink">
-      <Link href={`/san-pham/${product.slug}`} prefetch={false} onClick={handleSelectItem} className="m-card-media relative block aspect-[3/4] w-full shrink-0 overflow-hidden bg-theme-subtle">
+      <ProductCardLink
+        {...analyticsProps}
+        className="m-card-media relative block aspect-[3/4] w-full shrink-0 overflow-hidden bg-theme-subtle"
+      >
         <SafeImage
           src={imageUrl}
           alt={product.name}
@@ -168,7 +85,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             </span>
           )}
         </div>
-      </Link>
+      </ProductCardLink>
 
       <div className="flex flex-1 flex-col p-3.5 sm:p-4">
         {product.category && (
@@ -176,52 +93,30 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.category.name}
           </p>
         )}
-        <Link href={`/san-pham/${product.slug}`} prefetch={false} onClick={handleSelectItem} className="mb-3 block flex-1">
+        <ProductCardLink {...analyticsProps} className="mb-3 block flex-1">
           <h3 className="line-clamp-2 text-sm font-extrabold leading-snug text-theme-primary transition-colors group-hover:text-theme-accent sm:text-[15px]">
             {product.name}
           </h3>
-        </Link>
+        </ProductCardLink>
 
         <div className="mt-auto flex flex-col gap-1">
-          {bestVoucher && bestDiscount > 0 && (
-            <div className="mb-1 text-[11px] font-bold text-theme-accent">
-              <span className="rounded bg-primary/10 px-1.5 py-0.5">
-                Rẻ hơn với voucher giảm{' '}
-                {bestVoucher.discountType === 'PERCENT'
-                  ? `${Number(bestVoucher.discountValue)}%`
-                  : formatPrice(bestDiscount)}
-              </span>
-            </div>
-          )}
-          <div className="flex flex-wrap items-baseline gap-2 tabular-nums">
-            <strong className="text-xl text-theme-accent">{formatPrice(displayPrice)}</strong>
-            {originalPrice && originalPrice > displayPrice && (
-              <span className="text-xs text-theme-muted line-through">{formatPrice(originalPrice)}</span>
-            )}
-          </div>
-          <button
-            onClick={handleAddToCart}
-            disabled={isOutOfStock}
-            className={`mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-3 text-xs font-extrabold transition duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 active:translate-y-px ${
-              added
-                ? 'bg-yellow text-brand-ink'
-                : isOutOfStock
-                  ? 'cursor-not-allowed bg-theme-subtle text-theme-muted'
-                  : 'bg-primary text-white hover:bg-primary-dark'
-            }`}
-            aria-label={added ? 'Đã thêm' : isOutOfStock ? 'Hết hàng' : 'Chọn mua'}
-            type="button"
+          <ProductCardActions
+            productId={product.id}
+            productName={product.name}
+            categoryName={product.category?.name}
+            displayPrice={displayPrice}
+            imageUrl={imageUrl}
+            isOutOfStock={isOutOfStock}
           >
-            {added ? (
-              <>
-                <Check size={16} /> Đã thêm
-              </>
-            ) : (
-              <>
-                <ShoppingBag size={16} /> Chọn mua
-              </>
-            )}
-          </button>
+            <div className="flex flex-wrap items-baseline gap-2 tabular-nums">
+              <strong className="text-xl text-theme-accent">{formatPrice(displayPrice)}</strong>
+              {originalPrice && originalPrice > displayPrice && (
+                <span className="text-xs text-theme-muted line-through">
+                  {formatPrice(originalPrice)}
+                </span>
+              )}
+            </div>
+          </ProductCardActions>
         </div>
       </div>
     </article>
