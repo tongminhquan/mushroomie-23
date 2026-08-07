@@ -5,6 +5,11 @@ import {enter} from '../../lib/motion';
 import {seededUnit} from '../../lib/seed';
 import {VerticalSceneShell} from '../VerticalSceneShell';
 
+const hookCopy = {
+  first: 'Một món phụ kiện',
+  second: 'Một câu chuyện riêng',
+} as const;
+
 export const VerticalHookScene = () => {
   const frame = useCurrentFrame();
   const logoScale = interpolate(frame, [0, 14], [0.62, 1], {
@@ -39,13 +44,13 @@ export const VerticalHookScene = () => {
             />
           );
         })}
-        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28, textAlign: 'center'}}>
+        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28, textAlign: 'center', width: 760, maxWidth: '100%'}}>
           <Img src={staticFile(ASSETS.brand.logo)} style={{width: 190, height: 190, marginBottom: 44, transform: `scale(${logoScale})`}} />
           <div style={{fontFamily: THEME.fonts.heading, fontSize: 82, lineHeight: 1.08, color: THEME.colors.cream, opacity: firstOpacity, transform: `translateY(${firstY}px)`}}>
-            Má»™t mÃ³n phá»¥ kiá»‡n
+            {hookCopy.first}
           </div>
           <div style={{fontFamily: THEME.fonts.heading, fontSize: 104, lineHeight: 1.02, color: THEME.colors.brand, opacity: secondOpacity, transform: `translateY(${secondY}px)`}}>
-            Má»™t cÃ¢u chuyá»‡n riÃªng
+            {hookCopy.second}
           </div>
         </div>
       </AbsoluteFill>

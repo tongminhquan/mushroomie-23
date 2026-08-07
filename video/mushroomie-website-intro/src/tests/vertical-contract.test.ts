@@ -33,15 +33,24 @@ describe('vertical TikTok presentation contracts', () => {
     const website = source('../vertical/scenes/VerticalWebsiteScene.tsx');
     const products = source('../vertical/scenes/VerticalProductsScene.tsx');
 
-    expect(hook).toContain('Má»™t mÃ³n phá»¥ kiá»‡n');
-    expect(hook).toContain('Má»™t cÃ¢u chuyá»‡n riÃªng');
+    expect(hook).toContain('Một món phụ kiện');
+    expect(hook).toContain('Một câu chuyện riêng');
     expect(hook).toContain('durationInFrames={120}');
-    expect(website).toContain('KhÃ´ng gian handmade cá»§a riÃªng báº¡n');
+    expect(hook).toContain('width: 760');
+    expect(hook).toContain("maxWidth: '100%'");
+    expect(website).toContain('Không gian handmade của riêng bạn');
     expect(website).toContain('durationInFrames={144}');
     expect(website).toContain('height: 720');
-    expect(products).toContain('TÃ¬m mÃ³n phá»¥ kiá»‡n há»£p gu');
+    expect(website).toContain('maxWidth: 760');
+    expect(website).toContain('lineHeight: 1.08');
+    expect(products).toContain('Tìm món phụ kiện hợp gu');
     expect(products).toContain('durationInFrames={150}');
     expect(products).toContain('width: 390');
     expect(products).toContain('width: 300');
+    expect(products).toContain('minHeight: 172');
+    expect(products).toContain("top: 200");
+    expect(products).toContain('height: 500');
+    expect(products).toContain('top: 730');
+    expect(products).toContain('height: 450');
   });
 });

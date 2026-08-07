@@ -6,9 +6,9 @@ import {enter} from '../../lib/motion';
 import {VerticalSceneShell} from '../VerticalSceneShell';
 
 const products = [
-  {image: ASSETS.products.braceletGreen, name: 'VÃ²ng tay xanh', category: 'VÃ²ng tay'},
-  {image: ASSETS.products.braceletPink, name: 'VÃ²ng tay há»“ng', category: 'VÃ²ng tay'},
-  {image: ASSETS.products.keychainsPastel, name: 'MÃ³c khÃ³a pastel', category: 'MÃ³c khÃ³a'},
+  {image: ASSETS.products.braceletGreen, name: 'Vòng tay xanh', category: 'Vòng tay'},
+  {image: ASSETS.products.braceletPink, name: 'Vòng tay hồng', category: 'Vòng tay'},
+  {image: ASSETS.products.keychainsPastel, name: 'Móc khóa pastel', category: 'Móc khóa'},
 ] as const;
 
 export const VerticalProductsScene = () => {
@@ -21,17 +21,17 @@ export const VerticalProductsScene = () => {
   return (
     <VerticalSceneShell durationInFrames={150} accent="#ffe7a3">
       <AbsoluteFill>
-        <h1 style={{fontFamily: THEME.fonts.heading, fontSize: 72, color: THEME.colors.cream, textAlign: 'center', margin: 0, opacity: enter(frame, -12, 18)}}>
-          TÃ¬m mÃ³n phá»¥ kiá»‡n há»£p gu
+        <h1 style={{fontFamily: THEME.fonts.heading, fontSize: 72, lineHeight: 1.08, color: THEME.colors.cream, textAlign: 'center', width: '100%', maxWidth: 760, minHeight: 172, margin: 0, opacity: enter(frame, -12, 18)}}>
+          Tìm món phụ kiện hợp gu
         </h1>
-        <div style={{position: 'absolute', top: 120, left: 219, ...cardMotion(-8)}}>
-          <ProductCard {...products[0]} style={{width: 390, height: 600}} />
+        <div style={{position: 'absolute', top: 200, left: 219, ...cardMotion(-8)}}>
+          <ProductCard {...products[0]} style={{width: 390, height: 500}} />
         </div>
         <div style={{position: 'absolute', top: 730, left: 8, ...cardMotion(4)}}>
-          <ProductCard {...products[1]} style={{width: 300, height: 480}} />
+          <ProductCard {...products[1]} style={{width: 300, height: 450}} />
         </div>
         <div style={{position: 'absolute', top: 730, right: 8, ...cardMotion(16)}}>
-          <ProductCard {...products[2]} style={{width: 300, height: 480}} />
+          <ProductCard {...products[2]} style={{width: 300, height: 450}} />
         </div>
       </AbsoluteFill>
     </VerticalSceneShell>
