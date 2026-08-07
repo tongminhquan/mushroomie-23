@@ -95,7 +95,9 @@ describe('visual presentation contracts', () => {
 
     expect(hook).toContain('durationInFrames={120}');
     expect(website).toContain('durationInFrames={144}');
-    expect(website).toContain('[0, 144]');
+    expect(website).toContain(
+      "const zoom = interpolate(frame, [0, 144], [0.96, 1], {extrapolateRight: 'clamp'});",
+    );
     expect(products).toContain('durationInFrames={150}');
     expect(custom).toContain('durationInFrames={177}');
     expect(handmade).toContain('durationInFrames={174}');
@@ -103,6 +105,29 @@ describe('visual presentation contracts', () => {
     expect(shopping).toContain('durationInFrames={147}');
     expect(endCard).toContain('durationInFrames={117}');
     expect(endCard).toContain('durationInFrames={84}');
+  });
+
+  it('preserves the final-state milestones before each shortened scene ends', () => {
+    const hook = source('../scenes/HookScene.tsx');
+    const custom = source('../scenes/CustomScene.tsx');
+    const handmade = source('../scenes/HandmadeScene.tsx');
+    const features = source('../scenes/FeaturesScene.tsx');
+    const shopping = source('../scenes/ShoppingFlowScene.tsx');
+    const endCard = source('../scenes/EndCardScene.tsx');
+
+    expect(hook).toContain(
+      "const t2Y = interpolate(frame, [62, 76], [20, 0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.quad)});",
+    );
+    expect(custom).toContain('const titleY = interpolate(frame, [124, 140], [18, 0], {');
+    expect(handmade).toContain('const pathProgress = enter(frame, 0, 122);');
+    expect(features).toContain(
+      "{title: 'Mini game thú vị', subtitle: 'Chơi và nhận quà', icon: '🎮', screenshot: ASSETS.screenshots.miniGameDesktop, delay: 38},",
+    );
+    expect(features).toContain('const featureOpacity = enter(frame, feature.delay, 18);');
+    expect(shopping).toContain('const mobileOpacity = enter(frame, 104, 20);');
+    expect(shopping).toContain('const mobileY = interpolate(frame, [104, 124], [38, 0], {');
+    expect(endCard).toContain('const text2Opacity = enter(frame, 70, 15);');
+    expect(endCard).toContain('const settleProgress = enter(frame, 10, 60);');
   });
 
   it('uses the available visual headroom for larger focal artwork and legible copy', () => {
