@@ -74,6 +74,24 @@ const newsPageSource = readFileSync(
   resolve(process.cwd(), 'src', 'app', '(user)', 'tin-tuc', 'page.tsx'),
   'utf8',
 )
+const miniGameHeroPath = resolve(
+  process.cwd(),
+  'src',
+  'components',
+  'minigame',
+  'MiniGameHero.tsx',
+)
+const miniGameHeroSource = existsSync(miniGameHeroPath)
+  ? readFileSync(miniGameHeroPath, 'utf8')
+  : ''
+const miniGameHubSource = readFileSync(
+  resolve(process.cwd(), 'src', 'components', 'minigame', 'MiniGameHub.tsx'),
+  'utf8',
+)
+const miniGamePageSource = readFileSync(
+  resolve(process.cwd(), 'src', 'app', '(user)', 'mini-game', 'page.tsx'),
+  'utf8',
+)
 
 test('shared browser utilities do not pull date-fns into public client bundles', () => {
   assert.doesNotMatch(utilsSource, /from ['"]date-fns/)
@@ -158,4 +176,14 @@ test('server-rendered story and news pages use the shared reveal runtime', () =>
     assert.doesNotMatch(source, /AnimateOnScroll|StaggerChildren/, `${label} still hydrates legacy motion`)
     assert.match(source, /data-reveal/, `${label} does not opt into the shared reveal runtime`)
   }
+})
+
+test('mini-game hero server renders before the interactive hub', () => {
+  assert.doesNotMatch(miniGameHeroSource, /^['"]use client['"]/)
+  assert.match(miniGameHeroSource, /Chọn game, ghi điểm và nhận voucher/)
+  assert.doesNotMatch(miniGameHubSource, /<h1|Chọn game, ghi điểm và nhận voucher/)
+  assert.ok(
+    miniGamePageSource.indexOf('<MiniGameHero') < miniGamePageSource.indexOf('<MiniGameHub'),
+    'mini-game page must render its stable hero before the client hub',
+  )
 })

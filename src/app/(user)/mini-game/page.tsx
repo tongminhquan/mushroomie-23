@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import MiniGameHero from '@/components/minigame/MiniGameHero'
 import MiniGameHub from '@/components/minigame/MiniGameHub'
 
 export const metadata: Metadata = {
@@ -7,5 +8,10 @@ export const metadata: Metadata = {
 }
 
 export default function MiniGamePage() {
-  return <MiniGameHub />
+  return (
+    <div className="min-h-[100dvh] bg-theme-page text-theme-primary">
+      <MiniGameHero />
+      <MiniGameHub />
+    </div>
+  )
 }

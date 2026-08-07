@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
-import { ArrowRight, Gamepad2, Sparkles, Ticket, Trophy } from 'lucide-react'
+import { ArrowRight, Sparkles, Ticket, Trophy } from 'lucide-react'
 import { GAME_DEFINITIONS, GAME_KEYS, type GameKey } from '@/lib/game-config'
 
 interface PlayerSummary {
@@ -20,7 +19,6 @@ interface LeaderboardPreviewItem {
 }
 
 export default function MiniGameHub() {
-  const { data: session } = useSession()
   const [summary, setSummary] = useState<PlayerSummary | null>(null)
   const [leaderboards, setLeaderboards] = useState<Record<string, LeaderboardPreviewItem[]>>({})
 
@@ -59,29 +57,7 @@ export default function MiniGameHub() {
   }, [])
 
   return (
-    <div className="min-h-[100dvh] bg-theme-page text-theme-primary">
-      <section className="border-b border-theme-border bg-theme-section">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-12 md:px-6 md:py-16">
-          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#e41d1d]/30 bg-[#e41d1d]/10 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#ff6b6b]">
-            <Gamepad2 size={15} />
-            Mini Game Mushroomie
-          </div>
-          <div className="max-w-3xl">
-            <h1 className="font-body text-4xl font-extrabold leading-tight tracking-normal md:text-6xl">
-              Chọn game, ghi điểm và nhận voucher
-            </h1>
-            <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-theme-secondary md:text-lg">
-              Mỗi game có màn hình bắt đầu riêng, bảng xếp hạng riêng và voucher tính theo điểm của một lượt chơi.
-            </p>
-          </div>
-          {!session && (
-            <div className="max-w-xl rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-theme-secondary">
-              Đăng nhập để lưu điểm và nhận voucher sau mỗi lượt chơi đạt mốc.
-            </div>
-          )}
-        </div>
-      </section>
-
+    <>
       <section className="mx-auto grid max-w-6xl gap-5 px-4 py-8 md:grid-cols-2 md:px-6">
         {GAME_KEYS.map((game) => {
           const config = GAME_DEFINITIONS[game]
@@ -176,6 +152,6 @@ export default function MiniGameHub() {
           </div>
         </section>
       )}
-    </div>
+    </>
   )
 }
