@@ -46,7 +46,7 @@ describe('approved content contract', () => {
 
   it('locks the approved slogan and CTA domain', () => {
     expect(NARRATION[7].text.toLocaleLowerCase('vi')).toContain(
-      'làm bằng tay... trao bằng tim',
+      'làm bằng tay, trao bằng tim',
     );
     expect(NARRATION[8].text).toContain('mát-shrù-mi chấm ai ô chấm vi en');
   });
