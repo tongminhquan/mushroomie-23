@@ -40,7 +40,19 @@
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "overrides": {
+    "@eslint/eslintrc": {
+      "js-yaml": "4.3.1"
+    },
     "es-toolkit": "1.47.1",
+    "minimatch@3": {
+      "brace-expansion": "1.1.18"
+    },
+    "minimatch@5": {
+      "brace-expansion": "2.1.4"
+    },
+    "minimatch@10": {
+      "brace-expansion": "5.0.9"
+    },
     "postcss": "8.5.23",
     "sharp": "0.35.3",
     "uuid": "11.1.1"
@@ -72,7 +84,7 @@
     "lucide-react": "^1.16.0",
     "next": "16.2.11",
     "next-auth": "5.0.0-beta.32",
-    "nodemailer": "8.0.11",
+    "nodemailer-v9": "npm:nodemailer@9.0.5",
     "parse5": "^8.0.1",
     "prisma": "^5.22.0",
     "react": "19.2.4",
@@ -82,7 +94,7 @@
     "recharts": "^3.8.1",
     "sharp": "0.35.3",
     "tailwind-merge": "^3.6.0",
-    "undici": "^7.28.0",
+    "undici": "^7.29.0",
     "zod": "^4.4.3",
     "zustand": "^5.0.13"
   },
@@ -96,7 +108,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/dompurify": "^3.0.5",
     "@types/node": "^20",
-    "@types/nodemailer": "8.0.0",
+    "@types/nodemailer": "8.0.1",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",

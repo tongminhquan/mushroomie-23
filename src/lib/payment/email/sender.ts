@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer'
+import nodemailer from 'nodemailer-v9'
 import { prisma } from '@/lib/prisma'
 import { EmailTemplateKey, EMAIL_SUBJECTS } from '@/types'
 import { renderPaymentSuccessEmail, renderOrderStatusEmail } from './templates'

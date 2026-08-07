@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer'
+import nodemailer from 'nodemailer-v9'
 import { MAIL_TRANSPORT_SECURITY } from './mail-security'
 
 export function createTransporter() {

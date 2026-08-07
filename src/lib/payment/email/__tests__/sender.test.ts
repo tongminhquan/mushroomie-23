@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   emailLogUpdate: vi.fn(),
 }))
 
-vi.mock('nodemailer', () => ({
+vi.mock('nodemailer-v9', () => ({
   default: { createTransport: mocks.createTransport },
 }))
 vi.mock('@/lib/prisma', () => ({

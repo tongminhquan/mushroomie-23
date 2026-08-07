@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({ createTransport: vi.fn(), sendMail: vi.fn() }))
-vi.mock('nodemailer', () => ({ default: { createTransport: mocks.createTransport } }))
+vi.mock('nodemailer-v9', () => ({ default: { createTransport: mocks.createTransport } }))
 
 import { createTransporter, sendPasswordResetEmail } from '@/lib/email'
 
