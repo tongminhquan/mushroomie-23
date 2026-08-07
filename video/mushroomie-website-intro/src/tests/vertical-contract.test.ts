@@ -45,12 +45,24 @@ describe('vertical TikTok presentation contracts', () => {
     expect(website).toContain('lineHeight: 1.08');
     expect(products).toContain('Tìm món phụ kiện hợp gu');
     expect(products).toContain('durationInFrames={150}');
-    expect(products).toContain('width: 390');
-    expect(products).toContain('width: 300');
     expect(products).toContain('minHeight: 172');
+
+    const productCards = Array.from(
+      products.matchAll(/ProductCard \{\.\.\.products\[\d\]\} style=\{\{width: (\d+), height: (\d+)\}\}/g),
+      ([, width, height]) => ({width: Number(width), height: Number(height)}),
+    );
+    expect(productCards).toHaveLength(3);
+    productCards.forEach(({width, height}) => {
+      const imageHeight = width * 4 / 3;
+      expect(height - imageHeight).toBeGreaterThanOrEqual(100);
+    });
+    expect(products).toContain("margin: '0 auto'");
     expect(products).toContain("top: 200");
-    expect(products).toContain('height: 500');
-    expect(products).toContain('top: 730');
-    expect(products).toContain('height: 450');
+    expect(products).toContain('top: 792');
+    expect(productCards[0]).toEqual({width: 360, height: 580});
+    expect(productCards.slice(1)).toEqual([
+      {width: 240, height: 420},
+      {width: 240, height: 420},
+    ]);
   });
 });

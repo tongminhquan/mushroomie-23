@@ -21,17 +21,17 @@ export const VerticalProductsScene = () => {
   return (
     <VerticalSceneShell durationInFrames={150} accent="#ffe7a3">
       <AbsoluteFill>
-        <h1 style={{fontFamily: THEME.fonts.heading, fontSize: 72, lineHeight: 1.08, color: THEME.colors.cream, textAlign: 'center', width: '100%', maxWidth: 760, minHeight: 172, margin: 0, opacity: enter(frame, -12, 18)}}>
+        <h1 style={{fontFamily: THEME.fonts.heading, fontSize: 72, lineHeight: 1.08, color: THEME.colors.cream, textAlign: 'center', width: '100%', maxWidth: 760, minHeight: 172, margin: '0 auto', opacity: enter(frame, -12, 18)}}>
           Tìm món phụ kiện hợp gu
         </h1>
-        <div style={{position: 'absolute', top: 200, left: 219, ...cardMotion(-8)}}>
-          <ProductCard {...products[0]} style={{width: 390, height: 500}} />
+        <div style={{position: 'absolute', top: 200, left: 234, ...cardMotion(-8)}}>
+          <ProductCard {...products[0]} style={{width: 360, height: 580}} />
         </div>
-        <div style={{position: 'absolute', top: 730, left: 8, ...cardMotion(4)}}>
-          <ProductCard {...products[1]} style={{width: 300, height: 450}} />
+        <div style={{position: 'absolute', top: 792, left: 24, ...cardMotion(4)}}>
+          <ProductCard {...products[1]} style={{width: 240, height: 420}} />
         </div>
-        <div style={{position: 'absolute', top: 730, right: 8, ...cardMotion(16)}}>
-          <ProductCard {...products[2]} style={{width: 300, height: 450}} />
+        <div style={{position: 'absolute', top: 792, right: 24, ...cardMotion(16)}}>
+          <ProductCard {...products[2]} style={{width: 240, height: 420}} />
         </div>
       </AbsoluteFill>
     </VerticalSceneShell>
