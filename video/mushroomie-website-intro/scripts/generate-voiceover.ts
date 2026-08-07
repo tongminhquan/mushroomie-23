@@ -34,7 +34,7 @@ export const buildEdgeTtsArgs = (
   EDGE_VOICE,
   `--rate=${job.rate}`,
   `--pitch=${job.pitch}`,
-  '--volume=+0%',
+  `--volume=${job.volume}`,
   '--text',
   job.text,
   '--write-media',
