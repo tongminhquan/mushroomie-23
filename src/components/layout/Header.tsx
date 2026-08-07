@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useDrawerTransition } from '@/hooks/useDrawerTransition'
@@ -16,8 +17,11 @@ import {
 } from 'lucide-react'
 import ThemeToggle from '@/components/theme/ThemeToggle'
 import SafeImage from '@/components/ui/SafeImage'
-import CompactHeader from '@/components/layout/CompactHeader'
 import { useCartStore } from '@/store/cart'
+
+const CompactHeader = dynamic(() => import('@/components/layout/CompactHeader'), {
+  loading: () => null,
+})
 
 interface CategoryLink {
   href: string

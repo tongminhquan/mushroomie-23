@@ -18,7 +18,12 @@ test('desktop header rows do not overlap while the page starts scrolling', () =>
 })
 
 test('a dedicated compact header appears after the full header leaves the viewport', () => {
-  assert.match(HEADER, /import CompactHeader from '@\/components\/layout\/CompactHeader'/)
+  assert.match(HEADER, /import dynamic from 'next\/dynamic'/)
+  assert.match(
+    HEADER,
+    /const CompactHeader = dynamic\(\(\) => import\('@\/components\/layout\/CompactHeader'\)/,
+  )
+  assert.doesNotMatch(HEADER, /import CompactHeader from '@\/components\/layout\/CompactHeader'/)
   assert.match(HEADER, /new IntersectionObserver/)
   assert.match(HEADER, /compactSentinelRef/)
   assert.match(HEADER, /compactMounted/)
