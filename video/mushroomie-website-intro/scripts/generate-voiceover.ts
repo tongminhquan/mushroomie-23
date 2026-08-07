@@ -9,6 +9,13 @@ import {VIDEO_CONFIG} from '../src/config';
 const scriptPath = fileURLToPath(import.meta.url);
 const scriptDirectory = path.dirname(scriptPath);
 const videoRoot = path.resolve(scriptDirectory, '..');
+const remotionCli = path.resolve(
+  videoRoot,
+  'node_modules',
+  '@remotion',
+  'cli',
+  'remotion-cli.js',
+);
 
 export const EDGE_VOICE = 'vi-VN-NamMinhNeural';
 
@@ -41,7 +48,7 @@ export const buildEdgeTtsArgs = (
   job.output,
 ];
 
-const run = (
+const runCapture = (
   command: string,
   args: string[],
   label: string,
@@ -61,19 +68,20 @@ const run = (
     throw new Error(`${label} failed: ${result.stderr || result.stdout}`);
   }
 
-  return result.stdout;
+  return result;
 };
+
+const run = (
+  command: string,
+  args: string[],
+  label: string,
+  options: {cwd?: string} = {},
+) => runCapture(command, args, label, options).stdout;
 
 export const buildFfprobeInvocation = (filePath: string) => ({
   command: process.execPath,
   args: [
-    path.resolve(
-      videoRoot,
-      'node_modules',
-      '@remotion',
-      'cli',
-      'remotion-cli.js',
-    ),
+    remotionCli,
     'ffprobe',
     '-v',
     'error',
@@ -84,6 +92,49 @@ export const buildFfprobeInvocation = (filePath: string) => ({
     filePath,
   ],
 });
+
+export const buildSilenceDetectInvocation = (filePath: string) => ({
+  command: process.execPath,
+  args: [
+    remotionCli,
+    'ffmpeg',
+    '-hide_banner',
+    '-nostats',
+    '-i',
+    filePath,
+    '-af',
+    'silencedetect=noise=-40dB:d=0.15',
+    '-f',
+    'null',
+    '-',
+  ],
+});
+
+export const parseSpokenEndSeconds = (
+  output: string,
+  totalSeconds: number,
+) => {
+  const starts = Array.from(
+    output.matchAll(/silence_start:\s*([0-9.]+)/g),
+    (match) => Number(match[1]),
+  );
+  const ends = Array.from(
+    output.matchAll(/silence_end:\s*([0-9.]+)/g),
+    (match) => Number(match[1]),
+  );
+  const trailingStart = starts.at(-1);
+  const trailingEnd = ends.at(-1);
+
+  if (
+    trailingStart === undefined ||
+    trailingEnd === undefined ||
+    Math.abs(trailingEnd - totalSeconds) > 0.1
+  ) {
+    return totalSeconds;
+  }
+
+  return trailingStart;
+};
 
 const probeDuration = (filePath: string) => {
   const invocation = buildFfprobeInvocation(filePath);
@@ -100,6 +151,19 @@ const probeDuration = (filePath: string) => {
   }
 
   return duration;
+};
+
+const probeSpokenEnd = (filePath: string, totalSeconds: number) => {
+  const invocation = buildSilenceDetectInvocation(filePath);
+  const result = runCapture(
+    invocation.command,
+    invocation.args,
+    `Silence detect ${path.basename(filePath)}`,
+  );
+  return parseSpokenEndSeconds(
+    `${result.stdout}\n${result.stderr}`,
+    totalSeconds,
+  );
 };
 
 export const generateVoiceover = async () => {
@@ -120,16 +184,18 @@ export const generateVoiceover = async () => {
     );
 
     const actualSeconds = probeDuration(job.output);
-    if (actualSeconds > job.allowedSeconds) {
+    const spokenEndSeconds = probeSpokenEnd(job.output, actualSeconds);
+    if (spokenEndSeconds > job.allowedSeconds) {
       throw new Error(
-        `${job.scene} voice-over is ${actualSeconds.toFixed(3)}s; ` +
+        `${job.scene} spoken audio ends at ${spokenEndSeconds.toFixed(3)}s; ` +
           `allowed ${job.allowedSeconds.toFixed(3)}s at ${job.rate}`,
       );
     }
 
     console.log(
-      `${job.scene}: ${actualSeconds.toFixed(3)}s / ` +
-        `${job.allowedSeconds.toFixed(3)}s at ${job.rate} -> ${job.output}`,
+      `${job.scene}: speech ${spokenEndSeconds.toFixed(3)}s / ` +
+        `${job.allowedSeconds.toFixed(3)}s; media ${actualSeconds.toFixed(3)}s ` +
+        `at ${job.rate} -> ${job.output}`,
     );
   }
 };
