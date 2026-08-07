@@ -20,7 +20,7 @@ export const FeaturesScene = () => {
   ];
 
   return (
-    <SceneShell durationInFrames={240} accent="#ffd6d6">
+    <SceneShell durationInFrames={177} accent="#ffd6d6">
       <AbsoluteFill
         style={{
           display: 'flex',

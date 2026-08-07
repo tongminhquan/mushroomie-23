@@ -16,7 +16,7 @@ export const HandmadeScene = () => {
   const pathProgress = enter(frame, 0, 122);
 
   return (
-    <SceneShell durationInFrames={270} accent="#b9794b">
+    <SceneShell durationInFrames={174} accent="#b9794b">
       <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center'}}>
         
         {/* Bead Path Visual */}

@@ -19,7 +19,7 @@ export const ShoppingFlowScene = () => {
   });
 
   return (
-    <SceneShell durationInFrames={240} accent="#ffe7a3">
+    <SceneShell durationInFrames={147} accent="#ffe7a3">
       <AbsoluteFill style={{boxSizing: 'border-box'}}>
         <div
           style={{

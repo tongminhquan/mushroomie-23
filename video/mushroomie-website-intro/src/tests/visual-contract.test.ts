@@ -83,6 +83,28 @@ describe('visual presentation contracts', () => {
     expect(endCard).toContain('const btnOpacity = enter(frame, 20, 16);');
   });
 
+  it('keeps every local scene animation inside the 43-second registry', () => {
+    const hook = source('../scenes/HookScene.tsx');
+    const website = source('../scenes/WebsiteScene.tsx');
+    const products = source('../scenes/ProductsScene.tsx');
+    const custom = source('../scenes/CustomScene.tsx');
+    const handmade = source('../scenes/HandmadeScene.tsx');
+    const features = source('../scenes/FeaturesScene.tsx');
+    const shopping = source('../scenes/ShoppingFlowScene.tsx');
+    const endCard = source('../scenes/EndCardScene.tsx');
+
+    expect(hook).toContain('durationInFrames={120}');
+    expect(website).toContain('durationInFrames={144}');
+    expect(website).toContain('[0, 144]');
+    expect(products).toContain('durationInFrames={150}');
+    expect(custom).toContain('durationInFrames={177}');
+    expect(handmade).toContain('durationInFrames={174}');
+    expect(features).toContain('durationInFrames={177}');
+    expect(shopping).toContain('durationInFrames={147}');
+    expect(endCard).toContain('durationInFrames={117}');
+    expect(endCard).toContain('durationInFrames={84}');
+  });
+
   it('uses the available visual headroom for larger focal artwork and legible copy', () => {
     const hook = source('../scenes/HookScene.tsx');
     const website = source('../scenes/WebsiteScene.tsx');

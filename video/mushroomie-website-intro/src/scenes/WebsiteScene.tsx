@@ -17,12 +17,12 @@ export const WebsiteScene = () => {
 
   const chips = ['Vòng tay', 'Charm', 'Móc khóa', 'Phụ kiện'];
 
-  const zoom = interpolate(frame, [0, 180], [0.96, 1], {extrapolateRight: 'clamp'});
+  const zoom = interpolate(frame, [0, 144], [0.96, 1], {extrapolateRight: 'clamp'});
   const browserOpacity = enter(frame, -8, 20);
   const browserY = interpolate(frame, [-8, 12], [32, 0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.quad)});
 
   return (
-    <SceneShell durationInFrames={180} accent="#ffd6d6">
+    <SceneShell durationInFrames={144} accent="#ffd6d6">
       <AbsoluteFill style={{
         display: 'flex',
         flexDirection: 'row',

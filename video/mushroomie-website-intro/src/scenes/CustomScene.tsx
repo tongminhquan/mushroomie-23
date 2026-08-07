@@ -25,7 +25,7 @@ export const CustomScene = () => {
   });
 
   return (
-    <SceneShell durationInFrames={270} accent="#e41d1d">
+    <SceneShell durationInFrames={177} accent="#e41d1d">
       <AbsoluteFill
         style={{
           display: 'flex',

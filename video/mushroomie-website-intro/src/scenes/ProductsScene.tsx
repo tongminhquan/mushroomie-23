@@ -18,7 +18,7 @@ export const ProductsScene = () => {
   ];
 
   return (
-    <SceneShell durationInFrames={210} accent="#ffe7a3">
+    <SceneShell durationInFrames={150} accent="#ffe7a3">
       <AbsoluteFill style={{
         display: 'flex',
         flexDirection: 'column',

@@ -15,7 +15,7 @@ export const EndCardScene = ({mode}: {mode: 'slogan' | 'cta'}) => {
     const text2Opacity = enter(frame, 70, 15);
     
     return (
-      <SceneShell durationInFrames={150} accent="#ffe7a3">
+      <SceneShell durationInFrames={117} accent="#ffe7a3">
         <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center', display: 'flex', flexDirection: 'column', gap: 60}}>
           <Img 
             src={staticFile(ASSETS.brand.logo)} 
@@ -49,7 +49,7 @@ export const EndCardScene = ({mode}: {mode: 'slogan' | 'cta'}) => {
   const btnScale = interpolate(frame, [20, 36], [0.9, 1], {extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.5))});
 
   return (
-    <SceneShell durationInFrames={90} accent="#e41d1d">
+    <SceneShell durationInFrames={84} accent="#e41d1d">
       <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center', display: 'flex', flexDirection: 'column'}}>
         <Img 
           src={staticFile(ASSETS.brand.logo)} 

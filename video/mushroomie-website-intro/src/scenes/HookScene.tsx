@@ -21,7 +21,7 @@ export const HookScene = () => {
   const t2Y = interpolate(frame, [62, 76], [20, 0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.quad)});
 
   return (
-    <SceneShell durationInFrames={150} accent="#e41d1d">
+    <SceneShell durationInFrames={120} accent="#e41d1d">
       <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center'}}>
         {/* Orbits */}
         {[...Array(6)].map((_, i) => {
