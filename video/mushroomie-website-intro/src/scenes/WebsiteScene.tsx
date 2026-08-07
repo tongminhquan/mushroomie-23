@@ -7,6 +7,10 @@ import {enter} from '../lib/motion';
 
 export const WebsiteScene = () => {
   const frame = useCurrentFrame();
+  const captionReserve =
+    THEME.caption.bottom +
+    THEME.caption.maxHeight +
+    THEME.caption.clearance;
 
   const titleOpacity = enter(frame, -10, 18);
   const titleY = interpolate(frame, [-10, 8], [20, 0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.quad)});
@@ -23,7 +27,7 @@ export const WebsiteScene = () => {
         display: 'flex',
         flexDirection: 'row',
         boxSizing: 'border-box',
-        padding: `${THEME.safe.y}px ${THEME.safe.x}px 190px`,
+        padding: `${THEME.safe.y}px ${THEME.safe.x}px ${captionReserve}px`,
       }}>
         {/* Left 38% */}
         <div style={{flex: 0.38, display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingRight: 48}}>
@@ -67,8 +71,12 @@ export const WebsiteScene = () => {
         <div style={{flex: 0.62, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
           <div style={{
             width: '100%',
+            maxWidth: 1040,
+            height: 650,
+            overflow: 'hidden',
+            borderRadius: 28,
             opacity: browserOpacity,
-            transform: `translateY(${browserY - 46}px) scale(${zoom})`,
+            transform: `translateY(${browserY - 26}px) scale(${zoom})`,
           }}>
             <BrowserFrame src={ASSETS.screenshots.homeDesktop} style={{width: '100%', maxWidth: 1040}} />
           </div>

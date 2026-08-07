@@ -14,5 +14,6 @@ export const THEME = {
     body: "'Segoe UI', Arial, sans-serif",
   },
   safe: {x: 96, y: 96},
+  caption: {bottom: 108, maxHeight: 128, clearance: 28},
   radii: {card: 28, small: 18},
 } as const;
