@@ -11,5 +11,7 @@ describe('master render command', () => {
 
     expect(command).toContain('--concurrency=2');
     expect(command).toContain('--timeout=60000');
+    expect(command).toContain('mushroomie-website-intro-43s-master.mp4');
+    expect(command).not.toContain('mushroomie-website-intro-master.mp4');
   });
 });

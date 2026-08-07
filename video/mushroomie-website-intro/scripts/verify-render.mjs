@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 export function validateMetadata(meta) {
   const errors = [];
-  if (meta.duration < 58 || meta.duration > 62) errors.push('Duration must be between 58 and 62 seconds');
+  if (meta.duration < 42.8 || meta.duration > 43.2) errors.push('Duration must be between 42.8 and 43.2 seconds');
   if (meta.width !== 1920) errors.push('Width must be 1920');
   if (meta.height !== 1080) errors.push('Height must be 1080');
   if (Math.abs(meta.fps - 30) > 0.01) errors.push('FPS must be 30');
@@ -23,7 +23,10 @@ const isMain = process.argv[1] === __filename;
 
 if (isMain) {
   const artifactsDir = path.resolve(__dirname, '../../../artifacts/mushroomie-brand-video');
-  const mp4Path = path.join(artifactsDir, 'mushroomie-website-intro-60s-16x9.mp4');
+  const mp4Path = path.join(
+    artifactsDir,
+    'mushroomie-website-intro-43s-16x9-v1.mp4',
+  );
   
   if (!fs.existsSync(mp4Path)) {
     console.error('File not found:', mp4Path);
@@ -57,7 +60,7 @@ if (isMain) {
   const errors = validateMetadata(meta);
   
   const verificationData = { meta, errors, valid: errors.length === 0 };
-  fs.writeFileSync(path.join(artifactsDir, 'verification.json'), JSON.stringify(verificationData, null, 2));
+  fs.writeFileSync(path.join(artifactsDir, 'verification-43s.json'), JSON.stringify(verificationData, null, 2));
 
   if (errors.length > 0) {
     console.error('Validation failed:');

@@ -13,9 +13,13 @@ const artifactDirectory = path.resolve(
   'artifacts',
   'mushroomie-brand-video',
 );
-const masterPath = path.join(artifactDirectory, 'mushroomie-website-intro-master.mp4');
-const finalPath = path.join(artifactDirectory, 'mushroomie-website-intro-60s-16x9.mp4');
-const finalContactSheetPath = path.join(artifactDirectory, 'final-contact-sheet.jpg');
+export const MASTER_FILENAME = 'mushroomie-website-intro-43s-master.mp4';
+export const FINAL_FILENAME = 'mushroomie-website-intro-43s-16x9-v1.mp4';
+export const FINAL_CONTACT_SHEET_FILENAME = 'final-contact-sheet-43s.jpg';
+
+const masterPath = path.join(artifactDirectory, MASTER_FILENAME);
+const finalPath = path.join(artifactDirectory, FINAL_FILENAME);
+const finalContactSheetPath = path.join(artifactDirectory, FINAL_CONTACT_SHEET_FILENAME);
 
 const run = (command, args, label) => {
   const result = spawnSync(command, args, {
@@ -115,7 +119,7 @@ export const buildFinalContactSheetArgs = (inputPath, outputPath) => [
   '-i',
   inputPath,
   '-vf',
-  'fps=1/12,scale=480:-1:flags=lanczos,tile=5x1:padding=8:margin=8:color=0x071014',
+  'fps=1/10,scale=480:-1:flags=lanczos,tile=5x1:padding=8:margin=8:color=0x071014',
   '-frames:v',
   '1',
   '-q:v',

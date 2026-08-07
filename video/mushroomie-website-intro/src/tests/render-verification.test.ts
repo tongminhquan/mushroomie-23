@@ -4,7 +4,7 @@ describe('render metadata validator', () => {
   it('accepts valid metadata', async () => {
     const {validateMetadata} = await import('../../scripts/verify-render.mjs');
     const valid = {
-      duration: 60.0,
+      duration: 43.0,
       width: 1920,
       height: 1080,
       fps: 30,
@@ -37,7 +37,7 @@ describe('render metadata validator', () => {
   it('rejects an almost-30 frame rate that is not the approved 30 fps contract', async () => {
     const {validateMetadata} = await import('../../scripts/verify-render.mjs');
     const errors = validateMetadata({
-      duration: 60,
+      duration: 43,
       width: 1920,
       height: 1080,
       fps: 29,
@@ -49,5 +49,21 @@ describe('render metadata validator', () => {
     });
 
     expect(errors.some((error: string) => error.includes('FPS'))).toBe(true);
+  });
+
+  it('rejects a delivery outside the 42.8 to 43.2 second window', async () => {
+    const {validateMetadata} = await import('../../scripts/verify-render.mjs');
+    const errors = validateMetadata({
+      duration: 43.5,
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      videoCodec: 'h264',
+      pixFmt: 'yuv420p',
+      audioCodec: 'aac',
+      channels: 2,
+      fileSizeBytes: 5_000_000,
+    });
+    expect(errors).toContain('Duration must be between 42.8 and 43.2 seconds');
   });
 });

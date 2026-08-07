@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 
 // Representative in-scene moments expose the intended art direction instead of
 // sampling the exact cut where a new scene is only beginning its entrance.
-export const KEY_FRAMES = [75, 255, 435, 735, 945, 1200, 1440, 1640, 1740, 1770];
+export const KEY_FRAMES = [90, 210, 354, 559, 720, 855, 1072, 1190, 1260, 1276];
 
 const scriptPath = fileURLToPath(import.meta.url);
 const scriptDirectory = path.dirname(scriptPath);

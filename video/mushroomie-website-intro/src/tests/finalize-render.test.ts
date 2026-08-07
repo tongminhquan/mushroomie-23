@@ -18,11 +18,21 @@ describe('final video delivery pipeline', () => {
     expect(args).toContain('loudnorm=I=-16:LRA=11:TP=-1.5');
   });
 
-  it('creates a five-frame final contact sheet at deterministic 12-second intervals', async () => {
-    const {buildFinalContactSheetArgs} = await import('../../scripts/finalize-render.mjs');
-    const args = buildFinalContactSheetArgs('final.mp4', 'final-contact-sheet.jpg');
+  it('uses the 43-second delivery filenames and creates a five-frame contact sheet at deterministic 10-second intervals', async () => {
+    const {
+      buildFinalContactSheetArgs,
+      FINAL_CONTACT_SHEET_FILENAME,
+      FINAL_FILENAME,
+      MASTER_FILENAME,
+    } = await import('../../scripts/finalize-render.mjs');
+    const args = buildFinalContactSheetArgs('final.mp4', 'final-contact-sheet-43s.jpg');
 
-    expect(args).toContain('fps=1/12,scale=480:-1:flags=lanczos,tile=5x1:padding=8:margin=8:color=0x071014');
-    expect(args.slice(-1)).toEqual(['final-contact-sheet.jpg']);
+    expect(MASTER_FILENAME).toBe('mushroomie-website-intro-43s-master.mp4');
+    expect(FINAL_FILENAME).toBe('mushroomie-website-intro-43s-16x9-v1.mp4');
+    expect(FINAL_CONTACT_SHEET_FILENAME).toBe('final-contact-sheet-43s.jpg');
+    expect(args).toContain(
+      'fps=1/10,scale=480:-1:flags=lanczos,tile=5x1:padding=8:margin=8:color=0x071014',
+    );
+    expect(args.slice(-1)).toEqual(['final-contact-sheet-43s.jpg']);
   });
 });
