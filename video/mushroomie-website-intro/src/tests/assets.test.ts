@@ -46,4 +46,17 @@ describe('visual asset pipeline', () => {
       ),
     ).toEqual(['screenshots/home-desktop.png', 'screenshots/home-mobile.png']);
   });
+
+  it('captures the homepage mobile viewport as a real 390 by 844 touch device', () => {
+    const mobileCapture = CAPTURE_MANIFEST.find(
+      ({destination}) => destination === 'screenshots/home-mobile.png',
+    );
+
+    expect(mobileCapture).toMatchObject({
+      route: '/',
+      width: 390,
+      height: 844,
+      mobile: true,
+    });
+  });
 });

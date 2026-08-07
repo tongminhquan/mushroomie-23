@@ -38,7 +38,7 @@ export const CustomScene = () => {
         <div
           style={{
             position: 'absolute',
-            top: 54,
+            top: 28,
             color: THEME.colors.yellow,
             fontFamily: THEME.fonts.body,
             fontSize: 22,
@@ -46,6 +46,7 @@ export const CustomScene = () => {
             letterSpacing: 2,
             textTransform: 'uppercase',
             fontWeight: 700,
+            zIndex: 2,
           }}
         >
           Minh họa quy trình cá nhân hóa

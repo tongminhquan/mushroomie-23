@@ -18,15 +18,20 @@ describe('visual presentation contracts', () => {
     expect(handmade).not.toContain('width: `${pathProgress * 100}%`');
   });
 
-  it('keeps product-card sizing coherent and removes CSS transition timing from the custom scene', () => {
+  it('keeps product-card sizing coherent and reserves a clear title corridor', () => {
     const products = source('../scenes/ProductsScene.tsx');
     const custom = source('../scenes/CustomScene.tsx');
     const card = source('../components/ProductCard.tsx');
 
     expect(products).not.toContain('style={{width: 400}}');
-    expect(products).toContain("transform: 'translateY(-54px)'");
+    expect(products).not.toContain("translateY(-54px)");
+    expect(products).toContain('paddingTop: 12');
+    expect(products).toContain('marginTop: 18');
+    expect(products).toContain('[-24, 0]');
     expect(custom).not.toContain('style={{width: 480}}');
     expect(custom).not.toContain('transition:');
+    expect(custom).toContain('top: 28');
+    expect(custom).toContain('zIndex: 2');
     expect(card).toContain("aspectRatio: '3 / 4'");
     expect(card).toContain('height: 560');
   });
@@ -40,6 +45,8 @@ describe('visual presentation contracts', () => {
     expect(features).toContain('paddingBottom: 180');
     expect(features).toContain('height: 248');
     expect(shopping).toContain('top: 24');
+    expect(shopping).toContain('style={{width: 300}}');
+    expect(shopping).not.toContain('height: 500');
     expect(shopping).not.toContain('bottom: THEME.safe.y');
     expect(audio).toContain('durationInFrames={sceneDuration(scene)}');
     expect(captions).toContain('fontSize: 38');

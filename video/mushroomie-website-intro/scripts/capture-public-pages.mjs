@@ -18,7 +18,8 @@ export const CAPTURE_MANIFEST = [
   {
     route: '/',
     width: 390,
-    height: 2000,
+    height: 844,
+    mobile: true,
     destination: 'screenshots/home-mobile.png',
   },
   {
@@ -40,6 +41,10 @@ export const CAPTURE_MANIFEST = [
     destination: 'screenshots/mini-game-desktop.png',
   },
 ];
+
+const MOBILE_USER_AGENT =
+  'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 ' +
+  '(KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36';
 
 const edgeCandidates = [
   process.env.EDGE_PATH,
@@ -111,6 +116,12 @@ export const capturePublicPages = async () => {
           '--virtual-time-budget=5000',
           `--window-size=${item.width},${item.height}`,
           `--user-data-dir=${profileDirectory}`,
+          ...(item.mobile
+            ? [
+                '--touch-events=enabled',
+                `--user-agent=${MOBILE_USER_AGENT}`,
+              ]
+            : []),
           `--screenshot=${output}`,
           pageUrl,
         ],

@@ -124,7 +124,7 @@ export const ShoppingFlowScene = () => {
           >
             Mọi thiết bị
           </div>
-          <MobileFrame src={ASSETS.screenshots.homeMobile} style={{width: 260, height: 500}} />
+          <MobileFrame src={ASSETS.screenshots.homeMobile} style={{width: 300}} />
         </div>
       </AbsoluteFill>
     </SceneShell>

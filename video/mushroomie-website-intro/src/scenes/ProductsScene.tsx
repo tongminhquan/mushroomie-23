@@ -24,7 +24,7 @@ export const ProductsScene = () => {
         flexDirection: 'column',
         alignItems: 'center',
         boxSizing: 'border-box',
-        paddingTop: THEME.safe.y + 8,
+        paddingTop: 12,
       }}>
         <h1 style={{
           fontFamily: THEME.fonts.heading,
@@ -43,12 +43,12 @@ export const ProductsScene = () => {
           gap: 40,
           justifyContent: 'center',
           width: '100%',
-          transform: 'translateY(-54px)',
+          marginTop: 18,
         }}>
           {products.map((p, i) => {
             const delay = i * 12 - 8;
             const pOpacity = enter(frame, delay, 20);
-            const pY = interpolate(frame, [delay, delay + 20], [36, 0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.2))});
+            const pY = interpolate(frame, [delay, delay + 20], [-24, 0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.2))});
             const pScale = interpolate(frame, [delay, delay + 20], [0.94, 1], {extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.2))});
 
             return (
