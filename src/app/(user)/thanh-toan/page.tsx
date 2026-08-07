@@ -13,7 +13,7 @@ import Textarea from '@/components/ui/Textarea'
 import CheckoutStepper from '@/components/checkout/CheckoutStepper'
 import ShippingFeeNotice from '@/components/checkout/ShippingFeeNotice'
 import { trackAnalyticsEvent, trackAnalyticsEventOnce } from '@/lib/analytics'
-import { GOOGLE_ADS_PURCHASE_SEND_TO } from '@/lib/google-tags'
+import { createOrderCreatedAnalyticsEvent } from '@/lib/checkout-analytics'
 import { useShippingFee } from '@/hooks/useShippingFee'
 import { useGiftWrap } from '@/hooks/useGiftWrap'
 import { GiftWrapOptionContent } from '@/components/product/GiftWrapOption'
@@ -267,16 +267,24 @@ export default function CheckoutPage() {
       }
       const { orderId, orderCode, accessToken } = orderData
 
-      // Chuyển đổi "Lượt mua hàng" của Google Ads (kiểu Nhấp chuột — đo lúc khách bấm
-      // đặt hàng). Bắn sau khi đơn đã tạo xong nên vẫn gửi được mã đơn và tổng tiền
-      // thật, thay vì transaction_id rỗng + value 1.0 như snippet mặc định.
-      // Lưu ý: đơn chuyển khoản chưa chắc được thanh toán, nên số này là ý định mua.
-      trackAnalyticsEventOnce(`ads_click_${orderCode}`, 'conversion', {
-        send_to: GOOGLE_ADS_PURCHASE_SEND_TO,
-        transaction_id: orderCode,
-        currency: 'VND',
+      const orderCreatedEvent = createOrderCreatedAnalyticsEvent({
+        orderCode,
         value: total,
+        paymentMethod,
+        items: items.map((item) => ({
+          item_id: String(item.productId),
+          item_name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        })),
       })
+      if (orderCreatedEvent) {
+        trackAnalyticsEventOnce(
+          orderCreatedEvent.key,
+          orderCreatedEvent.event,
+          orderCreatedEvent.params,
+        )
+      }
 
       if (paymentMethod === 'bank_transfer') {
         const payRes = await fetch('/api/payments', {
