@@ -66,6 +66,14 @@ const bannerVariantScript = readFileSync(
   resolve(process.cwd(), 'scripts', 'generate-banner-variants.mjs'),
   'utf8',
 )
+const aboutPageSource = readFileSync(
+  resolve(process.cwd(), 'src', 'app', '(user)', 'gioi-thieu', 'page.tsx'),
+  'utf8',
+)
+const newsPageSource = readFileSync(
+  resolve(process.cwd(), 'src', 'app', '(user)', 'tin-tuc', 'page.tsx'),
+  'utf8',
+)
 
 test('shared browser utilities do not pull date-fns into public client bundles', () => {
   assert.doesNotMatch(utilsSource, /from ['"]date-fns/)
@@ -140,4 +148,14 @@ test('global navigation does not eagerly prefetch unrelated RSC routes', () => {
 
 test('raw LCP banner variants use the same production quality budget as Next images', () => {
   assert.match(bannerVariantScript, /\.webp\(\{\s*quality:\s*75,\s*effort:\s*5\s*\}\)/)
+})
+
+test('server-rendered story and news pages use the shared reveal runtime', () => {
+  for (const [label, source] of [
+    ['story page', aboutPageSource],
+    ['news page', newsPageSource],
+  ] as const) {
+    assert.doesNotMatch(source, /AnimateOnScroll|StaggerChildren/, `${label} still hydrates legacy motion`)
+    assert.match(source, /data-reveal/, `${label} does not opt into the shared reveal runtime`)
+  }
 })

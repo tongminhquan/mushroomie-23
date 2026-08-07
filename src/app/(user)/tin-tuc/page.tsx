@@ -4,7 +4,6 @@ import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import PostCard from '@/components/blog/PostCard'
 import Breadcrumb from '@/components/layout/Breadcrumb'
-import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 import BrandContainer from '@/components/ui/BrandContainer'
 import EmptyState from '@/components/ui/EmptyState'
 import { DEFAULT_SOCIAL_IMAGE } from '@/lib/seo-assets'
@@ -168,22 +167,20 @@ export default async function BlogPage({
 
       <BrandContainer className="mt-8">
         {categories.length > 0 && (
-          <AnimateOnScroll animation="fade-up">
-            <div className="mb-8 flex flex-wrap justify-center gap-2">
-              <Link href="/tin-tuc" className={chipClass(!categorySlug)}>
-                Tất cả
+          <div data-reveal className="mb-8 flex flex-wrap justify-center gap-2">
+            <Link href="/tin-tuc" className={chipClass(!categorySlug)}>
+              Tất cả
+            </Link>
+            {categories.map((category) => (
+              <Link
+                key={category.id}
+                href={buildUrl({ category: category.slug, page: undefined })}
+                className={chipClass(categorySlug === category.slug)}
+              >
+                {category.name}
               </Link>
-              {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={buildUrl({ category: category.slug, page: undefined })}
-                  className={chipClass(categorySlug === category.slug)}
-                >
-                  {category.name}
-                </Link>
-              ))}
-            </div>
-          </AnimateOnScroll>
+            ))}
+          </div>
         )}
 
         {posts.length === 0 ? (
