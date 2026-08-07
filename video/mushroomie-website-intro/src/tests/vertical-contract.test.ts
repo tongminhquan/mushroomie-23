@@ -48,21 +48,54 @@ describe('vertical TikTok presentation contracts', () => {
     expect(products).toContain('minHeight: 172');
 
     const productCards = Array.from(
-      products.matchAll(/ProductCard \{\.\.\.products\[\d\]\} style=\{\{width: (\d+), height: (\d+)\}\}/g),
+      products.matchAll(/width:\s*(\d+),\s*height:\s*(\d+)/g),
       ([, width, height]) => ({width: Number(width), height: Number(height)}),
     );
     expect(productCards).toHaveLength(3);
-    productCards.forEach(({width, height}) => {
+    const titleLines = [1, 2, 2] as const;
+    productCards.forEach(({width, height}, index) => {
       const imageHeight = width * 4 / 3;
-      expect(height - imageHeight).toBeGreaterThanOrEqual(100);
+      const labelBudget = 34 + titleLines[index] * 26 * 1.2 + 4 + 17 * 1.2;
+      expect(height - imageHeight).toBeGreaterThanOrEqual(labelBudget);
+    });
+    const cardPositions = Array.from(
+      products.matchAll(/top:\s*(\d+),\s*(left|right):\s*(\d+)/g),
+      ([, top, side, horizontal]) => ({
+        top: Number(top),
+        side,
+        horizontal: Number(horizontal),
+      }),
+    );
+    expect(cardPositions).toHaveLength(3);
+    const entranceOffset = 28;
+    const shadowAllowance = 30;
+    cardPositions.forEach(({top}, index) => {
+      expect(top + productCards[index].height + entranceOffset + shadowAllowance).toBeLessThanOrEqual(1240);
+    });
+    const horizontalExtent = (index: number) => {
+      const {side, horizontal} = cardPositions[index];
+      const width = productCards[index].width;
+      return side === 'left'
+        ? {left: horizontal, right: horizontal + width}
+        : {left: 828 - horizontal - width, right: 828 - horizontal};
+    };
+    const hero = horizontalExtent(0);
+    const rectangles = cardPositions.map(({top}, index) => ({
+      ...horizontalExtent(index),
+      top,
+      bottom: top + productCards[index].height,
+    }));
+    rectangles.slice(1).forEach((support) => {
+      expect(support.left).toBeGreaterThanOrEqual(0);
+      expect(support.right).toBeLessThanOrEqual(828);
+      expect(support.right <= hero.left || support.left >= hero.right).toBe(true);
+      expect(
+        support.right <= rectangles[0].left ||
+          support.left >= rectangles[0].right ||
+          support.bottom <= rectangles[0].top ||
+          support.top >= rectangles[0].bottom,
+      ).toBe(true);
     });
     expect(products).toContain("margin: '0 auto'");
-    expect(products).toContain("top: 200");
-    expect(products).toContain('top: 792');
-    expect(productCards[0]).toEqual({width: 360, height: 580});
-    expect(productCards.slice(1)).toEqual([
-      {width: 240, height: 420},
-      {width: 240, height: 420},
-    ]);
   });
 });
