@@ -27,4 +27,21 @@ describe('vertical TikTok presentation contracts', () => {
     expect(captions).toContain('paddingRight: VERTICAL_THEME.safe.right');
     expect(captions).toContain('WebkitLineClamp: 3');
   });
+
+  it('keeps Hook, Website, and Products inside vertical safe geometry', () => {
+    const hook = source('../vertical/scenes/VerticalHookScene.tsx');
+    const website = source('../vertical/scenes/VerticalWebsiteScene.tsx');
+    const products = source('../vertical/scenes/VerticalProductsScene.tsx');
+
+    expect(hook).toContain('Má»™t mÃ³n phá»¥ kiá»‡n');
+    expect(hook).toContain('Má»™t cÃ¢u chuyá»‡n riÃªng');
+    expect(hook).toContain('durationInFrames={120}');
+    expect(website).toContain('KhÃ´ng gian handmade cá»§a riÃªng báº¡n');
+    expect(website).toContain('durationInFrames={144}');
+    expect(website).toContain('height: 720');
+    expect(products).toContain('TÃ¬m mÃ³n phá»¥ kiá»‡n há»£p gu');
+    expect(products).toContain('durationInFrames={150}');
+    expect(products).toContain('width: 390');
+    expect(products).toContain('width: 300');
+  });
 });
