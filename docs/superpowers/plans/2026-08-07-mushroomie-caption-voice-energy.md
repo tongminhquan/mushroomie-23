@@ -179,3 +179,16 @@ Commit: `docs(video): record caption and voice QA`
 - Spec coverage: layout corridor, energetic NamMinh delivery, exact slogan, full render, and output verification are each mapped to a task.
 - Placeholder scan: no placeholder markers or unspecified implementation steps remain.
 - Type consistency: `NarrationRecord.volume`, `THEME.caption`, and all referenced commands match the current project structure.
+
+## Execution Record (2026-08-07)
+
+- Added a shared caption geometry contract: bottom 108px, maximum plate height 128px, and 28px clearance.
+- Bounded the website mockup to a 650px clipped viewport. Frames 270, 300, and 325 visually confirm that the mockup ends above the caption plate while remaining large and readable.
+- Kept `vi-VN-NamMinhNeural` and regenerated all nine clips with per-scene rate, pitch, volume, and promotional punctuation. Every clip passed the existing scene-duration safety margin; the tightest CTA is 2.352s in a 2.650s allowance.
+- Preserved the exact spoken and visible slogan “Làm bằng tay, trao bằng tim”.
+- Source verification passed: 13 test files, 46 tests, TypeScript typecheck, all 30 local assets, and the 1920×1080/30fps/1,800-frame composition contract.
+- The master rendered all 1,800 frames in 194.3 seconds and produced a 10.1MB file.
+- Windows kept the previous delivery MP4 open in another process, so the finalizer did not overwrite it. The revised delivery was written non-destructively as `mushroomie-website-intro-60s-16x9-v2.mp4`.
+- Final v2 verification: 60.10s, 1920×1080, 30fps, exactly 1,800 decoded video frames, H.264/yuv420p, AAC stereo, 8,223,598 bytes, and a clean full audio/video decode.
+- EBU R128 measurement: -16.1 LUFS integrated loudness, 6.2 LU loudness range, and -2.2 dBFS true peak.
+- SHA-256: `BFA8ADD5395AFD7C6111396410F0A23C12FC2ED4FE90CCB85B4AFD735AED5BC0`.
