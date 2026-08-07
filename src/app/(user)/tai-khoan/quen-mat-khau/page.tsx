@@ -44,7 +44,7 @@ export default function ForgotPasswordPage() {
 
       <div className="w-full max-w-md relative">
         <div className="text-center mb-8 flex flex-col items-center">
-          <div className="relative h-20 w-48 mb-4"><Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority /></div>
+          <div className="relative h-20 w-48 mb-4"><Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority unoptimized /></div>
           <span className="text-xs font-extrabold tracking-[0.14em] uppercase text-primary mb-2">Khôi phục tài khoản</span>
           <h1 className="font-heading text-2xl font-bold">Quên mật khẩu</h1>
           <p className="mt-1 text-sm text-theme-muted">Nhập email của bạn để nhận link khôi phục</p>

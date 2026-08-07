@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { useState } from 'react'
 import { getPublicImageUrl } from '@/lib/utils'
+import { isResponsiveUploadUrl, uploadVariantLoader } from '@/lib/image-variants'
 
 type CategoryIconSize = 'sm' | 'md' | 'lg' | 'xl'
 
@@ -47,6 +48,7 @@ export default function CategoryIcon({
     return (
       <Image
         src={src}
+        loader={isResponsiveUploadUrl(src) ? uploadVariantLoader : undefined}
         alt={name}
         width={classes.pixels}
         height={classes.pixels}

@@ -4,6 +4,7 @@ import Image, { type ImageProps } from 'next/image'
 import { useState } from 'react'
 import { getPublicImageUrl } from '@/lib/utils'
 import type { PublicImageKind } from '@/lib/image-url'
+import { isResponsiveUploadUrl, uploadVariantLoader } from '@/lib/image-variants'
 
 interface SafeImageProps extends Omit<ImageProps, 'src'> {
   src?: string | null
@@ -39,15 +40,20 @@ function ResolvedImage({
   fallback,
   unoptimized,
   alt,
+  loader,
   ...props
 }: Omit<ImageProps, 'src'> & { initialSrc: string; fallback: string }) {
   const [resolvedSrc, setResolvedSrc] = useState(initialSrc)
+  const responsiveUploadLoader = isResponsiveUploadUrl(resolvedSrc)
+    ? uploadVariantLoader
+    : undefined
 
   return (
     <Image
       {...props}
       src={resolvedSrc}
       alt={alt}
+      loader={loader || responsiveUploadLoader}
       unoptimized={unoptimized ?? shouldBypassOptimizer(resolvedSrc)}
       onError={() => {
         if (resolvedSrc !== fallback) setResolvedSrc(fallback)
@@ -58,6 +64,7 @@ function ResolvedImage({
 
 function shouldBypassOptimizer(src: string) {
   if (src.startsWith('data:') || src.startsWith('blob:') || src.endsWith('.svg')) return true
+  if (src === '/logo.webp' || src.startsWith('/images/')) return true
   if (!/^https?:\/\//i.test(src)) return false
 
   try {

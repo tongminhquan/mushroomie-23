@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "media:banner-variants": "node scripts/generate-banner-variants.mjs",
+    "media:upload-variants": "node scripts/generate-upload-variants.mjs",
+    "media:upload-variants:apply": "node scripts/generate-upload-variants.mjs --apply",
     "perf:report": "node scripts/performance/lighthouse-report.mjs",
     "dev": "next dev",
     "prebuild": "node scripts/check-build-env.mjs",

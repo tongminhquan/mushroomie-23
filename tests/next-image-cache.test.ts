@@ -9,3 +9,11 @@ test('self-hosted image optimization avoids the poisoned Next.js disk LRU', () =
     'Next.js disk image cache must stay disabled until the zero-byte LRU initialization bug is fixed upstream',
   )
 })
+
+test('self-hosted incremental cache does not retain a duplicate in-memory copy', () => {
+  assert.equal(
+    nextConfig.cacheMaxMemorySize,
+    0,
+    'Production uses the durable cache and must not spend another 50 MiB on the default process-local cache',
+  )
+})

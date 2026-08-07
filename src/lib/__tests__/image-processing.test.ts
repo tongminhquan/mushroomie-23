@@ -44,6 +44,15 @@ describe('safe upload image processing', () => {
     expect(metadata.format).toBe('webp')
     expect(metadata.width).toBe(512)
     expect(metadata.height).toBe(384)
+
+    const basename = path.parse(result.filename).name
+    const mobileVariant = await sharp(await readFile(path.join(uploadDir, `${basename}-384.webp`))).metadata()
+    const tabletVariant = await sharp(await readFile(path.join(uploadDir, `${basename}-750.webp`))).metadata()
+
+    expect(mobileVariant.format).toBe('webp')
+    expect(mobileVariant.width).toBe(384)
+    expect(tabletVariant.format).toBe('webp')
+    expect(tabletVariant.width).toBe(512)
   })
 
   it('applies a safe crop before resize without enlarging the result', async () => {

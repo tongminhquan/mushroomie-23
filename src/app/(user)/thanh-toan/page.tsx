@@ -4,7 +4,6 @@ import { useCartStore } from '@/store/cart'
 import { useSession } from 'next-auth/react'
 import { formatPrice, getPublicImageUrl } from '@/lib/utils'
 import Button from '@/components/ui/Button'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Landmark, PackageCheck, ShieldCheck } from 'lucide-react'
@@ -19,6 +18,7 @@ import { useGiftWrap } from '@/hooks/useGiftWrap'
 import { GiftWrapOptionContent } from '@/components/product/GiftWrapOption'
 import GiftWrapFeeNotice from '@/components/checkout/GiftWrapFeeNotice'
 import { resolveGiftWrapFee } from '@/lib/gift-wrap'
+import SafeImage from '@/components/ui/SafeImage'
 
 interface CheckoutUser {
   name?: string | null
@@ -419,7 +419,7 @@ export default function CheckoutPage() {
                   {items.map((item) => (
                     <div key={item.id} className="flex gap-3">
                       <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-theme-subtle">
-                        <Image src={getPublicImageUrl(item.image)} alt={item.name} fill sizes="56px" className="object-contain p-1" />
+                        <SafeImage src={getPublicImageUrl(item.image)} alt={item.name} fill sizes="56px" className="object-contain p-1" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold line-clamp-1">{item.name}</p>

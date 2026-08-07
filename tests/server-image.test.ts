@@ -43,15 +43,11 @@ test('responsive article resolver keeps article metadata and emits upload srcset
     const html = `<img src="${src}" alt="Vòng tay custom" title="Mẫu mới" class="rounded" width="960" height="960">`
     const result = await resolveResponsiveArticleImagesForRender(html, 'post', { uploadRoot })
     const [attributes] = collectImageAttributes(result)
-    const responsiveWidths = (attributes.srcset || '')
-      .split(',')
-      .map((candidate) => Number(candidate.match(/[?&]w=(\d+)/)?.[1] || 0))
-      .filter(Boolean)
-
     assert.equal(attributes.src, src)
-    assert.match(attributes.srcset, /\/_next\/image/)
+    assert.match(attributes.srcset, /-384\.webp/)
+    assert.match(attributes.srcset, /-750\.webp/)
+    assert.doesNotMatch(attributes.srcset, /\/_next\/image/)
     assert.equal(attributes.sizes, '(max-width: 767px) calc(100vw - 2.5rem), 480px')
-    assert.ok(responsiveWidths.some((width) => width <= 640))
     assert.equal(attributes.width, '1920')
     assert.equal(attributes.height, '1080')
     assert.equal(attributes.alt, 'Vòng tay custom')

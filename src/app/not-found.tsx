@@ -12,7 +12,7 @@ export default function NotFound() {
     <main id="main-content" className="paper-surface grid min-h-[100dvh] place-items-center bg-theme-page p-4">
       <div className="grid w-full max-w-4xl overflow-hidden rounded-[18px] border border-theme-border bg-theme-card shadow-strong md:grid-cols-[0.8fr_1.2fr]">
         <div className="relative min-h-64 bg-pink">
-          <Image src="/logo.webp" alt="Mushroomie" fill sizes="(max-width: 768px) 100vw, 40vw" className="object-contain p-12" />
+          <Image src="/logo.webp" alt="Mushroomie" fill sizes="(max-width: 768px) 100vw, 40vw" className="object-contain p-12" unoptimized />
         </div>
         <div className="flex flex-col justify-center p-8 md:p-12">
           <p className="brand-kicker mb-4">Lạc đường một chút</p>

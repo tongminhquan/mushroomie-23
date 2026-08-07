@@ -44,7 +44,7 @@ function LoginPageContent() {
 
       <div className="relative w-full max-w-md">
         <div className="text-center mb-8 flex flex-col items-center">
-          <div className="relative h-20 w-48 mb-4"><Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority /></div>
+          <div className="relative h-20 w-48 mb-4"><Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority unoptimized /></div>
           <span className="text-xs font-extrabold tracking-[0.14em] uppercase text-theme-accent mb-2">Ghé Nhà Nấm nhỏ</span>
           <h1 className="font-heading text-3xl font-bold">Đăng nhập Mushroomie</h1>
           <p className="mt-2 text-sm text-theme-muted">Chào mừng bạn trở lại! ♡</p>

@@ -2,9 +2,9 @@
 import { useCartStore } from '@/store/cart'
 import { X, ShoppingBag, Minus, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { formatPrice, getPublicImageUrl } from '@/lib/utils'
 import Button from '@/components/ui/Button'
+import SafeImage from '@/components/ui/SafeImage'
 import { GiftWrapOptionContent } from '@/components/product/GiftWrapOption'
 import { useGiftWrap } from '@/hooks/useGiftWrap'
 import { useDrawerTransition } from '@/hooks/useDrawerTransition'
@@ -67,7 +67,7 @@ function CartDrawerContent({ drawerState }: { drawerState: 'entering' | 'open' |
               {items.map((item) => (
                 <div key={item.id} className="flex gap-3 rounded-[18px] border border-theme-border bg-theme-card p-3 shadow-card">
                   <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-theme-subtle">
-                    <Image src={getPublicImageUrl(item.image)} alt={item.name} fill sizes="80px" className="object-contain p-1" />
+                    <SafeImage src={getPublicImageUrl(item.image)} alt={item.name} fill sizes="80px" className="object-contain p-1" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="mb-1 line-clamp-2 text-sm font-semibold text-theme-primary">{item.name}</h3>

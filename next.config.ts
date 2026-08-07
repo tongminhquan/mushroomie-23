@@ -15,6 +15,10 @@ const developmentEvalSource = isDevelopment ? " 'unsafe-eval'" : ''
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || '.next',
   output: 'standalone',
+  // The self-hosted release has a durable on-disk cache. Keeping Next's
+  // additional 50 MiB process-local cache pushed PM2 over its 480 MiB RSS
+  // guard while image-heavy routes were warming up.
+  cacheMaxMemorySize: 0,
   poweredByHeader: false,
   turbopack: {
     root: path.resolve(__dirname),

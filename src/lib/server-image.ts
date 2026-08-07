@@ -5,6 +5,7 @@ import { parseFragment, serialize, type DefaultTreeAdapterTypes } from 'parse5'
 import sharp from 'sharp'
 import { getImageFallback, normalizeImageUrl, type PublicImageKind } from '@/lib/image-url'
 import { normalizeGeneratedPostImageAlt } from '@/lib/image-alt'
+import { uploadVariantLoader } from '@/lib/image-variants'
 
 const UPLOAD_PREFIX = '/uploads/'
 const PUBLIC_ROOT = path.join(process.cwd(), 'public')
@@ -177,6 +178,7 @@ function applyResponsiveArticleImageAttributes(
 
   const { props } = getImageProps({
     src: image.renderSrc,
+    loader: uploadVariantLoader,
     alt,
     width: image.width,
     height: image.height,

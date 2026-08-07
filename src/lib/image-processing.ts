@@ -33,7 +33,8 @@ const WEBP_QUALITY = 85
 export const MAX_WEB_IMAGE_BYTES = 500 * 1024 - 1
 const WEBP_QUALITY_STEPS = [WEBP_QUALITY, 80, 74, 68, 62, 56] as const
 const WEBP_WIDTH_SCALES = [1, 0.85, 0.7, 0.55, 0.4] as const
-const BANNER_VARIANT_WIDTHS = [750, 1280] as const
+const RESPONSIVE_VARIANT_WIDTHS = [384, 750] as const
+const BANNER_VARIANT_WIDTHS = [384, 750, 1280] as const
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024
 // 120MP để nhận ảnh điện thoại 48/50/108MP; RAM vẫn thấp vì mọi purpose đều
 // resize xuống ≤1920px nên JPEG được decode qua shrink-on-load, không decode full.
@@ -110,13 +111,13 @@ export async function optimizeUploadImage({
 
   await writeFile(outputPath, output.data)
 
-  if (purpose === 'banner') {
-    await Promise.all(
-      BANNER_VARIANT_WIDTHS.map(async (width) => {
-        const variant = await encodeWebpWithinLimit(output.data, width)
-        await writeFile(path.join(uploadDir, `${path.parse(filename).name}-${width}.webp`), variant.data)
-      }),
-    )
+  const variantWidths = purpose === 'banner' ? BANNER_VARIANT_WIDTHS : RESPONSIVE_VARIANT_WIDTHS
+  for (const width of variantWidths) {
+    const variant = await sharp(output.data, sharpInputOptions)
+      .resize({ width, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 75, effort: 5 })
+      .toBuffer()
+    await writeFile(path.join(uploadDir, `${path.parse(filename).name}-${width}.webp`), variant)
   }
 
   const fileStat = await stat(outputPath)

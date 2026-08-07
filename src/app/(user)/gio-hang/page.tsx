@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { Minus, PackageCheck, Plus, ShoppingBag, Trash2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
@@ -12,6 +11,7 @@ import { useShippingFee } from '@/hooks/useShippingFee'
 import { GiftWrapOptionContent } from '@/components/product/GiftWrapOption'
 import GiftWrapFeeNotice from '@/components/checkout/GiftWrapFeeNotice'
 import { useGiftWrap } from '@/hooks/useGiftWrap'
+import SafeImage from '@/components/ui/SafeImage'
 
 export default function CartPage() {
   const { items, giftWrap, removeItem, updateQuantity, getTotalPrice } = useCartStore()
@@ -72,7 +72,7 @@ export default function CartPage() {
                     className="flex gap-4 rounded-[16px] border-[1.5px] border-theme-border bg-theme-elevated p-4"
                   >
                     <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-theme-subtle">
-                      <Image
+                      <SafeImage
                         src={getPublicImageUrl(item.image)}
                         alt={item.name}
                         fill
