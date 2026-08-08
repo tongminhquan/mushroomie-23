@@ -25,7 +25,8 @@ describe('vertical TikTok presentation contracts', () => {
     expect(captions).toContain('VERTICAL_VIDEO_CONFIG.fps');
     expect(captions).toContain('maxWidth: VERTICAL_THEME.caption.maxWidth');
     expect(captions).toContain('paddingRight: VERTICAL_THEME.safe.right');
-    expect(captions).toContain('WebkitLineClamp: 3');
+    expect(captions).toContain('verticalCaptionFontSize(caption.text)');
+    expect(captions).not.toContain('WebkitLineClamp');
   });
 
   it('keeps Hook, Website, and Products inside vertical safe geometry', () => {

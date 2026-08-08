@@ -23,3 +23,10 @@ export const VERTICAL_MAIN_WIDTH =
 
 export const VERTICAL_MAIN_HEIGHT =
   1920 - VERTICAL_THEME.safe.top - VERTICAL_THEME.safe.bottom;
+
+const LONG_CAPTION_CHARACTER_THRESHOLD = 95;
+
+export const verticalCaptionFontSize = (text: string) =>
+  Array.from(text).length >= LONG_CAPTION_CHARACTER_THRESHOLD
+    ? 38
+    : VERTICAL_THEME.caption.fontSize;

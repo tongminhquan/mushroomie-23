@@ -3,7 +3,10 @@ import {SCENES} from '../content/scenes';
 import {THEME} from '../content/theme';
 import {VERTICAL_VIDEO_CONFIG} from '../config';
 import {activeCaptionAt, splitEmphasis} from '../lib/captions';
-import {VERTICAL_THEME} from './vertical-theme';
+import {
+  VERTICAL_THEME,
+  verticalCaptionFontSize,
+} from './vertical-theme';
 
 export const VerticalCaptionTrack = () => {
   const frame = useCurrentFrame();
@@ -45,16 +48,14 @@ export const VerticalCaptionTrack = () => {
           width: '100%',
           maxWidth: VERTICAL_THEME.caption.maxWidth,
           maxHeight: VERTICAL_THEME.caption.maxHeight,
-          display: '-webkit-box',
-          WebkitBoxOrient: 'vertical',
-          WebkitLineClamp: 3,
+          display: 'block',
           overflow: 'hidden',
           padding: '10px 18px',
           borderRadius: 22,
           backgroundColor: 'rgba(7, 16, 20, 0.82)',
           color: THEME.colors.cream,
           fontFamily: THEME.fonts.body,
-          fontSize: VERTICAL_THEME.caption.fontSize,
+          fontSize: verticalCaptionFontSize(caption.text),
           fontWeight: 700,
           lineHeight: VERTICAL_THEME.caption.lineHeight,
           textAlign: 'left',
