@@ -98,4 +98,88 @@ describe('vertical TikTok presentation contracts', () => {
     });
     expect(products).toContain("margin: '0 auto'");
   });
+
+  it('uses vertical timelines for Custom, Handmade, and Features', () => {
+    const custom = source('../vertical/scenes/VerticalCustomScene.tsx');
+    const handmade = source('../vertical/scenes/VerticalHandmadeScene.tsx');
+    const features = source('../vertical/scenes/VerticalFeaturesScene.tsx');
+    expect(custom).toContain('durationInFrames={177}');
+    expect(custom).toContain('[124, 140]');
+    expect(custom).toContain('Màu sắc');
+    expect(custom).toContain('Vòng tay Custom');
+    expect(handmade).toContain('durationInFrames={174}');
+    expect(handmade).toContain('enter(frame, 0, 122)');
+    expect(handmade).toContain("flexDirection: 'column'");
+    expect(features).toContain('durationInFrames={177}');
+    expect(features).toContain("gridTemplateColumns: 'repeat(2, 1fr)'");
+    expect(features).toContain('delay: 38');
+  });
+
+  it('keeps the middle-scene artwork within the 828 by 1240 safe canvas', () => {
+    const custom = source('../vertical/scenes/VerticalCustomScene.tsx');
+    const handmade = source('../vertical/scenes/VerticalHandmadeScene.tsx');
+    const features = source('../vertical/scenes/VerticalFeaturesScene.tsx');
+
+    const customCard = {width: 480, height: 760};
+    const customImageHeight = customCard.width * 4 / 3;
+    const customLabelBudget = 34 + 26 * 1.2 + 4 + 17 * 1.2;
+    const customFlowHeight =
+      24 * 1.2 + 36 + 2 * 76 * 1.06 + 28 + (30 * 1.2 + 28) + 34 + customCard.height;
+    expect(custom).toContain('style={{width: 480, height: 760}}');
+    expect(customCard.height - customImageHeight).toBeGreaterThanOrEqual(customLabelBudget);
+    expect(28).toBeGreaterThanOrEqual(20);
+    expect(customFlowHeight).toBeLessThanOrEqual(1240);
+
+    const handmadeTitleHeight = 72 * 1.2 + 30;
+    const handmadeCardsHeight = 3 * 300 + 2 * 28;
+    const handmadeEntranceOffset = 36;
+    const handmadeTextWidth = 828 - 82 - 32 - 220 - 30;
+    expect(handmade).toContain('height: 300');
+    expect(handmade).toContain('width: 220, height: 220');
+    expect(handmadeTitleHeight + handmadeCardsHeight + handmadeEntranceOffset).toBeLessThanOrEqual(1240);
+    expect(handmadeTextWidth).toBeGreaterThanOrEqual(400);
+    expect(2 * 42 * 1.12).toBeLessThanOrEqual(300 - 60);
+
+    const featureCardWidth = (828 - 24) / 2;
+    const featureInnerWidth = featureCardWidth - 40;
+    const featureTitleHeight = 2 * 70 * 1.08 + 34;
+    const featureCardHeight = Number(
+      features.match(/const FEATURE_CARD_HEIGHT = (\d+);/)?.[1],
+    );
+    const featurePreviewWidth = Number(
+      features.match(/const FEATURE_PREVIEW_WIDTH = (\d+);/)?.[1],
+    );
+    const featureGridHeight = 2 * featureCardHeight + 24;
+    const featureInnerHeight =
+      20 + 54 + 12 + 64 + 6 + 27 + 16 + 32 + featurePreviewWidth * 2500 / 1440 + 20;
+    expect(features).toContain('height: FEATURE_CARD_HEIGHT');
+    expect(features).toContain('height: 64');
+    expect(features).toContain('style={{width: FEATURE_PREVIEW_WIDTH}}');
+    expect(featureCardWidth).toBeLessThanOrEqual(828);
+    expect(featureInnerWidth).toBeGreaterThan(0);
+    expect(featureTitleHeight + featureGridHeight).toBeLessThanOrEqual(1240);
+    expect(featureInnerHeight).toBeLessThanOrEqual(featureCardHeight);
+  });
+
+  it('fits every full-height BrowserFrame preview without clipping it', () => {
+    const features = source('../vertical/scenes/VerticalFeaturesScene.tsx');
+    const previewWidth = Number(
+      features.match(/const FEATURE_PREVIEW_WIDTH = (\d+);/)?.[1],
+    );
+    const cardHeight = Number(
+      features.match(/const FEATURE_CARD_HEIGHT = (\d+);/)?.[1],
+    );
+
+    expect(features).toContain('style={{width: FEATURE_PREVIEW_WIDTH}}');
+    expect(features).not.toContain("height: 280, overflow: 'hidden'");
+    expect(previewWidth).toBeGreaterThan(0);
+    expect(cardHeight).toBe(500);
+
+    // Every current desktop screenshot is 1440 by 2500, and BrowserFrame adds
+    // its 32px toolbar. The source width must therefore fit the complete frame
+    // inside the card's real remaining vertical budget.
+    const previewHeight = 32 + previewWidth * 2500 / 1440;
+    const verticalChrome = 20 + 54 + 12 + 64 + 6 + 27 + 16 + 20;
+    expect(previewHeight).toBeLessThanOrEqual(cardHeight - verticalChrome);
+  });
 });
