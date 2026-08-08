@@ -1,4 +1,5 @@
 import { getPublicImageUrl } from '@/lib/utils'
+import BrandLogo from '@/components/ui/BrandLogo'
 
 function getVariantUrl(src: string, width: 750 | 1280) {
   return src.replace(/\.webp$/, `-${width}.webp`)
@@ -19,6 +20,17 @@ export default function HomeBannerImage({
   const supportsVariants = normalizedSrc.startsWith('/uploads/') && normalizedSrc.endsWith('.webp')
   const mobileSrc = supportsVariants ? getVariantUrl(normalizedSrc, 750) : normalizedSrc
   const desktopSrc = supportsVariants ? getVariantUrl(normalizedSrc, 1280) : normalizedSrc
+
+  if (normalizedSrc === '/logo.webp') {
+    return (
+      <BrandLogo
+        alt={alt}
+        fill
+        sizes="(max-width: 640px) 100vw, 1200px"
+        className={className}
+      />
+    )
+  }
 
   return (
     <picture>

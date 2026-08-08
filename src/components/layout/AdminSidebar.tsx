@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
@@ -31,6 +30,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import ThemeToggle from '@/components/theme/ThemeToggle'
+import BrandLogo from '@/components/ui/BrandLogo'
 
 interface AdminNavItem {
   href: string
@@ -173,7 +173,7 @@ export default function AdminSidebar() {
               )}
             >
               <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-theme-border bg-primary" aria-hidden />
-              <Image src="/logo.webp" alt="Mushroomie" width={44} height={44} className="h-10 w-10 object-contain" priority unoptimized />
+              <BrandLogo alt="Mushroomie" width={44} height={44} className="h-10 w-10" />
             </div>
             {!isCollapsed && (
               <div className="flex min-w-0 flex-col leading-tight">

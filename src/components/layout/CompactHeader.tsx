@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEventHandler } from 'react'
 import Link from 'next/link'
 import { Menu, Search, ShoppingBag, User, X } from 'lucide-react'
 import ThemeToggle from '@/components/theme/ThemeToggle'
-import SafeImage from '@/components/ui/SafeImage'
+import BrandLogo from '@/components/ui/BrandLogo'
 
 interface CompactHeaderProps {
   visible: boolean
@@ -63,7 +63,7 @@ export default function CompactHeader({
           : 'pointer-events-none -translate-y-full opacity-0'
       }`}
     >
-      <div className="brand-container flex h-16 items-center gap-1 sm:gap-2">
+      <div className="brand-container flex h-16 items-center gap-1.5 sm:gap-2">
         <button
           type="button"
           aria-label={menuOpen ? 'Đóng menu' : 'Mở menu'}
@@ -77,17 +77,14 @@ export default function CompactHeader({
 
         <Link
           href="/"
-          prefetch={false}
           aria-label="Mushroomie - Trang chủ"
-          className="m-press relative h-10 w-16 shrink-0 sm:w-24"
+          className="m-press relative h-10 w-[4.5rem] shrink-0 sm:w-24"
         >
-          <SafeImage
-            src="/logo.webp"
-            fallbackSrc="/logo.webp"
+          <BrandLogo
             alt="Mushroomie"
-            width={96}
-            height={40}
-            className="h-full w-full object-contain"
+            fill
+            sizes="96px"
+            className="object-contain"
           />
         </Link>
 
@@ -97,12 +94,11 @@ export default function CompactHeader({
         >
           <Link
             href="/san-pham"
-            prefetch={false}
             aria-current={pathname.startsWith('/san-pham') ? 'page' : undefined}
             className={`flex h-full items-center gap-2 border-b-2 px-3 text-sm font-extrabold ${
               pathname.startsWith('/san-pham')
-                ? 'border-primary text-theme-accent'
-                : 'border-transparent text-theme-secondary hover:text-theme-accent'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-theme-secondary hover:text-primary'
             }`}
           >
             <Menu size={17} />
@@ -115,12 +111,11 @@ export default function CompactHeader({
               <Link
                 key={link.href}
                 href={link.href}
-                prefetch={false}
                 aria-current={active ? 'page' : undefined}
                 className={`flex h-full items-center border-b-2 px-2.5 text-sm font-bold ${
                   active
-                    ? 'border-primary text-theme-accent'
-                    : 'border-transparent text-theme-secondary hover:text-theme-accent'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-theme-secondary hover:text-primary'
                 }`}
               >
                 {link.label}
@@ -131,10 +126,9 @@ export default function CompactHeader({
 
         <Link
           href="/san-pham"
-          prefetch={false}
           className="ml-2 hidden h-10 shrink-0 items-center gap-2 rounded-xl px-3 text-sm font-extrabold text-theme-primary hover:bg-theme-subtle md:flex xl:hidden"
         >
-          <Menu size={17} className="text-theme-accent" />
+          <Menu size={17} className="text-primary" />
           Danh mục
         </Link>
 
@@ -163,7 +157,7 @@ export default function CompactHeader({
           </div>
         </form>
 
-        <div className="ml-auto flex shrink-0 items-center gap-0 sm:gap-1">
+        <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1">
           <button
             type="button"
             aria-label={mobileSearchOpen ? 'Đóng tìm kiếm' : 'Mở tìm kiếm'}
@@ -179,11 +173,10 @@ export default function CompactHeader({
 
           <Link
             href={accountHref}
-            prefetch={false}
             aria-label="Tài khoản"
-            className="m-press flex h-11 items-center gap-2 rounded-xl px-2 text-theme-primary hover:bg-theme-subtle sm:px-3"
+            className="m-press flex h-11 items-center gap-2 rounded-xl px-3 text-theme-primary hover:bg-theme-subtle"
           >
-            <User size={19} className="text-theme-accent" />
+            <User size={19} className="text-primary" />
             <span className="hidden max-w-24 truncate text-sm font-bold lg:block">{accountLabel}</span>
           </Link>
 
@@ -199,7 +192,7 @@ export default function CompactHeader({
             {totalItems > 0 && (
               <span
                 key={`compact-badge-${cartBump}`}
-                className={`absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-md bg-yellow px-1 text-[10px] font-black text-brand-ink ring-2 ring-theme-page${
+                className={`absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-md bg-yellow px-1 text-[10px] font-black text-text ring-2 ring-theme-page${
                   cartBump > 0 ? ' m-badge-pop' : ''
                 }`}
               >

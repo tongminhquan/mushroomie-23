@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
-import Image from 'next/image'
+import BrandLogo from '@/components/ui/BrandLogo'
 
 export default function ProfileCompletionGuard({ children }: { children: React.ReactNode }) {
   const { data: session, status, update } = useSession()
@@ -77,7 +77,7 @@ export default function ProfileCompletionGuard({ children }: { children: React.R
         <div className="m-pop-in w-full max-w-md rounded-3xl border border-theme-border bg-theme-card p-8 shadow-2xl">
           <div className="text-center mb-6 flex flex-col items-center">
             <div className="relative h-16 w-40 mb-4">
-              <Image src="/logo.webp" alt="Mushroomie Logo" fill className="object-contain" priority unoptimized />
+              <BrandLogo alt="Mushroomie Logo" fill />
             </div>
             <h2 className="font-heading text-xl font-bold text-primary mb-2">Bổ sung thông tin</h2>
             <p className="text-theme-secondary text-sm">
