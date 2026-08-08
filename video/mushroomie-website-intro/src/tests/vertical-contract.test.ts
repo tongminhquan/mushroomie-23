@@ -182,4 +182,65 @@ describe('vertical TikTok presentation contracts', () => {
     const verticalChrome = 20 + 54 + 12 + 64 + 6 + 27 + 16 + 20;
     expect(previewHeight).toBeLessThanOrEqual(cardHeight - verticalChrome);
   });
+
+  it('registers one independent vertical composition and one shared audio bed', () => {
+    const root = source('../Root.tsx');
+    const vertical = source('../MushroomieIntroVertical.tsx');
+
+    expect(root).toContain('id={VERTICAL_COMPOSITION_ID}');
+    expect(root).toContain('component={MushroomieIntroVertical}');
+    expect(root).toContain('durationInFrames={VERTICAL_VIDEO_CONFIG.durationInFrames}');
+    expect(root).toContain('fps={VERTICAL_VIDEO_CONFIG.fps}');
+    expect(root).toContain('width={VERTICAL_VIDEO_CONFIG.width}');
+    expect(root).toContain('height={VERTICAL_VIDEO_CONFIG.height}');
+    expect(vertical.match(/<Sequence /g)).toHaveLength(9);
+    expect(vertical.match(/<AudioBed \/>/g)).toHaveLength(1);
+    expect(vertical.match(/<VerticalCaptionTrack \/>/g)).toHaveLength(1);
+    expect(vertical.match(/<VerticalProgressLine \/>/g)).toHaveLength(1);
+    expect(vertical.match(/from=\{SCENES\[/g)).toHaveLength(9);
+    expect(vertical.match(/durationInFrames=\{sceneDuration\(SCENES\[/g)).toHaveLength(9);
+  });
+
+  it('keeps Shopping Flow, slogan, and CTA inside final vertical contracts', () => {
+    const shopping = source('../vertical/scenes/VerticalShoppingFlowScene.tsx');
+    const end = source('../vertical/scenes/VerticalEndCardScene.tsx');
+
+    expect(shopping).toContain('durationInFrames={147}');
+    expect(shopping).toContain('ASSETS.screenshots.homeMobile');
+    expect(shopping).toContain('width: 440');
+    expect(shopping).toContain('[104, 124]');
+    expect(end).toContain('durationInFrames={117}');
+    expect(end).toContain('durationInFrames={84}');
+    expect(end).toContain('Làm bằng tay,');
+    expect(end).toContain('trao bằng tim');
+    expect(end).not.toContain('Trao bằng tim');
+    expect(end).toContain('mushroomie.io.vn');
+    expect(end).toContain('Khám phá ngay');
+    expect(end).toContain('enter(frame, 10, 60)');
+
+    // The safe canvas is 828x1240 after the vertical shell's reserved edges.
+    // The three labels and the mobile preview occupy disjoint horizontal lanes.
+    const safeCanvas = {width: 828, height: 1240};
+    const labelLane = {left: 0, width: 300};
+    const phone = {right: 0, width: 440, border: 8};
+    const phoneLeft = safeCanvas.width - phone.width - phone.border * 2;
+    expect(labelLane.left + labelLane.width).toBeLessThanOrEqual(phoneLeft);
+
+    // The source screenshot is exactly 390x844. Its displayed height includes
+    // the MobileFrame's 8px border on each side; peak entrance displacement is 38px.
+    const screenshotSource = {width: 390, height: 844};
+    const innerWidth = phone.width - phone.border * 2;
+    const phoneHeight = phone.border * 2 + (innerWidth * screenshotSource.height) / screenshotSource.width;
+    const deviceLabelHeight = 30;
+    const deviceStackBottom = 150 + deviceLabelHeight + 14 + phoneHeight + 38;
+    expect(deviceStackBottom).toBeLessThanOrEqual(safeCanvas.height);
+
+    const stepsBottom = 280 + 3 * 190 + 2 * 24;
+    expect(stepsBottom).toBeLessThan(deviceStackBottom);
+    expect(deviceStackBottom).toBeLessThanOrEqual(safeCanvas.height);
+
+    // CTA motion settles by frame 70, before its local frame range ends at 84.
+    const ctaFinalStateFrame = 10 + 60;
+    expect(ctaFinalStateFrame).toBeLessThan(84);
+  });
 });
