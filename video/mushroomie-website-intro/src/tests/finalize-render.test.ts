@@ -35,4 +35,18 @@ describe('final video delivery pipeline', () => {
     );
     expect(args.slice(-1)).toEqual(['final-contact-sheet-43s.jpg']);
   });
+
+  it('uses independent vertical delivery names', async () => {
+    const verticalFinal = await import('../../scripts/finalize-vertical-render.mjs');
+
+    expect(verticalFinal.VERTICAL_MASTER_FILENAME).toBe(
+      'mushroomie-website-intro-43s-9x16-tiktok-master.mp4',
+    );
+    expect(verticalFinal.VERTICAL_FINAL_FILENAME).toBe(
+      'mushroomie-website-intro-43s-9x16-tiktok-v1.mp4',
+    );
+    expect(verticalFinal.VERTICAL_CONTACT_SHEET_FILENAME).toBe(
+      'final-contact-sheet-43s-9x16-tiktok.jpg',
+    );
+  });
 });

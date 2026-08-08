@@ -17,7 +17,11 @@
     "review:stills": "node scripts/render-keyframes.mjs",
     "render:master": "remotion render src/index.ts MushroomieWebsiteIntro ../../artifacts/mushroomie-brand-video/mushroomie-website-intro-43s-master.mp4 --codec=h264 --pixel-format=yuv420p --audio-codec=aac --crf=18 --concurrency=2 --timeout=60000 --overwrite",
     "render:final": "node scripts/finalize-render.mjs",
-    "verify": "node scripts/verify-render.mjs"
+    "verify": "node scripts/verify-render.mjs",
+    "review:vertical-stills": "node scripts/render-vertical-keyframes.mjs",
+    "render:vertical-master": "remotion render src/index.ts MushroomieWebsiteIntroVertical ../../artifacts/mushroomie-brand-video/mushroomie-website-intro-43s-9x16-tiktok-master.mp4 --codec=h264 --pixel-format=yuv420p --audio-codec=aac --crf=18 --concurrency=2 --timeout=60000 --overwrite",
+    "render:vertical-final": "node scripts/finalize-vertical-render.mjs",
+    "verify:vertical": "node scripts/verify-vertical-render.mjs"
   },
   "dependencies": {
     "@remotion/captions": "4.0.506",

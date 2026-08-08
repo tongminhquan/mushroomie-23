@@ -30,4 +30,14 @@ describe('key-frame review', () => {
       "fontfile='C\\:/Windows/Fonts/arial.ttf'",
     );
   });
+
+  it('uses independent vertical still-review names', async () => {
+    const vertical = await import('../../scripts/render-vertical-keyframes.mjs');
+
+    expect(vertical.VERTICAL_COMPOSITION_ID).toBe('MushroomieWebsiteIntroVertical');
+    expect(vertical.VERTICAL_KEYFRAMES_DIRECTORY).toBe('vertical-keyframes');
+    expect(vertical.VERTICAL_CONTACT_SHEET_FILENAME).toBe(
+      'vertical-keyframes-contact-sheet.jpg',
+    );
+  });
 });

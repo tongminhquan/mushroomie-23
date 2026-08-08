@@ -11,7 +11,6 @@ const scriptPath = fileURLToPath(import.meta.url);
 const scriptDirectory = path.dirname(scriptPath);
 const videoRoot = path.resolve(scriptDirectory, '..');
 const artifactDirectory = path.resolve(videoRoot, '..', '..', 'artifacts', 'mushroomie-brand-video');
-const keyframesDirectory = path.join(artifactDirectory, 'keyframes');
 const remotionCli = path.join(videoRoot, 'node_modules', '@remotion', 'cli', 'remotion-cli.js');
 
 const run = (command, args, label) => {
@@ -79,16 +78,16 @@ const findFullFfmpeg = async () => {
   throw new Error('Full FFmpeg was not found. Set FFMPEG_PATH before running review:stills.');
 };
 
-const stillInvocation = (frame, outputPath) => ({
+const stillInvocation = (frame, outputPath, {compositionId, scale}) => ({
   command: process.execPath,
   args: [
     remotionCli,
     'still',
     'src/index.ts',
-    'MushroomieWebsiteIntro',
+    compositionId,
     outputPath,
     `--frame=${frame}`,
-    '--scale=0.5',
+    `--scale=${scale}`,
     '--overwrite',
   ],
 });
@@ -121,33 +120,48 @@ const contactSheetArgs = (inputPaths, outputPath, fontPath) => {
   ];
 };
 
-export const renderKeyframes = async () => {
-  await mkdir(keyframesDirectory, {recursive: true});
+export const renderKeyframeSet = async ({
+  compositionId,
+  directoryName,
+  contactSheetFilename,
+  scale,
+}) => {
+  const outputDirectory = path.join(artifactDirectory, directoryName);
+  await mkdir(outputDirectory, {recursive: true});
   const paths = [];
 
   for (const frame of KEY_FRAMES) {
     const outputPath = path.join(
-      keyframesDirectory,
+      outputDirectory,
       `frame-${String(frame).padStart(4, '0')}.png`,
     );
-    const invocation = stillInvocation(frame, outputPath);
-    console.log(`Rendering frame ${frame}...`);
-    run(invocation.command, invocation.args, `Render still ${frame}`);
+    const invocation = stillInvocation(frame, outputPath, {compositionId, scale});
+    console.log(`Rendering ${compositionId} frame ${frame}...`);
+    run(invocation.command, invocation.args, `Render ${compositionId} still ${frame}`);
     paths.push(outputPath);
   }
 
   const fullFfmpeg = await findFullFfmpeg();
   const labelFont = process.env.MUSHROOMIE_LABEL_FONT ?? 'C:\\Windows\\Fonts\\arial.ttf';
   await access(labelFont);
-  const contactSheet = path.join(artifactDirectory, 'keyframes-contact-sheet.jpg');
+  const contactSheet = path.join(artifactDirectory, contactSheetFilename);
   const invocation = buildFullFfmpegInvocation(
     contactSheetArgs(paths, contactSheet, labelFont),
     fullFfmpeg,
   );
-  console.log('Generating contact sheet...');
-  run(invocation.command, invocation.args, 'Generate contact sheet');
+  console.log(`Generating ${compositionId} contact sheet...`);
+  run(invocation.command, invocation.args, `Generate ${compositionId} contact sheet`);
   console.log(contactSheet);
+  return {paths, contactSheet};
 };
+
+export const renderKeyframes = () =>
+  renderKeyframeSet({
+    compositionId: 'MushroomieWebsiteIntro',
+    directoryName: 'keyframes',
+    contactSheetFilename: 'keyframes-contact-sheet.jpg',
+    scale: 0.5,
+  });
 
 const invokedPath = process.argv[1] ? path.resolve(process.argv[1]) : '';
 if (invokedPath.toLocaleLowerCase() === scriptPath.toLocaleLowerCase()) {

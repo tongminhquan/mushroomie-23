@@ -17,10 +17,6 @@ export const MASTER_FILENAME = 'mushroomie-website-intro-43s-master.mp4';
 export const FINAL_FILENAME = 'mushroomie-website-intro-43s-16x9-v1.mp4';
 export const FINAL_CONTACT_SHEET_FILENAME = 'final-contact-sheet-43s.jpg';
 
-const masterPath = path.join(artifactDirectory, MASTER_FILENAME);
-const finalPath = path.join(artifactDirectory, FINAL_FILENAME);
-const finalContactSheetPath = path.join(artifactDirectory, FINAL_CONTACT_SHEET_FILENAME);
-
 const run = (command, args, label) => {
   const result = spawnSync(command, args, {
     cwd: videoRoot,
@@ -114,12 +110,19 @@ export const buildFinalEncodeArgs = (inputPath, outputPath) => [
   outputPath,
 ];
 
-export const buildFinalContactSheetArgs = (inputPath, outputPath) => [
+export const HORIZONTAL_CONTACT_SHEET_FILTER =
+  'fps=1/10,scale=480:-1:flags=lanczos,tile=5x1:padding=8:margin=8:color=0x071014';
+
+export const buildFinalContactSheetArgs = (
+  inputPath,
+  outputPath,
+  filter = HORIZONTAL_CONTACT_SHEET_FILTER,
+) => [
   '-y',
   '-i',
   inputPath,
   '-vf',
-  'fps=1/10,scale=480:-1:flags=lanczos,tile=5x1:padding=8:margin=8:color=0x071014',
+  filter,
   '-frames:v',
   '1',
   '-q:v',
@@ -127,22 +130,43 @@ export const buildFinalContactSheetArgs = (inputPath, outputPath) => [
   outputPath,
 ];
 
-export const finalizeRender = async () => {
+export const finalizeDelivery = async ({
+  masterFilename,
+  finalFilename,
+  contactSheetFilename,
+  contactSheetFilter,
+}) => {
   await mkdir(artifactDirectory, {recursive: true});
-  await access(masterPath);
+  const resolvedMaster = path.join(artifactDirectory, masterFilename);
+  const resolvedFinal = path.join(artifactDirectory, finalFilename);
+  const resolvedContactSheet = path.join(artifactDirectory, contactSheetFilename);
+  await access(resolvedMaster);
   const ffmpeg = await findFullFfmpeg();
 
-  console.log('Encoding final delivery MP4...');
-  run(ffmpeg, buildFinalEncodeArgs(masterPath, finalPath), 'Encode final video');
-  console.log('Creating final contact sheet...');
+  console.log(`Encoding ${finalFilename}...`);
+  run(ffmpeg, buildFinalEncodeArgs(resolvedMaster, resolvedFinal), `Encode ${finalFilename}`);
+  console.log(`Creating ${contactSheetFilename}...`);
   run(
     ffmpeg,
-    buildFinalContactSheetArgs(finalPath, finalContactSheetPath),
-    'Create final contact sheet',
+    buildFinalContactSheetArgs(
+      resolvedFinal,
+      resolvedContactSheet,
+      contactSheetFilter,
+    ),
+    `Create ${contactSheetFilename}`,
   );
-  console.log(finalPath);
-  console.log(finalContactSheetPath);
+  console.log(resolvedFinal);
+  console.log(resolvedContactSheet);
+  return {finalPath: resolvedFinal, contactSheetPath: resolvedContactSheet};
 };
+
+export const finalizeRender = () =>
+  finalizeDelivery({
+    masterFilename: MASTER_FILENAME,
+    finalFilename: FINAL_FILENAME,
+    contactSheetFilename: FINAL_CONTACT_SHEET_FILENAME,
+    contactSheetFilter: HORIZONTAL_CONTACT_SHEET_FILTER,
+  });
 
 const invokedPath = process.argv[1] ? path.resolve(process.argv[1]) : '';
 if (invokedPath.toLocaleLowerCase() === scriptPath.toLocaleLowerCase()) {

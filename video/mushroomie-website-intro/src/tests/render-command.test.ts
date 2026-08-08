@@ -14,4 +14,13 @@ describe('master render command', () => {
     expect(command).toContain('mushroomie-website-intro-43s-master.mp4');
     expect(command).not.toContain('mushroomie-website-intro-master.mp4');
   });
+
+  it('renders the vertical master to a unique path', () => {
+    expect(packageJson.scripts['render:vertical-master']).toContain(
+      'MushroomieWebsiteIntroVertical',
+    );
+    expect(packageJson.scripts['render:vertical-master']).toContain(
+      'mushroomie-website-intro-43s-9x16-tiktok-master.mp4',
+    );
+  });
 });

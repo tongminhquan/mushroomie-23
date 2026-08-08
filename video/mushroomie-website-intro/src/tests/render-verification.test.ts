@@ -66,4 +66,27 @@ describe('render metadata validator', () => {
     });
     expect(errors).toContain('Duration must be between 42.8 and 43.2 seconds');
   });
+
+  it('validates the approved vertical dimensions independently', async () => {
+    const {validateMetadata} = await import('../../scripts/verify-render.mjs');
+    const validVertical = {
+      duration: 43,
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      videoCodec: 'h264',
+      pixFmt: 'yuv420p',
+      audioCodec: 'aac',
+      channels: 2,
+      fileSizeBytes: 5_000_000,
+    };
+
+    expect(validateMetadata(validVertical, {width: 1080, height: 1920})).toEqual([]);
+    expect(
+      validateMetadata(
+        {...validVertical, width: 1920, height: 1080},
+        {width: 1080, height: 1920},
+      ),
+    ).toEqual(expect.arrayContaining(['Width must be 1080', 'Height must be 1920']));
+  });
 });
