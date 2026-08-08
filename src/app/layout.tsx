@@ -9,7 +9,7 @@ const montserrat = localFont({
   src: './fonts/montserrat-vietnamese.woff2',
   variable: '--font-body',
   weight: '100 900',
-  display: 'optional',
+  display: 'swap',
   preload: false,
 })
 
@@ -17,7 +17,7 @@ const paytoneOne = localFont({
   src: './fonts/paytone-vietnamese.woff2',
   weight: '400',
   variable: '--font-heading',
-  display: 'optional',
+  display: 'swap',
   preload: false,
 })
 
