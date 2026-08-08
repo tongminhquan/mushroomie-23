@@ -1,191 +1,105 @@
-# Mushroomie — Phụ kiện Handmade Cá nhân hóa
+# Mushroomie — Phụ kiện handmade cá nhân hóa
 
-## Giới thiệu
+> **Làm bằng tay, trao bằng tim**
 
-**Mushroomie** là website thương mại điện tử bán phụ kiện handmade cá nhân hóa dành cho giới trẻ.
+Mushroomie là website thương mại điện tử B2C dành cho phụ kiện handmade và quà tặng cá nhân hóa: vòng tay, charm, móc khóa, vòng cổ, hộp quà cùng nhiều món nhỏ mang dấu ấn riêng.
 
-## Tech Stack
+[Khám phá Mushroomie](https://mushroomie.io.vn)
 
-- **Next.js 14** (App Router)
-- **MySQL 8** + **Prisma ORM**
-- **NextAuth.js v5** (Authentication)
-- **Tailwind CSS** (Styling)
-- **Tiptap** (Rich text editor)
-- **Nodemailer** (Email)
-- **Zustand** (State management)
-- **Zod** (Validation)
+## Video giới thiệu
 
-## Yêu cầu hệ thống
+[![Xem video giới thiệu Mushroomie 16:9](docs/media/mushroomie-intro-16x9-preview.png)](docs/media/mushroomie-intro-43s-16x9.mp4)
 
-- Node.js >= 18
-- MySQL 8.0+
-- npm >= 9
+[Xem hoặc tải video giới thiệu Mushroomie — 16:9, 43 giây](docs/media/mushroomie-intro-43s-16x9.mp4)
 
-## Cài đặt
+## Trải nghiệm chính
 
-### 1. Clone & cài dependencies
+- Khám phá phụ kiện handmade theo danh mục, phong cách và sản phẩm nổi bật.
+- Cá nhân hóa sản phẩm theo màu sắc, hạt, charm và thông điệp riêng.
+- Giỏ hàng, đặt hàng, voucher, đánh giá và theo dõi đơn hàng.
+- Thanh toán tích hợp PayOS/VietQR với kiểm tra dữ liệu phía máy chủ.
+- Tin tức, câu chuyện thương hiệu và nội dung SEO địa phương.
+- Mini game được tách riêng để không làm nặng trang chủ.
+- Khu vực tài khoản khách hàng và hệ thống quản trị nội dung, sản phẩm, đơn hàng, media, voucher và người dùng.
+- Giao diện responsive cho desktop và mobile.
 
-```bash
-git clone <repo-url>
-cd mushroomie
-npm install
+## Công nghệ
+
+- Next.js 16 App Router, React 19 và TypeScript 5.
+- Tailwind CSS 4, GSAP và bộ nhận diện riêng của Mushroomie.
+- Prisma 5 với MySQL.
+- NextAuth 5 cho xác thực.
+- PayOS/VietQR cho luồng thanh toán.
+- Zustand, Zod, Sharp và các công cụ xử lý media.
+- Vitest, Testing Library và Node test runner.
+- PM2 và Nginx trên production hiện tại.
+
+## Cấu trúc dự án
+
+```text
+src/app/          Trang, layout và API routes của Next.js
+src/components/   Component giao diện dùng chung
+src/lib/          Dịch vụ, xác thực, thanh toán và tiện ích
+src/store/        Client state với Zustand
+prisma/           Schema, migrations và seed
+public/           Static assets và uploads công khai
+scripts/          Công cụ vận hành, SEO và tối ưu media
+tests/            Kiểm thử Node và integration
+docs/             Hướng dẫn kỹ thuật và báo cáo đang sử dụng
 ```
 
-### 2. Cấu hình environment
+## Chạy local
+
+Yêu cầu khuyến nghị: Node.js 20 LTS hoặc mới hơn, npm và MySQL 8.
 
 ```bash
-cp .env.example .env
+git clone https://github.com/tongminhquan/mushroomie-23.git
+cd mushroomie-23
+npm ci
 ```
 
-Chỉnh sửa file `.env` với thông tin của bạn:
+Tạo `.env` cục bộ, tối thiểu có kết nối MySQL. Không commit tệp này:
 
 ```env
-DATABASE_URL="mysql://root:password@localhost:3306/mushroomie"
-NEXTAUTH_SECRET="your-secret-here"
-NEXTAUTH_URL="http://localhost:3000"
-PAYMENT_PROVIDER=vietqr_casso
-BANK_BIN=970436
-BANK_ACCOUNT_NUMBER=your-account-number
-BANK_ACCOUNT_NAME=YOUR NAME
-# ... (xem .env.example đầy đủ)
+DATABASE_URL="mysql://USER:PASSWORD@HOST:3306/DATABASE"
 ```
 
-### 3. Tạo database MySQL
-
-```sql
-CREATE DATABASE mushroomie CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-### 4. Chạy migration
+Các tích hợp xác thực, email và thanh toán cần thêm biến môi trường tương ứng của môi trường triển khai. Không sử dụng secret production cho máy phát triển.
 
 ```bash
-npx prisma migrate dev --name init
-```
-
-### 5. Seed dữ liệu mẫu
-
-```bash
-npx prisma db seed
-```
-
-Tài khoản mặc định:
-- **Admin**: `admin@mushroomie.vn` / `Admin@123`
-- **User test**: `user@mushroomie.vn` / `User@123`
-
-### 6. Thêm font Cooper BT (tuỳ chọn)
-
-Bỏ file font vào `/public/fonts/`:
-- `CooperBT-Bold.woff2`
-- `CooperBT-Bold.woff`
-
-### 7. Chạy development server
-
-```bash
+npx prisma generate
 npm run dev
 ```
 
-Truy cập: http://localhost:3000
+Mặc định ứng dụng phát triển chạy tại `http://localhost:3000`.
 
-Admin panel: http://localhost:3000/admin
-
-## Cấu hình Payment Provider
-
-### VietQR + Casso (Recommended)
-
-1. Đăng ký tài khoản tại [casso.vn](https://casso.vn)
-2. Kết nối tài khoản ngân hàng
-3. Lấy API key và webhook secret
-4. Cấu hình trong `.env`:
-
-```env
-PAYMENT_PROVIDER=vietqr_casso
-PAYMENT_WEBHOOK_SECRET=your-casso-webhook-secret
-PAYMENT_API_KEY=your-casso-api-key
-BANK_BIN=970436
-BANK_ACCOUNT_NUMBER=your-account
-BANK_ACCOUNT_NAME=YOUR NAME
-```
-
-5. Cấu hình webhook URL trong Casso: `https://your-domain.com/api/webhooks/payment`
-
-### VietQR + SePay
-
-```env
-PAYMENT_PROVIDER=vietqr_sepay
-PAYMENT_WEBHOOK_SECRET=your-sepay-webhook-secret
-PAYMENT_API_KEY=your-sepay-api-key
-```
-
-### Bank BIN Codes phổ biến
-
-| Ngân hàng | BIN |
-|---|---|
-| Vietcombank | 970436 |
-| Techcombank | 970407 |
-| MB Bank | 970422 |
-| VPBank | 970432 |
-| Agribank | 970405 |
-| BIDV | 970418 |
-| Vietinbank | 970415 |
-
-## Cấu hình Email
-
-### Gmail SMTP
-
-1. Bật 2FA cho Gmail
-2. Tạo App Password: Google Account → Security → App Passwords
-3. Cấu hình `.env`:
-
-```env
-EMAIL_PROVIDER=smtp
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASSWORD=your-app-password
-EMAIL_FROM="Mushroomie <your-email@gmail.com>"
-```
-
-### Resend (Khuyến nghị cho production)
-
-```env
-EMAIL_PROVIDER=resend
-RESEND_API_KEY=re_xxxxxxxxxxxx
-EMAIL_FROM="Mushroomie <noreply@mushroomie.vn>"
-```
-
-## Cấu trúc thư mục
-
-```
-src/
-├── app/
-│   ├── (user)/          # User-facing pages
-│   ├── admin/           # Admin pages
-│   └── api/             # API routes
-├── components/          # React components
-├── lib/                 # Utilities & services
-│   └── payment/         # Payment adapter
-├── store/               # Zustand stores
-└── types/               # TypeScript types
-```
-
-## Deploy
-
-### Vercel (Recommended)
+## Kiểm tra chất lượng
 
 ```bash
+npm run typecheck
+npm test
 npm run build
-vercel deploy
 ```
 
-### Lưu ý webhook khi deploy
+Build yêu cầu `DATABASE_URL` hợp lệ. Các script có khả năng thay đổi dữ liệu hoặc media phải được đọc kỹ và chạy dry-run/backup theo tài liệu vận hành trước khi dùng chế độ apply.
 
-Webhook URL phải là public HTTPS URL. Cập nhật trong provider dashboard và `.env`:
+## Production
 
-```env
-APP_URL=https://your-domain.com
-NEXTAUTH_URL=https://your-domain.com
-```
+Production hiện chạy tại [mushroomie.io.vn](https://mushroomie.io.vn) bằng PM2 phía sau Nginx; không dùng Docker trong quy trình production hiện tại.
+
+- [Hướng dẫn triển khai](deployment_guide.md)
+- [Production runbook](production_runbook.md)
+- [Production checklist](production_checklist.md)
+- [Incident checklist](incident_checklist.md)
+- [Hướng dẫn kiểm thử](docs/testing.md)
+
+## Bảo mật
+
+- Không commit `.env`, secret, token, mật khẩu, backup, database dump hoặc dữ liệu production.
+- API quản trị phải kiểm tra quyền ở phía máy chủ.
+- Tổng tiền, voucher và trạng thái thanh toán phải được xác thực lại trên server.
+- Upload chỉ sử dụng định dạng ảnh được cho phép và URL công khai dạng `/uploads/<file>`.
 
 ## Giấy phép
 
-MIT © 2024 Mushroomie
+Dự án thuộc Mushroomie. Vui lòng liên hệ chủ sở hữu trước khi sao chép hoặc phân phối mã nguồn, nội dung và tài sản thương hiệu.
