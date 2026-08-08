@@ -145,6 +145,10 @@ test('local fonts do not compete with the LCP image as high-priority preloads', 
   assert.equal(rootLayoutSource.match(/preload\s*:\s*false/g)?.length, 2)
 })
 
+test('local fonts avoid a late mobile font swap that can replace the LCP candidate', () => {
+  assert.equal(rootLayoutSource.match(/display\s*:\s*['"]optional['"]/g)?.length, 2)
+})
+
 test('global navigation does not eagerly prefetch unrelated RSC routes', () => {
   const initialHeaderSource = headerSource.split('{menu.mounted &&')[0]
   const globalNavigationSources = [
