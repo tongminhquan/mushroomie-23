@@ -193,7 +193,7 @@ describe('vertical TikTok presentation contracts', () => {
     expect(root).toContain('fps={VERTICAL_VIDEO_CONFIG.fps}');
     expect(root).toContain('width={VERTICAL_VIDEO_CONFIG.width}');
     expect(root).toContain('height={VERTICAL_VIDEO_CONFIG.height}');
-    expect(vertical.match(/<Sequence /g)).toHaveLength(9);
+    expect(vertical.match(/<Sequence\b/g)).toHaveLength(9);
     expect(vertical.match(/<AudioBed \/>/g)).toHaveLength(1);
     expect(vertical.match(/<VerticalCaptionTrack \/>/g)).toHaveLength(1);
     expect(vertical.match(/<VerticalProgressLine \/>/g)).toHaveLength(1);
@@ -219,18 +219,28 @@ describe('vertical TikTok presentation contracts', () => {
     expect(end).toContain('enter(frame, 10, 60)');
 
     // The safe canvas is 828x1240 after the vertical shell's reserved edges.
-    // The three labels and the mobile preview occupy disjoint horizontal lanes.
+    // MobileFrame has an 8px border on every edge, so its passed width must be
+    // a border-box width; otherwise right: 0 would clip the final 16px.
+    expect(shopping).toContain(
+      "style={{width: 440, boxSizing: 'border-box'}}",
+    );
     const safeCanvas = {width: 828, height: 1240};
     const labelLane = {left: 0, width: 300};
-    const phone = {right: 0, width: 440, border: 8};
-    const phoneLeft = safeCanvas.width - phone.width - phone.border * 2;
+    const phone = {right: 0, outerWidth: 440, border: 8};
+    const phoneLeft = safeCanvas.width - phone.right - phone.outerWidth;
+    const phoneRight = phoneLeft + phone.outerWidth;
+    expect(phoneLeft).toBe(388);
+    expect(phoneRight).toBe(safeCanvas.width);
     expect(labelLane.left + labelLane.width).toBeLessThanOrEqual(phoneLeft);
 
     // The source screenshot is exactly 390x844. Its displayed height includes
     // the MobileFrame's 8px border on each side; peak entrance displacement is 38px.
     const screenshotSource = {width: 390, height: 844};
-    const innerWidth = phone.width - phone.border * 2;
-    const phoneHeight = phone.border * 2 + (innerWidth * screenshotSource.height) / screenshotSource.width;
+    const innerWidth = phone.outerWidth - phone.border * 2;
+    const imageHeight = (innerWidth * screenshotSource.height) / screenshotSource.width;
+    const phoneHeight = phone.border * 2 + imageHeight;
+    expect(innerWidth).toBe(424);
+    expect(imageHeight).toBeCloseTo(917.579, 3);
     const deviceLabelHeight = 30;
     const deviceStackBottom = 150 + deviceLabelHeight + 14 + phoneHeight + 38;
     expect(deviceStackBottom).toBeLessThanOrEqual(safeCanvas.height);
@@ -238,6 +248,13 @@ describe('vertical TikTok presentation contracts', () => {
     const stepsBottom = 280 + 3 * 190 + 2 * 24;
     expect(stepsBottom).toBeLessThan(deviceStackBottom);
     expect(deviceStackBottom).toBeLessThanOrEqual(safeCanvas.height);
+
+    const globalSceneTop = 150;
+    const captionTop = 1920 - 310 - 180;
+    const globalDeviceBottom = globalSceneTop + deviceStackBottom;
+    expect(globalDeviceBottom).toBeCloseTo(1315.579, 3);
+    expect(captionTop - globalDeviceBottom).toBeCloseTo(114.421, 3);
+    expect(globalDeviceBottom).toBeLessThanOrEqual(captionTop);
 
     // CTA motion settles by frame 70, before its local frame range ends at 84.
     const ctaFinalStateFrame = 10 + 60;

@@ -109,7 +109,10 @@ export const VerticalShoppingFlowScene = () => {
           >
             Mọi thiết bị
           </div>
-          <MobileFrame src={ASSETS.screenshots.homeMobile} style={{width: 440}} />
+          <MobileFrame
+            src={ASSETS.screenshots.homeMobile}
+            style={{width: 440, boxSizing: 'border-box'}}
+          />
         </div>
       </AbsoluteFill>
     </VerticalSceneShell>
