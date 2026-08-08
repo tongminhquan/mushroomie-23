@@ -1,9 +1,0 @@
-node_modules/
-.venv/
-.remotion/
-out/
-public/audio/music/*.wav
-public/audio/sfx/*.wav
-public/audio/voice/*.mp3
-public/screenshots/*.png
-../../artifacts/mushroomie-brand-video/
