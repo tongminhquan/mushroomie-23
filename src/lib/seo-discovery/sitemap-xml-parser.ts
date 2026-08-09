@@ -22,6 +22,16 @@ const MAX_SITEMAP_URL_ENTRIES = 10_000
 const MAX_XML_NESTING_DEPTH = 32
 const MAX_CORE_TEXT_LENGTH = 2_048
 const SITEMAP_NAMESPACE = 'http://www.sitemaps.org/schemas/sitemap/0.9'
+const SITEMAP_CHANGE_FREQUENCIES = new Set([
+  'always',
+  'hourly',
+  'daily',
+  'weekly',
+  'monthly',
+  'yearly',
+  'never',
+])
+const SITEMAP_PRIORITY_PATTERN = /^(?:0(?:\.\d+)?|1(?:\.0+)?)$/
 
 function validXmlCodePoint(codePoint: number): boolean {
   return codePoint === 0x09
@@ -263,7 +273,9 @@ class XmlTokenizer {
     const end = this.source.indexOf('-->', valueStart)
     if (end < 0) xmlError('SITEMAP_INVALID_XML')
     const value = this.source.slice(valueStart, end)
-    if (value.includes('--')) xmlError('SITEMAP_INVALID_XML')
+    if (value.includes('--') || value.endsWith('-')) {
+      xmlError('SITEMAP_INVALID_XML')
+    }
     assertValidXmlCharacters(value)
     this.cursor = end + 3
     return { kind: 'comment', offset, value }
@@ -434,7 +446,18 @@ function namespaceScope(
   return scope
 }
 
-type XmlFrameKind = 'urlset' | 'url' | 'loc' | 'lastmod' | 'extension'
+type SitemapScalarFrameKind = 'loc' | 'lastmod' | 'changefreq' | 'priority'
+
+type XmlFrameKind = 'urlset' | 'url' | SitemapScalarFrameKind | 'extension'
+
+function isSitemapScalarFrameKind(
+  kind: string,
+): kind is SitemapScalarFrameKind {
+  return kind === 'loc'
+    || kind === 'lastmod'
+    || kind === 'changefreq'
+    || kind === 'priority'
+}
 
 interface XmlFrame {
   kind: XmlFrameKind
@@ -443,6 +466,8 @@ interface XmlFrame {
   text: string
   location: string | null
   lastModified: string | null
+  changeFrequency: string | null
+  priority: string | null
 }
 
 function createFrame(
@@ -457,6 +482,8 @@ function createFrame(
     text: '',
     location: null,
     lastModified: null,
+    changeFrequency: null,
+    priority: null,
   }
 }
 
@@ -474,7 +501,7 @@ export function parseSitemapXml(xml: string): Map<string, Date | null> {
     const frame = stack.pop()
     if (!frame || frame.name !== name) xmlError('SITEMAP_INVALID_XML')
 
-    if (frame.kind === 'loc' || frame.kind === 'lastmod') {
+    if (isSitemapScalarFrameKind(frame.kind)) {
       const parent = stack.at(-1)
       if (!parent || parent.kind !== 'url') xmlError('SITEMAP_INVALID_XML')
       const value = frame.text.trim()
@@ -484,9 +511,25 @@ export function parseSitemapXml(xml: string): Map<string, Date | null> {
       if (frame.kind === 'loc') {
         if (parent.location !== null) xmlError('SITEMAP_INVALID_XML')
         parent.location = value
-      } else {
+      } else if (frame.kind === 'lastmod') {
         if (parent.lastModified !== null) xmlError('SITEMAP_INVALID_XML')
         parent.lastModified = value
+      } else if (frame.kind === 'changefreq') {
+        if (
+          parent.changeFrequency !== null
+          || !SITEMAP_CHANGE_FREQUENCIES.has(value)
+        ) {
+          xmlError('SITEMAP_INVALID_XML')
+        }
+        parent.changeFrequency = value
+      } else {
+        if (
+          parent.priority !== null
+          || !SITEMAP_PRIORITY_PATTERN.test(value)
+        ) {
+          xmlError('SITEMAP_INVALID_XML')
+        }
+        parent.priority = value
       }
       return
     }
@@ -548,7 +591,7 @@ export function parseSitemapXml(xml: string): Map<string, Date | null> {
         ? decodeXmlEntities(token.value)
         : token.value
 
-      if (frame?.kind === 'loc' || frame?.kind === 'lastmod') {
+      if (frame && isSitemapScalarFrameKind(frame.kind)) {
         frame.text += value
         if (frame.text.length > MAX_CORE_TEXT_LENGTH) {
           xmlError('SITEMAP_INVALID_XML')
@@ -598,12 +641,21 @@ export function parseSitemapXml(xml: string): Map<string, Date | null> {
         }
         kind = 'url'
       } else if (parent.kind === 'url') {
-        if (token.name === 'loc' || token.name === 'lastmod') {
+        if (isSitemapScalarFrameKind(token.name)) {
           if (token.attributes.size !== 0) xmlError('SITEMAP_INVALID_XML')
           if (token.name === 'loc' && parent.location !== null) {
             xmlError('SITEMAP_INVALID_XML')
           }
           if (token.name === 'lastmod' && parent.lastModified !== null) {
+            xmlError('SITEMAP_INVALID_XML')
+          }
+          if (
+            token.name === 'changefreq'
+            && parent.changeFrequency !== null
+          ) {
+            xmlError('SITEMAP_INVALID_XML')
+          }
+          if (token.name === 'priority' && parent.priority !== null) {
             xmlError('SITEMAP_INVALID_XML')
           }
           kind = token.name

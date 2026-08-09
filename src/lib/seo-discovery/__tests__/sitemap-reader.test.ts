@@ -90,6 +90,77 @@ describe('readFixedSitemap', () => {
     ])
   })
 
+  it('accepts standard fields emitted by the installed Next sitemap serializer', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(xmlResponse(sitemapXml(`
+      <url>
+        <loc>https://mushroomie.io.vn/</loc>
+        <lastmod>2026-08-10T07:15:30.000Z</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1</priority>
+      </url>
+      <url>
+        <loc>https://mushroomie.io.vn/lien-he</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+      </url>
+    `)))
+
+    await expect(readFixedSitemap({ fetch: fetchMock })).resolves.toEqual(
+      new Map([
+        [
+          'https://mushroomie.io.vn/',
+          new Date('2026-08-10T07:15:30.000Z'),
+        ],
+        ['https://mushroomie.io.vn/lien-he', null],
+      ]),
+    )
+  })
+
+  it.each([
+    [
+      'an invalid changefreq value',
+      '<url><loc>https://mushroomie.io.vn/</loc><changefreq>sometimes</changefreq></url>',
+    ],
+    [
+      'two changefreq elements',
+      '<url><loc>https://mushroomie.io.vn/</loc><changefreq>daily</changefreq><changefreq>weekly</changefreq></url>',
+    ],
+    [
+      'an out-of-range priority',
+      '<url><loc>https://mushroomie.io.vn/</loc><priority>1.1</priority></url>',
+    ],
+    [
+      'a non-decimal priority lexical form',
+      '<url><loc>https://mushroomie.io.vn/</loc><priority>1e0</priority></url>',
+    ],
+    [
+      'two priority elements',
+      '<url><loc>https://mushroomie.io.vn/</loc><priority>0.8</priority><priority>0.7</priority></url>',
+    ],
+    [
+      'a standard field wrapping a core element',
+      '<url><changefreq><loc>https://mushroomie.io.vn/</loc></changefreq></url>',
+    ],
+  ])('rejects malformed standard sitemap data: %s', async (_label, blocks) => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      xmlResponse(sitemapXml(blocks)),
+    )
+
+    await expect(readFixedSitemap({ fetch: fetchMock })).rejects.toMatchObject(
+      invalidXmlResult(),
+    )
+  })
+
+  it('rejects an XML comment whose value ends with a hyphen', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(xmlResponse(sitemapXml(
+      '<url><loc>https://mushroomie.io.vn/</loc><!--invalid---></url>',
+    )))
+
+    await expect(readFixedSitemap({ fetch: fetchMock })).rejects.toMatchObject(
+      invalidXmlResult(),
+    )
+  })
+
   it('decodes numeric XML entities before validating a location', async () => {
     const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(xmlResponse(sitemapXml(`
       <url>
