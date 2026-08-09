@@ -464,6 +464,39 @@ model EmailLog {
   @@map("email_logs")
 }
 
+// SEO DISCOVERY JOBS
+model SeoDiscoveryJob {
+  id                 Int       @id @default(autoincrement())
+  url                String    @unique @db.VarChar(512)
+  source_type        String    @db.VarChar(32)
+  source_id          Int?
+  content_updated_at DateTime
+  status             String    @default("PENDING_ELIGIBILITY") @db.VarChar(40)
+  eligibility_status String?   @db.VarChar(40)
+  http_status        Int?
+  declared_canonical String?   @db.VarChar(512)
+  robots_indexable   Boolean?
+  gsc_verdict        String?   @db.VarChar(80)
+  coverage_state     String?   @db.VarChar(160)
+  page_fetch_state   String?   @db.VarChar(80)
+  google_canonical   String?   @db.VarChar(512)
+  last_crawl_at      DateTime?
+  last_inspected_at  DateTime?
+  next_attempt_at    DateTime  @default(now())
+  attempt_count      Int       @default(0)
+  last_error_code    String?   @db.VarChar(80)
+  last_error_message String?   @db.Text
+  lease_token        String?   @db.VarChar(64)
+  lease_expires_at   DateTime?
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  @@index([status, next_attempt_at])
+  @@index([source_type, source_id])
+  @@index([lease_expires_at])
+  @@map("seo_discovery_jobs")
+}
+
 // ─────────────────────────────────────────────
 // POSTS (Blog/News)
 // ─────────────────────────────────────────────

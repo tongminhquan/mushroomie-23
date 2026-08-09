@@ -1,0 +1,33 @@
+-- Durable queue for crawl and Search Console inspection work.
+CREATE TABLE `seo_discovery_jobs` (
+  `id` INTEGER NOT NULL AUTO_INCREMENT,
+  `url` VARCHAR(512) NOT NULL,
+  `source_type` VARCHAR(32) NOT NULL,
+  `source_id` INTEGER NULL,
+  `content_updated_at` DATETIME(3) NOT NULL,
+  `status` VARCHAR(40) NOT NULL DEFAULT 'PENDING_ELIGIBILITY',
+  `eligibility_status` VARCHAR(40) NULL,
+  `http_status` INTEGER NULL,
+  `declared_canonical` VARCHAR(512) NULL,
+  `robots_indexable` BOOLEAN NULL,
+  `gsc_verdict` VARCHAR(80) NULL,
+  `coverage_state` VARCHAR(160) NULL,
+  `page_fetch_state` VARCHAR(80) NULL,
+  `google_canonical` VARCHAR(512) NULL,
+  `last_crawl_at` DATETIME(3) NULL,
+  `last_inspected_at` DATETIME(3) NULL,
+  `next_attempt_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `attempt_count` INTEGER NOT NULL DEFAULT 0,
+  `last_error_code` VARCHAR(80) NULL,
+  `last_error_message` TEXT NULL,
+  `lease_token` VARCHAR(64) NULL,
+  `lease_expires_at` DATETIME(3) NULL,
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` DATETIME(3) NOT NULL,
+
+  UNIQUE INDEX `seo_discovery_jobs_url_key`(`url`),
+  INDEX `seo_discovery_jobs_status_next_attempt_at_idx`(`status`, `next_attempt_at`),
+  INDEX `seo_discovery_jobs_source_type_source_id_idx`(`source_type`, `source_id`),
+  INDEX `seo_discovery_jobs_lease_expires_at_idx`(`lease_expires_at`),
+  PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
