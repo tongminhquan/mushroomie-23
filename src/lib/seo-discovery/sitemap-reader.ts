@@ -1,11 +1,12 @@
 import {
   BodyLimitExceededError,
   fetchWithValidatedRedirects,
+  InvalidTextEncodingError,
   readBoundedText,
   ValidatedFetchError,
-  validatePublicUrl,
   validateSameOriginFetchUrl,
 } from './eligibility'
+import { parseSitemapXml, SitemapXmlError } from './sitemap-xml-parser'
 
 export const FIXED_SITEMAP_URL = 'https://mushroomie.io.vn/sitemap.xml'
 
@@ -68,10 +69,35 @@ function discardBody(response: Response): void {
   }
 }
 
-function normalizedMediaType(response: Response): string | null {
+function validateXmlContentType(response: Response): void {
   const contentType = response.headers.get('content-type')
-  if (!contentType) return null
-  return contentType.split(';', 1)[0].trim().toLowerCase()
+  if (!contentType) sitemapError('SITEMAP_UNSUPPORTED_CONTENT_TYPE')
+
+  const [rawMediaType, ...rawParameters] = contentType.split(';')
+  if (!XML_MEDIA_TYPES.has(rawMediaType.trim().toLowerCase())) {
+    sitemapError('SITEMAP_UNSUPPORTED_CONTENT_TYPE')
+  }
+
+  let charsetSeen = false
+  for (const rawParameter of rawParameters) {
+    const separator = rawParameter.indexOf('=')
+    if (separator < 0) continue
+
+    const name = rawParameter.slice(0, separator).trim().toLowerCase()
+    if (name !== 'charset') continue
+    if (charsetSeen) sitemapError('SITEMAP_INVALID_XML')
+    charsetSeen = true
+
+    let value = rawParameter.slice(separator + 1).trim()
+    if (
+      value.length >= 2
+      && ((value.startsWith('"') && value.endsWith('"'))
+        || (value.startsWith("'") && value.endsWith("'")))
+    ) {
+      value = value.slice(1, -1)
+    }
+    if (value.toLowerCase() !== 'utf-8') sitemapError('SITEMAP_INVALID_XML')
+  }
 }
 
 function mapFetchError(error: ValidatedFetchError): never {
@@ -91,152 +117,6 @@ function isTimeoutLike(error: unknown, signal: AbortSignal): boolean {
   if (signal.aborted) return true
   if (!error || typeof error !== 'object' || !('name' in error)) return false
   return error.name === 'AbortError' || error.name === 'TimeoutError'
-}
-
-function validXmlCodePoint(codePoint: number): boolean {
-  return codePoint === 0x09
-    || codePoint === 0x0a
-    || codePoint === 0x0d
-    || (codePoint >= 0x20 && codePoint <= 0xd7ff)
-    || (codePoint >= 0xe000 && codePoint <= 0xfffd)
-    || (codePoint >= 0x10000 && codePoint <= 0x10ffff)
-}
-
-function decodeXmlEntities(value: string): string {
-  const entities: Readonly<Record<string, string>> = {
-    amp: '&',
-    apos: "'",
-    gt: '>',
-    lt: '<',
-    quot: '"',
-  }
-  const entityPattern = /&(?:#(\d+)|#x([\da-fA-F]+)|(amp|apos|gt|lt|quot));/g
-  let decoded = ''
-  let cursor = 0
-
-  for (const match of value.matchAll(entityPattern)) {
-    const index = match.index
-    const unmatched = value.slice(cursor, index)
-    if (unmatched.includes('&')) sitemapError('SITEMAP_INVALID_XML')
-    decoded += unmatched
-
-    if (match[3]) {
-      decoded += entities[match[3]]
-    } else {
-      const codePoint = Number.parseInt(match[1] ?? match[2], match[1] ? 10 : 16)
-      if (!Number.isSafeInteger(codePoint) || !validXmlCodePoint(codePoint)) {
-        sitemapError('SITEMAP_INVALID_XML')
-      }
-      decoded += String.fromCodePoint(codePoint)
-    }
-    cursor = index + match[0].length
-  }
-
-  const tail = value.slice(cursor)
-  if (tail.includes('&')) sitemapError('SITEMAP_INVALID_XML')
-  return decoded + tail
-}
-
-function isValidCalendarDate(value: string): boolean {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
-  if (!match) return false
-
-  const year = Number(match[1])
-  const month = Number(match[2])
-  const day = Number(match[3])
-  const date = new Date(Date.UTC(year, month - 1, day))
-  return date.getUTCFullYear() === year
-    && date.getUTCMonth() === month - 1
-    && date.getUTCDate() === day
-}
-
-function parseLastModified(value: string): Date {
-  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value)
-  const dateTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)
-  if (!dateOnly && !dateTime) sitemapError('SITEMAP_INVALID_XML')
-  if (!isValidCalendarDate(value.slice(0, 10))) sitemapError('SITEMAP_INVALID_XML')
-
-  const timestamp = Date.parse(dateOnly ? `${value}T00:00:00.000Z` : value)
-  if (!Number.isFinite(timestamp)) sitemapError('SITEMAP_INVALID_XML')
-  return new Date(timestamp)
-}
-
-function elementValues(block: string, elementName: 'loc' | 'lastmod'): string[] {
-  const openingPattern = new RegExp(`<${elementName}(?:\\s[^>]*)?>`, 'g')
-  const closingPattern = new RegExp(`</${elementName}\\s*>`, 'g')
-  const valuePattern = new RegExp(
-    `<${elementName}(?:\\s[^>]*)?>([^<]*)</${elementName}\\s*>`,
-    'g',
-  )
-  const openingCount = block.match(openingPattern)?.length ?? 0
-  const closingCount = block.match(closingPattern)?.length ?? 0
-  const values = [...block.matchAll(valuePattern)].map((match) => match[1])
-
-  if (openingCount !== closingCount || values.length !== openingCount) {
-    sitemapError('SITEMAP_INVALID_XML')
-  }
-  return values
-}
-
-function stripXmlDeclaration(xml: string): string {
-  return xml
-    .replace(/^\uFEFF?\s*<\?xml\s[^?]*\?>/i, '')
-    .trim()
-}
-
-function parseSitemapXml(xml: string): Map<string, Date | null> {
-  if (/<!DOCTYPE|<!ENTITY/i.test(xml)) sitemapError('SITEMAP_INVALID_XML')
-
-  const document = stripXmlDeclaration(xml)
-  const root = /^<urlset(?:\s[^>]*)?>([\s\S]*)<\/urlset\s*>$/.exec(document)
-  if (!root) sitemapError('SITEMAP_INVALID_XML')
-
-  const contents = root[1]
-  const urlPattern = /<url(?:\s[^>]*)?>([\s\S]*?)<\/url\s*>/g
-  const result = new Map<string, Date | null>()
-  let cursor = 0
-
-  for (const match of contents.matchAll(urlPattern)) {
-    const index = match.index
-    if (contents.slice(cursor, index).trim() !== '') {
-      sitemapError('SITEMAP_INVALID_XML')
-    }
-
-    const block = match[1]
-    const locations = elementValues(block, 'loc')
-    const lastModifiedValues = elementValues(block, 'lastmod')
-    if (locations.length !== 1 || lastModifiedValues.length > 1) {
-      sitemapError('SITEMAP_INVALID_XML')
-    }
-
-    let url: string
-    try {
-      const decodedLocation = decodeXmlEntities(locations[0]).trim()
-      if (!decodedLocation) sitemapError('SITEMAP_INVALID_XML')
-      url = validatePublicUrl(decodedLocation)
-    } catch (error) {
-      if (error instanceof SitemapReaderError) throw error
-      sitemapError('SITEMAP_INVALID_XML')
-    }
-
-    if (result.has(url)) sitemapError('SITEMAP_DUPLICATE_URL')
-
-    let lastModified: Date | null = null
-    if (lastModifiedValues.length === 1) {
-      const decodedLastModified = decodeXmlEntities(lastModifiedValues[0]).trim()
-      if (!decodedLastModified) sitemapError('SITEMAP_INVALID_XML')
-      lastModified = parseLastModified(decodedLastModified)
-    }
-
-    result.set(url, lastModified)
-    cursor = index + match[0].length
-  }
-
-  if (contents.slice(cursor).trim() !== '' || result.size === 0) {
-    sitemapError('SITEMAP_INVALID_XML')
-  }
-
-  return result
 }
 
 export async function readFixedSitemap(
@@ -265,18 +145,24 @@ export async function readFixedSitemap(
     sitemapError('SITEMAP_HTTP_ERROR', false, response.status)
   }
 
-  const mediaType = normalizedMediaType(response)
-  if (!mediaType || !XML_MEDIA_TYPES.has(mediaType)) {
+  try {
+    validateXmlContentType(response)
+  } catch (error) {
     discardBody(response)
-    sitemapError('SITEMAP_UNSUPPORTED_CONTENT_TYPE')
+    throw error
   }
 
   let xml: string
   try {
-    xml = await readBoundedText(response, MAX_SITEMAP_BYTES, signal)
+    xml = await readBoundedText(response, MAX_SITEMAP_BYTES, signal, {
+      fatalUtf8: true,
+    })
   } catch (error) {
     if (error instanceof BodyLimitExceededError) {
       sitemapError('SITEMAP_TOO_LARGE')
+    }
+    if (error instanceof InvalidTextEncodingError) {
+      sitemapError('SITEMAP_INVALID_XML')
     }
     sitemapError(
       isTimeoutLike(error, signal)
@@ -286,5 +172,10 @@ export async function readFixedSitemap(
     )
   }
 
-  return parseSitemapXml(xml)
+  try {
+    return parseSitemapXml(xml)
+  } catch (error) {
+    if (error instanceof SitemapXmlError) sitemapError(error.code)
+    sitemapError('SITEMAP_INVALID_XML')
+  }
 }

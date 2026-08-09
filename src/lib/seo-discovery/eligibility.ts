@@ -82,6 +82,13 @@ export class BodyLimitExceededError extends Error {
   }
 }
 
+export class InvalidTextEncodingError extends Error {
+  constructor() {
+    super('SEO_DISCOVERY_INVALID_TEXT_ENCODING')
+    this.name = 'InvalidTextEncodingError'
+  }
+}
+
 interface StrictUrlOptions {
   publicPageOnly: boolean
 }
@@ -201,6 +208,7 @@ function parseStrictAbsoluteUrl(
   }
 
   parsed.pathname = decodedPathname
+  if (parsed.toString().length > MAX_PUBLIC_URL_LENGTH) invalid()
 
   if (!options.publicPageOnly) {
     if (rawQuery !== undefined) invalid()
@@ -388,6 +396,7 @@ export async function readBoundedText(
   response: Response,
   maxBytes: number,
   signal: AbortSignal,
+  options: { fatalUtf8?: boolean } = {},
 ): Promise<string> {
   const contentLength = response.headers.get('content-length')
   if (contentLength && /^\d+$/.test(contentLength)) {
@@ -401,7 +410,9 @@ export async function readBoundedText(
   if (!response.body) return ''
 
   const reader = response.body.getReader()
-  const decoder = new TextDecoder()
+  const decoder = new TextDecoder('utf-8', {
+    fatal: options.fatalUtf8 ?? false,
+  })
   let byteCount = 0
   let text = ''
 
@@ -415,10 +426,18 @@ export async function readBoundedText(
 
       byteCount += value.byteLength
       if (byteCount > maxBytes) throw new BodyLimitExceededError()
-      text += decoder.decode(value, { stream: true })
+      try {
+        text += decoder.decode(value, { stream: true })
+      } catch {
+        throw new InvalidTextEncodingError()
+      }
     }
 
-    return text + decoder.decode()
+    try {
+      return text + decoder.decode()
+    } catch {
+      throw new InvalidTextEncodingError()
+    }
   } catch (error) {
     try {
       const cancellation = reader.cancel()

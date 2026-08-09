@@ -41,6 +41,14 @@ function sitemapWith(...urls: string[]) {
   return new Map(urls.map((url) => [url, null] as const))
 }
 
+function unicodeExpandedUrl() {
+  const url = `https://mushroomie.io.vn/${'🍄'.repeat(50)}`
+  if (url.length > 512 || new URL(url).toString().length <= 512) {
+    throw new Error('test URL must expand past the serialized URL limit')
+  }
+  return url
+}
+
 describe('validatePublicUrl', () => {
   it.each([
     ['home', 'https://mushroomie.io.vn/', 'https://mushroomie.io.vn/'],
@@ -143,6 +151,12 @@ describe('validatePublicUrl', () => {
         expect(String(error)).not.toContain('credential-secret')
       }
     }
+  })
+
+  it('rejects a candidate whose normalized serialized URL exceeds 512 characters', () => {
+    expect(() => validatePublicUrl(unicodeExpandedUrl())).toThrow(
+      'SEO_DISCOVERY_INVALID_PUBLIC_URL',
+    )
   })
 })
 
@@ -247,6 +261,27 @@ describe('checkPublicUrlEligibility', () => {
           location: '//mushroomie.io.vn/admin/../tin-tuc/vong-tay-do',
         },
       }))
+      .mockResolvedValueOnce(htmlResponse(ARTICLE_URL))
+
+    await expect(checkPublicUrlEligibility(
+      ARTICLE_URL,
+      sitemapWith(ARTICLE_URL),
+      { fetch: fetchMock },
+    )).resolves.toMatchObject({
+      eligible: false,
+      retryable: false,
+      code: 'INVALID_REDIRECT',
+    })
+    expect(fetchMock).toHaveBeenCalledOnce()
+  })
+
+  it('rejects an absolute redirect whose normalized URL exceeds 512 characters', async () => {
+    const redirectResponse = new Response(null, { status: 302 })
+    vi.spyOn(redirectResponse.headers, 'get').mockImplementation((name) => (
+      name.toLowerCase() === 'location' ? unicodeExpandedUrl() : null
+    ))
+    const fetchMock = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(redirectResponse)
       .mockResolvedValueOnce(htmlResponse(ARTICLE_URL))
 
     await expect(checkPublicUrlEligibility(
@@ -382,6 +417,22 @@ describe('checkPublicUrlEligibility', () => {
       declaredCanonical: null,
     })
     expect(JSON.stringify(result)).not.toContain('query-secret')
+  })
+
+  it('does not expose a canonical whose normalized URL exceeds 512 characters', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      htmlResponse(unicodeExpandedUrl()),
+    )
+
+    await expect(checkPublicUrlEligibility(
+      ARTICLE_URL,
+      sitemapWith(ARTICLE_URL),
+      { fetch: fetchMock },
+    )).resolves.toMatchObject({
+      eligible: false,
+      code: 'CANONICAL_MISMATCH',
+      declaredCanonical: null,
+    })
   })
 
   it.each([

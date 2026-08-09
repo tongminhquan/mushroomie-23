@@ -5,6 +5,9 @@ import {
   readFixedSitemap,
 } from '@/lib/seo-discovery/sitemap-reader'
 
+const MAX_SITEMAP_BYTES = 2 * 1024 * 1024
+const MAX_SITEMAP_URL_ENTRIES = 10_000
+
 function xmlResponse(xml: BodyInit, headers: HeadersInit = {}) {
   return new Response(xml, {
     status: 200,
@@ -22,6 +25,34 @@ function sitemapXml(blocks: string) {
     blocks,
     '</urlset>',
   ].join('')
+}
+
+function invalidXmlResult() {
+  return {
+    code: 'SITEMAP_INVALID_XML',
+    message: 'SEO_DISCOVERY_SITEMAP_INVALID_XML',
+    retryable: false,
+  }
+}
+
+function xmlWithExactByteLength(byteLength: number) {
+  const opening = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    '<url><loc>https://mushroomie.io.vn/</loc></url>',
+  ].join('')
+  const closing = '</urlset>'
+  const paddingLength = byteLength - opening.length - closing.length
+  if (paddingLength < 0) throw new Error('requested XML body is too small')
+  return `${opening}${' '.repeat(paddingLength)}${closing}`
+}
+
+function unicodeExpandedUrl() {
+  const url = `https://mushroomie.io.vn/${'🍄'.repeat(50)}`
+  if (url.length > 512 || new URL(url).toString().length <= 512) {
+    throw new Error('test URL must expand past the serialized URL limit')
+  }
+  return url
 }
 
 describe('readFixedSitemap', () => {
@@ -75,6 +106,203 @@ describe('readFixedSitemap', () => {
         ],
       ]),
     )
+  })
+
+  it.each([
+    [
+      'a commented loc instead of a direct child',
+      '<url><!-- <loc>https://mushroomie.io.vn/lien-he</loc> --></url>',
+    ],
+    [
+      'a nested loc instead of a direct child',
+      '<url><wrapper><loc>https://mushroomie.io.vn/lien-he</loc></wrapper></url>',
+    ],
+    [
+      'a nested lastmod in an unrecognized wrapper',
+      '<url><loc>https://mushroomie.io.vn/lien-he</loc><wrapper><lastmod>2026-08-01</lastmod></wrapper></url>',
+    ],
+    [
+      'mismatched extension elements',
+      '<url><loc>https://mushroomie.io.vn/lien-he</loc><image:image xmlns:image="urn:image" xmlns:video="urn:video"></video:video></url>',
+    ],
+    [
+      'an unbalanced extension element',
+      '<url><loc>https://mushroomie.io.vn/lien-he</loc><image:image xmlns:image="urn:image"></url>',
+    ],
+    [
+      'an unquoted attribute',
+      '<url broken=nope><loc>https://mushroomie.io.vn/lien-he</loc></url>',
+    ],
+    [
+      'two direct-child lastmod elements',
+      '<url><loc>https://mushroomie.io.vn/lien-he</loc><lastmod>2026-08-01</lastmod><lastmod>2026-08-02</lastmod></url>',
+    ],
+    [
+      'an undefined entity reference',
+      '<url><loc>https://mushroomie.io.vn/tin-tuc/&undefined;</loc></url>',
+    ],
+    [
+      'a double-escaped entity reference',
+      '<url><loc>https://mushroomie.io.vn/tin-tuc/charm&amp;amp;-hat</loc></url>',
+    ],
+  ])('rejects structurally invalid XML with %s', async (_label, blocks) => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      xmlResponse(sitemapXml(blocks)),
+    )
+
+    await expect(readFixedSitemap({ fetch: fetchMock })).rejects.toMatchObject(
+      invalidXmlResult(),
+    )
+  })
+
+  it('requires the expected sitemap urlset root namespace', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(xmlResponse(
+      '<urlset><url><loc>https://mushroomie.io.vn/</loc></url></urlset>',
+    ))
+
+    await expect(readFixedSitemap({ fetch: fetchMock })).rejects.toMatchObject(
+      invalidXmlResult(),
+    )
+  })
+
+  it.each([
+    '<!DOCTYPE urlset [<!ENTITY internal "https://mushroomie.io.vn/">]>',
+    '<!DOCTYPE urlset [<!ENTITY external SYSTEM "https://evil.test/entity">]>',
+  ])('rejects DTD and entity declarations without resolving them', async (declaration) => {
+    const xml = `${declaration}${sitemapXml(
+      '<url><loc>https://mushroomie.io.vn/</loc></url>',
+    )}`
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(xmlResponse(xml))
+
+    await expect(readFixedSitemap({ fetch: fetchMock })).rejects.toMatchObject(
+      invalidXmlResult(),
+    )
+  })
+
+  it('ignores comments and well-formed declared extension subtrees without changing core values', async () => {
+    const xml = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"',
+      ' xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"',
+      ' xmlns:xhtml="http://www.w3.org/1999/xhtml">',
+      '<url>',
+      '<loc>https://mushroomie.io.vn/lien-he</loc>',
+      '<!-- <lastmod>1999-01-01</lastmod> -->',
+      '<image:image><image:loc><![CDATA[https://cdn.example/image?a&b]]></image:loc></image:image>',
+      '<xhtml:link rel="alternate" hreflang="vi" href="https://mushroomie.io.vn/lien-he"/>',
+      '</url>',
+      '</urlset>',
+    ].join('')
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(xmlResponse(xml))
+
+    await expect(readFixedSitemap({ fetch: fetchMock })).resolves.toEqual(
+      new Map([['https://mushroomie.io.vn/lien-he', null]]),
+    )
+  })
+
+  it('rejects more than the bounded number of URL entries', async () => {
+    const blocks = Array.from(
+      { length: MAX_SITEMAP_URL_ENTRIES + 1 },
+      (_, index) => `<url><loc>https://mushroomie.io.vn/${index.toString(36)}</loc></url>`,
+    ).join('')
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      xmlResponse(sitemapXml(blocks)),
+    )
+
+    await expect(readFixedSitemap({ fetch: fetchMock })).rejects.toMatchObject(
+      invalidXmlResult(),
+    )
+  })
+
+  it('rejects a near-limit adversarial opening-tag document without suffix rescans', async () => {
+    const opening = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ].join('')
+    const closing = '</urlset>'
+    const malformedOpeningTags = '<url '.repeat(
+      Math.floor((MAX_SITEMAP_BYTES - opening.length - closing.length) / 5),
+    )
+    const xml = `${opening}${malformedOpeningTags}${closing}`
+    expect(new TextEncoder().encode(xml).byteLength).toBeLessThanOrEqual(
+      MAX_SITEMAP_BYTES,
+    )
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(xmlResponse(xml))
+
+    await expect(readFixedSitemap({ fetch: fetchMock })).rejects.toMatchObject(
+      invalidXmlResult(),
+    )
+  })
+
+  it('rejects a sitemap loc whose normalized serialized URL exceeds 512 characters', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(xmlResponse(sitemapXml(
+      `<url><loc>${unicodeExpandedUrl()}</loc></url>`,
+    )))
+
+    await expect(readFixedSitemap({ fetch: fetchMock })).rejects.toMatchObject(
+      invalidXmlResult(),
+    )
+  })
+
+  it('rejects malformed UTF-8 bytes instead of accepting replacement characters', async () => {
+    const prefix = new TextEncoder().encode(sitemapXml(
+      '<url><loc>https://mushroomie.io.vn/tin-tuc/',
+    ).replace('</urlset>', ''))
+    const suffix = new TextEncoder().encode('</loc></url></urlset>')
+    const bytes = new Uint8Array(prefix.length + 2 + suffix.length)
+    bytes.set(prefix)
+    bytes.set([0xc3, 0x28], prefix.length)
+    bytes.set(suffix, prefix.length + 2)
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(xmlResponse(bytes))
+
+    await expect(readFixedSitemap({ fetch: fetchMock })).rejects.toMatchObject(
+      invalidXmlResult(),
+    )
+  })
+
+  it.each([
+    [
+      'a non-UTF-8 XML declaration',
+      sitemapXml('<url><loc>https://mushroomie.io.vn/</loc></url>')
+        .replace('encoding="UTF-8"', 'encoding="UTF-16"'),
+      {},
+    ],
+    [
+      'a non-UTF-8 HTTP charset',
+      sitemapXml('<url><loc>https://mushroomie.io.vn/</loc></url>'),
+      { 'content-type': 'application/xml; charset=iso-8859-1' },
+    ],
+    [
+      'contradictory XML and HTTP encodings',
+      sitemapXml('<url><loc>https://mushroomie.io.vn/</loc></url>')
+        .replace('encoding="UTF-8"', 'encoding="windows-1252"'),
+      { 'content-type': 'application/xml; charset=utf-8' },
+    ],
+  ])('rejects %s', async (_label, xml, headers) => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      xmlResponse(xml, headers),
+    )
+
+    await expect(readFixedSitemap({ fetch: fetchMock })).rejects.toMatchObject(
+      invalidXmlResult(),
+    )
+  })
+
+  it('accepts exactly 2 MiB and rejects one byte more', async () => {
+    const exactFetch = vi.fn<typeof fetch>().mockResolvedValue(
+      xmlResponse(xmlWithExactByteLength(MAX_SITEMAP_BYTES)),
+    )
+    await expect(readFixedSitemap({ fetch: exactFetch })).resolves.toEqual(
+      new Map([['https://mushroomie.io.vn/', null]]),
+    )
+
+    const oversizedFetch = vi.fn<typeof fetch>().mockResolvedValue(
+      xmlResponse(xmlWithExactByteLength(MAX_SITEMAP_BYTES + 1)),
+    )
+    await expect(readFixedSitemap({ fetch: oversizedFetch })).rejects.toMatchObject({
+      code: 'SITEMAP_TOO_LARGE',
+      retryable: false,
+    })
   })
 
   it.each([
