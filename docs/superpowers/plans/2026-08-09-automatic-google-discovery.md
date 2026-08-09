@@ -173,13 +173,17 @@ export interface PublicContentPublication {
 
 Implement `readSeoDiscoveryConfig(env)`, `buildPublicContentUrl(source, slug)`, and `assertProductionUrl(url)` without accepting a caller-controlled origin.
 
-- [ ] **Step 4: Write a failing repository test with a mocked Prisma client**
+- [ ] **Step 4: Write failing repository and concurrency tests with a mocked Prisma client**
 
-Verify `recordPublicContentPublication()` uses `upsert({ where: { url } })`; a newer `contentUpdatedAt` resets status, attempts, errors, and inspection evidence; an older/equal event does not reset an indexed job.
+Verify `recordPublicContentPublication()` normalizes the URL before opening a transaction, then performs one comparison read followed by `upsert({ where: { url } })` inside the same Prisma interactive transaction at `Serializable` isolation. The transaction options must be `maxWait: 500` and `timeout: 2000` milliseconds.
 
-- [ ] **Step 5: Implement idempotent persistence**
+Use deterministic, database-free tests with injected `sleep` and `random`. Cover missing, strictly newer, older, and equal rows; both concurrent first-delivery orderings with a fresh comparison read after conflict; retryable **actual** `PrismaClientKnownRequestError` instances with codes `P2034` and `P2002`; three-attempt exhaustion; non-retryable failure; invalid input that opens no transaction; and a throwing `console.error` that still cannot fail publication.
 
-Use one comparison read followed by an upsert. Normalize the URL before persistence. On a newer version set:
+- [ ] **Step 5: Implement concurrency-safe idempotent persistence**
+
+Normalize the URL before persistence. Run the comparison read and URL-keyed upsert inside one Prisma interactive transaction using `Serializable`, `maxWait: 500`, and `timeout: 2000`. Retry the **whole transaction with a fresh comparison read** only for actual Prisma `P2034` or `P2002` known-request errors, with at most 3 total attempts. Sleep outside the transaction using injected `sleep`/`random`: jitter from 0–10 ms before attempt 2 and 0–20 ms before attempt 3. Never run logging, sleeping, network, cache revalidation, or content writes inside the transaction callback.
+
+On a missing row, create the job. Only a strictly newer `contentUpdatedAt` may reset the existing row. The newer update must persist the new content version and source identity while resetting all eligibility, HTTP/canonical/robots, crawl/inspection, scheduling, attempt/error, and lease evidence, including:
 
 ```ts
 {
@@ -195,18 +199,18 @@ Use one comparison read followed by an upsert. Normalize the URL before persiste
 }
 ```
 
-Do not make publication fail if queue recording fails: log only the source type/id and a stable error code, then return `{ recorded: false }`.
+An older or equal event must use an empty update and preserve every existing indexed/evidence field. After a terminal retry exhaustion or any non-retryable/validation failure, log exactly once and only the safe source type/id plus a stable error code, then return `{ recorded: false }`. A failure to log must also remain isolated from the publishing caller.
 
 - [ ] **Step 6: Run tests and typecheck**
 
-Run: `npm run test:vitest -- src/lib/seo-discovery/__tests__ && npm run typecheck`
+Run: `npm run test:vitest -- src/lib/seo-discovery/__tests__ && npx prisma generate && npm run typecheck && npm run lint -- src/lib/seo-discovery && git diff --check`
 
 Expected: all focused tests and TypeScript pass.
 
 - [ ] **Step 7: Commit the core queue contract**
 
 ```bash
-git add src/lib/seo-discovery
+git add docs/superpowers/plans/2026-08-09-automatic-google-discovery.md src/lib/seo-discovery
 git commit -m "feat(seo): add discovery queue contract"
 ```
 
@@ -460,7 +464,7 @@ git commit -m "feat(seo): add Search Console inspection adapter"
 
 - [ ] **Step 1: Write failing lease and concurrency tests**
 
-Assert a batch size of at most 10, a 2-minute lease, an atomic conditional `updateMany` claim per candidate, and processing only rows carrying this worker's random lease token. Simulate two workers selecting the same row and prove only one obtains the lease.
+Assert a batch size of at most 10, a 2-minute lease, an atomic conditional `updateMany` claim per candidate, and processing only rows carrying this worker's random lease token. Simulate two workers selecting the same row and prove only one obtains the lease. Every completion/failure/finally mutation must guard on both the lease token and the exact `content_updated_at` captured when the row was claimed, so a newly published content version can never be overwritten or have its lease cleared by an older worker.
 
 - [ ] **Step 2: Write failing state-transition tests**
 
@@ -489,7 +493,7 @@ Keep `computeNextAttempt()` pure by injecting `now` and `random`; cap transient 
 
 - [ ] **Step 4: Implement worker flow**
 
-For each leased row: re-read it, validate eligibility, persist eligibility evidence, optionally ensure the sitemap is registered only if its fingerprint/last successful state changed, inspect when due, map Google results into the stored evidence columns, schedule the next attempt, and clear the lease in a `finally` path. Publication is never rolled back because the worker fails.
+For each leased row: re-read it, capture its claimed `content_updated_at`, validate eligibility, persist eligibility evidence, optionally ensure the sitemap is registered only if its fingerprint/last successful state changed, inspect when due, map Google results into the stored evidence columns, schedule the next attempt, and clear the lease in a `finally` path. Every worker write, including final lease cleanup, must condition on both the lease token and claimed content version. Publication is never rolled back because the worker fails.
 
 - [ ] **Step 5: Integrate with both maintenance triggers**
 
@@ -500,6 +504,8 @@ After scheduled publishing and inventory release, run one bounded discovery batc
 Run: `npm run test:vitest -- src/lib/seo-discovery/__tests__/worker.test.ts && npx tsx --test tests/admin-maintenance.test.ts tests/seo-discovery-scheduled-products.test.ts`
 
 Expected: concurrency, retries, and disabled mode pass; maintenance remains resilient.
+
+Before enabling the worker in production, use a read-only `information_schema.TABLES` check to confirm `seo_discovery_jobs.ENGINE = 'InnoDB'`. A different or unknown storage engine blocks rollout because the Serializable transaction and row/next-key locking guarantees depend on InnoDB.
 
 - [ ] **Step 7: Commit worker integration**
 
