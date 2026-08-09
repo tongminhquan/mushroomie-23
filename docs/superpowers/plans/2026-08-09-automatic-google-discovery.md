@@ -577,6 +577,7 @@ git commit -m "feat(admin): monitor Google discovery status"
 - Modify: `README.md`
 - Modify: `docs/operations/google-search-console.md`
 - Create: `tests/seo-discovery-backfill.test.ts`
+- Create: `tests/seo-discovery-performance-boundaries.test.ts`
 
 - [ ] **Step 1: Write a failing dry-run backfill test**
 
@@ -616,7 +617,50 @@ npm audit --omit=dev
 
 Expected: all commands pass and audit reports no high/critical production vulnerability. If lint reveals pre-existing out-of-scope failures, capture exact evidence and do not hide/ignore them.
 
-- [ ] **Step 5: Review the entire diff for secrets and scope**
+- [ ] **Step 5: Verify performance boundaries and measure desktop/mobile after the feature**
+
+Use the `web-performance-optimization` skill and establish reproducible before/after evidence. Before production deploy, preserve three production Lighthouse JSON runs for each public route `/`, `/tin-tuc`, and `/san-pham` in both mobile and desktop modes. After deploy, repeat the same 18 audits using the same Lighthouse version, Chrome version, network/CPU throttling, geographic runner, and time window. Use Chrome DevTools MCP for waterfall, LCP element, console, and failed-network inspection when available; if unavailable, record the limitation and retain Lighthouse JSON evidence instead.
+
+Pin the one-shot runner so the comparison cannot silently change Lighthouse versions:
+
+```bash
+mkdir -p artifacts/performance
+for phase in before after; do
+  for route in home tin-tuc san-pham; do
+    case "$route" in
+      home) path=/ ;;
+      tin-tuc) path=/tin-tuc ;;
+      san-pham) path=/san-pham ;;
+    esac
+    for run in 1 2 3; do
+      npx -y lighthouse@13.4.1 "https://mushroomie.io.vn${path}" --output=json --output-path="artifacts/performance/${phase}-${route}-mobile-${run}.json" --form-factor=mobile --only-categories=performance
+      npx -y lighthouse@13.4.1 "https://mushroomie.io.vn${path}" --output=json --output-path="artifacts/performance/${phase}-${route}-desktop-${run}.json" --preset=desktop --only-categories=performance
+    done
+  done
+done
+npm run perf:report -- artifacts/performance/*.json
+```
+
+Run only the `before` loop before deploy and only the `after` loop after deploy; the combined loop above defines the exact filenames and identical command shape. Do not commit generated reports. Compare medians, not a single best run. Record Performance score, FCP, LCP, TBT, CLS, total KiB, main-thread time, TTFB, LCP element, request count, failed requests, and transferred JS/CSS.
+
+Add `tests/seo-discovery-performance-boundaries.test.ts` to assert that public layouts/routes do not import the admin dashboard, `google-auth-library`, GSC adapter, or worker; only the admin route may ship the dashboard client island. Run:
+
+```bash
+npx tsx --test tests/seo-discovery-performance-boundaries.test.ts tests/performance-regressions.test.ts tests/site-build-boundaries.test.ts
+```
+
+Acceptance thresholds:
+
+- target Lighthouse Performance is 100/100 on both desktop and mobile for `/`; every controllable audit regression must be fixed;
+- median public-route score must not fall by more than 2 points from the before baseline;
+- median LCP/FCP/TBT/CLS/total KiB/main-thread time may not regress by more than 5% without an explained external cause and user approval;
+- storefront initial JavaScript must not include the GSC/auth/admin code and should show zero feature-attributable increase;
+- maintenance worker work must remain outside request rendering, process at most its bounded batch, and never delay public-route responses;
+- admin discovery table remains paginated and does not fetch all jobs.
+
+If any threshold fails, use the same skill to identify the waterfall/bundle/query cause, implement a focused fix through the Subagent-driven review loop, and rerun the identical measurement set. Do not claim 100/100 or “no regression” from a single run.
+
+- [ ] **Step 6: Review the entire diff for secrets and scope**
 
 Run:
 
@@ -629,30 +673,30 @@ git status --short
 
 Confirm there are no credentials, private keys, `.env`, build output, uploads, backups, logs, temporary files, or unrelated user artifacts staged.
 
-- [ ] **Step 6: Commit documentation and rollout tooling**
+- [ ] **Step 7: Commit documentation and rollout tooling**
 
 ```bash
-git add scripts/seo-discovery-backfill.ts package.json package-lock.json README.md docs/operations/google-search-console.md tests/seo-discovery-backfill.test.ts
+git add scripts/seo-discovery-backfill.ts package.json package-lock.json README.md docs/operations/google-search-console.md tests/seo-discovery-backfill.test.ts tests/seo-discovery-performance-boundaries.test.ts
 git commit -m "docs(seo): add discovery rollout runbook"
 ```
 
-- [ ] **Step 7: Request code review before production migration/deploy**
+- [ ] **Step 8: Request code review before production migration/deploy**
 
 Use the `requesting-code-review` skill, resolve actionable findings, rerun affected tests, and present the final commit list and risk report. Do not push/deploy until review is clean.
 
-- [ ] **Step 8: Prepare the production database change, then stop for confirmation**
+- [ ] **Step 9: Prepare the production database change, then stop for confirmation**
 
 On the new production VPS (not the stale `103.173.226.86` host), verify the exact host/project path, create and inspect `./scripts/backup-production.sh` output, inspect pending migration SQL, and run only non-mutating status/dry-run checks. Present the backup path, SQL summary, expected lock/unique-index warning, rollback plan, and ask for explicit confirmation before `prisma migrate deploy` or equivalent schema application.
 
-- [ ] **Step 9: After confirmation, deploy with the repository production skill**
+- [ ] **Step 10: After confirmation, deploy with the repository production skill**
 
 Use `source-command-deploy-production` and preserve the required standalone layout: release assets at `<release>/.next-deploy/static`, public files excluding uploads, absolute `public/uploads` symlink, release `.env`, Nginx static copy at `/var/www/mushroomie/.next/static`, and `standalone.previous.<timestamp>` until health/MIME checks pass. Do not run a deploy path that deletes rollback releases or performs an uncontrolled `db push`.
 
-- [ ] **Step 10: Verify production before enabling Google calls**
+- [ ] **Step 11: Verify production before enabling Google calls**
 
 With both flags still false, verify PM2 logs, `/`, `/san-pham`, `/tin-tuc`, `/sitemap.xml`, `/feed.xml`, `/admin/seo/lap-chi-muc`, `/mini-game`, `/tai-khoan/dang-nhap`, `/gio-hang`, `/thanh-toan`, `/admin`, CSS/JS MIME, uploads, product images, and payment QR. Then enable only `SEO_DISCOVERY_ENABLED=true`, run/inspect the backfill, and observe queue health. Enable `GSC_INTEGRATION_ENABLED=true` only after `test_connection` succeeds and the Search Console property confirms access.
 
-- [ ] **Step 11: Final production acceptance**
+- [ ] **Step 12: Final production acceptance**
 
 Publish one controlled article or activate one controlled product, verify its canonical URL appears in `/sitemap.xml`, confirm exactly one durable job, confirm eligibility evidence, confirm no Indexing API call, and confirm URL Inspection evidence is stored after the first scheduled inspection run. Report Google state as observed evidence, never as a guaranteed indexed result.
 
@@ -669,5 +713,6 @@ Publish one controlled article or activate one controlled product, verify its ca
 - [ ] Missing/bad credentials become `CONFIGURATION_REQUIRED` without log spam or server crashes.
 - [ ] Admin APIs enforce backend authorization, validation, rate limits, pagination, and redacted responses.
 - [ ] Admin UI is usable at desktop and 360/390px mobile sizes with no serious console/network errors.
+- [ ] Three-run median Lighthouse comparisons cover `/`, `/tin-tuc`, and `/san-pham` on desktop/mobile; public bundles exclude all GSC/admin/worker code and performance meets the stated score/Core Web Vitals regression thresholds.
 - [ ] Migration is additive, backed up, reviewed, explicitly confirmed, and retains data on rollback.
 - [ ] Full tests, lint, typecheck, build, audit, PM2, production routes, asset MIME, uploads/images, and QR checks pass before completion is claimed.
