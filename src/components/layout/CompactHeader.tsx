@@ -77,6 +77,7 @@ export default function CompactHeader({
 
         <Link
           href="/"
+          prefetch={false}
           aria-label="Mushroomie - Trang chủ"
           className="m-press relative h-10 w-[4.5rem] shrink-0 sm:w-24"
         >
@@ -94,6 +95,7 @@ export default function CompactHeader({
         >
           <Link
             href="/san-pham"
+            prefetch={false}
             aria-current={pathname.startsWith('/san-pham') ? 'page' : undefined}
             className={`flex h-full items-center gap-2 border-b-2 px-3 text-sm font-extrabold ${
               pathname.startsWith('/san-pham')
@@ -111,6 +113,7 @@ export default function CompactHeader({
               <Link
                 key={link.href}
                 href={link.href}
+                prefetch={false}
                 aria-current={active ? 'page' : undefined}
                 className={`flex h-full items-center border-b-2 px-2.5 text-sm font-bold ${
                   active
@@ -126,6 +129,7 @@ export default function CompactHeader({
 
         <Link
           href="/san-pham"
+          prefetch={false}
           className="ml-2 hidden h-10 shrink-0 items-center gap-2 rounded-xl px-3 text-sm font-extrabold text-theme-primary hover:bg-theme-subtle md:flex xl:hidden"
         >
           <Menu size={17} className="text-primary" />
@@ -173,6 +177,7 @@ export default function CompactHeader({
 
           <Link
             href={accountHref}
+            prefetch={false}
             aria-label="Tài khoản"
             className="m-press flex h-11 items-center gap-2 rounded-xl px-3 text-theme-primary hover:bg-theme-subtle"
           >

@@ -17,7 +17,7 @@ export default function Footer({ categories }: { categories: Array<{ id: number;
           className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.35fr_0.7fr_0.75fr_0.75fr_1fr]"
         >
           <div>
-            <Link href="/" className="m-press relative mb-5 block h-14 w-36">
+            <Link href="/" prefetch={false} className="m-press relative mb-5 block h-14 w-36">
               <BrandLogo
                 variant="white"
                 alt={BRAND.name}
@@ -39,13 +39,13 @@ export default function Footer({ categories }: { categories: Array<{ id: number;
             <ul className="space-y-3 text-sm text-white/60">
               {categories.map((category) => (
                 <li key={category.id}>
-                  <Link href={`/san-pham?category=${category.slug}`} className="m-underline hover:text-white">
+                  <Link href={`/san-pham?category=${category.slug}`} prefetch={false} className="m-underline hover:text-white">
                     {category.name}
                   </Link>
                 </li>
               ))}
               <li>
-                <Link href="/san-pham" className="font-bold text-white hover:text-yellow">
+                <Link href="/san-pham" prefetch={false} className="font-bold text-white hover:text-yellow">
                   Xem tất cả
                 </Link>
               </li>
@@ -55,20 +55,20 @@ export default function Footer({ categories }: { categories: Array<{ id: number;
           <div>
             <h2 className="mb-4 text-sm font-extrabold text-white">{BRAND.name}</h2>
             <ul className="space-y-3 text-sm text-white/60">
-              <li><Link href="/gioi-thieu" className="m-underline hover:text-white">Câu chuyện thương hiệu</Link></li>
-              <li><Link href="/tin-tuc" className="m-underline hover:text-white">Tin tức</Link></li>
-              <li><Link href="/voucher" className="m-underline hover:text-white">Voucher</Link></li>
-              <li><Link href="/mini-game" className="m-underline hover:text-white">Mini game</Link></li>
-              <li><Link href="/lien-he" className="m-underline hover:text-white">Liên hệ</Link></li>
+              <li><Link href="/gioi-thieu" prefetch={false} className="m-underline hover:text-white">Câu chuyện thương hiệu</Link></li>
+              <li><Link href="/tin-tuc" prefetch={false} className="m-underline hover:text-white">Tin tức</Link></li>
+              <li><Link href="/voucher" prefetch={false} className="m-underline hover:text-white">Voucher</Link></li>
+              <li><Link href="/mini-game" prefetch={false} className="m-underline hover:text-white">Mini game</Link></li>
+              <li><Link href="/lien-he" prefetch={false} className="m-underline hover:text-white">Liên hệ</Link></li>
             </ul>
           </div>
 
           <div>
             <h2 className="mb-4 text-sm font-extrabold text-white">Chính sách</h2>
             <ul className="space-y-3 text-sm text-white/60">
-              <li><Link href="/chinh-sach-doi-tra" className="m-underline hover:text-white">Giao hàng & đổi trả</Link></li>
-              <li><Link href="/chinh-sach-bao-mat" className="m-underline hover:text-white">Bảo mật</Link></li>
-              <li><Link href="/dieu-khoan-dich-vu" className="m-underline hover:text-white">Điều khoản dịch vụ</Link></li>
+              <li><Link href="/chinh-sach-doi-tra" prefetch={false} className="m-underline hover:text-white">Giao hàng & đổi trả</Link></li>
+              <li><Link href="/chinh-sach-bao-mat" prefetch={false} className="m-underline hover:text-white">Bảo mật</Link></li>
+              <li><Link href="/dieu-khoan-dich-vu" prefetch={false} className="m-underline hover:text-white">Điều khoản dịch vụ</Link></li>
             </ul>
           </div>
 

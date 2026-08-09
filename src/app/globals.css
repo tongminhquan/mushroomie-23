@@ -28,6 +28,8 @@
   --color-yellow: #ffe7a3;
   --color-kraft: #6f4528;
   --color-text: #2b2b2b;
+  --color-brand-ink: #2b2b2b;
+  --color-brand-ink-muted: #4a4542;
 
   /* Accents */
   --color-accent-peach: #ffd6d6; /* Hồng nhạt */
@@ -168,10 +170,8 @@ html[data-theme="dark"] .brand-logo__white {
   display: block;
 }
 
-/* `text` is also used as a dark brand surface. Remap only its text utility. */
-html[data-theme="dark"] [class~="text-text"] {
-  color: var(--text-primary-theme);
-}
+/* `text` remains a static brand surface. Theme-aware copy uses `text-theme-*`,
+   while copy on fixed pink/yellow surfaces uses `text-brand-ink*`. */
 
 /* Keep light-mode game text readable while an older client chunk is replaced. */
 html[data-theme="light"] .mini-game-theme-scope [class~="text-white"] {
@@ -546,17 +546,6 @@ body {
   transition-duration: 200ms;
 }
 
-/* --- Vào trang: chạy ở mọi route qua src/app/template.tsx ---
-   Chỉ dịch 10px: đủ để cảm nhận trang vừa đổi, không đủ để gây khó chịu khi điều
-   hướng liên tục trong admin. Dùng `both` để giữ trạng thái cuối. */
-@keyframes m-page-enter {
-  from { opacity: 0; transform: translate3d(0, 10px, 0); }
-  to   { opacity: 1; transform: translate3d(0, 0, 0); }
-}
-.m-page-enter {
-  animation: m-page-enter 320ms var(--m-ease-out) both;
-}
-
 /* --- Parallax: lớp nền trôi chậm hơn nội dung khi cuộn.
    GSAP ghi trực tiếp vào transform; khai báo will-change để trình duyệt tách lớp
    sẵn thay vì tạo layer giữa chừng (nguyên nhân gây giật khung hình đầu). --- */
@@ -827,22 +816,18 @@ body {
 
 /* ========== Smooth Transitions (scoped) ========== */
 .theme-transition {
-  transition-property: all;
+  /* Không dùng `all`: các thay đổi width/height/position vô tình sẽ bị nội suy và
+     buộc layout lại. Danh sách này bao phủ theme, hover lift và shadow hiện có. */
+  transition-property: color, background-color, border-color, opacity, transform, box-shadow;
   transition-duration: 150ms;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-html[data-theme="dark"] input,
-html[data-theme="dark"] textarea,
-html[data-theme="dark"] select {
+html[data-theme="dark"] :where(input, textarea, select) {
   color-scheme: dark;
-  background-color: var(--surface-input);
-  color: var(--text-primary-theme);
-  border-color: var(--border-default-theme);
 }
 
-html[data-theme="dark"] input::placeholder,
-html[data-theme="dark"] textarea::placeholder {
+html[data-theme="dark"] :where(input::placeholder, textarea::placeholder) {
   color: var(--text-muted-theme);
 }
 
@@ -928,7 +913,7 @@ html[data-theme="dark"] .admin-theme-scope :is(
 a, button, input, textarea, select,
 [role="button"], [tabindex],
 .transition-all, .transition-colors, .transition-transform, .transition-shadow {
-  transition-property: color, background-color, border-color, transform, box-shadow, opacity;
+  transition-property: color, background-color, border-color, opacity, transform, box-shadow;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -1040,13 +1025,6 @@ a, button, input, textarea, select,
   /* Slogan: bỏ ánh sáng quét, giữ lại chữ đọc được (gradient đứng yên vẫn hiện màu). */
   .m-slogan-shimmer {
     animation: none !important;
-  }
-
-  /* Vào trang: giữ lại một nhịp fade rất ngắn thay vì trượt lên — bỏ hẳn sẽ khiến
-     trang "nháy" đột ngột mỗi lần điều hướng. */
-  .m-page-enter {
-    animation: none !important;
-    transition: opacity 120ms linear;
   }
 
   /* Hộp thoại mount mới: bỏ phần phóng to, giữ một nhịp fade để mắt kịp bắt được nó
