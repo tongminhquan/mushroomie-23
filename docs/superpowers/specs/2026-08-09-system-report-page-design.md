@@ -67,10 +67,10 @@ CSS `@media print` sẽ:
 - Zustand, Zod, bcryptjs và Sharp.
 - Thanh toán VietQR + Casso, VietQR + SePay và PayOS qua provider abstraction.
 - PM2, Nginx, Cloudflare, GitHub Actions và standalone deployment.
-- 77 page route, 73 API route, 29 Prisma model và hơn 100 file kiểm thử/tài nguyên kiểm thử tại thời điểm báo cáo.
+- 78 page route (77 route nghiệp vụ và 1 route báo cáo), 73 API route, 29 Prisma model và hơn 100 file kiểm thử/tài nguyên kiểm thử tại thời điểm báo cáo.
 - Các phân hệ sản phẩm, giỏ hàng, đơn hàng, thanh toán, voucher, mini game, tài khoản, admin, CMS, media, review, contact, SEO, analytics và email.
 - Không công khai secret, mật khẩu mẫu, database URL thật, webhook token hoặc thông tin tài khoản ngân hàng.
-- VPS production hiện hành là `103.77.242.153`; không sử dụng IP cũ `103.173.226.86` trong tài liệu mới.
+- VPS production hiện hành là `103.77.242.153`; tài liệu mới không chứa thông tin VPS đã ngừng sử dụng.
 
 ## README
 
