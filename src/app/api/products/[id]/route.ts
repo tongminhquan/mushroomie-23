@@ -6,6 +6,11 @@ import { logAdminAction } from '@/lib/admin-logger'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { revalidateProduct } from '@/lib/product-revalidate'
 import { createProductUpdateSchema } from '@/lib/product-validation'
+import {
+  recordAndRevalidatePublication,
+  shouldRecordProductPublication,
+} from '@/lib/seo-discovery/publication'
+import { buildPublicContentUrl } from '@/lib/seo-discovery/urls'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -37,7 +42,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params
     const existing = await prisma.product.findUnique({
       where: { id: Number(id) },
-      select: { slug: true, price: true, sale_price: true },
+      include: {
+        images: {
+          select: { image_url: true, sort_order: true },
+          orderBy: { sort_order: 'asc' },
+        },
+      },
     })
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
@@ -71,7 +81,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
             sort_order: index,
           }))
         } : undefined
-      } 
+      },
+      include: {
+        images: {
+          select: { image_url: true, sort_order: true },
+          orderBy: { sort_order: 'asc' },
+        },
+      },
     })
     
     await logAdminAction({
@@ -82,7 +98,25 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       ipAddress: request.headers.get('x-forwarded-for') || undefined
     })
 
-    revalidateProduct(existing.slug, product.slug)
+    if (shouldRecordProductPublication(existing, product)) {
+      const publication = {
+        source: 'product' as const,
+        sourceId: product.id,
+        url: buildPublicContentUrl('product', product.slug),
+        contentUpdatedAt: product.updated_at,
+        reason: existing.status === 'active' ? 'updated' as const : 'activated' as const,
+      }
+      const previousUrl = existing.status === 'active' && existing.slug !== product.slug
+        ? buildPublicContentUrl('product', existing.slug)
+        : undefined
+
+      await recordAndRevalidatePublication(
+        publication,
+        ...(previousUrl ? [{ previousUrl }] as const : [] as const),
+      )
+    } else {
+      revalidateProduct(existing.slug, product.slug)
+    }
 
     return NextResponse.json(product)
   } catch (error: any) {

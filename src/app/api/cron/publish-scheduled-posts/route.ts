@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { timingSafeStringEqual } from '@/lib/security'
+import { publishDuePosts } from '@/lib/scheduled-publisher'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -11,8 +11,8 @@ export const runtime = 'nodejs'
  * - Cơ chế CHÍNH là job in-process (src/instrumentation.ts, tick 60s).
  *   Endpoint này là backstop cho trường hợp process treo/missed schedule,
  *   được system cron gọi mỗi 5 phút.
- * - Idempotent: updateMany với điều kiện status='scheduled' — gọi bao nhiêu
- *   lần cũng không publish trùng.
+ * - Idempotent: implementation dùng conditional update status='scheduled' cho
+ *   từng id; chỉ worker chuyển trạng thái thành công mới phát publication event.
  * - Bảo vệ bằng CRON_SECRET (Bearer). Thiếu secret trong env → luôn 401,
  *   không bao giờ mở public.
  */
@@ -26,23 +26,20 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Lấy id trước để trả về danh sách (log vừa đủ, không log nội dung bài)
-    const due = await prisma.post.findMany({
-      where: { status: 'scheduled', published_at: { lte: new Date() } },
-      select: { id: true },
-    })
+    const publishedPosts = await publishDuePosts()
+    const postIds = publishedPosts.map((post) => post.id)
 
-    if (due.length === 0) {
-      return NextResponse.json({ success: true, publishedCount: 0, postIds: [] })
+    if (publishedPosts.length > 0) {
+      console.info(
+        `[cron/publish-scheduled] Đã xuất bản ${publishedPosts.length} bài:`,
+        postIds.join(','),
+      )
     }
-
-    const result = await prisma.post.updateMany({
-      where: { id: { in: due.map((p) => p.id) }, status: 'scheduled' },
-      data: { status: 'published' },
+    return NextResponse.json({
+      success: true,
+      publishedCount: publishedPosts.length,
+      postIds: publishedPosts.map((post) => post.id),
     })
-
-    console.info(`[cron/publish-scheduled] Đã xuất bản ${result.count} bài:`, due.map((p) => p.id).join(','))
-    return NextResponse.json({ success: true, publishedCount: result.count, postIds: due.map((p) => p.id) })
   } catch (error) {
     console.error('[cron/publish-scheduled] Lỗi:', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })

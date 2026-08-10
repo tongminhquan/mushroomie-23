@@ -70,7 +70,15 @@ test('product write routes use the shared create and update validation schemas',
   assert.match(createRoute, /productCreateSchema/)
   assert.match(updateRoute, /createProductUpdateSchema/)
   assert.match(updateRoute, /prisma\.product\.findUnique/)
-  assert.match(updateRoute, /select:\s*\{ slug: true, price: true, sale_price: true \}/)
+  assert.match(updateRoute, /price:\s*Number\(existing\.price\)/)
+  assert.match(
+    updateRoute,
+    /sale_price:\s*existing\.sale_price === null \? null : Number\(existing\.sale_price\)/,
+  )
+  assert.match(
+    updateRoute,
+    /include:\s*\{\s*images:\s*\{\s*select:\s*\{ image_url: true, sort_order: true \}/,
+  )
 })
 
 test('every price consumer imports the shared product price resolver', () => {

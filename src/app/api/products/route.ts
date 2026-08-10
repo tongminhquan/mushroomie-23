@@ -6,6 +6,8 @@ import { logAdminAction } from '@/lib/admin-logger'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { revalidateProduct } from '@/lib/product-revalidate'
 import { productCreateSchema } from '@/lib/product-validation'
+import { recordAndRevalidatePublication } from '@/lib/seo-discovery/publication'
+import { buildPublicContentUrl } from '@/lib/seo-discovery/urls'
 
 export async function GET(request: NextRequest) {
   try {
@@ -85,6 +87,12 @@ export async function POST(request: NextRequest) {
           }))
         } : undefined
       },
+      include: {
+        images: {
+          select: { image_url: true, sort_order: true },
+          orderBy: { sort_order: 'asc' },
+        },
+      },
     })
 
     await logAdminAction({
@@ -95,7 +103,17 @@ export async function POST(request: NextRequest) {
       ipAddress: request.headers.get('x-forwarded-for') || undefined
     })
 
-    revalidateProduct(product.slug)
+    if (product.status === 'active') {
+      await recordAndRevalidatePublication({
+        source: 'product',
+        sourceId: product.id,
+        url: buildPublicContentUrl('product', product.slug),
+        contentUpdatedAt: product.updated_at,
+        reason: 'created',
+      })
+    } else {
+      revalidateProduct(product.slug)
+    }
 
     return NextResponse.json(product, { status: 201 })
   } catch (error: any) {

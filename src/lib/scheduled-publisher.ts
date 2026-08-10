@@ -1,5 +1,9 @@
+import { Prisma, type Post } from '@prisma/client'
+
 import { prisma } from '@/lib/prisma'
 import { releaseExpiredOrderReservations } from '@/lib/order-inventory'
+import { recordAndRevalidatePublication } from '@/lib/seo-discovery/publication'
+import { buildPublicContentUrl } from '@/lib/seo-discovery/urls'
 
 /**
  * Bộ xuất bản bài viết theo lịch (tính năng "Đăng bài tự động").
@@ -17,28 +21,62 @@ const globalStore = globalThis as unknown as {
   __mushroomieScheduledPublisher?: ReturnType<typeof setInterval>
 }
 
-export async function publishDuePosts(): Promise<number> {
-  try {
-    const result = await prisma.post.updateMany({
-      where: {
-        status: 'scheduled',
-        published_at: { lte: new Date() },
-      },
-      data: { status: 'published' },
-    })
-    if (result.count > 0) {
-      console.info(`[scheduled-publisher] Đã tự động xuất bản ${result.count} bài viết`)
+export type ScheduledPublishedPost = Pick<Post, 'id' | 'slug' | 'updated_at'>
+
+function isLostScheduledPublicationRace(error: unknown): boolean {
+  return error instanceof Prisma.PrismaClientKnownRequestError
+    && error.code === 'P2025'
+}
+
+export async function publishDuePosts(): Promise<ScheduledPublishedPost[]> {
+  const duePosts = await prisma.post.findMany({
+    where: {
+      status: 'scheduled',
+      published_at: { lte: new Date() },
+    },
+    select: { id: true },
+  })
+  const publishedPosts: ScheduledPublishedPost[] = []
+
+  for (const duePost of duePosts) {
+    let publishedPost: ScheduledPublishedPost
+    try {
+      publishedPost = await prisma.post.update({
+        where: { id: duePost.id, status: 'scheduled' },
+        data: { status: 'published' },
+        select: { id: true, slug: true, updated_at: true },
+      })
+    } catch (error) {
+      if (isLostScheduledPublicationRace(error)) continue
+      throw error
     }
-    return result.count
-  } catch (error) {
-    // Không để job làm sập server — chỉ ghi log và thử lại ở tick sau.
-    console.error('[scheduled-publisher] Lỗi khi xuất bản bài theo lịch:', error)
-    return 0
+
+    publishedPosts.push(publishedPost)
+    await recordAndRevalidatePublication({
+      source: 'post',
+      sourceId: publishedPost.id,
+      url: buildPublicContentUrl('post', publishedPost.slug),
+      contentUpdatedAt: publishedPost.updated_at,
+      reason: 'scheduled',
+    })
   }
+
+  if (publishedPosts.length > 0) {
+    console.info(
+      `[scheduled-publisher] Đã tự động xuất bản ${publishedPosts.length} bài viết`,
+    )
+  }
+
+  return publishedPosts
 }
 
 async function runMaintenance() {
-  await publishDuePosts()
+  try {
+    await publishDuePosts()
+  } catch (error) {
+    // Không để một tick lỗi làm sập server; cron sẽ phản hồi 500 để được retry.
+    console.error('[scheduled-publisher] Lỗi khi xuất bản bài theo lịch:', error)
+  }
   try {
     const released = await releaseExpiredOrderReservations()
     if (released > 0) console.info(`[inventory] Released ${released} expired order reservations`)

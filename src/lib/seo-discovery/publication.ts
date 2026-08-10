@@ -1,5 +1,5 @@
 import { revalidatePath } from 'next/cache'
-import type { Post } from '@prisma/client'
+import { Prisma, type Post, type Product } from '@prisma/client'
 
 import { readSeoDiscoveryConfig } from './config'
 import { recordPublicContentPublication } from './repository'
@@ -51,6 +51,35 @@ const MATERIAL_PUBLIC_POST_FIELDS = [
 type MaterialPublicPostField = (typeof MATERIAL_PUBLIC_POST_FIELDS)[number]
 type PublicPostPublicationState = Pick<Post, 'status' | MaterialPublicPostField>
 
+const MATERIAL_PUBLIC_PRODUCT_FIELDS = [
+  'name',
+  'slug',
+  'short_description',
+  'description',
+  'price',
+  'sale_price',
+  'sku',
+  'stock',
+  'is_customizable',
+  'is_featured',
+  'featured_image',
+  'category_id',
+] as const satisfies readonly (keyof Product)[]
+
+type MaterialPublicProductField = (typeof MATERIAL_PUBLIC_PRODUCT_FIELDS)[number]
+
+export interface PublicProductImagePublicationState {
+  image_url: string
+  sort_order: number
+}
+
+export type PublicProductPublicationState = Pick<
+  Product,
+  'status' | MaterialPublicProductField
+> & {
+  images: readonly PublicProductImagePublicationState[]
+}
+
 function publicationValuesEqual(existing: unknown, saved: unknown): boolean {
   if (existing instanceof Date || saved instanceof Date) {
     return existing instanceof Date
@@ -58,7 +87,24 @@ function publicationValuesEqual(existing: unknown, saved: unknown): boolean {
       && existing.getTime() === saved.getTime()
   }
 
+  if (Prisma.Decimal.isDecimal(existing) || Prisma.Decimal.isDecimal(saved)) {
+    return Prisma.Decimal.isDecimal(existing)
+      && Prisma.Decimal.isDecimal(saved)
+      && existing.equals(saved)
+  }
+
   return existing === saved
+}
+
+function productImagesEqual(
+  existing: readonly PublicProductImagePublicationState[],
+  saved: readonly PublicProductImagePublicationState[],
+): boolean {
+  return existing.length === saved.length
+    && existing.every((image, index) => (
+      image.image_url === saved[index]?.image_url
+      && image.sort_order === saved[index]?.sort_order
+    ))
 }
 
 export function shouldRecordPostPublication(
@@ -73,6 +119,20 @@ export function shouldRecordPostPublication(
   return MATERIAL_PUBLIC_POST_FIELDS.some((field) => (
     !publicationValuesEqual(existing[field], saved[field])
   ))
+}
+
+export function shouldRecordProductPublication(
+  existing: PublicProductPublicationState,
+  saved: PublicProductPublicationState,
+): boolean {
+  if (saved.status !== 'active') return false
+  if (existing.status !== 'active') return true
+
+  // updated_at changes for every save. Only rendered, merchandising, or SEO
+  // inputs (including ordered gallery URLs) create a new discovery version.
+  return MATERIAL_PUBLIC_PRODUCT_FIELDS.some((field) => (
+    !publicationValuesEqual(existing[field], saved[field])
+  )) || !productImagesEqual(existing.images, saved.images)
 }
 
 export interface PublicationRevalidationOptions {
