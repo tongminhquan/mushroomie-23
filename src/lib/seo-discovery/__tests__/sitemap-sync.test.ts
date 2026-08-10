@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { describe, expect, it, vi } from 'vitest'
 
 import {
@@ -71,10 +72,37 @@ function storedJob(overrides: Partial<StoredJob> = {}): StoredJob {
   }
 }
 
+type UpdateManyArgs = {
+  where: {
+    id?: number
+    url?: string
+    source_type?: string
+    content_updated_at?: { lt: Date }
+    updated_at?: Date
+  }
+  data: Partial<StoredJob>
+}
+
+interface InMemorySitemapClientOptions {
+  afterFindMany?(callNumber: number): Promise<void>
+  beforeUpdateMany?(
+    args: UpdateManyArgs,
+    callNumber: number,
+    jobs: Map<string, StoredJob>,
+  ): Promise<void>
+  rollbackOnTransactionError?: boolean
+}
+
 class InMemorySitemapClient {
   readonly jobs = new Map<string, StoredJob>()
   private nextId = 1
   private findManyCallCount = 0
+  private updateManyCallCount = 0
+  private readonly afterFindMany: (callNumber: number) => Promise<void>
+  private readonly beforeUpdateMany: NonNullable<
+    InMemorySitemapClientOptions['beforeUpdateMany']
+  >
+  private readonly rollbackOnTransactionError: boolean
 
   readonly postUpdate = vi.fn(() => {
     throw new Error('sitemap sync must not mutate posts')
@@ -94,6 +122,15 @@ class InMemorySitemapClient {
     // Yield after capturing the snapshot so concurrent tests exercise stale reads.
     await this.afterFindMany(callNumber)
     return snapshot
+  })
+  readonly findUnique = vi.fn(async (args: {
+    where: { id?: number, url?: string }
+  }) => {
+    const job = [...this.jobs.values()].find((candidate) => (
+      (args.where.id === undefined || candidate.id === args.where.id)
+      && (args.where.url === undefined || candidate.url === args.where.url)
+    ))
+    return job ? { ...job } : null
   })
   readonly createMany = vi.fn(async (args: {
     data: Array<Omit<StoredJob, 'id' | 'updated_at'> & { updated_at?: Date }>
@@ -115,16 +152,10 @@ class InMemorySitemapClient {
     }
     return { count }
   })
-  readonly updateMany = vi.fn(async (args: {
-    where: {
-      id?: number
-      url?: string
-      source_type?: string
-      content_updated_at?: { lt: Date }
-      updated_at?: Date
-    }
-    data: Partial<StoredJob>
-  }) => {
+  readonly updateMany = vi.fn(async (args: UpdateManyArgs) => {
+    const callNumber = ++this.updateManyCallCount
+    await this.beforeUpdateMany(args, callNumber, this.jobs)
+
     const candidates = [...this.jobs.values()].filter((job) => {
       if (args.where.id !== undefined && job.id !== args.where.id) return false
       if (args.where.url !== undefined && job.url !== args.where.url) return false
@@ -170,24 +201,50 @@ class InMemorySitemapClient {
 
   readonly transaction = vi.fn(async (
     callback: (client: unknown) => Promise<unknown>,
-  ) => callback({
-    seoDiscoveryJob: {
-      findMany: this.findMany,
-      createMany: this.createMany,
-      updateMany: this.updateMany,
-      delete: this.deleteJob,
-      deleteMany: this.deleteJob,
-    },
-    post: { update: this.postUpdate, updateMany: this.postUpdate },
-    product: { update: this.productUpdate, updateMany: this.productUpdate },
-  }))
+  ) => {
+    const beforeTransaction = new Map(
+      [...this.jobs.entries()].map(([url, job]) => [url, { ...job }]),
+    )
+
+    try {
+      return await callback({
+        seoDiscoveryJob: {
+          findMany: this.findMany,
+          findUnique: this.findUnique,
+          createMany: this.createMany,
+          updateMany: this.updateMany,
+          delete: this.deleteJob,
+          deleteMany: this.deleteJob,
+        },
+        post: { update: this.postUpdate, updateMany: this.postUpdate },
+        product: { update: this.productUpdate, updateMany: this.productUpdate },
+      })
+    } catch (error) {
+      if (this.rollbackOnTransactionError) {
+        this.jobs.clear()
+        for (const [url, job] of beforeTransaction) {
+          this.jobs.set(url, job)
+        }
+      }
+      throw error
+    }
+  })
 
   constructor(
     initialJobs: StoredJob[] = [],
-    private readonly afterFindMany: (callNumber: number) => Promise<void> = async () => {
-      await Promise.resolve()
-    },
+    options: InMemorySitemapClientOptions | ((callNumber: number) => Promise<void>) = {},
   ) {
+    const normalizedOptions = typeof options === 'function'
+      ? { afterFindMany: options }
+      : options
+    this.afterFindMany = normalizedOptions.afterFindMany ?? (async () => {
+      await Promise.resolve()
+    })
+    this.beforeUpdateMany = normalizedOptions.beforeUpdateMany ?? (async () => {
+      await Promise.resolve()
+    })
+    this.rollbackOnTransactionError = normalizedOptions.rollbackOnTransactionError ?? false
+
     for (const job of initialJobs) {
       this.jobs.set(job.url, { ...job })
       this.nextId = Math.max(this.nextId, job.id + 1)
@@ -238,9 +295,8 @@ function expectPendingReset(job: StoredJob, contentUpdatedAt: Date) {
   })
 }
 
-function expectInspectionEvidencePreserved(saved: StoredJob, initial: StoredJob) {
+function expectInspectionEvidenceFieldsPreserved(saved: StoredJob, initial: StoredJob) {
   expect(saved).toMatchObject({
-    content_updated_at: initial.content_updated_at,
     eligibility_status: initial.eligibility_status,
     http_status: initial.http_status,
     declared_canonical: initial.declared_canonical,
@@ -252,6 +308,11 @@ function expectInspectionEvidencePreserved(saved: StoredJob, initial: StoredJob)
     last_crawl_at: initial.last_crawl_at,
     last_inspected_at: initial.last_inspected_at,
   })
+}
+
+function expectInspectionEvidencePreserved(saved: StoredJob, initial: StoredJob) {
+  expect(saved.content_updated_at).toEqual(initial.content_updated_at)
+  expectInspectionEvidenceFieldsPreserved(saved, initial)
 }
 
 function deferred() {
@@ -493,6 +554,21 @@ describe('syncSitemapDiscoveryJobs', () => {
     expect(prisma.get(STATIC_URL)).toEqual(initial)
   })
 
+  it('uses ReadCommitted with the bounded SEO transaction wait and timeout', async () => {
+    const prisma = new InMemorySitemapClient()
+
+    await syncSitemapDiscoveryJobs(
+      prisma.client,
+      dependencies(new Map([[STATIC_URL, NEW_LASTMOD]])),
+    )
+
+    expect(prisma.transaction).toHaveBeenCalledWith(expect.any(Function), {
+      isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+      maxWait: 500,
+      timeout: 2_000,
+    })
+  })
+
   it('is DB-idempotent when concurrent syncs both observe one missing URL', async () => {
     const prisma = new InMemorySitemapClient()
     const snapshot = new Map([[STATIC_URL, NEW_LASTMOD]])
@@ -580,6 +656,169 @@ describe('syncSitemapDiscoveryJobs', () => {
     expect(presentResult.resetCount).toBe(1)
     expect(staleResult.removedCount).toBe(0)
     expectPendingReset(prisma.get(STATIC_URL), NEW_LASTMOD)
+  })
+
+  it.each([
+    ['equal', EQUAL_LASTMOD],
+    ['null', null],
+  ])('retries a newer lastmod after a concurrent %s presence stamp wins the first CAS', async (
+    _label,
+    competingLastmod,
+  ) => {
+    const initial = storedJob({ content_updated_at: EQUAL_LASTMOD })
+    const newerCasCaptured = deferred()
+    const releaseNewerCas = deferred()
+    const prisma = new InMemorySitemapClient([initial], {
+      beforeUpdateMany: async (args, callNumber) => {
+        if (callNumber === 1 && args.where.id === initial.id) {
+          newerCasCaptured.resolve()
+          await releaseNewerCas.promise
+        }
+      },
+    })
+
+    const newerSync = syncSitemapDiscoveryJobs(
+      prisma.client,
+      dependencies(new Map([[STATIC_URL, NEW_LASTMOD]])),
+    )
+    await newerCasCaptured.promise
+
+    const competingResult = await syncSitemapDiscoveryJobs(
+      prisma.client,
+      dependencies(new Map([[STATIC_URL, competingLastmod]])),
+    )
+    const competingToken = new Date(prisma.get(STATIC_URL).updated_at.getTime())
+    releaseNewerCas.resolve()
+    const newerResult = await newerSync
+
+    expect(competingResult).toMatchObject({ resetCount: 0, unchangedCount: 1 })
+    expect(newerResult).toMatchObject({ resetCount: 1, unchangedCount: 0 })
+    expectPendingReset(prisma.get(STATIC_URL), NEW_LASTMOD)
+    expect(prisma.get(STATIC_URL).updated_at.getTime()).toBeGreaterThan(
+      competingToken.getTime(),
+    )
+  })
+
+  it('retries a newer lastmod after an unrelated bookkeeping token advance', async () => {
+    const initial = storedJob({ content_updated_at: OLD_LASTMOD })
+    const competingToken = new Date(NOW.getTime() + 60_000)
+    let conflictApplied = false
+    const prisma = new InMemorySitemapClient([initial], {
+      beforeUpdateMany: async (args, _callNumber, jobs) => {
+        if (conflictApplied || args.where.id !== initial.id) return
+        conflictApplied = true
+        const current = jobs.get(STATIC_URL)
+        if (current) current.updated_at = new Date(competingToken.getTime())
+      },
+    })
+
+    const result = await syncSitemapDiscoveryJobs(
+      prisma.client,
+      dependencies(new Map([[STATIC_URL, NEW_LASTMOD]])),
+    )
+
+    expect(result).toMatchObject({ resetCount: 1, unchangedCount: 0 })
+    expectPendingReset(prisma.get(STATIC_URL), NEW_LASTMOD)
+    expect(prisma.get(STATIC_URL).updated_at.getTime()).toBeGreaterThan(
+      competingToken.getTime(),
+    )
+  })
+
+  it('recomputes priority when a conflicting writer already stored newer content', async () => {
+    const initial = storedJob({ content_updated_at: OLD_LASTMOD })
+    const competingToken = new Date(NOW.getTime() + 60_000)
+    let conflictApplied = false
+    const prisma = new InMemorySitemapClient([initial], {
+      beforeUpdateMany: async (args, _callNumber, jobs) => {
+        if (conflictApplied || args.where.id !== initial.id) return
+        conflictApplied = true
+        const current = jobs.get(STATIC_URL)
+        if (!current) return
+        current.content_updated_at = new Date(NEWEST_LASTMOD.getTime())
+        current.updated_at = new Date(competingToken.getTime())
+      },
+    })
+
+    const result = await syncSitemapDiscoveryJobs(
+      prisma.client,
+      dependencies(new Map([[STATIC_URL, NEW_LASTMOD]])),
+    )
+
+    const saved = prisma.get(STATIC_URL)
+    expect(result).toMatchObject({ resetCount: 0, unchangedCount: 1 })
+    expect(saved.content_updated_at).toEqual(NEWEST_LASTMOD)
+    expectInspectionEvidenceFieldsPreserved(saved, initial)
+    expect(saved.updated_at.getTime()).toBeGreaterThan(competingToken.getTime())
+  })
+
+  it('preserves new ownership while applying a still-newer monotonic reset after conflict', async () => {
+    const initial = storedJob({ content_updated_at: OLD_LASTMOD })
+    const competingToken = new Date(NOW.getTime() + 60_000)
+    let conflictApplied = false
+    const prisma = new InMemorySitemapClient([initial], {
+      beforeUpdateMany: async (args, _callNumber, jobs) => {
+        if (conflictApplied || args.where.id !== initial.id) return
+        conflictApplied = true
+        const current = jobs.get(STATIC_URL)
+        if (!current) return
+        current.source_type = 'product'
+        current.source_id = 24
+        current.updated_at = new Date(competingToken.getTime())
+      },
+    })
+
+    const result = await syncSitemapDiscoveryJobs(
+      prisma.client,
+      dependencies(new Map([[STATIC_URL, NEW_LASTMOD]])),
+    )
+
+    expect(result).toMatchObject({ resetCount: 1, unchangedCount: 0 })
+    expect(prisma.get(STATIC_URL)).toMatchObject({
+      source_type: 'product',
+      source_id: 24,
+    })
+    expectPendingReset(prisma.get(STATIC_URL), NEW_LASTMOD)
+    expect(prisma.get(STATIC_URL).updated_at.getTime()).toBeGreaterThan(
+      competingToken.getTime(),
+    )
+  })
+
+  it('fails with a stable error and rolls back after three observation CAS conflicts', async () => {
+    const first = storedJob({
+      id: 2,
+      url: CONTACT_URL,
+      lease_token: null,
+      lease_expires_at: null,
+    })
+    const conflicted = storedJob({
+      id: 1,
+      url: STATIC_URL,
+      content_updated_at: OLD_LASTMOD,
+    })
+    let targetConflicts = 0
+    const prisma = new InMemorySitemapClient([first, conflicted], {
+      rollbackOnTransactionError: true,
+      beforeUpdateMany: async (args, _callNumber, jobs) => {
+        if (args.where.id !== conflicted.id || args.where.updated_at === undefined) return
+        targetConflicts += 1
+        const current = jobs.get(STATIC_URL)
+        if (current) {
+          current.updated_at = new Date(current.updated_at.getTime() + 1)
+        }
+      },
+    })
+
+    await expect(syncSitemapDiscoveryJobs(
+      prisma.client,
+      dependencies(new Map([
+        [CONTACT_URL, EQUAL_LASTMOD],
+        [STATIC_URL, NEW_LASTMOD],
+      ])),
+    )).rejects.toThrow('SEO_DISCOVERY_SITEMAP_CAS_RETRY_EXHAUSTED')
+
+    expect(targetConflicts).toBe(3)
+    expect(prisma.get(CONTACT_URL)).toEqual(first)
+    expect(prisma.get(STATIC_URL)).toEqual(conflicted)
   })
 
   it('keeps concurrent missing snapshots idempotent with one removal transition', async () => {

@@ -166,3 +166,58 @@ RED result: **11 failed, 7 passed**. Failures covered the missing bookkeeping ge
 The DB-free concurrency fake now models `updated_at`, exact Date CAS comparison, Prisma-like automatic update advancement, and a deterministic barrier after each captured database snapshot. Tests force a stale missing transaction to resume only after a newer-lastmod reset or equal/null presence stamp and assert that the stale removal count is zero. Two concurrent missing snapshots still produce one removal transition.
 
 The build again used only a process-local dummy MySQL URL pointing at unreachable loopback port 1. Expected Prisma connection/fallback logs were emitted; no real database or external network was used, and no `.env`, schema, migration, or dependency was changed.
+
+## Final CAS review follow-up
+
+A final review found that the first observation-generation CAS fix still treated a lost sitemap-owned CAS as unchanged. If an equal/null presence stamp advanced `updated_at` before a newer-lastmod writer completed, the newer writer affected zero rows and silently dropped its full reset.
+
+### Robust retry design
+
+- Sitemap-owned observation operations retain the exact `{ id, source_type, updated_at }` CAS.
+- A zero-row CAS now re-reads the current row by URL and retries, bounded to three total CAS attempts.
+- The interactive transaction runs at Prisma `ReadCommitted`, with the existing short SEO transaction limits `maxWait: 500` and `timeout: 2_000`, so a retry read can observe a concurrent MySQL commit.
+- Every attempt recomputes its operation from the freshly read row and derives the next generation as `max(now, current updated_at + 1 ms)`. No retry writes a token derived from a row that already lost a CAS.
+- Priority is recomputed on every retry: strictly newer incoming lastmod performs a full reset; current `SKIPPED / REMOVED_FROM_SITEMAP` with non-newer/null lastmod performs partial revival; otherwise sitemap-owned presence performs a bookkeeping-only stamp.
+- If a concurrent writer already stored content at least as new as the incoming lastmod, the retry preserves that content and its evidence, then advances the observation token so a stale missing snapshot cannot match it.
+- If ownership changes to post/product, non-newer/null presence performs no stamp. A still-newer lastmod uses the existing monotonic reset without changing `source_type` or `source_id`.
+- Three consecutive CAS losses throw stable internal error `SEO_DISCOVERY_SITEMAP_CAS_RETRY_EXHAUSTED`. Throwing from the interactive callback rolls back all earlier writes in that sync transaction rather than committing a partial reconciliation.
+- Missing reconciliation keeps its exact-token CAS and concurrent missing snapshots remain a single idempotent removal transition.
+
+### Final follow-up RED evidence
+
+Command:
+
+```text
+npm run test:vitest -- src/lib/seo-discovery/__tests__/sitemap-sync.test.ts
+```
+
+After correcting one test-fixture mistake where the purported “equal” lastmod was actually newer than the baseline, the accepted RED result was **7 failed, 18 passed**. Failures independently demonstrated:
+
+1. Missing `ReadCommitted` transaction options.
+2. A newer reset dropped after an equal presence stamp won the first CAS.
+3. A newer reset dropped after a null presence stamp won the first CAS.
+4. A newer reset dropped after an unrelated bookkeeping token advance.
+5. An already-newer refreshed row did not receive a fresh protection token.
+6. A still-newer reset was dropped after ownership changed to product.
+7. Continuous CAS conflict resolved as unchanged instead of throwing and rolling back.
+
+### Final follow-up GREEN and verification
+
+| Check | Result |
+| --- | --- |
+| Sitemap focused regression | PASS — **25/25** |
+| Combined Task 5 runtime suite | PASS — **54/54** across 4 files |
+| Required legacy/source suite | PASS — **12/12** |
+| Broader SEO Vitest suite | PASS — **255/255** across 11 files |
+| Broader SEO legacy suite | PASS — **22/22** |
+| `npm test` | PASS — Vitest **56/56 files, 625/625 tests**; legacy **315/315 tests** |
+| `npm run typecheck` | PASS |
+| Focused ESLint over final CAS scope | PASS — **0 errors, 0 warnings** |
+| `npx prisma generate` | PASS — Prisma Client 5.22 generated successfully |
+| Working diff check | PASS |
+| Staged secret/path scan | PASS — 3 scoped paths; 0 forbidden paths, 0 known secret signatures, 0 production secret literals |
+| Offline production build | PASS — Next.js 16.2.11 compiled, typechecked, and generated **113 static pages** |
+
+The DB-free transaction fake now supports ReadCommitted-style current-row re-reads, deterministic pre-update concurrency barriers, ownership/content changes by competing writers, and optional rollback verification. Assertions target durable outcomes: the incoming newer content wins exactly once, full evidence is reset only when still newer, generation tokens remain strictly monotonic, ownership is preserved, and retry exhaustion leaves earlier transaction work uncommitted.
+
+The final build used only a process-local dummy MySQL URL targeting unreachable `127.0.0.1:1`. Expected Prisma connection/fallback logs were emitted; no real database, external network, deployment, schema, migration, dependency, scheduler, cron, or product-route change was made in this follow-up.

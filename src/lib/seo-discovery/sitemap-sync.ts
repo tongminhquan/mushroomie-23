@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client'
+import { Prisma, type PrismaClient } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
@@ -6,6 +6,28 @@ import { readFixedSitemap } from './sitemap-reader'
 
 const NULL_LASTMOD_CONTENT_VERSION = new Date(0)
 const REMOVED_FROM_SITEMAP = 'REMOVED_FROM_SITEMAP'
+const SITEMAP_CAS_RETRY_EXHAUSTED = 'SEO_DISCOVERY_SITEMAP_CAS_RETRY_EXHAUSTED'
+const MAX_SITEMAP_CAS_ATTEMPTS = 3
+const SITEMAP_TRANSACTION_OPTIONS = {
+  isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+  maxWait: 500,
+  timeout: 2_000,
+} as const
+const SITEMAP_JOB_SNAPSHOT_SELECT = {
+  id: true,
+  url: true,
+  source_type: true,
+  content_updated_at: true,
+  status: true,
+  last_error_code: true,
+  lease_token: true,
+  lease_expires_at: true,
+  updated_at: true,
+} as const satisfies Prisma.SeoDiscoveryJobSelect
+
+type SitemapJobSnapshot = Prisma.SeoDiscoveryJobGetPayload<{
+  select: typeof SITEMAP_JOB_SNAPSHOT_SELECT
+}>
 
 export type SitemapSyncClient = Pick<PrismaClient, '$transaction'>
 
@@ -75,6 +97,73 @@ function revivedState(now: Date) {
   }
 }
 
+async function reconcileObservedExistingJob(
+  transaction: Prisma.TransactionClient,
+  initial: SitemapJobSnapshot,
+  lastModified: Date | null,
+  now: Date,
+): Promise<number> {
+  let current = initial
+
+  for (let attempt = 0; attempt < MAX_SITEMAP_CAS_ATTEMPTS; attempt += 1) {
+    const hasNewerLastmod = lastModified !== null
+      && lastModified.getTime() > current.content_updated_at.getTime()
+
+    if (current.source_type !== 'sitemap_sync') {
+      if (!hasNewerLastmod || lastModified === null) return 0
+
+      const reset = await transaction.seoDiscoveryJob.updateMany({
+        where: {
+          id: current.id,
+          content_updated_at: { lt: lastModified },
+        },
+        data: pendingState(lastModified, now),
+      })
+      return reset.count
+    }
+
+    const isRemovedReappearance = current.status === 'SKIPPED'
+      && current.last_error_code === REMOVED_FROM_SITEMAP
+    const observed = await transaction.seoDiscoveryJob.updateMany({
+      where: {
+        id: current.id,
+        source_type: 'sitemap_sync',
+        updated_at: current.updated_at,
+        ...(hasNewerLastmod && lastModified !== null
+          ? { content_updated_at: { lt: lastModified } }
+          : {}),
+      },
+      data: {
+        ...(hasNewerLastmod && lastModified !== null
+          ? pendingState(lastModified, now)
+          : isRemovedReappearance
+            ? revivedState(now)
+            : {}),
+        // Always derive the next token from the row read for this exact CAS
+        // attempt. A stale token must never overwrite a concurrent generation.
+        updated_at: nextObservationTimestamp(current.updated_at, now),
+      },
+    })
+
+    if (observed.count > 0) {
+      return hasNewerLastmod || isRemovedReappearance ? observed.count : 0
+    }
+
+    if (attempt === MAX_SITEMAP_CAS_ATTEMPTS - 1) {
+      throw new Error(SITEMAP_CAS_RETRY_EXHAUSTED)
+    }
+
+    const refreshed = await transaction.seoDiscoveryJob.findUnique({
+      where: { url: current.url },
+      select: SITEMAP_JOB_SNAPSHOT_SELECT,
+    })
+    if (!refreshed) throw new Error(SITEMAP_CAS_RETRY_EXHAUSTED)
+    current = refreshed
+  }
+
+  throw new Error(SITEMAP_CAS_RETRY_EXHAUSTED)
+}
+
 export async function syncSitemapDiscoveryJobs(
   client: SitemapSyncClient = prisma,
   dependencies: SitemapSyncDependencies = DEFAULT_DEPENDENCIES,
@@ -99,17 +188,7 @@ export async function syncSitemapDiscoveryJobs(
           { url: { in: entries.map(({ url }) => url) } },
         ],
       },
-      select: {
-        id: true,
-        url: true,
-        source_type: true,
-        content_updated_at: true,
-        status: true,
-        last_error_code: true,
-        lease_token: true,
-        lease_expires_at: true,
-        updated_at: true,
-      },
+      select: SITEMAP_JOB_SNAPSHOT_SELECT,
     })
     const existingJobs = new Map(relevantJobs.map((job) => [job.url, job]))
     const priorSitemapJobs = relevantJobs.filter(
@@ -138,46 +217,17 @@ export async function syncSitemapDiscoveryJobs(
     let resetCount = 0
     for (const { url, lastModified } of entries) {
       const existing = existingJobs.get(url)
-      const hasNewerLastmod = lastModified !== null
-        && (!existing || lastModified.getTime() > existing.content_updated_at.getTime())
-
-      if (existing?.source_type === 'sitemap_sync') {
-        const isRemovedReappearance = existing.status === 'SKIPPED'
-          && existing.last_error_code === REMOVED_FROM_SITEMAP
-        const observationUpdatedAt = nextObservationTimestamp(existing.updated_at, now)
-        const observed = await transaction.seoDiscoveryJob.updateMany({
-          where: {
-            id: existing.id,
-            source_type: 'sitemap_sync',
-            updated_at: existing.updated_at,
-            ...(hasNewerLastmod && lastModified !== null
-              ? { content_updated_at: { lt: lastModified } }
-              : {}),
-          },
-          data: {
-            ...(hasNewerLastmod && lastModified !== null
-              ? pendingState(lastModified, now)
-              : isRemovedReappearance
-                ? revivedState(now)
-                : {}),
-            // Presence bookkeeping is also the CAS generation used by a stale
-            // missing snapshot. It must not clear inspection evidence when the
-            // content version is unchanged.
-            updated_at: observationUpdatedAt,
-          },
-        })
-
-        if (hasNewerLastmod || isRemovedReappearance) {
-          resetCount += observed.count
-        }
+      if (existing) {
+        resetCount += await reconcileObservedExistingJob(
+          transaction,
+          existing,
+          lastModified,
+          now,
+        )
         continue
       }
 
       if (lastModified === null) continue
-      if (
-        existing
-        && lastModified.getTime() <= existing.content_updated_at.getTime()
-      ) continue
 
       const reset = await transaction.seoDiscoveryJob.updateMany({
         where: {
@@ -229,7 +279,7 @@ export async function syncSitemapDiscoveryJobs(
       resetCount,
       removedCount,
     }
-  })
+  }, SITEMAP_TRANSACTION_OPTIONS)
 
   return {
     observedCount: entries.length,
