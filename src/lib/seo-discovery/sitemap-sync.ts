@@ -56,6 +56,25 @@ function contentVersion(lastModified: Date | null): Date {
     : new Date(lastModified.getTime())
 }
 
+function nextObservationTimestamp(previous: Date, observedAt: Date): Date {
+  return new Date(Math.max(
+    observedAt.getTime(),
+    previous.getTime() + 1,
+  ))
+}
+
+function revivedState(now: Date) {
+  return {
+    status: 'PENDING_ELIGIBILITY',
+    next_attempt_at: new Date(now.getTime()),
+    attempt_count: 0,
+    last_error_code: null,
+    last_error_message: null,
+    lease_token: null,
+    lease_expires_at: null,
+  }
+}
+
 export async function syncSitemapDiscoveryJobs(
   client: SitemapSyncClient = prisma,
   dependencies: SitemapSyncDependencies = DEFAULT_DEPENDENCIES,
@@ -89,6 +108,7 @@ export async function syncSitemapDiscoveryJobs(
         last_error_code: true,
         lease_token: true,
         lease_expires_at: true,
+        updated_at: true,
       },
     })
     const existingJobs = new Map(relevantJobs.map((job) => [job.url, job]))
@@ -110,20 +130,54 @@ export async function syncSitemapDiscoveryJobs(
           source_type: 'sitemap_sync',
           source_id: null,
           ...pendingState(contentVersion(lastModified), now),
+          updated_at: new Date(now.getTime()),
         })),
         skipDuplicates: true,
       })
 
     let resetCount = 0
     for (const { url, lastModified } of entries) {
-      if (lastModified === null) continue
       const existing = existingJobs.get(url)
+      const hasNewerLastmod = lastModified !== null
+        && (!existing || lastModified.getTime() > existing.content_updated_at.getTime())
+
+      if (existing?.source_type === 'sitemap_sync') {
+        const isRemovedReappearance = existing.status === 'SKIPPED'
+          && existing.last_error_code === REMOVED_FROM_SITEMAP
+        const observationUpdatedAt = nextObservationTimestamp(existing.updated_at, now)
+        const observed = await transaction.seoDiscoveryJob.updateMany({
+          where: {
+            id: existing.id,
+            source_type: 'sitemap_sync',
+            updated_at: existing.updated_at,
+            ...(hasNewerLastmod && lastModified !== null
+              ? { content_updated_at: { lt: lastModified } }
+              : {}),
+          },
+          data: {
+            ...(hasNewerLastmod && lastModified !== null
+              ? pendingState(lastModified, now)
+              : isRemovedReappearance
+                ? revivedState(now)
+                : {}),
+            // Presence bookkeeping is also the CAS generation used by a stale
+            // missing snapshot. It must not clear inspection evidence when the
+            // content version is unchanged.
+            updated_at: observationUpdatedAt,
+          },
+        })
+
+        if (hasNewerLastmod || isRemovedReappearance) {
+          resetCount += observed.count
+        }
+        continue
+      }
+
+      if (lastModified === null) continue
       if (
         existing
         && lastModified.getTime() <= existing.content_updated_at.getTime()
-      ) {
-        continue
-      }
+      ) continue
 
       const reset = await transaction.seoDiscoveryJob.updateMany({
         where: {
@@ -149,6 +203,7 @@ export async function syncSitemapDiscoveryJobs(
         where: {
           id: job.id,
           source_type: 'sitemap_sync',
+          updated_at: job.updated_at,
           OR: [
             { status: { not: 'SKIPPED' } },
             { last_error_code: null },
@@ -163,6 +218,7 @@ export async function syncSitemapDiscoveryJobs(
           last_error_message: null,
           lease_token: null,
           lease_expires_at: null,
+          updated_at: nextObservationTimestamp(job.updated_at, now),
         },
       })
       removedCount += removed.count

@@ -106,7 +106,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         contentUpdatedAt: product.updated_at,
         reason: existing.status === 'active' ? 'updated' as const : 'activated' as const,
       }
-      const previousUrl = existing.status === 'active' && existing.slug !== product.slug
+      const previousUrl = existing.slug !== product.slug
         ? buildPublicContentUrl('product', existing.slug)
         : undefined
 

@@ -179,6 +179,36 @@ describe('product publication routes', () => {
     expect(mocks.revalidateProduct).not.toHaveBeenCalled()
   })
 
+  it('invalidates the old slug when activation also saves a new slug', async () => {
+    const existing = { ...existingProduct, status: 'inactive' }
+    const saved = {
+      ...existingProduct,
+      slug: 'moc-khoa-nam-moi',
+      status: 'active',
+      updated_at: SAVED_AT,
+    }
+    mocks.productFindUnique.mockResolvedValue(existing)
+    mocks.productUpdate.mockResolvedValue(saved)
+
+    const response = await updateProduct(
+      request('PUT', { slug: saved.slug, status: 'active' }),
+      updateContext(),
+    )
+
+    expect(response.status).toBe(200)
+    expect(mocks.recordAndRevalidatePublication).toHaveBeenCalledOnce()
+    expect(mocks.recordAndRevalidatePublication).toHaveBeenCalledWith({
+      source: 'product',
+      sourceId: saved.id,
+      url: 'https://mushroomie.io.vn/san-pham/moc-khoa-nam-moi',
+      contentUpdatedAt: SAVED_AT,
+      reason: 'activated',
+    }, {
+      previousUrl: 'https://mushroomie.io.vn/san-pham/moc-khoa-nam',
+    })
+    expect(mocks.revalidateProduct).not.toHaveBeenCalled()
+  })
+
   it('invalidates both active slug paths while enqueuing only the saved new URL', async () => {
     const saved = {
       ...existingProduct,
