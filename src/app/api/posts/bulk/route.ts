@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { logAdminAction } from '@/lib/admin-logger'
 import { restoreData, trashData } from '@/lib/post-workflow'
+import { recordAndRevalidatePublication } from '@/lib/seo-discovery/publication'
+import type { PublicContentPublication } from '@/lib/seo-discovery/types'
+import { buildPublicContentUrl } from '@/lib/seo-discovery/urls'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,13 +39,21 @@ export async function POST(request: NextRequest) {
     })
 
     let affected = 0
+    const publicationEvents: PublicContentPublication[] = []
     for (const post of posts) {
       switch (action) {
         case 'publish':
           if (post.status !== 'published' && post.status !== 'trash') {
-            await prisma.post.update({
+            const publishedPost = await prisma.post.update({
               where: { id: post.id },
               data: { status: 'published', published_at: post.published_at ?? new Date() },
+            })
+            publicationEvents.push({
+              source: 'post',
+              sourceId: publishedPost.id,
+              url: buildPublicContentUrl('post', publishedPost.slug),
+              contentUpdatedAt: publishedPost.updated_at,
+              reason: 'published',
             })
             affected++
           }
@@ -82,6 +93,10 @@ export async function POST(request: NextRequest) {
       details: { bulk: action, requested: ids.length, affected },
       ipAddress: request.headers.get('x-forwarded-for') || undefined,
     })
+
+    for (const publicationEvent of publicationEvents) {
+      await recordAndRevalidatePublication(publicationEvent)
+    }
 
     return NextResponse.json({ success: true, affected })
   } catch {

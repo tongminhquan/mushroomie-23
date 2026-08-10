@@ -5,6 +5,11 @@ import { generateSlug } from '@/lib/utils'
 import { logAdminAction } from '@/lib/admin-logger'
 import { buildPostContentMetrics, normalizeOptionalPostImage, serializePostForEditor, serializeStringArray } from '@/lib/post-normalization'
 import { isValidPostStatus, makeExcerpt, savePostRevision, syncPostTags, trashData } from '@/lib/post-workflow'
+import {
+  recordAndRevalidatePublication,
+  shouldRecordPostPublication,
+} from '@/lib/seo-discovery/publication'
+import { buildPublicContentUrl } from '@/lib/seo-discovery/urls'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -136,6 +141,20 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       details: { id: post.id, title: post.title },
       ipAddress: request.headers.get('x-forwarded-for') || undefined
     })
+
+    if (shouldRecordPostPublication(existing, post)) {
+      await recordAndRevalidatePublication({
+        source: 'post',
+        sourceId: post.id,
+        url: buildPublicContentUrl('post', post.slug),
+        contentUpdatedAt: post.updated_at,
+        reason: existing.status === 'published' ? 'updated' : 'published',
+      }, {
+        previousUrl: existing.slug !== post.slug
+          ? buildPublicContentUrl('post', existing.slug)
+          : undefined,
+      })
+    }
     
     return NextResponse.json({ post })
   } catch (e: any) {

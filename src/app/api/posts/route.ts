@@ -5,6 +5,8 @@ import { generateSlug } from '@/lib/utils'
 import { logAdminAction } from '@/lib/admin-logger'
 import { buildPostContentMetrics, normalizeOptionalPostImage, serializePostForEditor, serializeStringArray } from '@/lib/post-normalization'
 import { isValidPostStatus, makeExcerpt, syncPostTags } from '@/lib/post-workflow'
+import { recordAndRevalidatePublication } from '@/lib/seo-discovery/publication'
+import { buildPublicContentUrl } from '@/lib/seo-discovery/urls'
 
 const SORTABLE_FIELDS = new Set(['created_at', 'updated_at', 'published_at', 'title'])
 
@@ -165,6 +167,16 @@ export async function POST(request: NextRequest) {
       details: { id: post.id, title: post.title },
       ipAddress: request.headers.get('x-forwarded-for') || undefined
     })
+
+    if (post.status === 'published') {
+      await recordAndRevalidatePublication({
+        source: 'post',
+        sourceId: post.id,
+        url: buildPublicContentUrl('post', post.slug),
+        contentUpdatedAt: post.updated_at,
+        reason: 'created',
+      })
+    }
 
     return NextResponse.json(post, { status: 201 })
   } catch (error: any) {

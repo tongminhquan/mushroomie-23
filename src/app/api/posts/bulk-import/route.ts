@@ -7,6 +7,9 @@ import { logAdminAction } from '@/lib/admin-logger'
 import { optimizeUploadImage } from '@/lib/image-processing'
 import { buildPostContentMetrics, normalizeOptionalPostImage } from '@/lib/post-normalization'
 import { normalizePostCanonicalUrl, parseBulkImportFile, rewriteContentImages } from '@/lib/bulk-import'
+import { recordAndRevalidatePublication } from '@/lib/seo-discovery/publication'
+import type { PublicContentPublication } from '@/lib/seo-discovery/types'
+import { buildPublicContentUrl } from '@/lib/seo-discovery/urls'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -84,6 +87,7 @@ export async function POST(request: NextRequest) {
     const imageByName = new Map(images.map((f) => [f.name, f]))
     const uploadedCache = new Map<string, string>() // tên file gốc -> /uploads/url (tránh upload lặp)
     const results: RowResult[] = []
+    const publicationEvents: PublicContentPublication[] = []
 
     const uploadOne = async (name: string): Promise<string> => {
       const cached = uploadedCache.get(name)
@@ -173,26 +177,54 @@ export async function POST(request: NextRequest) {
           published_at: publishedAt,
         }
 
-        const isUpdate = existingSlugs.has(row.slug)
-        const post = isUpdate
-          ? await prisma.post.update({ where: { slug: row.slug }, data: baseData })
-          : await prisma.post.create({
-              data: { ...baseData, slug: row.slug, author_id: Number(session.user.id) },
-            })
-
-        // 5) Tags: upsert + gắn map (không xoá tag cũ khi update để an toàn)
+        // Normalize tags before opening the short per-row transaction. The first
+        // spelling for a slug wins, and deterministic ordering keeps lock order stable.
+        const normalizedTagsBySlug = new Map<string, { name: string; slug: string }>()
         for (const tagName of row.tags) {
           const tagSlug = generateSlug(tagName)
-          if (!tagSlug) continue
-          const tag = await prisma.postTag.upsert({
-            where: { slug: tagSlug },
-            update: {},
-            create: { name: tagName, slug: tagSlug },
-          })
-          await prisma.postTagMap.upsert({
-            where: { post_id_tag_id: { post_id: post.id, tag_id: tag.id } },
-            update: {},
-            create: { post_id: post.id, tag_id: tag.id },
+          if (tagSlug && !normalizedTagsBySlug.has(tagSlug)) {
+            normalizedTagsBySlug.set(tagSlug, { name: tagName, slug: tagSlug })
+          }
+        }
+        const normalizedTags = [...normalizedTagsBySlug.values()]
+          .sort((left, right) => left.slug.localeCompare(right.slug))
+
+        const isUpdate = existingSlugs.has(row.slug)
+        const post = await prisma.$transaction(async (transaction) => {
+          const savedPost = isUpdate
+            ? await transaction.post.update({ where: { slug: row.slug }, data: baseData })
+            : await transaction.post.create({
+                data: { ...baseData, slug: row.slug, author_id: Number(session.user.id) },
+              })
+
+          // Keep the post and its tag mappings atomic for this row. Existing tag
+          // mappings are intentionally retained on update, matching prior behavior.
+          for (const tagData of normalizedTags) {
+            const tag = await transaction.postTag.upsert({
+              where: { slug: tagData.slug },
+              update: {},
+              create: tagData,
+            })
+            await transaction.postTagMap.upsert({
+              where: { post_id_tag_id: { post_id: savedPost.id, tag_id: tag.id } },
+              update: {},
+              create: { post_id: savedPost.id, tag_id: tag.id },
+            })
+          }
+
+          return savedPost
+        }, {
+          maxWait: 2_000,
+          timeout: 5_000,
+        })
+
+        if (post.status === 'published') {
+          publicationEvents.push({
+            source: 'post',
+            sourceId: post.id,
+            url: buildPublicContentUrl('post', post.slug),
+            contentUpdatedAt: post.updated_at,
+            reason: isUpdate ? 'updated' : 'created',
           })
         }
 
@@ -236,6 +268,10 @@ export async function POST(request: NextRequest) {
       details: summary,
       ipAddress: request.headers.get('x-forwarded-for') || undefined,
     })
+
+    for (const publicationEvent of publicationEvents) {
+      await recordAndRevalidatePublication(publicationEvent)
+    }
 
     return NextResponse.json({ results, summary })
   } catch (error) {
