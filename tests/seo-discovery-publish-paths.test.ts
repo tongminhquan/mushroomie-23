@@ -115,9 +115,14 @@ test('slug updates invalidate the old DB-backed URL but enqueue only the new row
 
 test('bulk publish collects every successfully returned transition and records after logging', () => {
   assert.equal(count(bulkRoute, 'recordAndRevalidatePublication('), 1)
+  assert.equal(count(bulkRoute, 'await drainPublicationEvents()'), 2)
   const publishCaseStart = bulkRoute.indexOf("case 'publish':")
   const draftCaseStart = bulkRoute.indexOf("case 'draft':", publishCaseStart)
   const publishCase = bulkRoute.slice(publishCaseStart, draftCaseStart)
+  const drain = bracedBlock(
+    bulkRoute,
+    'const drainPublicationEvents = async () =>',
+  )
 
   assertOrdered(publishCase, [
     ['database update', 'const publishedPost = await prisma.post.update'],
@@ -125,17 +130,26 @@ test('bulk publish collects every successfully returned transition and records a
   ])
   assertEventUsesSavedRow(publishCase, 'publishedPost')
   assert.match(publishCase, /reason: 'published'/)
+  assert.match(drain, /const committedEvents = publicationEvents\.splice\(0\)/)
+  assert.match(drain, /for \(const publicationEvent of committedEvents\)/)
+  assert.match(drain, /await recordAndRevalidatePublication\(publicationEvent\)/)
   assertOrdered(bulkRoute, [
     ['bulk write loop', 'for (const post of posts)'],
     ['admin log', 'await logAdminAction({'],
-    ['successful event loop', 'for (const publicationEvent of publicationEvents)'],
-    ['publication helper', 'await recordAndRevalidatePublication(publicationEvent)'],
+    ['successful event drain', 'await drainPublicationEvents()'],
+  ])
+
+  const failedRequestCatch = bracedBlock(bulkRoute, '} catch {')
+  assertOrdered(failedRequestCatch, [
+    ['partial-failure event drain', 'await drainPublicationEvents()'],
+    ['unchanged error response', "return NextResponse.json({ error: 'Server error' }, { status: 500 })"],
   ])
 })
 
 test('bulk import atomically commits each post and its normalized tags before collecting an event', () => {
   assert.equal(count(bulkImportRoute, 'recordAndRevalidatePublication('), 1)
   assert.equal(count(bulkImportRoute, 'publicationEvents.push({'), 1)
+  assert.equal(count(bulkImportRoute, 'shouldRecordPostPublication(existingPost, post)'), 1)
   const transaction = bracedBlock(
     bulkImportRoute,
     'prisma.$transaction(async (transaction) =>',
@@ -157,19 +171,24 @@ test('bulk import atomically commits each post and its normalized tags before co
     transaction,
     /uploadOne|optimizeUploadImage|category\.upsert|logAdminAction|recordAndRevalidatePublication|revalidatePath|sleep/,
   )
-  const publishedGuard = bracedBlock(
+  const materialPublicationGuard = bracedBlock(
     bulkImportRoute,
-    "if (post.status === 'published') {",
+    "(!existingPost && post.status === 'published')",
   )
-  assert.match(publishedGuard, /publicationEvents\.push\(\{/)
+  assert.match(
+    materialPublicationGuard,
+    /shouldRecordPostPublication\(existingPost, post\)/,
+  )
+  assert.match(materialPublicationGuard, /publicationEvents\.push\(\{/)
   assert.match(
     bulkImportRoute,
     /const normalizedTags[\s\S]*?\.sort\(\(left, right\) => left\.slug\.localeCompare\(right\.slug\)\)/,
   )
   assertOrdered(bulkImportRoute, [
     ['deduplicated tag preparation', 'const normalizedTags'],
+    ['old row lookup', 'const existingPost = existingPostsBySlug.get(row.slug)'],
     ['row transaction', 'const post = await prisma.$transaction'],
-    ['saved-row visibility gate', "if (post.status === 'published')"],
+    ['saved-row material publication gate', 'shouldRecordPostPublication(existingPost, post)'],
     ['collect saved row', 'publicationEvents.push({'],
     ['successful result', 'results.push({'],
     ['admin log', 'await logAdminAction({'],
@@ -179,11 +198,14 @@ test('bulk import atomically commits each post and its normalized tags before co
   assertEventUsesSavedRow(bulkImportRoute, 'post')
   assert.match(
     bulkImportRoute,
-    /reason: isUpdate \? 'updated' : 'created'/,
+    /reason: !existingPost[\s\S]*?\? 'created'[\s\S]*?: existingPost\.status === 'published' \? 'updated' : 'published'/,
   )
 
   const transactionCallStart = bulkImportRoute.indexOf('const post = await prisma.$transaction')
-  const publicationStart = bulkImportRoute.indexOf("if (post.status === 'published')", transactionCallStart)
+  const publicationStart = bulkImportRoute.indexOf(
+    "(!existingPost && post.status === 'published')",
+    transactionCallStart,
+  )
   const transactionCall = bulkImportRoute.slice(transactionCallStart, publicationStart)
   assert.match(transactionCall, /maxWait: 2_000/)
   assert.match(transactionCall, /timeout: 5_000/)
@@ -210,7 +232,7 @@ test('non-public statuses, failed import rows, and autosaves never enqueue', () 
 
   const importPublishedGuard = bracedBlock(
     bulkImportRoute,
-    "if (post.status === 'published') {",
+    "(!existingPost && post.status === 'published')",
   )
   assert.equal(count(bulkImportRoute, 'publicationEvents.push({'), 1)
   assert.match(importPublishedGuard, /publicationEvents\.push\(\{/)

@@ -7,7 +7,10 @@ import { logAdminAction } from '@/lib/admin-logger'
 import { optimizeUploadImage } from '@/lib/image-processing'
 import { buildPostContentMetrics, normalizeOptionalPostImage } from '@/lib/post-normalization'
 import { normalizePostCanonicalUrl, parseBulkImportFile, rewriteContentImages } from '@/lib/bulk-import'
-import { recordAndRevalidatePublication } from '@/lib/seo-discovery/publication'
+import {
+  recordAndRevalidatePublication,
+  shouldRecordPostPublication,
+} from '@/lib/seo-discovery/publication'
 import type { PublicContentPublication } from '@/lib/seo-discovery/types'
 import { buildPublicContentUrl } from '@/lib/seo-discovery/urls'
 
@@ -60,11 +63,40 @@ export async function POST(request: NextRequest) {
 
     // Đánh dấu create/update theo slug đã tồn tại (chống trùng — giống app)
     const slugs = parsed.rows.map((r) => r.slug).filter(Boolean)
-    const existing = await prisma.post.findMany({
+    const existingPosts = await prisma.post.findMany({
       where: { slug: { in: slugs } },
-      select: { slug: true },
+      select: {
+        status: true,
+        title: true,
+        slug: true,
+        excerpt: true,
+        content: true,
+        featured_image: true,
+        featured_image_alt: true,
+        featured_image_caption: true,
+        featured_image_description: true,
+        category_id: true,
+        seo_title: true,
+        meta_description: true,
+        focus_keyword: true,
+        published_at: true,
+        og_title: true,
+        og_description: true,
+        og_image: true,
+        twitter_title: true,
+        twitter_description: true,
+        twitter_image: true,
+        canonical_url: true,
+        robots_index: true,
+        robots_follow: true,
+        schema_type: true,
+        secondary_keywords: true,
+        reading_time: true,
+        word_count: true,
+      },
     })
-    const existingSlugs = new Set(existing.map((p) => p.slug))
+    const existingPostsBySlug = new Map(existingPosts.map((post) => [post.slug, post]))
+    const existingSlugs = new Set(existingPostsBySlug.keys())
 
     if (mode === 'preview') {
       return NextResponse.json({
@@ -189,7 +221,8 @@ export async function POST(request: NextRequest) {
         const normalizedTags = [...normalizedTagsBySlug.values()]
           .sort((left, right) => left.slug.localeCompare(right.slug))
 
-        const isUpdate = existingSlugs.has(row.slug)
+        const existingPost = existingPostsBySlug.get(row.slug)
+        const isUpdate = existingPost !== undefined
         const post = await prisma.$transaction(async (transaction) => {
           const savedPost = isUpdate
             ? await transaction.post.update({ where: { slug: row.slug }, data: baseData })
@@ -218,13 +251,18 @@ export async function POST(request: NextRequest) {
           timeout: 5_000,
         })
 
-        if (post.status === 'published') {
+        if (
+          (!existingPost && post.status === 'published')
+          || (existingPost && shouldRecordPostPublication(existingPost, post))
+        ) {
           publicationEvents.push({
             source: 'post',
             sourceId: post.id,
             url: buildPublicContentUrl('post', post.slug),
             contentUpdatedAt: post.updated_at,
-            reason: isUpdate ? 'updated' : 'created',
+            reason: !existingPost
+              ? 'created'
+              : existingPost.status === 'published' ? 'updated' : 'published',
           })
         }
 

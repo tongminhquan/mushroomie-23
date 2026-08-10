@@ -14,6 +14,14 @@ const VALID_ACTIONS: BulkAction[] = ['publish', 'draft', 'trash', 'restore', 'de
 
 /** Bulk actions kiểu WordPress: Xuất bản / Chuyển nháp / Thùng rác / Khôi phục / Xóa vĩnh viễn */
 export async function POST(request: NextRequest) {
+  const publicationEvents: PublicContentPublication[] = []
+  const drainPublicationEvents = async () => {
+    const committedEvents = publicationEvents.splice(0)
+    for (const publicationEvent of committedEvents) {
+      await recordAndRevalidatePublication(publicationEvent)
+    }
+  }
+
   try {
     const session = await auth()
     if (!session || !['super_admin', 'admin'].includes((session.user as any).role)) {
@@ -39,7 +47,6 @@ export async function POST(request: NextRequest) {
     })
 
     let affected = 0
-    const publicationEvents: PublicContentPublication[] = []
     for (const post of posts) {
       switch (action) {
         case 'publish':
@@ -94,12 +101,11 @@ export async function POST(request: NextRequest) {
       ipAddress: request.headers.get('x-forwarded-for') || undefined,
     })
 
-    for (const publicationEvent of publicationEvents) {
-      await recordAndRevalidatePublication(publicationEvent)
-    }
+    await drainPublicationEvents()
 
     return NextResponse.json({ success: true, affected })
   } catch {
+    await drainPublicationEvents()
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
