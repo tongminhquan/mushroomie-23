@@ -1,3 +1,5 @@
+import 'server-only'
+
 import {
   accessSync,
   constants,
@@ -329,6 +331,11 @@ implements GoogleSearchConsoleClient {
     this.auth = new GoogleAuth({
       keyFilename: credentialPath,
       scopes: [WEBMASTERS_SCOPE],
+      clientOptions: {
+        transporterOptions: {
+          timeout: REQUEST_TIMEOUT_MS,
+        },
+      },
     })
   }
 
@@ -382,8 +389,23 @@ implements GoogleSearchConsoleClient {
     mapResponse: (response: Response) => Promise<T>,
   ): Promise<T> {
     const controller = new AbortController()
+    const deadline = Date.now() + REQUEST_TIMEOUT_MS
     let timedOut = false
     let timeoutHandle: ReturnType<typeof setTimeout> | undefined
+
+    const throwIfDeadlineExceeded = () => {
+      if (
+        timedOut
+        || controller.signal.aborted
+        || Date.now() >= deadline
+      ) {
+        timedOut = true
+        if (!controller.signal.aborted) {
+          controller.abort()
+        }
+        throw requestTimeoutError()
+      }
+    }
 
     const timeout = new Promise<never>((_resolve, reject) => {
       timeoutHandle = setTimeout(() => {
@@ -406,11 +428,15 @@ implements GoogleSearchConsoleClient {
         })
       }
 
+      throwIfDeadlineExceeded()
+
       const headers = new Headers(authenticationHeaders)
       new Headers(init.headers).forEach((value, name) => {
         headers.set(name, value)
       })
       headers.set('accept', 'application/json')
+
+      throwIfDeadlineExceeded()
 
       let response: Response
       try {

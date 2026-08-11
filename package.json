@@ -2,7 +2,11 @@
   "name": "mushroomie",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
+    "check:node": "node scripts/check-node-version.mjs",
     "media:banner-variants": "node scripts/generate-banner-variants.mjs",
     "media:upload-variants": "node scripts/generate-upload-variants.mjs",
     "media:upload-variants:apply": "node scripts/generate-upload-variants.mjs --apply",

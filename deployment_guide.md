@@ -11,6 +11,7 @@ Tài liệu này ghi nhận cấu hình hiện tại và hướng dẫn bạn ch
 
 - **Máy chủ Database:** MySQL được cài đặt trực tiếp trên VPS host (port `3306`).
 - **Web App:** Next.js chạy Standalone server thông qua Node.js.
+- **Runtime:** Node.js 22 trở lên; `deploy.sh` chạy preflight trước khi cài dependency.
 - **Quản lý Process:** PM2 quản lý tiến trình web app (tên app: `mushroomie_pm2`), lắng nghe trên port `3001`.
 - **Reverse Proxy:** Nginx proxy request từ port 80/443 vào `http://127.0.0.1:3001`.
 
@@ -55,6 +56,7 @@ Khi bạn có thay đổi code và đã push lên GitHub nhánh `main`, hãy SSH
 
 3. **Cập nhật thư viện và Build lại dự án:**
    ```bash
+   npm run check:node
    npm ci
    npx prisma generate
    npm run build

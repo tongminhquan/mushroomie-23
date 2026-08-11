@@ -276,7 +276,7 @@ mushroomie/
 
 ### Yêu cầu
 
-- Node.js 20 LTS hoặc mới hơn.
+- Node.js 22 hoặc mới hơn.
 - npm.
 - MySQL 8.
 
@@ -307,6 +307,7 @@ npm run dev
 ## Kiểm tra chất lượng
 
 ```bash
+npm run check:node
 npx prisma generate
 npm run typecheck
 npm run lint

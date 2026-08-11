@@ -244,6 +244,11 @@ describe('createGoogleSearchConsoleClient', () => {
     expect(googleAuthMocks.constructedWith).toHaveBeenCalledWith({
       keyFilename: credentialPath,
       scopes: ['https://www.googleapis.com/auth/webmasters'],
+      clientOptions: {
+        transporterOptions: {
+          timeout: 5_000,
+        },
+      },
     })
     const endpoint = 'https://www.googleapis.com/webmasters/v3/sites/sc-domain%3Amushroomie.io.vn/sitemaps'
     expect(googleAuthMocks.getRequestHeaders).toHaveBeenCalledWith(endpoint)
@@ -525,6 +530,31 @@ describe('createGoogleSearchConsoleClient', () => {
       code: 'GSC_REQUEST_TIMEOUT',
       retryable: true,
     })
+  })
+
+  it('never starts the provider request when auth resolves after the total deadline', async () => {
+    const fetchMock = vi.fn<typeof fetch>()
+    const { client } = await createEnabledClient(fetchMock)
+    vi.useFakeTimers()
+    googleAuthMocks.getRequestHeaders.mockImplementationOnce(() => (
+      new Promise<Headers>((resolve) => {
+        setTimeout(() => {
+          resolve(new Headers({ authorization: 'Bearer late-token' }))
+        }, 5_001)
+      })
+    ))
+
+    const outcome = client.listSitemaps().catch((caught) => caught)
+    await vi.advanceTimersByTimeAsync(5_000)
+    await expect(outcome).resolves.toMatchObject({
+      code: 'GSC_REQUEST_TIMEOUT',
+      retryable: true,
+    })
+    expect(fetchMock).not.toHaveBeenCalled()
+
+    await vi.advanceTimersByTimeAsync(1)
+    await Promise.resolve()
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it('aborts a pending fetch at the five-second total deadline', async () => {

@@ -54,6 +54,9 @@ rollback_release() {
 echo "Kéo mã nguồn mới nhất từ GitHub..."
 git pull --ff-only origin main
 
+echo "Checking the Node.js runtime requirement..."
+npm run check:node
+
 echo "Kiểm tra logo và favicon nguồn..."
 verify_public_assets "public"
 

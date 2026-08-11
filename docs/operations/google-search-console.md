@@ -20,6 +20,13 @@ GOOGLE_APPLICATION_CREDENTIALS=/etc/mushroomie/gsc-service-account.json
 access token, client secret hoặc bản mã hóa base64 vào `.env`, Git, log, database
 hay giao diện quản trị.
 
+## Yêu cầu runtime
+
+Search Console adapter dùng `google-auth-library@11.0.0`, vì vậy mọi môi
+trường build và production phải chạy Node.js 22 trở lên. `deploy.sh`
+chạy `npm run check:node` trước `npm ci`; nếu runtime còn ở Node.js 20
+hoặc thấp hơn, deploy sẽ dừng trước khi cài dependency hay build.
+
 ## Chuẩn bị service account
 
 1. Tạo một service account riêng cho Mushroomie và tải tệp JSON của tài khoản đó

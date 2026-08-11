@@ -1,4 +1,5 @@
 import react from '@vitejs/plugin-react'
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
@@ -7,6 +8,12 @@ export default defineConfig({
     tsconfigPaths: true,
   },
   test: {
+    alias: {
+      'server-only': fileURLToPath(new URL(
+        './node_modules/next/dist/compiled/server-only/empty.js',
+        import.meta.url,
+      )),
+    },
     environment: 'node',
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
