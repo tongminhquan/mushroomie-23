@@ -31,6 +31,7 @@ import { buildPublicContentUrl } from './urls'
 const MAX_BATCH_SIZE = 10
 const LEASE_DURATION_MS = 2 * 60 * 1000
 const MAX_BATCH_TIME_BUDGET_MS = 45 * 1000
+const MAX_NETWORK_OPERATION_MS = 5 * 1000
 const SITEMAP_SUBMISSION_COOLDOWN_MS = 60 * 60 * 1000
 const WORKER_ERROR_CODE = 'SEO_DISCOVERY_WORKER_ERROR'
 const INVALID_GSC_RESPONSE_CODE = 'GSC_INVALID_RESPONSE'
@@ -104,8 +105,20 @@ export interface SitemapRegistrationCoordinator {
     sitemapEntries: ReadonlyMap<string, Date | null>
     now: Date
     random: () => number
+    runNetwork?: <T>(operation: () => Promise<T>) => Promise<T>
   }): Promise<SitemapRegistrationOutcome>
   markConfigurationRequired?(code: string): void
+}
+
+export interface ConfigurationRecoveryCoordinator {
+  recover(input: {
+    enabled: boolean
+    now: Date
+    random: () => number
+    probe: () => Promise<SitemapRegistrationOutcome>
+    requeue: () => Promise<{ count: number; hasMore: boolean }>
+  }): Promise<number>
+  markConfigurationRequired?(): void
 }
 
 export interface SeoDiscoveryWorkerOptions {
@@ -115,12 +128,14 @@ export interface SeoDiscoveryWorkerOptions {
   config?: SeoDiscoveryConfig
   now?: () => Date
   monotonicNow?: () => number
+  networkOperationMaxMs?: number
   random?: () => number
   createLeaseToken?: () => string
   readSitemap?: () => Promise<Map<string, Date | null>>
   checkEligibility?: CheckEligibility
   gscClient?: GoogleSearchConsoleClient
   sitemapRegistrationCoordinator?: SitemapRegistrationCoordinator
+  configurationRecoveryCoordinator?: ConfigurationRecoveryCoordinator
 }
 
 const EMPTY_SUMMARY: SeoDiscoverySummary = {
@@ -134,6 +149,72 @@ interface CachedSitemapOutcome {
   fingerprint: string
   outcome: SitemapRegistrationOutcome
   nextAttemptAt: Date | null
+}
+
+class BatchDeadlineExceeded extends Error {
+  constructor() {
+    super('SEO_DISCOVERY_BATCH_DEADLINE_EXCEEDED')
+    this.name = 'BatchDeadlineExceeded'
+  }
+}
+
+interface BatchDeadline {
+  assertOpen(requiredHeadroomMs?: number): void
+  expired(): boolean
+  wait<T>(
+    operation: () => Promise<T>,
+    requiredHeadroomMs?: number,
+  ): Promise<T>
+}
+
+function createBatchDeadline(input: {
+  monotonicNow: () => number
+  budgetMs: number
+}): BatchDeadline {
+  const expiresAt = input.monotonicNow() + input.budgetMs
+  const remaining = () => expiresAt - input.monotonicNow()
+  const assertOpen = (requiredHeadroomMs = 0) => {
+    const remainingMs = remaining()
+    if (remainingMs <= 0 || remainingMs < requiredHeadroomMs) {
+      throw new BatchDeadlineExceeded()
+    }
+  }
+
+  return {
+    assertOpen,
+    expired: () => remaining() <= 0,
+    async wait<T>(
+      operation: () => Promise<T>,
+      requiredHeadroomMs = 0,
+    ): Promise<T> {
+      assertOpen(requiredHeadroomMs)
+      const remainingMs = Math.max(1, Math.ceil(remaining()))
+      let timer: ReturnType<typeof setTimeout> | undefined
+
+      try {
+        const value = await Promise.race([
+          Promise.resolve().then(() => {
+            assertOpen(requiredHeadroomMs)
+            return operation()
+          }),
+          new Promise<never>((_resolve, reject) => {
+            timer = setTimeout(() => {
+              reject(new BatchDeadlineExceeded())
+            }, remainingMs)
+          }),
+        ])
+        assertOpen()
+        return value
+      } catch (error) {
+        if (error instanceof BatchDeadlineExceeded || remaining() <= 0) {
+          throw new BatchDeadlineExceeded()
+        }
+        throw error
+      } finally {
+        if (timer !== undefined) clearTimeout(timer)
+      }
+    },
+  }
 }
 
 function sitemapFingerprint(entries: ReadonlyMap<string, Date | null>): string {
@@ -210,6 +291,13 @@ export function createSitemapRegistrationCoordinator(): SitemapRegistrationCoord
       ) {
         return Promise.resolve(cached.outcome)
       }
+      if (
+        cached?.outcome.state === 'retry'
+        && cached.nextAttemptAt !== null
+        && cached.nextAttemptAt.getTime() > input.now.getTime()
+      ) {
+        return Promise.resolve(cached.outcome)
+      }
       if (cached?.fingerprint === fingerprint) {
         if (cached.nextAttemptAt === null) return Promise.resolve(cached.outcome)
         if (cached.nextAttemptAt.getTime() > input.now.getTime()) {
@@ -220,7 +308,10 @@ export function createSitemapRegistrationCoordinator(): SitemapRegistrationCoord
 
       inFlight = (async () => {
         try {
-          const sitemaps = await input.client.listSitemaps()
+          const runNetwork = input.runNetwork ?? (async <T>(
+            operation: () => Promise<T>,
+          ) => operation())
+          const sitemaps = await runNetwork(() => input.client.listSitemaps())
           const canonical = sitemaps.find(({ url }) => url === FIXED_SITEMAP_URL)
           const needsSubmission = !canonical || (
             !canonical.pending
@@ -234,7 +325,7 @@ export function createSitemapRegistrationCoordinator(): SitemapRegistrationCoord
             return { state: 'ready' } as const
           }
 
-          await input.client.submitSitemap(FIXED_SITEMAP_URL)
+          await runNetwork(() => input.client.submitSitemap(FIXED_SITEMAP_URL))
           transientAttemptCount = 0
           const outcome = { state: 'ready' } as const
           cached = {
@@ -246,6 +337,7 @@ export function createSitemapRegistrationCoordinator(): SitemapRegistrationCoord
           }
           return outcome
         } catch (error) {
+          if (error instanceof BatchDeadlineExceeded) throw error
           const disposition = classifyFailure(error)
           const outcome = coordinatorOutcome(disposition)
           if (disposition.kind === 'configuration_required' || disposition.kind === 'error') {
@@ -281,7 +373,94 @@ export function createSitemapRegistrationCoordinator(): SitemapRegistrationCoord
   }
 }
 
-const defaultSitemapRegistrationCoordinator = createSitemapRegistrationCoordinator()
+export function createConfigurationRecoveryCoordinator(): ConfigurationRecoveryCoordinator {
+  let connectionReady = false
+  let completed = false
+  let inFlight: Promise<number> | null = null
+  let transientAttemptCount = 0
+  let nextProbeAt: Date | null = null
+
+  return {
+    recover(input) {
+      if (!input.enabled || completed) return Promise.resolve(0)
+      if (nextProbeAt !== null && nextProbeAt.getTime() > input.now.getTime()) {
+        return Promise.resolve(0)
+      }
+      if (inFlight) return inFlight
+
+      inFlight = (async () => {
+        if (!connectionReady) {
+          let outcome: SitemapRegistrationOutcome
+          try {
+            outcome = await input.probe()
+          } catch (error) {
+            if (error instanceof BatchDeadlineExceeded) throw error
+            const failure = classifyFailure(error)
+            if (failure.kind !== 'retry') {
+              completed = true
+              return 0
+            }
+            transientAttemptCount += 1
+            nextProbeAt = computeNextAttempt({
+              kind: 'transient',
+              attemptCount: transientAttemptCount,
+              now: input.now,
+              random: input.random,
+            })
+            return 0
+          }
+
+          if (outcome.state === 'retry') {
+            transientAttemptCount += 1
+            nextProbeAt = computeNextAttempt({
+              kind: 'transient',
+              attemptCount: transientAttemptCount,
+              now: input.now,
+              random: input.random,
+            })
+            return 0
+          }
+          if (outcome.state !== 'ready') {
+            completed = true
+            return 0
+          }
+          connectionReady = true
+        }
+
+        transientAttemptCount = 0
+        nextProbeAt = null
+        const recovered = await input.requeue()
+        completed = !recovered.hasMore
+        return recovered.count
+      })().finally(() => {
+        inFlight = null
+      })
+
+      return inFlight
+    },
+    markConfigurationRequired() {
+      completed = true
+      connectionReady = false
+      nextProbeAt = null
+      transientAttemptCount = 0
+    },
+  }
+}
+
+type SeoDiscoveryCoordinatorGlobal = typeof globalThis & {
+  __mushroomieSeoDiscoverySitemapCoordinator?: SitemapRegistrationCoordinator
+  __mushroomieSeoDiscoveryConfigurationRecovery?: ConfigurationRecoveryCoordinator
+}
+
+const coordinatorGlobal = globalThis as SeoDiscoveryCoordinatorGlobal
+const defaultSitemapRegistrationCoordinator = (
+  coordinatorGlobal.__mushroomieSeoDiscoverySitemapCoordinator
+  ??= createSitemapRegistrationCoordinator()
+)
+const defaultConfigurationRecoveryCoordinator = (
+  coordinatorGlobal.__mushroomieSeoDiscoveryConfigurationRecovery
+  ??= createConfigurationRecoveryCoordinator()
+)
 
 function boundedBatchSize(requested: number | undefined): number {
   if (!Number.isFinite(requested)) return MAX_BATCH_SIZE
@@ -293,6 +472,14 @@ function boundedTimeBudget(requested: number | undefined): number {
   return Math.min(
     MAX_BATCH_TIME_BUDGET_MS,
     Math.max(1, Math.floor(requested!)),
+  )
+}
+
+function boundedNetworkOperationMax(requested: number | undefined): number {
+  if (!Number.isFinite(requested)) return MAX_NETWORK_OPERATION_MS
+  return Math.min(
+    MAX_NETWORK_OPERATION_MS,
+    Math.max(0, Math.floor(requested!)),
   )
 }
 
@@ -316,7 +503,9 @@ async function writeOwnedJob(
   job: WorkerJob,
   leaseToken: string,
   data: Prisma.SeoDiscoveryJobUpdateManyMutationInput,
+  deadline?: BatchDeadline,
 ): Promise<boolean> {
+  deadline?.assertOpen()
   const updated = await client.seoDiscoveryJob.updateMany({
     where: ownedWhere(job, leaseToken),
     data,
@@ -435,6 +624,7 @@ async function persistFailure(
   attemptedAt: Date,
   random: () => number,
   evidence: Prisma.SeoDiscoveryJobUpdateManyMutationInput = {},
+  deadline?: BatchDeadline,
 ): Promise<{ persisted: boolean; failed: boolean; configurationRequired: boolean }> {
   if (failure.kind === 'configuration_required') {
     return {
@@ -444,14 +634,14 @@ async function persistFailure(
         attempt_count: 0,
         last_error_code: failure.code,
         last_error_message: null,
-      }),
+      }, deadline),
       failed: false,
       configurationRequired: true,
     }
   }
 
-  const attemptCount = job.attempt_count + 1
   if (failure.kind === 'retry') {
+    const attemptCount = job.attempt_count + 1
     return {
       persisted: await writeOwnedJob(client, job, leaseToken, {
         ...evidence,
@@ -465,7 +655,7 @@ async function persistFailure(
         attempt_count: attemptCount,
         last_error_code: failure.code,
         last_error_message: null,
-      }),
+      }, deadline),
       failed: true,
       configurationRequired: false,
     }
@@ -475,10 +665,10 @@ async function persistFailure(
     persisted: await writeOwnedJob(client, job, leaseToken, {
       ...evidence,
       status: 'ERROR',
-      attempt_count: attemptCount,
+      attempt_count: 0,
       last_error_code: failure.code,
       last_error_message: null,
-    }),
+    }, deadline),
     failed: true,
     configurationRequired: false,
   }
@@ -500,78 +690,171 @@ export async function runSeoDiscoveryBatch(
   const gscClient = options.gscClient ?? createGoogleSearchConsoleClient()
   const sitemapRegistrationCoordinator = options.sitemapRegistrationCoordinator
     ?? defaultSitemapRegistrationCoordinator
-
-  const claimedAt = now()
-  const batchStartedAt = monotonicNow()
+  const configurationRecoveryCoordinator = options.configurationRecoveryCoordinator
+    ?? defaultConfigurationRecoveryCoordinator
   const batchTimeBudget = boundedTimeBudget(options.batchTimeBudgetMs)
-  const leaseToken = validLeaseToken(createLeaseToken())
-  const leaseExpiresAt = new Date(claimedAt.getTime() + LEASE_DURATION_MS)
-  const candidates = await client.seoDiscoveryJob.findMany({
-    where: {
-      status: { in: [...CLAIMABLE_STATUSES] },
-      next_attempt_at: { lte: claimedAt },
-      OR: [
-        { lease_token: null },
-        { lease_expires_at: { lte: claimedAt } },
-      ],
-    },
-    orderBy: [
-      { next_attempt_at: 'asc' },
-      { id: 'asc' },
-    ],
-    take: boundedBatchSize(options.batchSize),
-    select: WORKER_JOB_SELECT,
-  })
-
+  const networkOperationMax = boundedNetworkOperationMax(
+    options.networkOperationMaxMs,
+  )
+  const deadline = createBatchDeadline({ monotonicNow, budgetMs: batchTimeBudget })
   const summary: SeoDiscoverySummary = { ...EMPTY_SUMMARY }
+  const candidateReadAt = now()
+  const leaseToken = validLeaseToken(createLeaseToken())
   let sitemapPromise: Promise<Map<string, Date | null>> | undefined
   let sitemapReadinessPromise: Promise<SitemapRegistrationOutcome> | undefined
   let batchGoogleFailure: FailureDisposition | null = null
   const getSitemap = () => {
-    sitemapPromise ??= readSitemap()
+    sitemapPromise ??= deadline.wait(readSitemap, networkOperationMax)
     return sitemapPromise
   }
   const getSitemapReadiness = (entries: ReadonlyMap<string, Date | null>) => {
-    sitemapReadinessPromise ??= sitemapRegistrationCoordinator.ensure({
-      client: gscClient,
-      sitemapEntries: entries,
-      now: now(),
-      random,
-    })
+    sitemapReadinessPromise ??= deadline.wait(
+      () => sitemapRegistrationCoordinator.ensure({
+        client: gscClient,
+        sitemapEntries: entries,
+        now: now(),
+        random,
+        runNetwork: (operation) => deadline.wait(
+          operation,
+          networkOperationMax,
+        ),
+      }),
+    )
     return sitemapReadinessPromise
   }
 
-  for (const candidate of candidates) {
-    if (monotonicNow() - batchStartedAt >= batchTimeBudget) break
+  try {
+    if (config.gscEnabled) {
+      const recoveryLimit = boundedBatchSize(options.batchSize)
+      const configurationSnapshots = await deadline.wait(
+        () => client.seoDiscoveryJob.findMany({
+          where: { status: 'CONFIGURATION_REQUIRED' },
+          orderBy: [{ id: 'asc' }],
+          take: MAX_BATCH_SIZE + 1,
+          select: WORKER_JOB_SELECT,
+        }),
+      )
+      const recoverySlice = configurationSnapshots.filter((job) => (
+        job.lease_token === null
+        || (
+          job.lease_expires_at !== null
+          && job.lease_expires_at.getTime() <= candidateReadAt.getTime()
+        )
+      )).slice(0, recoveryLimit)
+      if (recoverySlice.length > 0) {
+        await configurationRecoveryCoordinator.recover({
+          enabled: true,
+          now: candidateReadAt,
+          random,
+          probe: async () => getSitemapReadiness(await getSitemap()),
+          requeue: async () => {
+            deadline.assertOpen()
+            const recovered = await client.seoDiscoveryJob.updateMany({
+              where: {
+                status: 'CONFIGURATION_REQUIRED',
+                OR: recoverySlice.map((job) => ({
+                  id: job.id,
+                  content_updated_at: new Date(job.content_updated_at.getTime()),
+                  lease_token: job.lease_token,
+                  lease_expires_at: job.lease_expires_at === null
+                    ? null
+                    : new Date(job.lease_expires_at.getTime()),
+                })),
+              },
+              data: {
+                status: 'PENDING_ELIGIBILITY',
+                next_attempt_at: candidateReadAt,
+                attempt_count: 0,
+                lease_token: null,
+                lease_expires_at: null,
+              },
+            })
+            return {
+              count: recovered.count,
+              hasMore: configurationSnapshots.length > recoverySlice.length,
+            }
+          },
+        })
+      }
+    }
+    deadline.assertOpen()
+  } catch (error) {
+    if (error instanceof BatchDeadlineExceeded) return summary
+    throw error
+  }
 
-    const claimed = await client.seoDiscoveryJob.updateMany({
+  let candidates: WorkerJob[]
+  try {
+    candidates = await deadline.wait(() => client.seoDiscoveryJob.findMany({
       where: {
-        id: candidate.id,
-        content_updated_at: new Date(candidate.content_updated_at.getTime()),
         status: { in: [...CLAIMABLE_STATUSES] },
-        next_attempt_at: { lte: claimedAt },
+        next_attempt_at: { lte: candidateReadAt },
         OR: [
           { lease_token: null },
-          { lease_expires_at: { lte: claimedAt } },
+          { lease_expires_at: { lte: candidateReadAt } },
         ],
       },
-      data: {
-        lease_token: leaseToken,
-        lease_expires_at: leaseExpiresAt,
-      },
-    })
+      orderBy: [
+        { next_attempt_at: 'asc' },
+        { id: 'asc' },
+      ],
+      take: boundedBatchSize(options.batchSize),
+      select: WORKER_JOB_SELECT,
+    }))
+  } catch (error) {
+    if (error instanceof BatchDeadlineExceeded) return summary
+    throw error
+  }
+
+  for (const candidate of candidates) {
+    if (deadline.expired()) break
+
+    const claimStartedAt = now()
+    const leaseExpiresAt = new Date(claimStartedAt.getTime() + LEASE_DURATION_MS)
+    let claimed: { count: number }
+    try {
+      deadline.assertOpen()
+      claimed = await client.seoDiscoveryJob.updateMany({
+        where: {
+          id: candidate.id,
+          content_updated_at: new Date(candidate.content_updated_at.getTime()),
+          status: { in: [...CLAIMABLE_STATUSES] },
+          next_attempt_at: { lte: claimStartedAt },
+          OR: [
+            { lease_token: null },
+            { lease_expires_at: { lte: claimStartedAt } },
+          ],
+        },
+        data: {
+          lease_token: leaseToken,
+          lease_expires_at: leaseExpiresAt,
+        },
+      })
+    } catch (error) {
+      if (error instanceof BatchDeadlineExceeded || deadline.expired()) break
+      throw error
+    }
     if (claimed.count !== 1) continue
     summary.claimed += 1
 
-    const leasedJob = await client.seoDiscoveryJob.findFirst({
-      where: ownedWhere(candidate, leaseToken),
-      select: WORKER_JOB_SELECT,
-    })
-    if (!leasedJob) continue
-
+    let leasedJob: WorkerJob | null = null
     let failureCounted = false
+    let stopBatch = false
     try {
-      const sourceFailure = await sourceEligibilityFailure(client, leasedJob)
+      deadline.assertOpen()
+      leasedJob = await deadline.wait(() => client.seoDiscoveryJob.findFirst({
+        where: ownedWhere(candidate, leaseToken),
+        select: WORKER_JOB_SELECT,
+      }))
+      if (!leasedJob) {
+        summary.failed += 1
+        failureCounted = true
+        continue
+      }
+
+      const sourceFailure = await deadline.wait(
+        () => sourceEligibilityFailure(client, leasedJob!),
+      )
       if (sourceFailure !== null) {
         const persisted = await writeOwnedJob(client, leasedJob, leaseToken, {
           status: 'SKIPPED',
@@ -582,13 +865,40 @@ export async function runSeoDiscoveryBatch(
           attempt_count: 0,
           last_error_code: sourceFailure,
           last_error_message: null,
-        })
+        }, deadline)
         if (persisted) summary.processed += 1
         continue
       }
 
       const sitemapEntries = await getSitemap()
-      const eligibility = await checkEligibility(leasedJob.url, sitemapEntries)
+      const eligibility = await deadline.wait(
+        () => checkEligibility(leasedJob!.url, sitemapEntries),
+        networkOperationMax,
+      )
+      if (
+        !eligibility.eligible
+        && eligibility.code === 'HTTP_NOT_FOUND'
+        && !(
+          leasedJob.status === 'RETRY'
+          && leasedJob.last_error_code === 'HTTP_NOT_FOUND'
+        )
+      ) {
+        const persisted = await writeOwnedJob(client, leasedJob, leaseToken, {
+          ...eligibilityEvidence(eligibility),
+          status: 'RETRY',
+          next_attempt_at: computeNextAttempt({
+            kind: 'transient',
+            attemptCount: 1,
+            now: now(),
+            random,
+          }),
+          attempt_count: 0,
+          last_error_code: eligibility.code,
+          last_error_message: null,
+        }, deadline)
+        if (persisted) summary.processed += 1
+        continue
+      }
       if (!eligibility.eligible && !eligibility.retryable) {
         const persisted = await writeOwnedJob(client, leasedJob, leaseToken, {
           ...eligibilityEvidence(eligibility),
@@ -596,7 +906,7 @@ export async function runSeoDiscoveryBatch(
           attempt_count: 0,
           last_error_code: eligibility.code,
           last_error_message: null,
-        })
+        }, deadline)
         if (persisted) summary.processed += 1
         continue
       }
@@ -610,6 +920,7 @@ export async function runSeoDiscoveryBatch(
           now(),
           random,
           eligibilityEvidence(eligibility),
+          deadline,
         )
         if (transition.persisted) {
           summary.processed += 1
@@ -624,7 +935,7 @@ export async function runSeoDiscoveryBatch(
         status: 'ELIGIBLE',
         last_error_code: null,
         last_error_message: null,
-      })
+      }, deadline)
       if (!eligibilityPersisted) continue
 
       if (batchGoogleFailure !== null) {
@@ -635,6 +946,8 @@ export async function runSeoDiscoveryBatch(
           batchGoogleFailure,
           now(),
           random,
+          {},
+          deadline,
         )
         if (transition.persisted) {
           summary.processed += 1
@@ -656,6 +969,9 @@ export async function runSeoDiscoveryBatch(
           code: sitemapReadiness.code,
         }
         batchGoogleFailure = registrationFailure
+        if (registrationFailure.kind === 'configuration_required') {
+          configurationRecoveryCoordinator.markConfigurationRequired?.()
+        }
         const transition = await persistFailure(
           client,
           leasedJob,
@@ -663,6 +979,8 @@ export async function runSeoDiscoveryBatch(
           registrationFailure,
           now(),
           random,
+          {},
+          deadline,
         )
         if (transition.persisted) {
           summary.processed += 1
@@ -681,15 +999,20 @@ export async function runSeoDiscoveryBatch(
       let inspection: ValidatedInspectionEvidence
       try {
         inspection = validateInspectionResult(
-          await gscClient.inspectUrl(leasedJob.url),
+          await deadline.wait(
+            () => gscClient.inspectUrl(leasedJob!.url),
+            networkOperationMax,
+          ),
         )
       } catch (error) {
+        if (error instanceof BatchDeadlineExceeded) throw error
         if (error instanceof GscClientError) {
           batchGoogleFailure = classifyFailure(error)
           if (batchGoogleFailure.kind === 'configuration_required') {
             sitemapRegistrationCoordinator.markConfigurationRequired?.(
               batchGoogleFailure.code,
             )
+            configurationRecoveryCoordinator.markConfigurationRequired?.()
           }
         }
         throw error
@@ -719,47 +1042,65 @@ export async function runSeoDiscoveryBatch(
         attempt_count: 0,
         last_error_code: null,
         last_error_message: null,
-      })
+      }, deadline)
       if (persisted) summary.processed += 1
     } catch (error) {
-      try {
-        const transition = await persistFailure(
-          client,
-          leasedJob,
-          leaseToken,
-          classifyFailure(error),
-          now(),
-          random,
-        )
-        if (transition.persisted) {
-          summary.processed += 1
-          if (transition.failed) {
-            summary.failed += 1
-            failureCounted = true
-          }
-          if (transition.configurationRequired) {
-            summary.configurationRequired += 1
-          }
-        }
-      } catch {
+      if (error instanceof BatchDeadlineExceeded) {
         if (!failureCounted) {
           summary.failed += 1
           failureCounted = true
+        }
+        stopBatch = true
+      } else if (leasedJob === null) {
+        summary.failed += 1
+        failureCounted = true
+      } else {
+        try {
+          const transition = await persistFailure(
+            client,
+            leasedJob,
+            leaseToken,
+            classifyFailure(error),
+            now(),
+            random,
+            {},
+            deadline,
+          )
+          if (transition.persisted) {
+            summary.processed += 1
+            if (transition.failed) {
+              summary.failed += 1
+              failureCounted = true
+            }
+            if (transition.configurationRequired) {
+              summary.configurationRequired += 1
+            }
+          }
+        } catch (persistError) {
+          if (persistError instanceof BatchDeadlineExceeded) stopBatch = true
+          if (!failureCounted) {
+            summary.failed += 1
+            failureCounted = true
+          }
         }
       }
     } finally {
       try {
         await client.seoDiscoveryJob.updateMany({
-          where: ownedWhere(leasedJob, leaseToken),
+          where: ownedWhere(candidate, leaseToken),
           data: {
             lease_token: null,
             lease_expires_at: null,
           },
         })
       } catch {
-        if (!failureCounted) summary.failed += 1
+        if (!failureCounted) {
+          summary.failed += 1
+          failureCounted = true
+        }
       }
     }
+    if (stopBatch) break
   }
 
   return summary

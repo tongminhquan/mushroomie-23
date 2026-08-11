@@ -5,7 +5,8 @@ import {
   type UrlInspectionResult,
 } from '@/lib/seo-discovery/gsc-client'
 import type { PublicUrlEligibilityResult } from '@/lib/seo-discovery/eligibility'
-import { describe, expect, it, vi } from 'vitest'
+import { SitemapReaderError } from '@/lib/seo-discovery/sitemap-reader'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   computeNextAttempt,
@@ -13,6 +14,7 @@ import {
   INSPECTION_DELAYS_MS,
 } from '@/lib/seo-discovery/retry'
 import {
+  createConfigurationRecoveryCoordinator,
   createSitemapRegistrationCoordinator,
   runSeoDiscoveryBatch,
   runSeoDiscoveryBatchSafely,
@@ -21,6 +23,10 @@ import {
 const NOW = new Date('2026-08-11T05:00:00.000Z')
 const DAY_MS = 24 * 60 * 60 * 1000
 const SITEMAP_URL = 'https://mushroomie.io.vn/sitemap.xml'
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 interface FakeJob {
   id: number
@@ -152,6 +158,10 @@ class FakeWorkerClient {
   }> = []
   readonly findFirstCalls: Array<Record<string, unknown>> = []
   beforeCandidateRead?: () => Promise<void>
+  beforeUpdateMany?: (args: {
+    where: Record<string, unknown>
+    data: Record<string, unknown>
+  }) => Promise<void>
 
   constructor(jobs: FakeJob[]) {
     this.jobs = jobs.map(cloneValue)
@@ -200,6 +210,7 @@ class FakeWorkerClient {
       where: Record<string, unknown>
       data: Record<string, unknown>
     }) => {
+      await this.beforeUpdateMany?.(cloneValue(args))
       this.updateManyCalls.push(cloneValue(args))
       let count = 0
       for (const job of this.jobs) {
@@ -232,6 +243,17 @@ function skippedEligibility(): PublicUrlEligibilityResult {
     httpStatus: 200,
     declaredCanonical: null,
     robotsIndexable: false,
+  }
+}
+
+function notFoundEligibility(): PublicUrlEligibilityResult {
+  return {
+    eligible: false,
+    retryable: false,
+    code: 'HTTP_NOT_FOUND',
+    httpStatus: 404,
+    declaredCanonical: null,
+    robotsIndexable: null,
   }
 }
 
@@ -477,17 +499,312 @@ describe('runSeoDiscoveryBatch leasing', () => {
 
   it('stops claiming new rows when the strict batch time budget is exhausted', async () => {
     const client = new FakeWorkerClient([fakeJob(1), fakeJob(2)]).initialize()
-    const monotonicSamples = [0, 0, 1_001]
+    let monotonicTime = 0
+    client.beforeUpdateMany = async ({ where, data }) => {
+      if (
+        where.id === 1
+        && data.lease_token === null
+        && data.status === undefined
+      ) {
+        monotonicTime = 1_001
+      }
+    }
 
     const summary = await runSeoDiscoveryBatch(workerOptions(client, {
       batchTimeBudgetMs: 1_000,
-      monotonicNow: () => monotonicSamples.shift() ?? 1_001,
+      networkOperationMaxMs: 0,
+      monotonicNow: () => monotonicTime,
+      configurationRecoveryCoordinator: { recover: async () => 0 },
       checkEligibility: async () => skippedEligibility(),
     }))
 
     expect(summary).toMatchObject({ claimed: 1, processed: 1 })
     expect(client.jobs[0].status).toBe('SKIPPED')
     expect(client.jobs[1].status).toBe('PENDING_ELIGIBILITY')
+  })
+
+  it('does not persist an eligibility result that settles after the absolute deadline', async () => {
+    const client = new FakeWorkerClient([fakeJob(1)]).initialize()
+    let monotonicTime = 0
+
+    const summary = await runSeoDiscoveryBatch(workerOptions(client, {
+      batchTimeBudgetMs: 1_000,
+      networkOperationMaxMs: 0,
+      monotonicNow: () => monotonicTime,
+      configurationRecoveryCoordinator: { recover: async () => 0 },
+      checkEligibility: async () => {
+        monotonicTime = 1_001
+        return skippedEligibility()
+      },
+    }))
+
+    expect(summary).toEqual({
+      claimed: 1,
+      processed: 0,
+      failed: 1,
+      configurationRequired: 0,
+    })
+    expect(client.jobs[0]).toMatchObject({
+      status: 'PENDING_ELIGIBILITY',
+      eligibility_status: null,
+      last_error_code: null,
+      lease_token: null,
+      lease_expires_at: null,
+    })
+    expect(client.updateManyCalls.filter(({ data }) => (
+      typeof data.status === 'string'
+    ))).toHaveLength(0)
+  })
+
+  it('returns after a hung dependency deadline and ignores its late completion', async () => {
+    vi.useFakeTimers()
+    const client = new FakeWorkerClient([fakeJob(1)]).initialize()
+    let monotonicTime = 0
+    let resolveEligibility!: (result: PublicUrlEligibilityResult) => void
+    const lateEligibility = new Promise<PublicUrlEligibilityResult>((resolve) => {
+      resolveEligibility = resolve
+    })
+    const checkEligibility = vi.fn(() => lateEligibility)
+
+    const batchPromise = runSeoDiscoveryBatch(workerOptions(client, {
+      batchTimeBudgetMs: 1_000,
+      networkOperationMaxMs: 0,
+      monotonicNow: () => monotonicTime,
+      configurationRecoveryCoordinator: { recover: async () => 0 },
+      checkEligibility,
+    }))
+    for (let flush = 0; flush < 100 && checkEligibility.mock.calls.length === 0; flush += 1) {
+      await Promise.resolve()
+    }
+    expect(checkEligibility).toHaveBeenCalledOnce()
+
+    monotonicTime = 1_001
+    await vi.advanceTimersByTimeAsync(1_000)
+    await expect(batchPromise).resolves.toEqual({
+      claimed: 1,
+      processed: 0,
+      failed: 1,
+      configurationRequired: 0,
+    })
+    const writesAtReturn = client.updateManyCalls.length
+    expect(client.jobs[0].lease_token).toBeNull()
+
+    resolveEligibility(skippedEligibility())
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(client.updateManyCalls).toHaveLength(writesAtReturn)
+    expect(client.jobs[0].status).toBe('PENDING_ELIGIBILITY')
+  }, 2_000)
+
+  it('does not turn a GSC rejection after the deadline into a retry write', async () => {
+    const client = new FakeWorkerClient([fakeJob(1)]).initialize()
+    let monotonicTime = 0
+    const google = gscClient({
+      inspectUrl: vi.fn(async () => {
+        monotonicTime = 1_001
+        throw new GscClientError('GSC_RATE_LIMITED', { retryable: true })
+      }),
+    })
+
+    const summary = await runSeoDiscoveryBatch(workerOptions(client, {
+      batchTimeBudgetMs: 1_000,
+      networkOperationMaxMs: 0,
+      monotonicNow: () => monotonicTime,
+      configurationRecoveryCoordinator: { recover: async () => 0 },
+      gscClient: google,
+    }))
+
+    expect(summary).toEqual({
+      claimed: 1,
+      processed: 0,
+      failed: 1,
+      configurationRequired: 0,
+    })
+    expect(client.jobs[0]).toMatchObject({
+      status: 'ELIGIBLE',
+      attempt_count: 0,
+      last_error_code: null,
+      lease_token: null,
+    })
+    expect(client.updateManyCalls.some(({ data }) => data.status === 'RETRY')).toBe(false)
+  })
+
+  it('does not start a known five-second network operation without deadline headroom', async () => {
+    const client = new FakeWorkerClient([fakeJob(1)]).initialize()
+    const readSitemap = vi.fn(async () => new Map<string, Date | null>())
+
+    const summary = await runSeoDiscoveryBatch(workerOptions(client, {
+      batchTimeBudgetMs: 4_999,
+      monotonicNow: () => 0,
+      configurationRecoveryCoordinator: { recover: async () => 0 },
+      readSitemap,
+    }))
+
+    expect(summary).toMatchObject({ claimed: 1, processed: 0, failed: 1 })
+    expect(readSitemap).not.toHaveBeenCalled()
+    expect(client.jobs[0]).toMatchObject({
+      status: 'PENDING_ELIGIBILITY',
+      lease_token: null,
+    })
+  })
+
+  it('cleans the claimed identity and counts failure when the owned reread returns null', async () => {
+    const client = new FakeWorkerClient([fakeJob(1)]).initialize()
+    const originalFindFirst = client.seoDiscoveryJob.findFirst
+    client.seoDiscoveryJob.findFirst = vi.fn().mockResolvedValue(null)
+
+    const summary = await runSeoDiscoveryBatch(workerOptions(client, {
+      configurationRecoveryCoordinator: { recover: async () => 0 },
+    }))
+
+    expect(summary).toEqual({
+      claimed: 1,
+      processed: 0,
+      failed: 1,
+      configurationRequired: 0,
+    })
+    expect(client.jobs[0]).toMatchObject({
+      status: 'PENDING_ELIGIBILITY',
+      lease_token: null,
+      lease_expires_at: null,
+    })
+    expect(client.updateManyCalls.at(-1)?.where).toMatchObject({
+      id: 1,
+      lease_token: 'worker-token',
+      content_updated_at: new Date('2026-08-11T04:00:00.000Z'),
+    })
+
+    client.seoDiscoveryJob.findFirst = originalFindFirst
+    const reclaimed = await runSeoDiscoveryBatch(workerOptions(client, {
+      createLeaseToken: () => 'replacement-worker',
+      configurationRecoveryCoordinator: { recover: async () => 0 },
+      checkEligibility: async () => skippedEligibility(),
+    }))
+    expect(reclaimed).toMatchObject({ claimed: 1, processed: 1, failed: 0 })
+    expect(client.jobs[0].status).toBe('SKIPPED')
+  })
+
+  it('cleans the claimed identity and resolves fail-soft when the owned reread rejects', async () => {
+    const client = new FakeWorkerClient([fakeJob(1)]).initialize()
+    client.seoDiscoveryJob.findFirst = vi.fn().mockRejectedValue(
+      new Error('sensitive-owned-reread-sentinel'),
+    )
+
+    await expect(runSeoDiscoveryBatch(workerOptions(client, {
+      configurationRecoveryCoordinator: { recover: async () => 0 },
+    }))).resolves.toEqual({
+      claimed: 1,
+      processed: 0,
+      failed: 1,
+      configurationRequired: 0,
+    })
+    expect(client.jobs[0]).toMatchObject({
+      status: 'PENDING_ELIGIBILITY',
+      lease_token: null,
+      lease_expires_at: null,
+    })
+    expect(JSON.stringify(client.updateManyCalls)).not.toContain(
+      'sensitive-owned-reread-sentinel',
+    )
+  })
+
+  it('starts cleanup immediately when a successful claim itself settles after the deadline', async () => {
+    const client = new FakeWorkerClient([fakeJob(1)]).initialize()
+    let monotonicTime = 0
+    client.beforeUpdateMany = async ({ data }) => {
+      if (data.lease_token === 'worker-token') monotonicTime = 1_001
+    }
+
+    const summary = await runSeoDiscoveryBatch(workerOptions(client, {
+      batchTimeBudgetMs: 1_000,
+      networkOperationMaxMs: 0,
+      monotonicNow: () => monotonicTime,
+      configurationRecoveryCoordinator: { recover: async () => 0 },
+    }))
+
+    expect(summary).toMatchObject({ claimed: 1, processed: 0, failed: 1 })
+    expect(client.findFirstCalls).toHaveLength(0)
+    expect(client.jobs[0].lease_token).toBeNull()
+  })
+
+  it('waits for a non-cancellable recovery mutation before returning at the deadline', async () => {
+    vi.useFakeTimers()
+    const client = new FakeWorkerClient([fakeJob(1, {
+      status: 'CONFIGURATION_REQUIRED',
+      last_error_code: 'GSC_FORBIDDEN',
+    })]).initialize()
+    let monotonicTime = 0
+    let releaseRecovery!: () => void
+    const recoveryGate = new Promise<void>((resolve) => {
+      releaseRecovery = resolve
+    })
+    let recoveryStarted = false
+    client.beforeUpdateMany = async ({ where }) => {
+      if (where.status !== 'CONFIGURATION_REQUIRED') return
+      recoveryStarted = true
+      await recoveryGate
+    }
+
+    let batchSettled = false
+    const batchPromise = runSeoDiscoveryBatch(workerOptions(client, {
+      batchTimeBudgetMs: 1_000,
+      networkOperationMaxMs: 0,
+      monotonicNow: () => monotonicTime,
+      configurationRecoveryCoordinator: createConfigurationRecoveryCoordinator(),
+    })).finally(() => {
+      batchSettled = true
+    })
+    for (let flush = 0; flush < 100 && !recoveryStarted; flush += 1) {
+      await Promise.resolve()
+    }
+    expect(recoveryStarted).toBe(true)
+
+    monotonicTime = 1_001
+    await vi.advanceTimersByTimeAsync(1_000)
+    await Promise.resolve()
+    const settledBeforeMutation = batchSettled
+    releaseRecovery()
+
+    await expect(batchPromise).resolves.toEqual({
+      claimed: 0,
+      processed: 0,
+      failed: 0,
+      configurationRequired: 0,
+    })
+    expect(settledBeforeMutation).toBe(false)
+    expect(client.jobs[0]).toMatchObject({
+      status: 'PENDING_ELIGIBILITY',
+      lease_token: null,
+      lease_expires_at: null,
+    })
+  })
+
+  it('reports a terminal write as processed when its database response crosses the deadline', async () => {
+    const client = new FakeWorkerClient([fakeJob(1)]).initialize()
+    let monotonicTime = 0
+    client.beforeUpdateMany = async ({ data }) => {
+      if (data.status === 'SKIPPED') monotonicTime = 1_001
+    }
+
+    const summary = await runSeoDiscoveryBatch(workerOptions(client, {
+      batchTimeBudgetMs: 1_000,
+      networkOperationMaxMs: 0,
+      monotonicNow: () => monotonicTime,
+      configurationRecoveryCoordinator: { recover: async () => 0 },
+      checkEligibility: async () => skippedEligibility(),
+    }))
+
+    expect(summary).toEqual({
+      claimed: 1,
+      processed: 1,
+      failed: 0,
+      configurationRequired: 0,
+    })
+    expect(client.jobs[0]).toMatchObject({
+      status: 'SKIPPED',
+      last_error_code: 'ROBOTS_NOINDEX',
+      lease_token: null,
+    })
   })
 
   it('atomically lets only one of two workers lease and process the same row', async () => {
@@ -651,6 +968,57 @@ describe('runSeoDiscoveryBatch state transitions', () => {
       http_status: 503,
       declared_canonical: client.jobs[0].url,
       robots_indexable: true,
+    })
+  })
+
+  it('processes a newly published route after its first 404 observation propagates', async () => {
+    const client = new FakeWorkerClient([fakeJob(1, {
+      source_type: 'post',
+      source_id: 1,
+    })]).initialize()
+    client.posts.set(1, { id: 1, slug: 'bai-viet-1', status: 'published' })
+    let currentTime = new Date(NOW.getTime())
+    const checkEligibility = vi.fn()
+      .mockResolvedValueOnce(notFoundEligibility())
+      .mockImplementationOnce(async (url: string) => eligible(url))
+    const google = gscClient({
+      inspectUrl: vi.fn(async (url: string) => inspectionResult({
+        googleCanonical: url,
+        userCanonical: url,
+      })),
+    })
+    const options = workerOptions(client, {
+      now: () => new Date(currentTime.getTime()),
+      configurationRecoveryCoordinator: { recover: async () => 0 },
+      checkEligibility,
+      gscClient: google,
+    })
+
+    const beforePropagation = await runSeoDiscoveryBatch(options)
+    expect(beforePropagation).toMatchObject({ claimed: 1, processed: 1, failed: 0 })
+    expect(client.jobs[0]).toMatchObject({
+      status: 'RETRY',
+      eligibility_status: 'HTTP_NOT_FOUND',
+      http_status: 404,
+      attempt_count: 0,
+      last_error_code: 'HTTP_NOT_FOUND',
+    })
+    expect(google.inspectUrl).not.toHaveBeenCalled()
+
+    currentTime = new Date(client.jobs[0].next_attempt_at.getTime())
+    const afterPropagation = await runSeoDiscoveryBatch(options)
+
+    expect(afterPropagation).toMatchObject({ claimed: 1, processed: 1, failed: 0 })
+    expect(checkEligibility).toHaveBeenCalledTimes(2)
+    expect(google.inspectUrl).toHaveBeenCalledOnce()
+    expect(client.updateManyCalls.some(({ data }) => data.status === 'SKIPPED')).toBe(false)
+    expect(client.jobs[0]).toMatchObject({
+      status: 'INDEXED',
+      eligibility_status: 'ELIGIBLE',
+      http_status: 200,
+      attempt_count: 0,
+      last_error_code: null,
+      lease_token: null,
     })
   })
 
@@ -1045,7 +1413,9 @@ describe('runSeoDiscoveryBatch state transitions', () => {
   })
 
   it('stores a stable redacted ERROR for a malformed inspection response', async () => {
-    const client = new FakeWorkerClient([fakeJob(1)]).initialize()
+    const client = new FakeWorkerClient([fakeJob(1, {
+      attempt_count: 4,
+    })]).initialize()
     const secretSentinel = 'private-provider-body-token-sentinel'
     const google = gscClient({
       inspectUrl: vi.fn().mockResolvedValue({
@@ -1063,12 +1433,116 @@ describe('runSeoDiscoveryBatch state transitions', () => {
     expect(second).toMatchObject({ claimed: 0, processed: 0 })
     expect(client.jobs[0]).toMatchObject({
       status: 'ERROR',
+      attempt_count: 0,
       last_error_code: 'GSC_INVALID_RESPONSE',
       last_error_message: null,
       gsc_verdict: null,
       coverage_state: null,
     })
     expect(JSON.stringify(client.jobs[0])).not.toContain(secretSentinel)
+  })
+
+  it('does not count a terminal sitemap parsing failure as a transient retry', async () => {
+    const client = new FakeWorkerClient([fakeJob(1, {
+      attempt_count: 3,
+    })]).initialize()
+    const google = gscClient()
+
+    const summary = await runSeoDiscoveryBatch(workerOptions(client, {
+      readSitemap: vi.fn().mockRejectedValue(
+        new SitemapReaderError('SITEMAP_INVALID_XML', false),
+      ),
+      gscClient: google,
+    }))
+
+    expect(summary).toMatchObject({ claimed: 1, processed: 1, failed: 1 })
+    expect(client.jobs[0]).toMatchObject({
+      status: 'ERROR',
+      attempt_count: 0,
+      last_error_code: 'SITEMAP_INVALID_XML',
+      last_error_message: null,
+    })
+    expect(google.listSitemaps).not.toHaveBeenCalled()
+    expect(google.inspectUrl).not.toHaveBeenCalled()
+  })
+
+  it('requires two independent HTTP 404 observations before skipping a URL', async () => {
+    const client = new FakeWorkerClient([fakeJob(1, {
+      attempt_count: 5,
+    })]).initialize()
+    let currentTime = new Date(NOW.getTime())
+    const google = gscClient()
+    const checkEligibility = vi.fn(async () => notFoundEligibility())
+    const options = workerOptions(client, {
+      now: () => new Date(currentTime.getTime()),
+      checkEligibility,
+      gscClient: google,
+    })
+
+    const first = await runSeoDiscoveryBatch(options)
+
+    expect(first).toEqual({
+      claimed: 1,
+      processed: 1,
+      failed: 0,
+      configurationRequired: 0,
+    })
+    expect(client.jobs[0]).toMatchObject({
+      status: 'RETRY',
+      eligibility_status: 'HTTP_NOT_FOUND',
+      http_status: 404,
+      attempt_count: 0,
+      last_error_code: 'HTTP_NOT_FOUND',
+      last_error_message: null,
+      lease_token: null,
+      lease_expires_at: null,
+    })
+    expect(client.jobs[0].next_attempt_at.getTime()).toBeGreaterThan(
+      currentTime.getTime(),
+    )
+
+    currentTime = new Date(client.jobs[0].next_attempt_at.getTime())
+    const second = await runSeoDiscoveryBatch(options)
+
+    expect(second).toEqual({
+      claimed: 1,
+      processed: 1,
+      failed: 0,
+      configurationRequired: 0,
+    })
+    expect(client.jobs[0]).toMatchObject({
+      status: 'SKIPPED',
+      eligibility_status: 'HTTP_NOT_FOUND',
+      http_status: 404,
+      attempt_count: 0,
+      last_error_code: 'HTTP_NOT_FOUND',
+    })
+    expect(checkEligibility).toHaveBeenCalledTimes(2)
+    expect(google.listSitemaps).not.toHaveBeenCalled()
+    expect(google.inspectUrl).not.toHaveBeenCalled()
+  })
+
+  it('keeps NOT_IN_SITEMAP terminal on its first explicit observation', async () => {
+    const client = new FakeWorkerClient([fakeJob(1)]).initialize()
+    const notInSitemap: PublicUrlEligibilityResult = {
+      eligible: false,
+      retryable: false,
+      code: 'NOT_IN_SITEMAP',
+      httpStatus: 200,
+      declaredCanonical: client.jobs[0].url,
+      robotsIndexable: true,
+    }
+
+    await runSeoDiscoveryBatch(workerOptions(client, {
+      checkEligibility: async () => notInSitemap,
+    }))
+
+    expect(client.jobs[0]).toMatchObject({
+      status: 'SKIPPED',
+      eligibility_status: 'NOT_IN_SITEMAP',
+      attempt_count: 0,
+      last_error_code: 'NOT_IN_SITEMAP',
+    })
   })
 
   it.each([
@@ -1121,7 +1595,432 @@ describe('runSeoDiscoveryBatch state transitions', () => {
   })
 })
 
+describe('configuration-required recovery', () => {
+  function configurationJob(id: number): FakeJob {
+    return fakeJob(id, {
+      status: 'CONFIGURATION_REQUIRED',
+      eligibility_status: 'ELIGIBLE',
+      http_status: 200,
+      declared_canonical: `https://mushroomie.io.vn/tin-tuc/bai-viet-${id}`,
+      robots_indexable: true,
+      attempt_count: 0,
+      last_error_code: 'GSC_FORBIDDEN',
+      last_error_message: null,
+    })
+  }
+
+  it('keeps disabled or bad configuration blocked, then recovers after a fixed-process restart', async () => {
+    const client = new FakeWorkerClient([configurationJob(1)]).initialize()
+    const recovery = createConfigurationRecoveryCoordinator()
+    const disabledGoogle = gscClient({
+      getConnectionStatus: vi.fn().mockResolvedValue({
+        state: 'disabled',
+        code: 'GSC_DISABLED',
+      }),
+    })
+
+    const disabledOptions = workerOptions(client, {
+      config: {
+        discoveryEnabled: true,
+        gscEnabled: false,
+        property: 'sc-domain:mushroomie.io.vn',
+      },
+      gscClient: disabledGoogle,
+      configurationRecoveryCoordinator: recovery,
+    })
+    await runSeoDiscoveryBatch(disabledOptions)
+    await runSeoDiscoveryBatch(disabledOptions)
+
+    expect(disabledGoogle.listSitemaps).not.toHaveBeenCalled()
+    expect(client.jobs[0].status).toBe('CONFIGURATION_REQUIRED')
+
+    const badGoogle = gscClient({
+      listSitemaps: vi.fn().mockRejectedValue(new GscClientError(
+        'GSC_CONFIGURATION_REQUIRED',
+        { configurationRequired: true },
+      )),
+    })
+    const badOptions = workerOptions(client, {
+      gscClient: badGoogle,
+      configurationRecoveryCoordinator: recovery,
+    })
+    await runSeoDiscoveryBatch(badOptions)
+    await runSeoDiscoveryBatch(badOptions)
+
+    expect(badGoogle.listSitemaps).toHaveBeenCalledOnce()
+    expect(client.jobs[0].status).toBe('CONFIGURATION_REQUIRED')
+
+    const fixedGoogle = gscClient()
+    const originalVersion = new Date(client.jobs[0].content_updated_at.getTime())
+    const fixed = await runSeoDiscoveryBatch(workerOptions(client, {
+      gscClient: fixedGoogle,
+      configurationRecoveryCoordinator: createConfigurationRecoveryCoordinator(),
+      sitemapRegistrationCoordinator: createSitemapRegistrationCoordinator(),
+    }))
+
+    expect(fixed).toEqual({
+      claimed: 1,
+      processed: 1,
+      failed: 0,
+      configurationRequired: 0,
+    })
+    expect(fixedGoogle.listSitemaps).toHaveBeenCalledOnce()
+    expect(fixedGoogle.inspectUrl).toHaveBeenCalledOnce()
+    expect(client.jobs[0]).toMatchObject({
+      content_updated_at: originalVersion,
+      status: 'INDEXED',
+      attempt_count: 0,
+      last_error_code: null,
+    })
+
+    const recoveryWrites = client.updateManyCalls.filter(({ where }) => (
+      where.status === 'CONFIGURATION_REQUIRED'
+    ))
+    expect(recoveryWrites).toHaveLength(1)
+    expect(recoveryWrites[0]).toEqual({
+      where: {
+        status: 'CONFIGURATION_REQUIRED',
+        OR: [{
+          id: 1,
+          content_updated_at: new Date('2026-08-11T04:00:00.000Z'),
+          lease_token: null,
+          lease_expires_at: null,
+        }],
+      },
+      data: {
+        status: 'PENDING_ELIGIBILITY',
+        next_attempt_at: NOW,
+        attempt_count: 0,
+        lease_token: null,
+        lease_expires_at: null,
+      },
+    })
+  })
+
+  it('latches a thrown authentication failure without probing Google every minute', async () => {
+    const client = new FakeWorkerClient([configurationJob(1)]).initialize()
+    const listSitemaps = vi.fn().mockRejectedValue(new GscClientError(
+      'GSC_FORBIDDEN',
+      { configurationRequired: true, httpStatus: 403 },
+    ))
+    const recovery = createConfigurationRecoveryCoordinator()
+    const options = workerOptions(client, {
+      gscClient: gscClient({ listSitemaps }),
+      configurationRecoveryCoordinator: recovery,
+    })
+
+    await expect(runSeoDiscoveryBatch(options)).resolves.toMatchObject({
+      claimed: 0,
+      failed: 0,
+    })
+    await expect(runSeoDiscoveryBatch(options)).resolves.toMatchObject({
+      claimed: 0,
+      failed: 0,
+    })
+
+    expect(listSitemaps).toHaveBeenCalledOnce()
+    expect(client.jobs[0].status).toBe('CONFIGURATION_REQUIRED')
+    expect(client.updateManyCalls.some(({ where }) => (
+      where.status === 'CONFIGURATION_REQUIRED'
+    ))).toBe(false)
+  })
+
+  it('backs off a transient connection probe and retries it without a process restart', async () => {
+    const client = new FakeWorkerClient([configurationJob(1)]).initialize()
+    let currentTime = new Date(NOW.getTime())
+    const listSitemaps = vi.fn()
+      .mockRejectedValueOnce(new GscClientError(
+        'GSC_RATE_LIMITED',
+        { retryable: true, httpStatus: 429 },
+      ))
+      .mockResolvedValue([{
+        url: SITEMAP_URL,
+        lastSubmitted: '2026-08-11T03:00:00.000Z',
+        lastDownloaded: '2026-08-11T03:30:00.000Z',
+        pending: false,
+        warnings: 0,
+        errors: 0,
+      }])
+    const options = workerOptions(client, {
+      now: () => new Date(currentTime.getTime()),
+      gscClient: gscClient({ listSitemaps }),
+      configurationRecoveryCoordinator: createConfigurationRecoveryCoordinator(),
+    })
+
+    await expect(runSeoDiscoveryBatch(options)).resolves.toMatchObject({
+      claimed: 0,
+      failed: 0,
+    })
+    await expect(runSeoDiscoveryBatch(options)).resolves.toMatchObject({
+      claimed: 0,
+      failed: 0,
+    })
+
+    expect(listSitemaps).toHaveBeenCalledOnce()
+    expect(client.jobs[0].status).toBe('CONFIGURATION_REQUIRED')
+
+    currentTime = new Date(NOW.getTime() + 60_000)
+    await expect(runSeoDiscoveryBatch(options)).resolves.toMatchObject({
+      claimed: 1,
+      processed: 1,
+      failed: 0,
+    })
+    expect(listSitemaps).toHaveBeenCalledTimes(2)
+    expect(client.jobs[0].status).toBe('INDEXED')
+  })
+
+  it('deduplicates interval and cron recovery callers while normal lease CAS inspects each row once', async () => {
+    const client = new FakeWorkerClient([
+      configurationJob(1),
+      configurationJob(2),
+      configurationJob(3),
+    ]).initialize()
+    let releaseProbe!: () => void
+    const probeGate = new Promise<void>((resolve) => {
+      releaseProbe = resolve
+    })
+    const listSitemaps = vi.fn(async () => {
+      await probeGate
+      return [{
+        url: SITEMAP_URL,
+        lastSubmitted: '2026-08-11T03:00:00.000Z',
+        lastDownloaded: '2026-08-11T03:30:00.000Z',
+        pending: false,
+        warnings: 0,
+        errors: 0,
+      }]
+    })
+    const google = gscClient({
+      listSitemaps,
+      inspectUrl: vi.fn(async (url: string) => inspectionResult({
+        googleCanonical: url,
+        userCanonical: url,
+      })),
+    })
+    const recovery = createConfigurationRecoveryCoordinator()
+
+    const firstPromise = runSeoDiscoveryBatch(workerOptions(client, {
+      createLeaseToken: () => 'interval-worker',
+      gscClient: google,
+      configurationRecoveryCoordinator: recovery,
+    }))
+    const secondPromise = runSeoDiscoveryBatch(workerOptions(client, {
+      createLeaseToken: () => 'cron-worker',
+      gscClient: google,
+      configurationRecoveryCoordinator: recovery,
+    }))
+    releaseProbe()
+    await Promise.all([firstPromise, secondPromise])
+
+    const recoveryWrites = client.updateManyCalls.filter(({ where }) => (
+      where.status === 'CONFIGURATION_REQUIRED'
+    ))
+    expect(listSitemaps).toHaveBeenCalledTimes(2)
+    expect(recoveryWrites).toHaveLength(1)
+    expect(google.inspectUrl).toHaveBeenCalledTimes(3)
+    expect(new Set(vi.mocked(google.inspectUrl).mock.calls.map(([url]) => url)).size).toBe(3)
+    expect(client.jobs.every(({ status }) => status === 'INDEXED')).toBe(true)
+  })
+
+  it('retries only the recovery write after a database failure without probing Google again', async () => {
+    const client = new FakeWorkerClient([configurationJob(1)]).initialize()
+    const originalUpdateMany = client.seoDiscoveryJob.updateMany
+    let rejectRecovery = true
+    client.seoDiscoveryJob.updateMany = vi.fn(async (args: {
+      where: Record<string, unknown>
+      data: Record<string, unknown>
+    }) => {
+      if (args.where.status === 'CONFIGURATION_REQUIRED' && rejectRecovery) {
+        rejectRecovery = false
+        throw new Error('sensitive-recovery-database-sentinel')
+      }
+      return originalUpdateMany(args as never)
+    }) as never
+    const google = gscClient()
+    const recovery = createConfigurationRecoveryCoordinator()
+    const options = workerOptions(client, {
+      gscClient: google,
+      configurationRecoveryCoordinator: recovery,
+    })
+
+    const first = await runSeoDiscoveryBatchSafely(options)
+    const second = await runSeoDiscoveryBatchSafely(options)
+
+    expect(first).toMatchObject({ failed: 1, claimed: 0 })
+    expect(second).toMatchObject({ failed: 0, claimed: 1, processed: 1 })
+    expect(google.listSitemaps).toHaveBeenCalledTimes(2)
+    expect(client.jobs[0].status).toBe('INDEXED')
+  })
+
+  it('uses exact configuration status CAS so a newer publication is never overwritten', async () => {
+    const oldVersion = new Date('2026-08-11T04:00:00.000Z')
+    const newVersion = new Date('2026-08-11T04:30:00.000Z')
+    const client = new FakeWorkerClient([configurationJob(1)]).initialize()
+    client.beforeUpdateMany = async ({ where }) => {
+      if (where.status !== 'CONFIGURATION_REQUIRED') return
+      Object.assign(client.jobs[0], {
+        content_updated_at: newVersion,
+        status: 'PENDING_ELIGIBILITY',
+        eligibility_status: null,
+        last_error_code: null,
+        next_attempt_at: new Date(NOW.getTime() + DAY_MS),
+      })
+    }
+
+    const summary = await runSeoDiscoveryBatch(workerOptions(client, {
+      configurationRecoveryCoordinator: createConfigurationRecoveryCoordinator(),
+    }))
+
+    expect(summary).toEqual({
+      claimed: 0,
+      processed: 0,
+      failed: 0,
+      configurationRequired: 0,
+    })
+    expect(client.jobs[0]).toMatchObject({
+      content_updated_at: newVersion,
+      status: 'PENDING_ELIGIBILITY',
+      eligibility_status: null,
+      last_error_code: null,
+    })
+    expect(client.jobs[0].content_updated_at).not.toEqual(oldVersion)
+    expect(client.updateManyCalls[0].where).toEqual({
+      status: 'CONFIGURATION_REQUIRED',
+      OR: [{
+        id: 1,
+        content_updated_at: new Date('2026-08-11T04:00:00.000Z'),
+        lease_token: null,
+        lease_expires_at: null,
+      }],
+    })
+  })
+
+  it('recovers at most ten exact non-leased snapshots and leaves the rest bounded', async () => {
+    const client = new FakeWorkerClient(
+      Array.from({ length: 12 }, (_unused, index) => configurationJob(index + 1)),
+    ).initialize()
+    const google = gscClient({
+      inspectUrl: vi.fn(async (url: string) => inspectionResult({
+        googleCanonical: url,
+        userCanonical: url,
+      })),
+    })
+    const recovery = createConfigurationRecoveryCoordinator()
+    const options = workerOptions(client, {
+      batchSize: 99,
+      gscClient: google,
+      configurationRecoveryCoordinator: recovery,
+    })
+
+    const summary = await runSeoDiscoveryBatch(options)
+
+    expect(summary).toMatchObject({ claimed: 10, processed: 10, failed: 0 })
+    expect(client.jobs.filter(({ status }) => status === 'INDEXED')).toHaveLength(10)
+    expect(client.jobs.filter(({ status }) => (
+      status === 'CONFIGURATION_REQUIRED'
+    ))).toHaveLength(2)
+    expect(google.inspectUrl).toHaveBeenCalledTimes(10)
+
+    const recoveryWrite = client.updateManyCalls.find(({ where }) => (
+      where.status === 'CONFIGURATION_REQUIRED'
+    ))
+    expect(recoveryWrite?.where.OR).toHaveLength(10)
+    expect(recoveryWrite?.where.OR).toEqual(expect.arrayContaining(
+      Array.from({ length: 10 }, (_unused, index) => ({
+        id: index + 1,
+        content_updated_at: new Date('2026-08-11T04:00:00.000Z'),
+        lease_token: null,
+        lease_expires_at: null,
+      })),
+    ))
+
+    const remainder = await runSeoDiscoveryBatch(options)
+    expect(remainder).toMatchObject({ claimed: 2, processed: 2, failed: 0 })
+    expect(client.jobs.every(({ status }) => status === 'INDEXED')).toBe(true)
+    expect(google.inspectUrl).toHaveBeenCalledTimes(12)
+  })
+
+  it('does not revoke an active configuration lease during bounded recovery', async () => {
+    const activeLeaseExpiresAt = new Date(NOW.getTime() + 60_000)
+    const client = new FakeWorkerClient([
+      configurationJob(1),
+      configurationJob(2),
+    ]).initialize()
+    Object.assign(client.jobs[0], {
+      lease_token: 'active-worker',
+      lease_expires_at: activeLeaseExpiresAt,
+    })
+    let currentTime = new Date(NOW.getTime())
+    const options = workerOptions(client, {
+      now: () => new Date(currentTime.getTime()),
+      configurationRecoveryCoordinator: createConfigurationRecoveryCoordinator(),
+    })
+
+    const summary = await runSeoDiscoveryBatch(options)
+
+    expect(summary).toMatchObject({ claimed: 1, processed: 1, failed: 0 })
+    expect(client.jobs[0]).toMatchObject({
+      status: 'CONFIGURATION_REQUIRED',
+      lease_token: 'active-worker',
+      lease_expires_at: activeLeaseExpiresAt,
+    })
+    expect(client.jobs[1].status).toBe('INDEXED')
+    const recoveryWrite = client.updateManyCalls.find(({ where }) => (
+      where.status === 'CONFIGURATION_REQUIRED'
+    ))
+    expect(recoveryWrite?.where.OR).toEqual([{
+      id: 2,
+      content_updated_at: new Date('2026-08-11T04:00:00.000Z'),
+      lease_token: null,
+      lease_expires_at: null,
+    }])
+
+    currentTime = new Date(activeLeaseExpiresAt.getTime())
+    const afterExpiry = await runSeoDiscoveryBatch(options)
+    expect(afterExpiry).toMatchObject({ claimed: 1, processed: 1, failed: 0 })
+    expect(client.jobs[0].status).toBe('INDEXED')
+  })
+})
+
 describe('sitemap registration coordination', () => {
+  it('reuses a configuration-recovery sitemap probe for readiness in the same batch', async () => {
+    const client = new FakeWorkerClient([fakeJob(1, {
+      status: 'CONFIGURATION_REQUIRED',
+      eligibility_status: 'ELIGIBLE',
+      http_status: 200,
+      declared_canonical: 'https://mushroomie.io.vn/tin-tuc/bai-viet-1',
+      robots_indexable: true,
+      last_error_code: 'GSC_FORBIDDEN',
+    })]).initialize()
+    const listSitemaps = vi.fn().mockResolvedValue([{
+      url: SITEMAP_URL,
+      lastSubmitted: '2026-08-11T03:00:00.000Z',
+      lastDownloaded: '2026-08-11T03:30:00.000Z',
+      pending: false,
+      warnings: 0,
+      errors: 0,
+    }])
+    const getConnectionStatus = vi.fn(async () => {
+      await listSitemaps()
+      return {
+        state: 'connected' as const,
+        code: 'GSC_CONNECTED' as const,
+        property: 'sc-domain:mushroomie.io.vn',
+      }
+    })
+    const google = gscClient({ listSitemaps, getConnectionStatus })
+
+    const summary = await runSeoDiscoveryBatch(workerOptions(client, {
+      gscClient: google,
+      configurationRecoveryCoordinator: createConfigurationRecoveryCoordinator(),
+    }))
+
+    expect(summary).toMatchObject({ claimed: 1, processed: 1, failed: 0 })
+    expect(getConnectionStatus).not.toHaveBeenCalled()
+    expect(listSitemaps).toHaveBeenCalledOnce()
+    expect(google.inspectUrl).toHaveBeenCalledOnce()
+  })
+
   it('lists a healthy unchanged sitemap once for multiple jobs and does not resubmit it', async () => {
     const client = new FakeWorkerClient([fakeJob(1), fakeJob(2)]).initialize()
     const google = gscClient({
@@ -1206,5 +2105,31 @@ describe('sitemap registration coordination', () => {
     expect(google.listSitemaps).toHaveBeenCalledOnce()
     expect(google.submitSitemap).toHaveBeenCalledOnce()
     expect(google.inspectUrl).toHaveBeenCalledTimes(2)
+  })
+
+  it('keeps sitemap transient backoff global when a publication changes the fingerprint', async () => {
+    const client = new FakeWorkerClient([fakeJob(1)]).initialize()
+    const google = gscClient({
+      listSitemaps: vi.fn().mockRejectedValue(new GscClientError(
+        'GSC_RATE_LIMITED',
+        { retryable: true, httpStatus: 429 },
+      )),
+    })
+    const coordinator = createSitemapRegistrationCoordinator()
+    const options = workerOptions(client, {
+      gscClient: google,
+      sitemapRegistrationCoordinator: coordinator,
+    })
+
+    await runSeoDiscoveryBatch(options)
+    client.jobs.push(fakeJob(2))
+    await runSeoDiscoveryBatch(options)
+
+    expect(google.listSitemaps).toHaveBeenCalledOnce()
+    expect(client.jobs[1]).toMatchObject({
+      status: 'RETRY',
+      attempt_count: 1,
+      last_error_code: 'GSC_RATE_LIMITED',
+    })
   })
 })
