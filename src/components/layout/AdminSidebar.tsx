@@ -38,6 +38,7 @@ interface AdminNavItem {
   icon: LucideIcon
   label: string
   exact?: boolean
+  adminOnly?: boolean
   superAdminOnly?: boolean
 }
 
@@ -71,7 +72,7 @@ const navGroups: AdminNavGroup[] = [
     label: 'Nội dung & hệ thống',
     items: [
       { href: '/admin/bai-viet', icon: FileText, label: 'Bài viết' },
-      { href: '/admin/seo/lap-chi-muc', icon: SearchCheck, label: 'Lập chỉ mục' },
+      { href: '/admin/seo/lap-chi-muc', icon: SearchCheck, label: 'Lập chỉ mục', adminOnly: true },
       { href: '/admin/wordpress', icon: FileUp, label: 'Đăng WordPress' },
       { href: '/admin/thu-vien', icon: FolderOpen, label: 'Thư viện' },
       { href: '/admin/danh-gia', icon: Star, label: 'Đánh giá' },
@@ -113,7 +114,10 @@ export default function AdminSidebar() {
   const filteredGroups = navGroups
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => !item.superAdminOnly || role === 'super_admin'),
+      items: group.items.filter((item) => (
+        (!item.adminOnly || role === 'admin' || role === 'super_admin')
+        && (!item.superAdminOnly || role === 'super_admin')
+      )),
     }))
     .filter((group) => group.items.length > 0)
 

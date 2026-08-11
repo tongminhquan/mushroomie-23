@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -21,7 +21,7 @@ const job = {
   coverageState: 'Discovered - currently not indexed',
   pageFetchState: 'SUCCESSFUL',
   googleCanonical: null,
-  lastCrawlAt: null,
+  lastCrawlAt: '2026-08-11T05:00:00.000Z',
   lastInspectedAt: '2026-08-11T06:00:00.000Z',
   nextAttemptAt: '2026-08-12T06:00:00.000Z',
   attemptCount: 0,
@@ -221,6 +221,84 @@ describe('SeoDiscoveryDashboard', () => {
     expect((await screen.findAllByText('Trang 2 / 3')).length).toBeGreaterThan(0)
   })
 
+  it('aborts the previous load and ignores reversed stale GET responses', async () => {
+    const stale = deferred<ReturnType<typeof response>>()
+    const latest = deferred<ReturnType<typeof response>>()
+    const staleUrl = 'https://mushroomie.io.vn/tin-tuc/phan-hoi-cu'
+    const latestUrl = 'https://mushroomie.io.vn/tin-tuc/phan-hoi-moi'
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(response(overview))
+      .mockReturnValueOnce(stale.promise)
+      .mockReturnValueOnce(latest.promise)
+    vi.stubGlobal('fetch', fetchMock)
+    const user = userEvent.setup()
+
+    render(<SeoDiscoveryDashboard />)
+    await screen.findByText('Search Console đã kết nối')
+
+    const search = screen.getByLabelText('Tìm URL hoặc nguồn')
+    await user.type(search, 'cu')
+    await user.click(screen.getByRole('button', { name: 'Áp dụng bộ lọc' }))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+
+    await user.clear(search)
+    await user.type(search, 'moi')
+    await user.click(screen.getByRole('button', { name: 'Áp dụng bộ lọc' }))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3))
+
+    const staleSignal = fetchMock.mock.calls[1][1]?.signal as AbortSignal
+    expect(staleSignal.aborted).toBe(true)
+
+    latest.resolve(response({
+      ...overview,
+      jobs: [{ ...job, id: 43, url: latestUrl }],
+    }))
+    expect((await screen.findAllByText(latestUrl)).length).toBeGreaterThan(0)
+
+    stale.resolve(response({
+      ...overview,
+      jobs: [{ ...job, id: 42, url: staleUrl }],
+    }))
+    await waitFor(() => expect(screen.queryAllByText(staleUrl)).toHaveLength(0))
+    expect(screen.getAllByText(latestUrl).length).toBeGreaterThan(0)
+  })
+
+  it('refreshes the current query after an action instead of its captured query', async () => {
+    const action = deferred<ReturnType<typeof response>>()
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(response(overview))
+      .mockReturnValueOnce(action.promise)
+      .mockResolvedValueOnce(response(overview))
+      .mockResolvedValueOnce(response(overview))
+    vi.stubGlobal('fetch', fetchMock)
+    const user = userEvent.setup()
+
+    render(<SeoDiscoveryDashboard />)
+    await screen.findByText('Search Console đã kết nối')
+
+    await user.click(screen.getByRole('button', { name: 'Đồng bộ sitemap' }))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+
+    await user.type(screen.getByLabelText('Tìm URL hoặc nguồn'), 'moi')
+    await user.click(screen.getByRole('button', { name: 'Áp dụng bộ lọc' }))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3))
+
+    action.resolve(response({
+      ok: true,
+      action: 'sync_sitemap',
+      result: {
+        observedCount: 1,
+        createdCount: 0,
+        resetCount: 0,
+        unchangedCount: 1,
+        removedCount: 0,
+      },
+    }))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
+
+    expect(fetchMock.mock.calls[3][0]).toContain('search=moi')
+  })
+
   it('requires retry confirmation, sends only selected IDs, and disables actions while pending', async () => {
     const action = deferred<ReturnType<typeof response>>()
     const fetchMock = vi.fn()
@@ -265,6 +343,45 @@ describe('SeoDiscoveryDashboard', () => {
     }))
     expect(await screen.findByRole('status')).toHaveTextContent('Đã đưa 1 công việc vào hàng đợi thử lại')
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3))
+  })
+
+  it('uses a real 44 by 44 checkbox label target on desktop and mobile', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response(overview)))
+    const user = userEvent.setup()
+
+    render(<SeoDiscoveryDashboard />)
+
+    const checkboxes = await screen.findAllByRole('checkbox', {
+      name: 'Chọn công việc 41 để thử lại',
+    })
+    expect(checkboxes).toHaveLength(2)
+    for (const checkbox of checkboxes) {
+      const target = checkbox.closest('label')
+      expect(target).not.toBeNull()
+      expect(target).toHaveClass('h-11', 'w-11')
+    }
+
+    await user.click(checkboxes[0].closest('label') as HTMLLabelElement)
+    expect(screen.getByRole('button', { name: 'Thử lại 1 công việc' })).toBeEnabled()
+  })
+
+  it('shows the latest Google crawl timestamp in desktop and mobile evidence views', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response(overview)))
+    const expectedCrawl = new Intl.DateTimeFormat('vi-VN', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    }).format(new Date(job.lastCrawlAt))
+
+    render(<SeoDiscoveryDashboard />)
+
+    const table = await screen.findByRole('table', {
+      name: 'Các URL đang được theo dõi lập chỉ mục',
+    })
+    expect(within(table).getByText(`Google crawl: ${expectedCrawl}`)).toBeInTheDocument()
+
+    const mobileCard = screen.getAllByRole('article')[0]
+    expect(within(mobileCard).getByText('Google crawl')).toBeInTheDocument()
+    expect(within(mobileCard).getByText(expectedCrawl)).toBeInTheDocument()
   })
 
   it('gives every filter and operational action an accessible name and 44px target', async () => {

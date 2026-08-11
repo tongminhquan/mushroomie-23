@@ -45,18 +45,46 @@ migration, production deployment, or real Google Search Console request was perf
   explicitly warning that it may be stale.
 - Added the SearchCheck “Lập chỉ mục” entry under “Nội dung & hệ thống”.
 
+## Review hardening follow-up
+
+- Centralized dashboard reads behind one abort controller and monotonically increasing
+  request generation. Reversed or aborted responses cannot overwrite newer filter state,
+  and action completion refreshes the current query rather than a captured stale query.
+- Moved database summaries, filtered totals, effective-page clamping, and paginated rows
+  into one short interactive `RepeatableRead` transaction with bounded wait/timeout.
+  Google status is fetched only after that database transaction completes.
+- Restricted numeric job IDs to the signed database integer maximum
+  (`2_147_483_647`).
+- Hardened action CSRF checks for the production reverse-proxy topology: the exact
+  canonical `https://mushroomie.io.vn` origin is accepted independently of the internal
+  request URL, explicit localhost origins are development-only, and missing,
+  cross-origin, lookalike, or forwarded-host claims are rejected.
+- Bound action rate-limit identity to the authenticated administrator ID. Rotating
+  spoofable client-IP headers cannot reset the quota, while different administrators
+  retain independent quotas.
+- Added an explicit admin/super-admin role predicate to both API handlers. Anonymous,
+  user, and viewer roles are rejected server-side; the sidebar also hides the discovery
+  entry from viewer accounts.
+- Enlarged checkbox label hit areas to a true 44 × 44 px on desktop and mobile and
+  exposed Google `lastCrawlAt` evidence in both responsive presentations.
+
 ## TDD and self-review evidence
 
-- Initial API RED: route module missing; final API suite: 21/21 passing.
-- Initial UI RED: dashboard module missing; final UI suite: 11/11 passing.
+- Initial API RED: route module missing; final API suite: 29/29 passing.
+- Initial UI RED: dashboard module missing; final UI suite: 15/15 passing.
+- Sidebar role suite: 3/3 passing.
 - Initial source-security RED: 2/4 failing because the page/component were absent;
-  final source-security suite: 4/4 passing.
+  final source-security suite: 5/5 passing.
 - Additional RED → GREEN cases covered:
   - rate limiter backend failure must fail closed without mutation or secret leakage;
   - blocked sitemap submission must not be audited as success;
   - `application/jsonp` must not pass JSON media-type validation;
   - unbounded page offsets must be rejected;
-  - a refresh failure with existing data must remain visible to the administrator.
+  - a refresh failure with existing data must remain visible to the administrator;
+  - reversed deferred responses cannot win over the latest dashboard query;
+  - API reads use one repeatable database snapshot and return an effective clamped page;
+  - production reverse-proxy origins, role matrices, user-bound quotas, database ID
+    bounds, crawl timestamps, sidebar visibility, and 44 px checkbox labels.
 - Runtime tests cover authorization, strict filters/actions, rate limiting, body bounds,
   fixed sitemap submission, provider-error redaction, audit details, active/stale leases,
   bounded configuration recovery, loading/empty/configured/unconfigured/partial-error
@@ -70,14 +98,14 @@ migration, production deployment, or real Google Search Console request was perf
 ## Verification
 
 - `npx prisma generate`: PASS.
-- Focused Vitest API + UI: PASS — 2 files, 32 tests.
-- `npx tsx --test tests/seo-discovery-admin-security.test.ts`: PASS — 4 tests.
+- Focused Vitest API + UI/sidebar: PASS — 3 files, 47 tests.
+- `npx tsx --test tests/seo-discovery-admin-security.test.ts`: PASS — 5 tests.
 - `npm run typecheck --if-present`: PASS.
 - Scoped ESLint for all Task 8 files: PASS — 0 errors, 0 warnings.
 - Full `npm run lint --if-present`: PASS — 0 errors; 205 existing warnings outside
   Task 8 remain unchanged.
-- Full `npm run test:vitest`: PASS — 61 files, 757 tests.
-- Full `npm run test:legacy`: PASS — 323 tests.
+- Full `npm run test:vitest`: PASS — 62 files, 772 tests.
+- Full `npm run test:legacy`: PASS — 324 tests.
 - `npm audit --omit=dev`: PASS — 0 vulnerabilities.
 - Offline production `npm run build`: PASS — Next.js 16.2.11 compiled, typechecked,
   and generated 113 routes. It used a deliberately unreachable dummy database URL and

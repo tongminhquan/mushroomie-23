@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { requireAdmin } from '@/lib/auth'
 import {
+  isSeoDiscoveryAdminRole,
   parseSeoDiscoveryReadFilters,
   readSeoDiscoveryAdminOverview,
 } from '@/lib/seo-discovery/admin-api'
@@ -26,10 +27,14 @@ function authError(error: unknown): NextResponse | null {
 }
 
 export async function GET(request: NextRequest) {
+  let session: Awaited<ReturnType<typeof requireAdmin>>
   try {
-    await requireAdmin()
+    session = await requireAdmin()
   } catch (error) {
     return authError(error) ?? json({ error: 'Không thể xác thực quyền quản trị' }, 500)
+  }
+  if (!isSeoDiscoveryAdminRole(session.user.role)) {
+    return json({ error: 'Bạn không có quyền truy cập' }, 403)
   }
 
   const parsed = parseSeoDiscoveryReadFilters(request.nextUrl.searchParams)

@@ -10,8 +10,18 @@ class DistributedRateLimiter {
    * @param prefix Prefix for the key
    * @returns true if limited, false otherwise
    */
-  public async isLimited(req: NextRequest, limit: number, windowMs: number, prefix: string = 'global'): Promise<boolean> {
-    const result = await checkRateLimit(req, prefix, { limit, windowMs })
+  public async isLimited(
+    req: NextRequest,
+    limit: number,
+    windowMs: number,
+    prefix: string = 'global',
+    identity?: string,
+  ): Promise<boolean> {
+    const result = await checkRateLimit(req, prefix, {
+      limit,
+      windowMs,
+      ...(identity ? { identity } : {}),
+    })
     return !result.allowed
   }
 

@@ -14,7 +14,7 @@ import {
   Waypoints,
   XCircle,
 } from 'lucide-react'
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import {
   AdminCard,
@@ -284,14 +284,19 @@ function JobCheckbox({
   onChange: (jobId: number, checked: boolean) => void
 }) {
   return (
-    <input
-      type="checkbox"
-      className="h-5 w-5 rounded border-theme-border accent-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
-      aria-label={`Chọn công việc ${job.id} để thử lại`}
-      checked={checked}
-      disabled={!job.canRetry}
-      onChange={(event) => onChange(job.id, event.currentTarget.checked)}
-    />
+    <label className={cn(
+      'grid h-11 w-11 flex-shrink-0 place-items-center rounded-xl border border-theme-border bg-theme-subtle has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-primary/15',
+      job.canRetry ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
+    )}>
+      <input
+        type="checkbox"
+        className="h-5 w-5 rounded border-theme-border accent-primary focus-visible:outline-none"
+        checked={checked}
+        disabled={!job.canRetry}
+        onChange={(event) => onChange(job.id, event.currentTarget.checked)}
+      />
+      <span className="sr-only">Chọn công việc {job.id} để thử lại</span>
+    </label>
   )
 }
 
@@ -364,6 +369,7 @@ function DesktopJobTable({
               </td>
               <td className="whitespace-nowrap px-4 py-4 text-xs leading-6 text-theme-secondary">
                 <p>Cập nhật: {displayDate(job.contentUpdatedAt)}</p>
+                <p>Google crawl: {displayDate(job.lastCrawlAt)}</p>
                 <p>Kiểm tra: {displayDate(job.lastInspectedAt)}</p>
                 <p>Lần tới: {displayDate(job.nextAttemptAt)}</p>
               </td>
@@ -389,9 +395,7 @@ function MobileJobCards({
       {jobs.map((job) => (
         <article key={job.id} className="space-y-4 p-4">
           <div className="flex items-start gap-3">
-            <div className="grid min-h-11 min-w-11 place-items-center rounded-2xl border border-theme-border bg-theme-subtle">
-              <JobCheckbox job={job} checked={selected.has(job.id)} onChange={onSelection} />
-            </div>
+            <JobCheckbox job={job} checked={selected.has(job.id)} onChange={onSelection} />
             <div className="min-w-0 flex-1">
               <PublicUrl job={job} />
               <p className="mt-2 text-xs font-semibold text-theme-secondary">
@@ -408,6 +412,7 @@ function MobileJobCards({
           <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs leading-5 text-theme-secondary">
             <div><dt className="font-bold text-theme-primary">Google verdict</dt><dd>{job.gscVerdict ?? 'Chưa có'}</dd></div>
             <div><dt className="font-bold text-theme-primary">HTTP</dt><dd>{job.httpStatus ?? '—'}</dd></div>
+            <div><dt className="font-bold text-theme-primary">Google crawl</dt><dd>{displayDate(job.lastCrawlAt)}</dd></div>
             <div><dt className="font-bold text-theme-primary">Kiểm tra gần nhất</dt><dd>{displayDate(job.lastInspectedAt)}</dd></div>
             <div><dt className="font-bold text-theme-primary">Lần tiếp theo</dt><dd>{displayDate(job.nextAttemptAt)}</dd></div>
           </dl>
@@ -444,6 +449,9 @@ export default function SeoDiscoveryDashboard() {
   const [pendingAction, setPendingAction] = useState<DashboardAction['action'] | null>(null)
   const [actionMessage, setActionMessage] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  const queryRef = useRef('')
+  const requestGenerationRef = useRef(0)
+  const requestControllerRef = useRef<AbortController | null>(null)
 
   const query = useMemo(() => {
     const parameters = new URLSearchParams({
@@ -456,15 +464,26 @@ export default function SeoDiscoveryDashboard() {
     return parameters.toString()
   }, [filters, page])
 
-  const loadData = useCallback(async (signal?: AbortSignal) => {
+  const loadData = useCallback(async (requestedQuery = queryRef.current) => {
+    const generation = requestGenerationRef.current + 1
+    requestGenerationRef.current = generation
+    requestControllerRef.current?.abort()
+    const controller = new AbortController()
+    requestControllerRef.current = controller
+    const isCurrentRequest = () => (
+      requestGenerationRef.current === generation
+      && !controller.signal.aborted
+    )
+
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch(`/api/admin/seo-discovery?${query}`, {
+      const response = await fetch(`/api/admin/seo-discovery?${requestedQuery}`, {
         cache: 'no-store',
-        signal,
+        signal: controller.signal,
       })
       const payload: unknown = await response.json().catch(() => null)
+      if (!isCurrentRequest()) return
       if (!response.ok) {
         throw new Error(boundedMessage(
           isRecord(payload) ? payload.error : null,
@@ -480,21 +499,32 @@ export default function SeoDiscoveryDashboard() {
         return new Set([...current].filter((id) => selectableIds.has(id)))
       })
     } catch (loadError) {
+      if (!isCurrentRequest()) return
       if (loadError instanceof DOMException && loadError.name === 'AbortError') return
       setError(boundedMessage(
         loadError instanceof Error ? loadError.message : null,
         'Không thể tải trạng thái lập chỉ mục',
       ))
     } finally {
-      if (!signal?.aborted) setLoading(false)
+      if (requestGenerationRef.current === generation) {
+        if (requestControllerRef.current === controller) {
+          requestControllerRef.current = null
+        }
+        setLoading(false)
+      }
     }
-  }, [query])
+  }, [])
 
   useEffect(() => {
-    const controller = new AbortController()
-    void loadData(controller.signal)
-    return () => controller.abort()
-  }, [loadData])
+    queryRef.current = query
+    void loadData(query)
+  }, [loadData, query])
+
+  useEffect(() => () => {
+    requestGenerationRef.current += 1
+    requestControllerRef.current?.abort()
+    requestControllerRef.current = null
+  }, [])
 
   const updateSelection = useCallback((jobId: number, checked: boolean) => {
     setSelected((current) => {
@@ -547,7 +577,7 @@ export default function SeoDiscoveryDashboard() {
       } else {
         setActionMessage('Đã gửi sitemap chuẩn cho Google Search Console.')
       }
-      await loadData()
+      await loadData(queryRef.current)
     } catch (actionFailure) {
       setActionError(boundedMessage(
         actionFailure instanceof Error ? actionFailure.message : null,

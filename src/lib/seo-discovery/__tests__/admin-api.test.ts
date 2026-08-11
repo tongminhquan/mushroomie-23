@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   requireAdmin: vi.fn(),
+  transaction: vi.fn(),
   groupBy: vi.fn(),
   count: vi.fn(),
   findMany: vi.fn(),
@@ -22,6 +23,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/auth', () => ({ requireAdmin: mocks.requireAdmin }))
 vi.mock('@/lib/prisma', () => ({
   prisma: {
+    $transaction: mocks.transaction,
     seoDiscoveryJob: {
       groupBy: mocks.groupBy,
       count: mocks.count,
@@ -91,7 +93,12 @@ function readRequest(query = '') {
 
 function actionRequest(
   body: unknown,
-  options: { origin?: string | null; contentType?: string } = {},
+  options: {
+    origin?: string | null
+    contentType?: string
+    requestUrl?: string
+    headers?: Record<string, string>
+  } = {},
 ) {
   const headers = new Headers({
     'content-type': options.contentType ?? 'application/json',
@@ -101,9 +108,12 @@ function actionRequest(
     headers.set('origin', options.origin ?? 'https://mushroomie.io.vn')
     headers.set('sec-fetch-site', 'same-origin')
   }
+  for (const [name, value] of Object.entries(options.headers ?? {})) {
+    headers.set(name, value)
+  }
 
   return new NextRequest(
-    'https://mushroomie.io.vn/api/admin/seo-discovery/actions',
+    options.requestUrl ?? 'https://mushroomie.io.vn/api/admin/seo-discovery/actions',
     {
       method: 'POST',
       headers,
@@ -117,6 +127,7 @@ describe('SEO discovery admin APIs', () => {
     vi.useRealTimers()
     vi.setSystemTime(NOW)
     mocks.requireAdmin.mockReset()
+    mocks.transaction.mockReset()
     mocks.groupBy.mockReset()
     mocks.count.mockReset()
     mocks.findMany.mockReset()
@@ -184,6 +195,13 @@ describe('SEO discovery admin APIs', () => {
       { status: 429 },
     ))
     mocks.logAdminAction.mockResolvedValue(undefined)
+    mocks.transaction.mockImplementation(async (callback) => callback({
+      seoDiscoveryJob: {
+        groupBy: mocks.groupBy,
+        count: mocks.count,
+        findMany: mocks.findMany,
+      },
+    }))
   })
 
   it.each([
@@ -250,7 +268,7 @@ describe('SEO discovery admin APIs', () => {
         errors: 0,
       },
       pagination: {
-        page: 2,
+        page: 1,
         pageSize: 25,
         total: 13,
         totalPages: 1,
@@ -269,7 +287,7 @@ describe('SEO discovery admin APIs', () => {
     expect(JSON.stringify(body)).not.toContain('private-key-sentinel')
     expect(JSON.stringify(body)).not.toContain('lease_token')
     expect(mocks.findMany).toHaveBeenCalledWith(expect.objectContaining({
-      skip: 25,
+      skip: 0,
       take: 25,
       where: {
         status: 'NOT_INDEXED',
@@ -281,6 +299,69 @@ describe('SEO discovery admin APIs', () => {
       },
       select: expect.any(Object),
     }))
+  })
+
+  it('reads one repeatable snapshot, clamps the effective page, then contacts Google outside the transaction', async () => {
+    const events: string[] = []
+    mocks.groupBy.mockImplementation(async () => {
+      events.push('groupBy')
+      return [{ status: 'INDEXED', _count: { _all: 26 } }]
+    })
+    mocks.count.mockImplementation(async () => {
+      events.push('count')
+      return 26
+    })
+    mocks.findMany.mockImplementation(async () => {
+      events.push('findMany')
+      return [baseJob]
+    })
+    mocks.transaction.mockImplementation(async (callback) => {
+      events.push('transaction:start')
+      const result = await callback({
+        seoDiscoveryJob: {
+          groupBy: mocks.groupBy,
+          count: mocks.count,
+          findMany: mocks.findMany,
+        },
+      })
+      events.push('transaction:end')
+      return result
+    })
+    mocks.listSitemaps.mockImplementation(async () => {
+      events.push('google')
+      return []
+    })
+
+    const response = await GET(readRequest('?page=99&pageSize=25'))
+    const body = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(mocks.transaction).toHaveBeenCalledWith(
+      expect.any(Function),
+      {
+        isolationLevel: 'RepeatableRead',
+        maxWait: 500,
+        timeout: 2_000,
+      },
+    )
+    expect(events).toEqual([
+      'transaction:start',
+      'groupBy',
+      'count',
+      'findMany',
+      'transaction:end',
+      'google',
+    ])
+    expect(mocks.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      skip: 25,
+      take: 25,
+    }))
+    expect(body.pagination).toEqual({
+      page: 2,
+      pageSize: 25,
+      total: 26,
+      totalPages: 2,
+    })
   })
 
   it('keeps job data available when Search Console status has a sanitized partial failure', async () => {
@@ -333,6 +414,41 @@ describe('SEO discovery admin APIs', () => {
     expect(mocks.syncSitemap).not.toHaveBeenCalled()
   })
 
+  it.each(['viewer', 'user'])(
+    'fails closed when the auth boundary returns a %s session',
+    async (role) => {
+      mocks.requireAdmin.mockResolvedValue({
+        user: { id: '17', role, email: `${role}@mushroomie.io.vn` },
+      })
+
+      const readResponse = await GET(readRequest())
+      const actionResponse = await POST(actionRequest({ action: 'sync_sitemap' }))
+
+      expect(readResponse.status).toBe(403)
+      expect(actionResponse.status).toBe(403)
+      expect(mocks.transaction).not.toHaveBeenCalled()
+      expect(mocks.isLimited).not.toHaveBeenCalled()
+      expect(mocks.syncSitemap).not.toHaveBeenCalled()
+    },
+  )
+
+  it.each(['admin', 'super_admin'])(
+    'allows %s sessions to read and mutate discovery state',
+    async (role) => {
+      mocks.requireAdmin.mockResolvedValue({
+        user: { id: '17', role, email: `${role}@mushroomie.io.vn` },
+      })
+
+      const readResponse = await GET(readRequest())
+      const actionResponse = await POST(actionRequest({ action: 'sync_sitemap' }))
+
+      expect(readResponse.status).toBe(200)
+      expect(actionResponse.status).toBe(200)
+      expect(mocks.transaction).toHaveBeenCalledOnce()
+      expect(mocks.syncSitemap).toHaveBeenCalledOnce()
+    },
+  )
+
   it('requires exact same-origin JSON mutations', async () => {
     const crossOrigin = await POST(actionRequest(
       { action: 'sync_sitemap' },
@@ -358,6 +474,51 @@ describe('SEO discovery admin APIs', () => {
     expect(mocks.syncSitemap).not.toHaveBeenCalled()
   })
 
+  it('accepts the canonical browser origin behind Nginx and explicit localhost development origins', async () => {
+    const proxiedProduction = await POST(actionRequest(
+      { action: 'sync_sitemap' },
+      {
+        requestUrl: 'http://127.0.0.1:3001/api/admin/seo-discovery/actions',
+        origin: 'https://mushroomie.io.vn',
+      },
+    ))
+    const localDevelopment = await POST(actionRequest(
+      { action: 'sync_sitemap' },
+      {
+        requestUrl: 'http://127.0.0.1:3001/api/admin/seo-discovery/actions',
+        origin: 'http://localhost:3000',
+      },
+    ))
+
+    expect(proxiedProduction.status).toBe(200)
+    expect(localDevelopment.status).toBe(200)
+    expect(mocks.syncSitemap).toHaveBeenCalledTimes(2)
+  })
+
+  it('rejects canonical lookalikes even when forwarded host headers claim the production domain', async () => {
+    for (const origin of [
+      'https://mushroomie.io.vn.evil.example',
+      'https://evil-mushroomie.io.vn',
+      'https://www.mushroomie.io.vn',
+    ]) {
+      const response = await POST(actionRequest(
+        { action: 'sync_sitemap' },
+        {
+          requestUrl: 'http://127.0.0.1:3001/api/admin/seo-discovery/actions',
+          origin,
+          headers: {
+            'forwarded': 'host=mushroomie.io.vn;proto=https',
+            'x-forwarded-host': 'mushroomie.io.vn',
+            'x-forwarded-proto': 'https',
+          },
+        },
+      ))
+      expect(response.status, origin).toBe(403)
+    }
+
+    expect(mocks.syncSitemap).not.toHaveBeenCalled()
+  })
+
   it('accepts exactly four action shapes and no URL, property, or credential input', async () => {
     for (const body of [
       { action: 'inspect_url', url: baseJob.url },
@@ -367,6 +528,7 @@ describe('SEO discovery admin APIs', () => {
       { action: 'retry', ids: [] },
       { action: 'retry', ids: [1, 1] },
       { action: 'retry', ids: [0] },
+      { action: 'retry', ids: [2_147_483_648] },
       { action: 'retry', ids: Array.from({ length: 101 }, (_, index) => index + 1) },
     ]) {
       const response = await POST(actionRequest(body))
@@ -402,8 +564,47 @@ describe('SEO discovery admin APIs', () => {
       expect.any(Number),
       expect.any(Number),
       'admin_seo_discovery_actions',
+      'admin-user:7',
     )
     expect(mocks.syncSitemap).not.toHaveBeenCalled()
+  })
+
+  it('binds action limits to the authenticated user instead of spoofable client IP headers', async () => {
+    const attempts = new Map<string, number>()
+    mocks.isLimited.mockImplementation(async (
+      _request,
+      _limit,
+      _windowMs,
+      _prefix,
+      identity: string,
+    ) => {
+      const count = (attempts.get(identity) ?? 0) + 1
+      attempts.set(identity, count)
+      return count > 1
+    })
+
+    const first = await POST(actionRequest(
+      { action: 'sync_sitemap' },
+      { headers: { 'cf-connecting-ip': '198.51.100.10' } },
+    ))
+    const rotatedIp = await POST(actionRequest(
+      { action: 'sync_sitemap' },
+      { headers: { 'cf-connecting-ip': '203.0.113.20' } },
+    ))
+
+    mocks.requireAdmin.mockResolvedValue({
+      user: { id: '8', role: 'admin', email: 'admin-8@mushroomie.io.vn' },
+    })
+    const distinctUser = await POST(actionRequest(
+      { action: 'sync_sitemap' },
+      { headers: { 'cf-connecting-ip': '203.0.113.20' } },
+    ))
+
+    expect(first.status).toBe(200)
+    expect(rotatedIp.status).toBe(429)
+    expect(distinctUser.status).toBe(200)
+    expect(mocks.syncSitemap).toHaveBeenCalledTimes(2)
+    expect([...attempts.keys()]).toEqual(['admin-user:7', 'admin-user:8'])
   })
 
   it('fails closed with a stable response when rate limiting is unavailable', async () => {

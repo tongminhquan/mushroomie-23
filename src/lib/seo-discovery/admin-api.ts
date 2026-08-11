@@ -1,6 +1,6 @@
 import 'server-only'
 
-import type { Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 
 import { prisma } from '@/lib/prisma'
@@ -19,7 +19,13 @@ const MAX_PAGE = 1_000_000
 const DEFAULT_PAGE_SIZE = 25
 const MAX_SEARCH_LENGTH = 128
 const MAX_RETRY_IDS = 100
+const MAX_DATABASE_ID = 2_147_483_647
 const CONFIGURATION_RECOVERY_LIMIT = 10
+const ADMIN_READ_TRANSACTION_OPTIONS = {
+  isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
+  maxWait: 500,
+  timeout: 2_000,
+} as const
 
 const DISCOVERY_STATUSES = [
   'PENDING_ELIGIBILITY',
@@ -44,7 +50,7 @@ const readFilterSchema = z.object({
 }).strict()
 
 const retryIdsSchema = z.array(
-  z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+  z.number().int().positive().max(MAX_DATABASE_ID),
 )
   .min(1)
   .max(MAX_RETRY_IDS)
@@ -58,6 +64,12 @@ export const adminActionSchema = z.discriminatedUnion('action', [
 ])
 
 export type SeoDiscoveryAdminAction = z.infer<typeof adminActionSchema>
+
+export function isSeoDiscoveryAdminRole(
+  role: unknown,
+): role is 'admin' | 'super_admin' {
+  return role === 'admin' || role === 'super_admin'
+}
 
 export interface SeoDiscoveryReadFilters {
   page: number
@@ -384,47 +396,57 @@ export async function readSeoDiscoveryAdminOverview(
     ]
   }
 
-  const [groups, filteredTotal, jobs, google] = await Promise.all([
-    prisma.seoDiscoveryJob.groupBy({
+  const database = await prisma.$transaction(async (transaction) => {
+    const groups = await transaction.seoDiscoveryJob.groupBy({
       by: ['status'],
       _count: { _all: true },
-    }),
-    prisma.seoDiscoveryJob.count({ where }),
-    prisma.seoDiscoveryJob.findMany({
+    })
+    const total = groups.reduce((sum, group) => (
+      sum + (Number.isSafeInteger(group._count._all) ? Math.max(0, group._count._all) : 0)
+    ), 0)
+    const filteredTotal = await transaction.seoDiscoveryJob.count({ where })
+    const totalPages = Math.max(1, Math.ceil(filteredTotal / filters.pageSize))
+    const effectivePage = Math.min(filters.page, totalPages)
+    const jobs = await transaction.seoDiscoveryJob.findMany({
       where,
       orderBy: [{ updated_at: 'desc' }, { id: 'desc' }],
-      skip: (filters.page - 1) * filters.pageSize,
+      skip: (effectivePage - 1) * filters.pageSize,
       take: filters.pageSize,
       select: JOB_SELECT,
-    }),
-    readGoogleOverview(),
-  ])
+    })
 
-  const total = groups.reduce((sum, group) => (
-    sum + (Number.isSafeInteger(group._count._all) ? Math.max(0, group._count._all) : 0)
-  ), 0)
+    return {
+      effectivePage,
+      filteredTotal,
+      groups,
+      jobs,
+      total,
+      totalPages,
+    }
+  }, ADMIN_READ_TRANSACTION_OPTIONS)
+  const google = await readGoogleOverview()
 
   return {
     summary: {
-      total,
-      pending: countFor(groups, 'PENDING_ELIGIBILITY')
-        + countFor(groups, 'ELIGIBLE')
-        + countFor(groups, 'INSPECTION_SCHEDULED'),
-      indexed: countFor(groups, 'INDEXED'),
-      notIndexed: countFor(groups, 'NOT_INDEXED'),
-      retrying: countFor(groups, 'RETRY'),
-      skipped: countFor(groups, 'SKIPPED'),
-      errors: countFor(groups, 'ERROR'),
-      configurationRequired: countFor(groups, 'CONFIGURATION_REQUIRED'),
+      total: database.total,
+      pending: countFor(database.groups, 'PENDING_ELIGIBILITY')
+        + countFor(database.groups, 'ELIGIBLE')
+        + countFor(database.groups, 'INSPECTION_SCHEDULED'),
+      indexed: countFor(database.groups, 'INDEXED'),
+      notIndexed: countFor(database.groups, 'NOT_INDEXED'),
+      retrying: countFor(database.groups, 'RETRY'),
+      skipped: countFor(database.groups, 'SKIPPED'),
+      errors: countFor(database.groups, 'ERROR'),
+      configurationRequired: countFor(database.groups, 'CONFIGURATION_REQUIRED'),
     },
     connection: google.connection,
     sitemap: google.sitemap,
-    jobs: jobs.map((job) => toJobDto(job, now)),
+    jobs: database.jobs.map((job) => toJobDto(job, now)),
     pagination: {
-      page: filters.page,
+      page: database.effectivePage,
       pageSize: filters.pageSize,
-      total: filteredTotal,
-      totalPages: Math.max(1, Math.ceil(filteredTotal / filters.pageSize)),
+      total: database.filteredTotal,
+      totalPages: database.totalPages,
     },
   }
 }

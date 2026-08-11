@@ -6,6 +6,7 @@ import { rateLimiter } from '@/lib/rate-limit'
 import { getClientIp } from '@/lib/security'
 import {
   adminActionSchema,
+  isSeoDiscoveryAdminRole,
   recoverConfigurationRequiredJobs,
   retrySeoDiscoveryJobs,
   stableAdminActionError,
@@ -21,6 +22,13 @@ export const runtime = 'nodejs'
 const MAX_ACTION_BODY_BYTES = 16 * 1024
 const ACTION_RATE_LIMIT = 12
 const ACTION_RATE_WINDOW_MS = 60_000
+const CANONICAL_ADMIN_ORIGIN = 'https://mushroomie.io.vn'
+const DEVELOPMENT_ADMIN_ORIGINS = new Set([
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:3001',
+])
 
 class ActionBodyError extends Error {
   constructor(readonly status: number) {
@@ -49,11 +57,18 @@ function isSameOriginRequest(request: NextRequest): boolean {
   const origin = request.headers.get('origin')
   if (!origin) return false
 
+  let parsedOrigin: string
   try {
-    if (new URL(origin).origin !== request.nextUrl.origin) return false
+    parsedOrigin = new URL(origin).origin
   } catch {
     return false
   }
+  const originAllowed = parsedOrigin === CANONICAL_ADMIN_ORIGIN
+    || (
+      process.env.NODE_ENV !== 'production'
+      && DEVELOPMENT_ADMIN_ORIGINS.has(parsedOrigin)
+    )
+  if (!originAllowed) return false
 
   const fetchSite = request.headers.get('sec-fetch-site')
   return fetchSite === null || fetchSite === 'same-origin'
@@ -187,6 +202,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return authError(error) ?? json({ error: 'Không thể xác thực quyền quản trị' }, 500)
   }
+  if (!isSeoDiscoveryAdminRole(session.user.role)) {
+    return json({ error: 'Bạn không có quyền truy cập' }, 403)
+  }
 
   if (!isSameOriginRequest(request)) {
     return json({ error: 'Nguồn yêu cầu không hợp lệ' }, 403)
@@ -205,6 +223,7 @@ export async function POST(request: NextRequest) {
       ACTION_RATE_LIMIT,
       ACTION_RATE_WINDOW_MS,
       'admin_seo_discovery_actions',
+      `admin-user:${String(session.user.id)}`,
     )
   } catch {
     console.error('[SEO_DISCOVERY_ADMIN_RATE_LIMIT_FAILED]', {
