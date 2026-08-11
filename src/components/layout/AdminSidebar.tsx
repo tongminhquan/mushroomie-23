@@ -22,6 +22,7 @@ import {
   Package,
   PanelLeftClose,
   Settings,
+  SearchCheck,
   ShoppingCart,
   Star,
   TicketPercent,
@@ -70,6 +71,7 @@ const navGroups: AdminNavGroup[] = [
     label: 'Nội dung & hệ thống',
     items: [
       { href: '/admin/bai-viet', icon: FileText, label: 'Bài viết' },
+      { href: '/admin/seo/lap-chi-muc', icon: SearchCheck, label: 'Lập chỉ mục' },
       { href: '/admin/wordpress', icon: FileUp, label: 'Đăng WordPress' },
       { href: '/admin/thu-vien', icon: FolderOpen, label: 'Thư viện' },
       { href: '/admin/danh-gia', icon: Star, label: 'Đánh giá' },
