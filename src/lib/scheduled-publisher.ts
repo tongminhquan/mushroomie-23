@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { releaseExpiredOrderReservations } from '@/lib/order-inventory'
 import { recordAndRevalidatePublication } from '@/lib/seo-discovery/publication'
 import { buildPublicContentUrl } from '@/lib/seo-discovery/urls'
+import { runSeoDiscoveryBatchSafely } from '@/lib/seo-discovery/worker'
 
 /**
  * Bộ xuất bản bài viết theo lịch (tính năng "Đăng bài tự động").
@@ -70,7 +71,7 @@ export async function publishDuePosts(): Promise<ScheduledPublishedPost[]> {
   return publishedPosts
 }
 
-async function runMaintenance() {
+export async function runMaintenance() {
   try {
     await publishDuePosts()
   } catch (error) {
@@ -82,6 +83,15 @@ async function runMaintenance() {
     if (released > 0) console.info(`[inventory] Released ${released} expired order reservations`)
   } catch (error) {
     console.error('[inventory] Failed to release expired order reservations:', error)
+  }
+  try {
+    await runSeoDiscoveryBatchSafely()
+  } catch {
+    // The safe wrapper already normalizes ordinary failures. Keep this outer
+    // boundary redacted in case an unexpected invariant breaks.
+    console.error('[seo-discovery] maintenance integration failed', {
+      code: 'SEO_DISCOVERY_WORKER_ERROR',
+    })
   }
 }
 

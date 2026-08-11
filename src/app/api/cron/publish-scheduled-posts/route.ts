@@ -1,9 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { timingSafeStringEqual } from '@/lib/security'
 import { publishDuePosts } from '@/lib/scheduled-publisher'
+import {
+  runSeoDiscoveryBatchSafely,
+  type SeoDiscoverySummary,
+} from '@/lib/seo-discovery/worker'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+
+const DISCOVERY_FAILURE_SUMMARY: SeoDiscoverySummary = {
+  claimed: 0,
+  processed: 0,
+  failed: 1,
+  configurationRequired: 0,
+}
+
+async function runDiscoveryBackstop(): Promise<SeoDiscoverySummary> {
+  try {
+    return await runSeoDiscoveryBatchSafely()
+  } catch {
+    console.error('[cron/publish-scheduled] Discovery integration failed', {
+      code: 'SEO_DISCOVERY_WORKER_ERROR',
+    })
+    return { ...DISCOVERY_FAILURE_SUMMARY }
+  }
+}
 
 /**
  * Cron endpoint: xuất bản bài đã lên lịch đến hạn.
@@ -35,10 +57,12 @@ export async function GET(request: NextRequest) {
         postIds.join(','),
       )
     }
+    const discovery = await runDiscoveryBackstop()
     return NextResponse.json({
       success: true,
       publishedCount: publishedPosts.length,
       postIds: publishedPosts.map((post) => post.id),
+      discovery,
     })
   } catch (error) {
     console.error('[cron/publish-scheduled] Lỗi:', error)

@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   updateMany: vi.fn(),
   recordAndRevalidatePublication: vi.fn(),
   releaseExpiredOrderReservations: vi.fn(),
+  runSeoDiscoveryBatchSafely: vi.fn(),
 }))
 
 vi.mock('@/lib/prisma', () => ({
@@ -27,7 +28,11 @@ vi.mock('@/lib/order-inventory', () => ({
   releaseExpiredOrderReservations: mocks.releaseExpiredOrderReservations,
 }))
 
-import { publishDuePosts } from '@/lib/scheduled-publisher'
+vi.mock('@/lib/seo-discovery/worker', () => ({
+  runSeoDiscoveryBatchSafely: mocks.runSeoDiscoveryBatchSafely,
+}))
+
+import { publishDuePosts, runMaintenance } from '@/lib/scheduled-publisher'
 
 const NOW = new Date('2026-08-11T04:00:00.000Z')
 const FIRST_SAVED_ROW = {
@@ -57,8 +62,16 @@ describe('publishDuePosts', () => {
     mocks.updateMany.mockReset()
     mocks.recordAndRevalidatePublication.mockReset()
     mocks.releaseExpiredOrderReservations.mockReset()
+    mocks.runSeoDiscoveryBatchSafely.mockReset()
     mocks.updateMany.mockResolvedValue({ count: 2 })
     mocks.recordAndRevalidatePublication.mockResolvedValue({ recorded: true })
+    mocks.releaseExpiredOrderReservations.mockResolvedValue(0)
+    mocks.runSeoDiscoveryBatchSafely.mockResolvedValue({
+      claimed: 0,
+      processed: 0,
+      failed: 0,
+      configurationRequired: 0,
+    })
     vi.spyOn(console, 'info').mockImplementation(() => undefined)
     vi.spyOn(console, 'error').mockImplementation(() => undefined)
   })
@@ -134,5 +147,67 @@ describe('publishDuePosts', () => {
     await expect(publishDuePosts()).rejects.toBe(databaseFailure)
 
     expect(mocks.recordAndRevalidatePublication).not.toHaveBeenCalled()
+  })
+})
+
+describe('runMaintenance', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(NOW)
+    mocks.findMany.mockReset()
+    mocks.update.mockReset()
+    mocks.recordAndRevalidatePublication.mockReset()
+    mocks.releaseExpiredOrderReservations.mockReset()
+    mocks.runSeoDiscoveryBatchSafely.mockReset()
+    mocks.recordAndRevalidatePublication.mockResolvedValue({ recorded: true })
+    mocks.releaseExpiredOrderReservations.mockResolvedValue(0)
+    mocks.runSeoDiscoveryBatchSafely.mockResolvedValue({
+      claimed: 0,
+      processed: 0,
+      failed: 0,
+      configurationRequired: 0,
+    })
+    vi.spyOn(console, 'info').mockImplementation(() => undefined)
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+  })
+
+  it('runs one discovery batch after scheduled publishing and inventory release', async () => {
+    mocks.findMany.mockResolvedValue([])
+    mocks.releaseExpiredOrderReservations.mockResolvedValue(2)
+
+    await expect(runMaintenance()).resolves.toBeUndefined()
+
+    expect(mocks.findMany).toHaveBeenCalledOnce()
+    expect(mocks.releaseExpiredOrderReservations).toHaveBeenCalledOnce()
+    expect(mocks.runSeoDiscoveryBatchSafely).toHaveBeenCalledOnce()
+    expect(mocks.findMany.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.releaseExpiredOrderReservations.mock.invocationCallOrder[0],
+    )
+    expect(mocks.releaseExpiredOrderReservations.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.runSeoDiscoveryBatchSafely.mock.invocationCallOrder[0],
+    )
+  })
+
+  it('still runs discovery after independent publisher and inventory failures', async () => {
+    mocks.findMany.mockRejectedValue(new Error('publisher unavailable'))
+    mocks.releaseExpiredOrderReservations.mockRejectedValue(
+      new Error('inventory unavailable'),
+    )
+
+    await expect(runMaintenance()).resolves.toBeUndefined()
+
+    expect(mocks.runSeoDiscoveryBatchSafely).toHaveBeenCalledOnce()
+  })
+
+  it('does not expose a worker exception while keeping the maintenance tick alive', async () => {
+    const secretSentinel = 'private-service-account-key-sentinel'
+    mocks.findMany.mockResolvedValue([])
+    mocks.runSeoDiscoveryBatchSafely.mockRejectedValue(new Error(secretSentinel))
+
+    await expect(runMaintenance()).resolves.toBeUndefined()
+
+    expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toContain(
+      secretSentinel,
+    )
   })
 })
