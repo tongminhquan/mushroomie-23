@@ -7,7 +7,7 @@ import { PRODUCTION_ORIGIN } from './urls'
 const FETCH_TIMEOUT_MS = 5_000
 const MAX_REDIRECTS = 5
 const MAX_PUBLIC_URL_LENGTH = 512
-const MAX_HTML_BYTES = 256 * 1024
+const MAX_HTML_BYTES = 384 * 1024
 const PRODUCTION_HOSTNAME = 'mushroomie.io.vn'
 
 const FOLLOWABLE_REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308])

@@ -491,9 +491,29 @@ describe('checkPublicUrlEligibility', () => {
     )).resolves.toMatchObject({ code: 'UNSUPPORTED_CONTENT_TYPE' })
   })
 
-  it('stops consuming HTML once the 256 KiB byte limit is exceeded', async () => {
+  it('accepts the production-sized homepage within the bounded HTML budget', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      htmlResponse('https://mushroomie.io.vn/', {
+        bodyPrefix: 'a'.repeat(281_116),
+      }),
+    )
+
+    await expect(checkPublicUrlEligibility(
+      'https://mushroomie.io.vn/',
+      sitemapWith('https://mushroomie.io.vn/'),
+      { fetch: fetchMock },
+    )).resolves.toMatchObject({
+      eligible: true,
+      retryable: false,
+      code: 'ELIGIBLE',
+    })
+  })
+
+  it('stops consuming HTML once the 384 KiB byte limit is exceeded', async () => {
     const chunk = new Uint8Array(64 * 1024).fill(97)
     const chunks = [
+      chunk,
+      chunk,
       chunk,
       chunk,
       chunk,
