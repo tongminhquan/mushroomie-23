@@ -48,7 +48,7 @@ test('mọi owner URL đều là landing đã xuất bản và tự mô tả đ�
       `${owner.slug} có title lệch từ khóa owner`,
     )
     assert.equal(localServiceSchema(page).url, `https://mushroomie.io.vn${owner.href}`)
-    assert.equal(getLocalSeoLastModified(owner.slug).toISOString(), '2026-07-28T00:00:00.000Z')
+    assert.equal(getLocalSeoLastModified(owner.slug).toISOString(), '2026-08-12T00:00:00.000Z')
 
     const routeSource = readFileSync(
       resolve(process.cwd(), 'src', 'app', '(user)', owner.slug, 'page.tsx'),

@@ -14,6 +14,7 @@ import {
   localBusinessSchema,
   localServiceSchema,
 } from '../src/lib/local-seo'
+import { LOCAL_B30_OWNER_SLUGS } from '../src/lib/local-seo-b30'
 
 test('BRAND dùng đúng NAP và tọa độ đã được xác minh', () => {
   assert.equal(BRAND.phone, '0947192590')
@@ -173,21 +174,8 @@ test('4 landing ưu tiên có nội dung riêng theo đúng ý định tìm ki�
   }
 })
 
-test('sitemap chỉ làm mới lastmod của landing vừa được nâng cấp', () => {
-  const updatedAt = '2026-07-28T00:00:00.000Z'
-  const prioritySlugs = [
-    'vong-tay-handmade-dong-nai',
-    'vong-tay-custom-bien-hoa',
-    'moc-khoa-handmade-dong-nai',
-    'qua-tang-handmade-dong-nai',
-  ]
-
-  for (const slug of prioritySlugs) {
-    assert.equal(getLocalSeoLastModified(slug).toISOString(), updatedAt)
+test('all B30 owner lastmod values reflect the material release', () => {
+  for (const slug of LOCAL_B30_OWNER_SLUGS) {
+    assert.equal(getLocalSeoLastModified(slug).toISOString(), '2026-08-12T00:00:00.000Z')
   }
-
-  assert.equal(
-    getLocalSeoLastModified('phu-kien-handmade-dong-nai').toISOString(),
-    '2026-07-14T00:00:00.000Z',
-  )
 })
