@@ -230,7 +230,7 @@ Nếu Google thay đổi SERP, mục tiêu vẫn giữ nguyên; hệ thống ti�
 
 ### Pha 2 — On-page, cluster và internal links
 
-- Bổ sung bảy secondary-intent section vào năm owner hiện hữu.
+- Bổ sung bảy secondary-intent section vào sáu owner hiện hữu.
 - Chuẩn hóa meta description có tác động CTR mà không viết máy móc theo độ dài.
 - Tạo hub-to-owner và contextual incoming links; kiểm tra anchor diversity.
 - Giữ Server Components và không thêm JavaScript client vào public bundle.
