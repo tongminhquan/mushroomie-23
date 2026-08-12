@@ -97,6 +97,19 @@ gọi một lần Sitemap API và một lần URL Inspection cho URL cố địn
 không được bỏ qua master switch discovery, credential boundary, phân quyền admin,
 same-origin guard hay rate limit; một lần probe tiêu thụ một request Inspection.
 
+### Tự động đối soát sitemap
+
+Khi `SEO_DISCOVERY_ENABLED=true`, maintenance đối soát sitemap ngay sau khi
+process PM2 khởi động và sau đó tối đa một lần thành công mỗi 60 phút. Interval
+60 giây chỉ kiểm tra điều kiện đến hạn; nó không tải sitemap mỗi phút. Protected
+cron dùng chung coordinator trong cùng process, vì vậy hai trigger đồng thời chỉ
+có một fetch/transaction.
+
+Reconciliation chạy trước discovery worker. Nếu fetch, XML hoặc transaction lỗi,
+mốc thành công không tiến lên và tick sau retry; publication, inventory và worker
+vẫn tiếp tục. Khi `GSC_INTEGRATION_ENABLED=false`, bước này chỉ đối soát database,
+không gọi Google.
+
 ## Backfill an toàn
 
 Backfill chỉ đọc bài viết `published` chưa xóa và sản phẩm `active`, phân trang
@@ -171,6 +184,11 @@ Inspection trong ngày tiến gần 1.500. Không tăng tần suất để “é
    ảnh sản phẩm và QR thanh toán.
 4. Bật riêng `SEO_DISCOVERY_ENABLED=true`, restart PM2, chạy dry-run rồi apply
    backfill và theo dõi queue. Giữ `GSC_INTEGRATION_ENABLED=false`.
+   - Baseline 2026-08-12: sitemap 138 URL, queue 102 job, thiếu 37 URL
+     trang tĩnh/local/catalog.
+   - Sau restart rollout: chờ tối đa bốn worker tick để 37 URL mới hoàn tất
+     eligibility; khi GSC còn tắt, kỳ vọng 138 URL hợp lệ ở
+     `CONFIGURATION_REQUIRED`, một URL legacy ở `SKIPPED`, và không có lease treo.
 5. Đặt credential ngoài repository, cấp quyền Search Console, vào trang admin và
    chạy **Kiểm tra kết nối** khi GSC vẫn `false`; xác minh probe báo connected và
    tổng inventory/backlog thực tế vẫn dưới ngưỡng rollout 1.000.
@@ -222,7 +240,10 @@ commit.
 ## Rollback và xử lý sự cố
 
 - Dừng mọi Google call ngay: đặt `GSC_INTEGRATION_ENABLED=false`, restart PM2.
-- Dừng cả enqueue/worker: đặt thêm `SEO_DISCOVERY_ENABLED=false`, restart PM2.
+- Dừng cả enqueue/worker và mọi lần fetch sitemap tự động: đặt thêm
+  `SEO_DISCOVERY_ENABLED=false`, restart PM2.
+- Nếu chỉ đặt `GSC_INTEGRATION_ENABLED=false`, đối soát sitemap/database vẫn hoạt
+  động nhưng không có lời gọi Google tự động.
 - Giữ nguyên bảng `seo_discovery_jobs` khi rollback để bảo toàn audit/evidence;
   không drop table trong incident rollback.
 - Publication, sitemap public, feed và cache revalidation phải tiếp tục hoạt động
