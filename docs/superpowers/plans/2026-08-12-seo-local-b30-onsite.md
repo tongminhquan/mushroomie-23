@@ -685,16 +685,14 @@ git commit -m "feat(seo): refresh B30 metadata and lastmod"
 - Consumes: all Task 1–4 modules.
 - Produces: regression proof that public B30 code remains data/server-only and the legacy featured-four UI contract remains intentional.
 
-- [ ] **Step 1: Add failing import-boundary assertions**
+- [ ] **Step 1: Add explicit B30 import-boundary assertions**
 
-Extend the existing graph scanner entry set with:
+The existing scanner already discovers every public App Router entry recursively. Add a narrower registry-specific assertion so the two canonical B30 data modules cannot silently acquire client, database, admin, worker, or Google SDK dependencies:
 
 ```ts
-const B30_PUBLIC_ENTRIES = [
+const B30_DATA_ENTRIES = [
   'src/lib/local-seo-b30.ts',
   'src/lib/local-seo-link-graph.ts',
-  'src/components/local/LocalLandingPage.tsx',
-  'src/components/home/landing/HomeLocalAreas.tsx',
 ]
 
 const FORBIDDEN_B30_IMPORTS = [
@@ -707,13 +705,13 @@ const FORBIDDEN_B30_IMPORTS = [
 ]
 ```
 
-Assert every reachable import from the four entries excludes every forbidden module and only `LocalLandingPage` imports React/Next UI code. Assert `local-seo-b30.ts` and `local-seo-link-graph.ts` do not contain `'use client'`.
+Assert every reachable import from the two entries excludes every forbidden module. Assert both files omit `'use client'` and remain pure data modules. Keep the existing all-public-entry scan unchanged; it already covers `LocalLandingPage`, `HomeLocalAreas`, and every other public route/layout.
 
-- [ ] **Step 2: Run boundary tests before adjusting scanner fixtures**
+- [ ] **Step 2: Verify the characterization boundary and scanner sensitivity**
 
 Run: `npx tsx --test tests/seo-discovery-performance-boundaries.test.ts`
 
-Expected: test initially fails because new B30 entries are not in the coverage set; it must not fail due to a real forbidden import.
+Expected: PASS after Tasks 1–4 because this is a test-only characterization gate, not new production behavior. Prove the gate is meaningful with an isolated test fixture or parser assertion that contains a forbidden static/dynamic import and is rejected; do not edit a tracked production module merely to manufacture a RED state.
 
 - [ ] **Step 3: Update the legacy featured-four contract without expanding it to 30 cards**
 
