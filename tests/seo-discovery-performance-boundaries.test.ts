@@ -8,6 +8,18 @@ const projectRoot = process.cwd()
 const sourceRoot = path.join(projectRoot, 'src')
 const sourceExtensions = ['.ts', '.tsx', '.js', '.jsx', '.mjs'] as const
 const nextRenderEntryPattern = /^(?:page|layout|template|loading|error|default|not-found)\.(?:ts|tsx|js|jsx)$/
+const B30_DATA_ENTRIES = [
+  'src/lib/local-seo-b30.ts',
+  'src/lib/local-seo-link-graph.ts',
+] as const
+const FORBIDDEN_B30_IMPORTS = [
+  'google-auth-library',
+  '@/lib/seo-discovery/google-gsc-client',
+  '@/lib/seo-discovery/worker',
+  '@/lib/seo-discovery/admin-api',
+  '@/lib/prisma',
+  '@/components/admin',
+] as const
 const compilerOptions: ts.CompilerOptions = {
   allowJs: true,
   baseUrl: projectRoot,
@@ -73,6 +85,31 @@ function importSpecifiers(source: string, fileName = 'inline.tsx'): string[] {
   return specifiers
 }
 
+function isForbiddenB30Import(specifier: string): boolean {
+  return FORBIDDEN_B30_IMPORTS.some((forbidden) => (
+    specifier === forbidden || specifier.startsWith(`${forbidden}/`)
+  ))
+}
+
+function assertNoForbiddenB30Imports(
+  specifiers: readonly string[],
+  context: string,
+): void {
+  const forbidden = specifiers.filter(isForbiddenB30Import)
+  if (forbidden.length > 0) {
+    throw new Error(`${context} reached forbidden B30 imports: ${forbidden.join(', ')}`)
+  }
+}
+
+function matchesForbiddenLocalPath(filePath: string, forbidden: string): boolean {
+  if (!forbidden.startsWith('@/')) return false
+
+  const forbiddenPath = `src/${forbidden.slice(2)}`
+  return filePath === forbiddenPath
+    || filePath.startsWith(`${forbiddenPath}.`)
+    || filePath.startsWith(`${forbiddenPath}/`)
+}
+
 async function isFile(filePath: string): Promise<boolean> {
   try {
     return (await stat(filePath)).isFile()
@@ -113,6 +150,7 @@ async function collectImportGraph(entrypoints: readonly string[]) {
   const pending = entrypoints.map((entrypoint) => path.join(projectRoot, entrypoint))
   const visited = new Set<string>()
   const external = new Set<string>()
+  const imports = new Set<string>()
 
   while (pending.length > 0) {
     const current = path.normalize(pending.pop()!)
@@ -123,6 +161,7 @@ async function collectImportGraph(entrypoints: readonly string[]) {
 
     const source = await readFile(current, 'utf8')
     for (const specifier of importSpecifiers(source, current)) {
+      imports.add(specifier)
       const resolved = await resolveLocalImport(current, specifier)
       if (resolved) {
         pending.push(resolved)
@@ -132,7 +171,7 @@ async function collectImportGraph(entrypoints: readonly string[]) {
     }
   }
 
-  return { visited, external }
+  return { visited, external, imports }
 }
 
 async function discoverPublicEntrypoints(): Promise<string[]> {
@@ -181,6 +220,42 @@ test('storefront entrypoints cannot reach admin, Search Console auth, adapters, 
     )
   }
   assert.equal(external.has('google-auth-library'), false)
+})
+
+test('canonical B30 data modules stay client-free and cannot reach private runtime code', async () => {
+  const graph = await collectImportGraph(B30_DATA_ENTRIES)
+  const relativeFiles = [...graph.visited].map((filePath) => (
+    path.relative(projectRoot, filePath).replaceAll(path.sep, '/')
+  ))
+
+  assertNoForbiddenB30Imports([...graph.imports, ...graph.external], 'B30 data graph')
+  for (const forbidden of FORBIDDEN_B30_IMPORTS) {
+    assert.ok(
+      relativeFiles.every((filePath) => !matchesForbiddenLocalPath(filePath, forbidden)),
+      `B30 data graph reached ${forbidden}`,
+    )
+  }
+
+  for (const entrypoint of B30_DATA_ENTRIES) {
+    const source = await readFile(path.join(projectRoot, entrypoint), 'utf8')
+    assert.doesNotMatch(
+      source,
+      /(?:^|\n)\s*['"]use client['"]\s*;?/,
+      `${entrypoint} must remain a pure data module`,
+    )
+  }
+})
+
+test('B30 boundary parser rejects forbidden static and dynamic imports', () => {
+  const fixture = importSpecifiers(`
+    import { prisma } from '@/lib/prisma'
+    const worker = import('@/lib/seo-discovery/worker')
+  `, 'b30-boundary-fixture.ts')
+
+  assert.throws(
+    () => assertNoForbiddenB30Imports(fixture, 'isolated B30 fixture'),
+    /isolated B30 fixture reached forbidden B30 imports: @\/lib\/prisma, @\/lib\/seo-discovery\/worker/,
+  )
 })
 
 test('only the protected admin page imports the discovery dashboard client island', async () => {

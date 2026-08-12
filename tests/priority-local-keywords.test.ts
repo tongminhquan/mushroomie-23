@@ -13,6 +13,7 @@ import {
   getLocalSeoLastModified,
   localServiceSchema,
 } from '../src/lib/local-seo'
+import { LOCAL_B30_TARGETS } from '../src/lib/local-seo-b30'
 
 const EXPECTED_OWNERS = new Map([
   ['vòng tay handmade Đồng Nai', '/vong-tay-handmade-dong-nai'],
@@ -21,7 +22,14 @@ const EXPECTED_OWNERS = new Map([
   ['quà tặng handmade Đồng Nai', '/qua-tang-handmade-dong-nai'],
 ])
 
-test('mỗi từ khóa local ưu tiên chỉ có một owner URL', () => {
+test('bốn owner local ưu tiên là UI subset của canonical B30 registry', () => {
+  assert.equal(PRIORITY_LOCAL_KEYWORD_OWNERS.length, 4)
+  for (const featured of PRIORITY_LOCAL_KEYWORD_OWNERS) {
+    const canonical = LOCAL_B30_TARGETS.find((target) => target.query === featured.keyword)
+    assert.ok(canonical, `${featured.keyword} thiếu canonical B30 target`)
+    assert.equal(canonical.ownerHref, featured.href)
+  }
+
   const actualOwners = new Map(
     PRIORITY_LOCAL_KEYWORD_OWNERS.map((owner) => [owner.keyword, owner.href]),
   )
