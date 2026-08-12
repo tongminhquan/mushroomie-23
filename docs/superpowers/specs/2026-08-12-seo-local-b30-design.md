@@ -113,7 +113,7 @@ Mỗi owner URL phải:
 3. Nhận ít nhất ba incoming internal link có ngữ cảnh từ hub, bài viết hoặc trang sản phẩm liên quan.
 4. Link đến hai hoặc ba sibling URL có ích cho hành trình mua.
 5. Không dùng một anchor exact-match quá 40% tổng internal link trỏ đến URL.
-6. Không tự nhận primary keyword của owner khác trong title, H1 hoặc canonical.
+6. Không tự nhận primary keyword của owner khác trong title, H1 hoặc canonical. Ngoại lệ duy nhất là quan hệ strict-subquery không thể tránh giữa owner `shop phụ kiện handmade <khu vực>` và owner `phụ kiện handmade <khu vực>`: title của owner shop phải chứa đầy đủ query shop nên tất yếu chứa query ngắn hơn; canonical và H1 vẫn thuộc đúng owner, và không áp dụng ngoại lệ cho bất kỳ cặp nào khác.
 
 ### 4.2 Bảy truy vấn phụ
 

@@ -637,11 +637,37 @@ const B30_META_COPY = {
 
 Do not retain `B30_META_COPY` as a second runtime registry. Copy each string into the matching `LocalPage.metaDescription`, then let the length test guard it.
 
-Also replace the one punctuation-broken primary title with the exact 51-character title below so the complete primary query is contiguous:
+Replace all 23 titles with the exact map below. Every value contains its own primary query contiguously and measures 50–60 JavaScript UTF-16 code units:
 
 ```ts
-seoTitle: 'Móc Khóa Handmade Theo Yêu Cầu Đồng Nai – Làm Riêng',
+const B30_TITLE_COPY = {
+  'phu-kien-handmade-dong-nai': 'Phụ Kiện Handmade Đồng Nai – Custom Theo Gu Cá Tính',
+  'shop-phu-kien-handmade-dong-nai': 'Shop Phụ Kiện Handmade Đồng Nai – Đặt Mẫu Theo Gu Riêng',
+  'phu-kien-handmade-bien-hoa': 'Phụ Kiện Handmade Biên Hòa – Custom Theo Gu Cá Tính',
+  'phu-kien-handmade-tphcm': 'Phụ Kiện Handmade TP.HCM – Đặt Online, Giao Tận Nơi',
+  'vong-tay-handmade-dong-nai': 'Vòng Tay Handmade Đồng Nai – Phối Hạt Theo Gu Riêng',
+  'vong-tay-custom-dong-nai': 'Vòng Tay Custom Đồng Nai – Chọn Màu, Charm Và Tên Riêng',
+  'vong-tay-custom-bien-hoa': 'Vòng Tay Custom Biên Hòa – Chọn Màu, Charm Và Tên Riêng',
+  'moc-khoa-handmade-dong-nai': 'Móc Khóa Handmade Đồng Nai – Phối Charm Theo Gu Riêng',
+  'moc-khoa-handmade-theo-yeu-cau-dong-nai': 'Móc Khóa Handmade Theo Yêu Cầu Đồng Nai – Làm Riêng',
+  'qua-tang-handmade-dong-nai': 'Quà Tặng Handmade Đồng Nai – Chọn Quà Theo Từng Dịp',
+  'qua-tang-ca-nhan-hoa-dong-nai': 'Quà Tặng Cá Nhân Hóa Đồng Nai – Chọn Theo Người Nhận',
+  'phu-kien-handmade-trang-dai': 'Phụ Kiện Handmade Trảng Dài – Custom Theo Gu Riêng',
+  'vong-tay-handmade-trang-dai': 'Vòng Tay Handmade Trảng Dài – Phối Hạt Theo Gu Riêng',
+  'shop-phu-kien-handmade-bien-hoa': 'Shop Phụ Kiện Handmade Biên Hòa – Đặt Mẫu Online Theo Gu',
+  'vong-tay-handmade-bien-hoa': 'Vòng Tay Handmade Biên Hòa – Phối Hạt Theo Gu Riêng',
+  'moc-khoa-handmade-bien-hoa': 'Móc Khóa Handmade Biên Hòa – Chọn Charm Theo Gu Riêng',
+  'qua-tang-handmade-bien-hoa': 'Quà Tặng Handmade Biên Hòa – Chọn Quà Theo Từng Dịp',
+  'vong-tay-custom-tphcm': 'Vòng Tay Custom TP.HCM – Đặt Online, Giao Đến Tận Nơi',
+  'moc-khoa-handmade-tphcm': 'Móc Khóa Handmade TP.HCM – Đặt Online, Giao Tận Nơi',
+  'qua-tang-handmade-tphcm': 'Quà Tặng Handmade TP.HCM – Đặt Online, Giao Tận Nơi',
+  'vong-tay-cap-doi-dong-nai': 'Vòng Tay Cặp Đôi Đồng Nai – Phối Riêng Cho Hai Bạn',
+  'charm-handmade-dong-nai': 'Charm Handmade Đồng Nai – Phối Vòng, Móc Khóa Theo Gu',
+  'day-chuyen-handmade-dong-nai': 'Dây Chuyền Handmade Đồng Nai – Chọn Charm Theo Gu Riêng',
+} as const
 ```
+
+Do not retain `B30_TITLE_COPY` as a second runtime registry; copy each string into its matching `LocalPage.seoTitle`. The two shop titles necessarily contain the shorter `phụ kiện handmade <area>` query as a strict substring. This is the only permitted cross-owner title containment; add a test that rejects all other full-primary-query collisions.
 
 - [ ] **Step 4: Replace lastmod overrides with the material-release date**
 
