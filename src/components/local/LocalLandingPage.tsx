@@ -162,7 +162,7 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
             </h2>
             <div className="mt-6 grid gap-7 lg:grid-cols-2 lg:gap-10">
               {page.intentSections.map((section) => (
-                <article key={section.title}>
+                <article key={section.id ?? section.title}>
                   <h3 className="font-heading text-base leading-snug text-theme-primary">{section.title}</h3>
                   <p className="mt-2 text-sm leading-7 text-theme-secondary">{section.body}</p>
                 </article>

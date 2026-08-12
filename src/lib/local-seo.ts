@@ -1,5 +1,6 @@
 import { DEFAULT_SOCIAL_IMAGE } from '@/lib/seo-assets'
 import { getAreaDelivery } from '@/lib/local-area-content'
+import type { LocalB30ContentSectionId } from '@/lib/local-seo-b30'
 
 /**
  * Gói Local SEO cho Mushroomie — bản đồ từ khóa địa phương (Đồng Nai, Biên Hòa,
@@ -94,6 +95,7 @@ export interface LocalHighlight {
 }
 
 export interface LocalIntentSection {
+  id?: LocalB30ContentSectionId
   title: string
   body: string
 }
@@ -304,6 +306,11 @@ export const LOCAL_PAGES: LocalPage[] = [
     ],
     intentSections: [
       {
+        id: 'bracelet-shop-dong-nai',
+        title: 'Shop vòng tay handmade Đồng Nai: xem mẫu và đặt đúng size',
+        body: 'Nếu bạn tìm shop vòng tay handmade Đồng Nai, Mushroomie có mẫu hạt, charm, vòng đôi và nhận phối theo gu tại xưởng Trảng Dài. Bạn có thể xem mẫu trên website, gửi số đo cổ tay và nhắn màu mong muốn để được tư vấn. Việc hẹn nhận trực tiếp chỉ được chốt sau khi đơn đã hoàn thiện; khách ở xa vẫn có thể đặt online và giao hàng.',
+      },
+      {
         title: 'Chọn size vòng tay handmade vừa cổ tay',
         body: 'Để vòng đeo thoải mái, bạn nên đo sát quanh cổ tay bằng thước dây hoặc một sợi chỉ rồi ghi lại số đo theo centimet. Nếu thích vòng ôm gọn, Mushroomie sẽ chừa độ thoải mái vừa phải; nếu thích đeo lỏng hoặc phối nhiều vòng, hãy nói rõ khi đặt. Size được xác nhận trước khi làm để hạn chế vòng quá chật, quá rộng hoặc phải chỉnh lại sau khi nhận.',
       },
@@ -332,6 +339,18 @@ export const LOCAL_PAGES: LocalPage[] = [
       { emoji: '🎨', title: 'Bạn chọn – Mushroomie làm', body: 'Từ màu dây, hạt đến charm và ký hiệu riêng, mọi chi tiết đều theo yêu cầu của bạn.' },
       { emoji: '👯', title: 'Vòng đôi & bạn thân', body: 'Phối set cho hai người hoặc cả nhóm để lưu giữ kỷ niệm cùng nhau.' },
       { emoji: '💬', title: 'Tư vấn tận tình', body: 'Nhắn tin để được gợi ý phối màu và charm hợp phong cách hoặc dịp tặng.' },
+    ],
+    intentSections: [
+      {
+        id: 'bracelet-made-to-order-dong-nai',
+        title: 'Vòng tay theo yêu cầu Đồng Nai: từ ý tưởng đến mẫu đã chốt',
+        body: 'Khi đặt vòng tay theo yêu cầu Đồng Nai, bạn gửi số đo cổ tay, màu chủ đạo, loại hạt, charm và dịp sử dụng. Mushroomie đối chiếu vật liệu đang có, tư vấn cách phối rồi xác nhận mẫu, chi phí và thời gian trước khi làm. Quy trình này giúp yêu cầu cá nhân hóa rõ ràng, tránh hứa vật liệu hoặc lịch giao chưa được kiểm tra.',
+      },
+      {
+        id: 'bracelet-name-dong-nai',
+        title: 'Vòng tay handmade theo tên Đồng Nai cần chuẩn bị gì?',
+        body: 'Với vòng tay handmade theo tên Đồng Nai, bạn cần kiểm tra chính tả tên hoặc chữ cái, chọn bảng màu, size và biểu tượng đi kèm. Tên dài có thể cần đổi bố cục hoặc dùng chữ viết tắt để vòng vẫn cân đối. Vì đây là sản phẩm cá nhân hóa, Mushroomie sẽ gửi lại nội dung đã nhận để hai bên chốt chính xác trước khi xâu hạt và hoàn thiện.',
+      },
     ],
     productLinks: [productHub.bracelet, productHub.contact, productHub.all],
     cta: { label: 'Xem mẫu vòng tay', href: '/san-pham?category=vong-tay' },
@@ -416,6 +435,13 @@ export const LOCAL_PAGES: LocalPage[] = [
       { emoji: '🎨', title: 'Không đại trà', body: 'Mỗi chiếc là một thiết kế riêng, mang dấu ấn cá nhân.' },
       { emoji: '💬', title: 'Chốt mẫu dễ dàng', body: 'Nhắn tin mô tả ý tưởng, Mushroomie tư vấn và báo mẫu trước khi làm.' },
     ],
+    intentSections: [
+      {
+        id: 'keychain-custom-dong-nai',
+        title: 'Móc khóa custom Đồng Nai theo tên, màu và công dụng',
+        body: 'Đặt móc khóa custom Đồng Nai nên bắt đầu từ nơi bạn muốn gắn: chìa khóa, balo hay túi xách. Từ đó Mushroomie tư vấn kích thước, kiểu khoen, độ dài, màu hạt, charm và tên phù hợp. Đơn nhóm cần ghi rõ số lượng, phần thiết kế chung và chi tiết riêng từng người; vật liệu, giá và ngày nhận đều được xác nhận trước khi làm.',
+      },
+    ],
     productLinks: [productHub.keychain, productHub.contact, productHub.all],
     cta: { label: 'Xem mẫu móc khóa & charm', href: '/san-pham?category=moc-khoa' },
     related: ['moc-khoa-handmade-dong-nai', 'vong-tay-custom-dong-nai', 'qua-tang-ca-nhan-hoa-dong-nai'],
@@ -438,6 +464,11 @@ export const LOCAL_PAGES: LocalPage[] = [
       { emoji: '💗', title: 'Cá nhân hóa cảm xúc', body: 'Thêm tên, màu hoặc charm ý nghĩa để món quà thật sự dành riêng cho ai đó.' },
     ],
     intentSections: [
+      {
+        id: 'birthday-gift-dong-nai',
+        title: 'Chọn quà sinh nhật handmade Đồng Nai theo người nhận',
+        body: 'Một món quà sinh nhật handmade Đồng Nai nên bắt đầu từ phong cách, màu yêu thích, sở thích và độ tuổi của người nhận. Bạn có thể chọn vòng tay, móc khóa hoặc set charm rồi thêm chữ cái, thiệp và cách gói phù hợp. Hãy gửi ngày cần nhận và ngân sách ngay từ đầu để Mushroomie kiểm tra thời gian làm thủ công, vật liệu và phương án giao thực tế.',
+      },
       {
         title: 'Chọn quà handmade theo người nhận và dịp tặng',
         body: 'Với bạn thân, một vòng tay hoặc móc khóa có màu chung, chữ cái hay biểu tượng kỷ niệm thường dễ tạo cảm xúc. Quà sinh nhật có thể nổi bật hơn bằng charm theo sở thích; quà kỷ niệm nên ưu tiên chi tiết gắn với câu chuyện của hai người. Nếu chưa biết chọn gì, hãy cho Mushroomie biết độ tuổi, phong cách, dịp tặng và khoảng ngân sách để được gợi ý từ sản phẩm đang có thật.',
@@ -467,6 +498,13 @@ export const LOCAL_PAGES: LocalPage[] = [
       { emoji: '✍️', title: 'Theo tên & sở thích', body: 'Thêm tên, màu yêu thích hoặc charm gắn với kỷ niệm của người nhận.' },
       { emoji: '🎨', title: 'Bạn chọn từng chi tiết', body: 'Từ sản phẩm bên trong đến cách phối và đóng gói đều tùy chỉnh được.' },
       { emoji: '💝', title: 'Ý nghĩa hơn quà mua sẵn', body: 'Một món quà làm riêng luôn chạm cảm xúc hơn đồ đại trà.' },
+    ],
+    intentSections: [
+      {
+        id: 'lover-gift-dong-nai',
+        title: 'Quà handmade cho người yêu Đồng Nai mang dấu ấn riêng',
+        body: 'Khi chọn quà handmade cho người yêu Đồng Nai, một chi tiết gắn với câu chuyện chung thường ý nghĩa hơn việc thêm thật nhiều charm. Bạn có thể dùng màu kỷ niệm, chữ cái, ngày đặc biệt hoặc biểu tượng hai người cùng hiểu. Mushroomie tư vấn cách đưa chi tiết đó vào vòng tay, móc khóa hay set quà và chốt nội dung thiệp trước khi hoàn thiện.',
+      },
     ],
     productLinks: [productHub.gift, productHub.contact, productHub.all],
     cta: { label: 'Xem set quà tặng', href: '/san-pham' },
@@ -703,6 +741,13 @@ export const LOCAL_PAGES: LocalPage[] = [
       { emoji: '✨', title: 'Nhiều mẫu cute', body: 'Charm nhiều chủ đề và màu sắc để phối theo mood.' },
       { emoji: '🔗', title: 'Dễ phối', body: 'Gắn vào vòng tay, móc khóa hoặc dây đeo để làm mới phụ kiện.' },
       { emoji: '🎨', title: 'Tạo set riêng', body: 'Kết hợp charm theo cách của bạn để không đụng hàng.' },
+    ],
+    intentSections: [
+      {
+        id: 'bracelet-charm-dong-nai',
+        title: 'Charm vòng tay Đồng Nai: chọn đúng khoen và cách phối',
+        body: 'Khi tìm charm vòng tay Đồng Nai, bạn nên gửi ảnh vòng hiện có và kích thước điểm gắn để kiểm tra độ tương thích. Charm quá nặng hoặc khoen không đúng cỡ có thể làm vòng mất cân đối. Mushroomie tư vấn chủ đề, màu, số lượng charm và khoảng cách phối; bạn có thể mua charm rời khi phù hợp hoặc đặt phối lại thành một set hoàn chỉnh.',
+      },
     ],
     productLinks: [productHub.charm, productHub.keychain, productHub.bracelet, productHub.contact],
     cta: { label: 'Xem mẫu charm', href: '/san-pham?category=charm' },
