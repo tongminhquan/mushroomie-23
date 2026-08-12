@@ -172,6 +172,7 @@ test('storefront entrypoints cannot reach admin, Search Console auth, adapters, 
     'src/components/admin/',
     'src/lib/seo-discovery/google-gsc-client.ts',
     'src/lib/seo-discovery/gsc-client.ts',
+    'src/lib/seo-discovery/sitemap-maintenance.ts',
     'src/lib/seo-discovery/worker.ts',
   ]) {
     assert.ok(
@@ -208,12 +209,25 @@ test('maintenance processing remains bounded and outside public request renderin
     path.join(sourceRoot, 'lib', 'seo-discovery', 'worker.ts'),
     'utf8',
   )
+  const sitemapMaintenancePath = path.join(
+    sourceRoot,
+    'lib',
+    'seo-discovery',
+    'sitemap-maintenance.ts',
+  )
+  const sitemapMaintenanceSource = await readFile(sitemapMaintenancePath, 'utf8')
   const publicGraph = await collectImportGraph(await discoverPublicEntrypoints())
 
   assert.match(workerSource, /const MAX_BATCH_SIZE = 10\b/)
+  assert.match(sitemapMaintenanceSource, /60 \* 60 \* 1_000/)
   assert.ok(
     [...publicGraph.visited].every((filePath) => (
       path.normalize(filePath) !== path.join(sourceRoot, 'lib', 'seo-discovery', 'worker.ts')
+    )),
+  )
+  assert.ok(
+    [...publicGraph.visited].every((filePath) => (
+      path.normalize(filePath) !== sitemapMaintenancePath
     )),
   )
 })
