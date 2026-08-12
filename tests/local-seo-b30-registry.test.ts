@@ -32,8 +32,12 @@ test('every target owns one published canonical route', () => {
 
 test('only secondary targets name a visible content section', () => {
   for (const target of LOCAL_B30_TARGETS) {
-    if (target.role === 'secondary') assert.ok(target.contentSectionId)
-    else assert.equal(target.contentSectionId, undefined)
+    if (target.role === 'secondary') {
+      assert.ok('contentSectionId' in target)
+      assert.ok(target.contentSectionId)
+    } else {
+      assert.ok(!('contentSectionId' in target))
+    }
     assert.ok(getLocalB30TargetsByOwner(target.ownerSlug).includes(target))
   }
 })
