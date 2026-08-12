@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   updateMany: vi.fn(),
   recordAndRevalidatePublication: vi.fn(),
   releaseExpiredOrderReservations: vi.fn(),
+  runSitemapReconciliationIfDue: vi.fn(),
   runSeoDiscoveryBatchSafely: vi.fn(),
 }))
 
@@ -26,6 +27,10 @@ vi.mock('@/lib/seo-discovery/publication', () => ({
 
 vi.mock('@/lib/order-inventory', () => ({
   releaseExpiredOrderReservations: mocks.releaseExpiredOrderReservations,
+}))
+
+vi.mock('@/lib/seo-discovery/sitemap-maintenance', () => ({
+  runSitemapReconciliationIfDue: mocks.runSitemapReconciliationIfDue,
 }))
 
 vi.mock('@/lib/seo-discovery/worker', () => ({
@@ -62,10 +67,12 @@ describe('publishDuePosts', () => {
     mocks.updateMany.mockReset()
     mocks.recordAndRevalidatePublication.mockReset()
     mocks.releaseExpiredOrderReservations.mockReset()
+    mocks.runSitemapReconciliationIfDue.mockReset()
     mocks.runSeoDiscoveryBatchSafely.mockReset()
     mocks.updateMany.mockResolvedValue({ count: 2 })
     mocks.recordAndRevalidatePublication.mockResolvedValue({ recorded: true })
     mocks.releaseExpiredOrderReservations.mockResolvedValue(0)
+    mocks.runSitemapReconciliationIfDue.mockResolvedValue({ status: 'not_due' })
     mocks.runSeoDiscoveryBatchSafely.mockResolvedValue({
       claimed: 0,
       processed: 0,
@@ -158,9 +165,11 @@ describe('runMaintenance', () => {
     mocks.update.mockReset()
     mocks.recordAndRevalidatePublication.mockReset()
     mocks.releaseExpiredOrderReservations.mockReset()
+    mocks.runSitemapReconciliationIfDue.mockReset()
     mocks.runSeoDiscoveryBatchSafely.mockReset()
     mocks.recordAndRevalidatePublication.mockResolvedValue({ recorded: true })
     mocks.releaseExpiredOrderReservations.mockResolvedValue(0)
+    mocks.runSitemapReconciliationIfDue.mockResolvedValue({ status: 'not_due' })
     mocks.runSeoDiscoveryBatchSafely.mockResolvedValue({
       claimed: 0,
       processed: 0,
@@ -184,6 +193,9 @@ describe('runMaintenance', () => {
       mocks.releaseExpiredOrderReservations.mock.invocationCallOrder[0],
     )
     expect(mocks.releaseExpiredOrderReservations.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.runSitemapReconciliationIfDue.mock.invocationCallOrder[0],
+    )
+    expect(mocks.runSitemapReconciliationIfDue.mock.invocationCallOrder[0]).toBeLessThan(
       mocks.runSeoDiscoveryBatchSafely.mock.invocationCallOrder[0],
     )
   })
@@ -197,6 +209,17 @@ describe('runMaintenance', () => {
     await expect(runMaintenance()).resolves.toBeUndefined()
 
     expect(mocks.runSeoDiscoveryBatchSafely).toHaveBeenCalledOnce()
+  })
+
+  it('still runs discovery when automatic sitemap reconciliation unexpectedly throws', async () => {
+    const secret = 'raw-sitemap-provider-response-sentinel'
+    mocks.findMany.mockResolvedValue([])
+    mocks.runSitemapReconciliationIfDue.mockRejectedValue(new Error(secret))
+
+    await expect(runMaintenance()).resolves.toBeUndefined()
+
+    expect(mocks.runSeoDiscoveryBatchSafely).toHaveBeenCalledOnce()
+    expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toContain(secret)
   })
 
   it('does not expose a worker exception while keeping the maintenance tick alive', async () => {

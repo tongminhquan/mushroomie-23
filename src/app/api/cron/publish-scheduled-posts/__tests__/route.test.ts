@@ -3,11 +3,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   publishDuePosts: vi.fn(),
+  runSitemapReconciliationIfDue: vi.fn(),
   runSeoDiscoveryBatchSafely: vi.fn(),
 }))
 
 vi.mock('@/lib/scheduled-publisher', () => ({
   publishDuePosts: mocks.publishDuePosts,
+}))
+
+vi.mock('@/lib/seo-discovery/sitemap-maintenance', () => ({
+  runSitemapReconciliationIfDue: mocks.runSitemapReconciliationIfDue,
 }))
 
 vi.mock('@/lib/seo-discovery/worker', () => ({
@@ -34,6 +39,7 @@ describe('publish scheduled posts cron discovery integration', () => {
   beforeEach(() => {
     vi.stubEnv('CRON_SECRET', 'cron-secret')
     mocks.publishDuePosts.mockReset()
+    mocks.runSitemapReconciliationIfDue.mockReset()
     mocks.runSeoDiscoveryBatchSafely.mockReset()
     mocks.publishDuePosts.mockResolvedValue([
       {
@@ -42,6 +48,7 @@ describe('publish scheduled posts cron discovery integration', () => {
         updated_at: new Date('2026-08-11T05:00:00.000Z'),
       },
     ])
+    mocks.runSitemapReconciliationIfDue.mockResolvedValue({ status: 'not_due' })
     mocks.runSeoDiscoveryBatchSafely.mockResolvedValue(DISCOVERY_SUMMARY)
     vi.spyOn(console, 'info').mockImplementation(() => undefined)
     vi.spyOn(console, 'error').mockImplementation(() => undefined)
@@ -53,6 +60,7 @@ describe('publish scheduled posts cron discovery integration', () => {
     expect(response.status).toBe(401)
     await expect(response.json()).resolves.toEqual({ error: 'Unauthorized' })
     expect(mocks.publishDuePosts).not.toHaveBeenCalled()
+    expect(mocks.runSitemapReconciliationIfDue).not.toHaveBeenCalled()
     expect(mocks.runSeoDiscoveryBatchSafely).not.toHaveBeenCalled()
   })
 
@@ -69,6 +77,9 @@ describe('publish scheduled posts cron discovery integration', () => {
     expect(mocks.publishDuePosts).toHaveBeenCalledOnce()
     expect(mocks.runSeoDiscoveryBatchSafely).toHaveBeenCalledOnce()
     expect(mocks.publishDuePosts.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.runSitemapReconciliationIfDue.mock.invocationCallOrder[0],
+    )
+    expect(mocks.runSitemapReconciliationIfDue.mock.invocationCallOrder[0]).toBeLessThan(
       mocks.runSeoDiscoveryBatchSafely.mock.invocationCallOrder[0],
     )
     expect(POST).toBe(GET)
@@ -97,6 +108,23 @@ describe('publish scheduled posts cron discovery integration', () => {
     )
   })
 
+  it('keeps the successful response and runs discovery after a sitemap invariant failure', async () => {
+    const secret = 'private-sitemap-response-sentinel'
+    mocks.runSitemapReconciliationIfDue.mockRejectedValue(new Error(secret))
+
+    const response = await GET(request())
+
+    expect(response.status).toBe(200)
+    await expect(response.json()).resolves.toEqual({
+      success: true,
+      publishedCount: 1,
+      postIds: [41],
+      discovery: DISCOVERY_SUMMARY,
+    })
+    expect(mocks.runSeoDiscoveryBatchSafely).toHaveBeenCalledOnce()
+    expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toContain(secret)
+  })
+
   it('retains the existing 500 contract when scheduled publication itself fails', async () => {
     mocks.publishDuePosts.mockRejectedValue(new Error('database unavailable'))
 
@@ -104,6 +132,7 @@ describe('publish scheduled posts cron discovery integration', () => {
 
     expect(response.status).toBe(500)
     await expect(response.json()).resolves.toEqual({ error: 'Server error' })
+    expect(mocks.runSitemapReconciliationIfDue).not.toHaveBeenCalled()
     expect(mocks.runSeoDiscoveryBatchSafely).not.toHaveBeenCalled()
   })
 })

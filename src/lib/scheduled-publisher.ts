@@ -3,6 +3,7 @@ import { Prisma, type Post } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { releaseExpiredOrderReservations } from '@/lib/order-inventory'
 import { recordAndRevalidatePublication } from '@/lib/seo-discovery/publication'
+import { runSitemapReconciliationIfDue } from '@/lib/seo-discovery/sitemap-maintenance'
 import { buildPublicContentUrl } from '@/lib/seo-discovery/urls'
 import { runSeoDiscoveryBatchSafely } from '@/lib/seo-discovery/worker'
 
@@ -83,6 +84,13 @@ export async function runMaintenance() {
     if (released > 0) console.info(`[inventory] Released ${released} expired order reservations`)
   } catch (error) {
     console.error('[inventory] Failed to release expired order reservations:', error)
+  }
+  try {
+    await runSitemapReconciliationIfDue()
+  } catch {
+    console.error('[seo-discovery] sitemap maintenance integration failed', {
+      code: 'SEO_DISCOVERY_SITEMAP_MAINTENANCE_ERROR',
+    })
   }
   try {
     await runSeoDiscoveryBatchSafely()

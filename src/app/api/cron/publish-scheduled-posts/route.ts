@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { timingSafeStringEqual } from '@/lib/security'
 import { publishDuePosts } from '@/lib/scheduled-publisher'
+import { runSitemapReconciliationIfDue } from '@/lib/seo-discovery/sitemap-maintenance'
 import {
   runSeoDiscoveryBatchSafely,
   type SeoDiscoverySummary,
@@ -14,6 +15,16 @@ const DISCOVERY_FAILURE_SUMMARY: SeoDiscoverySummary = {
   processed: 0,
   failed: 1,
   configurationRequired: 0,
+}
+
+async function runSitemapBackstop(): Promise<void> {
+  try {
+    await runSitemapReconciliationIfDue()
+  } catch {
+    console.error('[cron/publish-scheduled] Sitemap integration failed', {
+      code: 'SEO_DISCOVERY_SITEMAP_MAINTENANCE_ERROR',
+    })
+  }
 }
 
 async function runDiscoveryBackstop(): Promise<SeoDiscoverySummary> {
@@ -57,6 +68,7 @@ export async function GET(request: NextRequest) {
         postIds.join(','),
       )
     }
+    await runSitemapBackstop()
     const discovery = await runDiscoveryBackstop()
     return NextResponse.json({
       success: true,
