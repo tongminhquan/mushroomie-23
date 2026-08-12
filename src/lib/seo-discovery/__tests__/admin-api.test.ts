@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   updateMany: vi.fn(),
   readConfig: vi.fn(),
   createGscClient: vi.fn(),
+  createGscProbeClient: vi.fn(),
   getConnectionStatus: vi.fn(),
   listSitemaps: vi.fn(),
   submitSitemap: vi.fn(),
@@ -37,6 +38,7 @@ vi.mock('@/lib/seo-discovery/config', () => ({
 }))
 vi.mock('@/lib/seo-discovery/google-gsc-client', () => ({
   createGoogleSearchConsoleClient: mocks.createGscClient,
+  createGoogleSearchConsoleProbeClient: mocks.createGscProbeClient,
 }))
 vi.mock('@/lib/seo-discovery/sitemap-sync', () => ({
   syncSitemapDiscoveryJobs: mocks.syncSitemap,
@@ -134,6 +136,7 @@ describe('SEO discovery admin APIs', () => {
     mocks.updateMany.mockReset()
     mocks.readConfig.mockReset()
     mocks.createGscClient.mockReset()
+    mocks.createGscProbeClient.mockReset()
     mocks.getConnectionStatus.mockReset()
     mocks.listSitemaps.mockReset()
     mocks.submitSitemap.mockReset()
@@ -163,6 +166,12 @@ describe('SEO discovery admin APIs', () => {
       property: 'sc-domain:mushroomie.io.vn',
     })
     mocks.createGscClient.mockReturnValue({
+      getConnectionStatus: mocks.getConnectionStatus,
+      listSitemaps: mocks.listSitemaps,
+      submitSitemap: mocks.submitSitemap,
+      inspectUrl: mocks.inspectUrl,
+    })
+    mocks.createGscProbeClient.mockReturnValue({
       getConnectionStatus: mocks.getConnectionStatus,
       listSitemaps: mocks.listSitemaps,
       submitSitemap: mocks.submitSitemap,
@@ -767,6 +776,8 @@ describe('SEO discovery admin APIs', () => {
       recoveryHasMore: true,
     })
     expect(mocks.getConnectionStatus).toHaveBeenCalledOnce()
+    expect(mocks.createGscProbeClient).toHaveBeenCalledOnce()
+    expect(mocks.createGscClient).not.toHaveBeenCalled()
     expect(mocks.updateMany).toHaveBeenCalledWith(expect.objectContaining({
       where: {
         status: 'CONFIGURATION_REQUIRED',

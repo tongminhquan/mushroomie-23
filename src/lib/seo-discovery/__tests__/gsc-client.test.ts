@@ -4,7 +4,10 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 
 import { GscClientError } from '@/lib/seo-discovery/gsc-client'
-import { createGoogleSearchConsoleClient } from '@/lib/seo-discovery/google-gsc-client'
+import {
+  createGoogleSearchConsoleClient,
+  createGoogleSearchConsoleProbeClient,
+} from '@/lib/seo-discovery/google-gsc-client'
 
 const googleAuthMocks = vi.hoisted(() => ({
   constructedWith: vi.fn(),
@@ -94,6 +97,83 @@ describe('createGoogleSearchConsoleClient', () => {
         httpStatus: null,
       })
     }
+    expect(googleAuthMocks.constructedWith).not.toHaveBeenCalled()
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('keeps the worker client disabled while an admin probe verifies both GSC APIs', async () => {
+    const credentialPath = await createExternalCredentialFile()
+    const fetchMock = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ sitemap: [] }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        inspectionResult: {
+          indexStatusResult: {
+            verdict: 'NEUTRAL',
+            coverageState: 'URL is unknown to Google',
+          },
+        },
+      }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }))
+    const options = {
+      env: {
+        SEO_DISCOVERY_ENABLED: 'true',
+        GSC_INTEGRATION_ENABLED: 'false',
+        GSC_PROPERTY: 'sc-domain:mushroomie.io.vn',
+        GOOGLE_APPLICATION_CREDENTIALS: credentialPath,
+      },
+      fetch: fetchMock,
+      repositoryRoot: process.cwd(),
+    }
+
+    const workerClient = createGoogleSearchConsoleClient(options)
+    await expect(workerClient.getConnectionStatus()).resolves.toEqual({
+      state: 'disabled',
+      code: 'GSC_DISABLED',
+    })
+    expect(fetchMock).not.toHaveBeenCalled()
+
+    const probeClient = createGoogleSearchConsoleProbeClient(options)
+    await expect(probeClient.getConnectionStatus()).resolves.toEqual({
+      state: 'connected',
+      code: 'GSC_CONNECTED',
+      property: 'sc-domain:mushroomie.io.vn',
+    })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      'https://www.googleapis.com/webmasters/v3/sites/sc-domain%3Amushroomie.io.vn/sitemaps',
+    )
+    expect(fetchMock.mock.calls[1]?.[0]).toBe(
+      'https://searchconsole.googleapis.com/v1/urlInspection/index:inspect',
+    )
+    expect(JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body))).toEqual({
+      inspectionUrl: 'https://mushroomie.io.vn/',
+      siteUrl: 'sc-domain:mushroomie.io.vn',
+    })
+  })
+
+  it('does not let the admin probe bypass the discovery master switch', async () => {
+    const credentialPath = await createExternalCredentialFile()
+    const fetchMock = vi.fn<typeof fetch>()
+    const client = createGoogleSearchConsoleProbeClient({
+      env: {
+        SEO_DISCOVERY_ENABLED: 'false',
+        GSC_INTEGRATION_ENABLED: 'false',
+        GSC_PROPERTY: 'sc-domain:mushroomie.io.vn',
+        GOOGLE_APPLICATION_CREDENTIALS: credentialPath,
+      },
+      fetch: fetchMock,
+      repositoryRoot: process.cwd(),
+    })
+
+    await expect(client.getConnectionStatus()).resolves.toEqual({
+      state: 'disabled',
+      code: 'GSC_DISABLED',
+    })
     expect(googleAuthMocks.constructedWith).not.toHaveBeenCalled()
     expect(fetchMock).not.toHaveBeenCalled()
   })

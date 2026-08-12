@@ -25,6 +25,7 @@ const WEBMASTERS_SCOPE = 'https://www.googleapis.com/auth/webmasters'
 const WEBMASTERS_API_ROOT = 'https://www.googleapis.com/webmasters/v3'
 const URL_INSPECTION_ENDPOINT = 'https://searchconsole.googleapis.com/v1/urlInspection/index:inspect'
 const CANONICAL_SITEMAP_URL = 'https://mushroomie.io.vn/sitemap.xml'
+const CONNECTION_PROBE_URL = 'https://mushroomie.io.vn/'
 const REQUEST_TIMEOUT_MS = 5_000
 const MAX_JSON_RESPONSE_BYTES = 1024 * 1024
 const MAX_CREDENTIAL_FILE_BYTES = 64 * 1024
@@ -327,6 +328,7 @@ implements GoogleSearchConsoleClient {
     private readonly property: string,
     credentialPath: string,
     private readonly fetchImplementation: typeof fetch,
+    private readonly inspectConnectionPermission = false,
   ) {
     this.auth = new GoogleAuth({
       keyFilename: credentialPath,
@@ -341,6 +343,9 @@ implements GoogleSearchConsoleClient {
 
   async getConnectionStatus(): Promise<ConnectionStatus> {
     await this.listSitemaps()
+    if (this.inspectConnectionPermission) {
+      await this.inspectUrl(CONNECTION_PROBE_URL)
+    }
     return {
       state: 'connected',
       code: 'GSC_CONNECTED',
@@ -480,12 +485,16 @@ implements GoogleSearchConsoleClient {
   }
 }
 
-export function createGoogleSearchConsoleClient(
-  options: CreateGoogleSearchConsoleClientOptions = {},
+function createGoogleSearchConsoleClientInternal(
+  options: CreateGoogleSearchConsoleClientOptions,
+  allowDisabledIntegrationProbe: boolean,
 ): GoogleSearchConsoleClient {
   const environment = options.env ?? process.env
   const config = readSeoDiscoveryConfig(environment)
-  if (!config.discoveryEnabled || !config.gscEnabled) {
+  if (
+    !config.discoveryEnabled
+    || (!config.gscEnabled && !allowDisabledIntegrationProbe)
+  ) {
     return new DisabledGoogleSearchConsoleClient()
   }
 
@@ -501,5 +510,24 @@ export function createGoogleSearchConsoleClient(
     config.property,
     credentialPath,
     options.fetch ?? globalThis.fetch,
+    allowDisabledIntegrationProbe,
   )
+}
+
+export function createGoogleSearchConsoleClient(
+  options: CreateGoogleSearchConsoleClientOptions = {},
+): GoogleSearchConsoleClient {
+  return createGoogleSearchConsoleClientInternal(options, false)
+}
+
+/**
+ * Admin-only connection probe. It may ignore only the GSC integration switch so
+ * operators can validate sitemap and URL Inspection access before the worker is
+ * enabled. The discovery master switch and every credential boundary remain
+ * mandatory.
+ */
+export function createGoogleSearchConsoleProbeClient(
+  options: CreateGoogleSearchConsoleClientOptions = {},
+): GoogleSearchConsoleClient {
+  return createGoogleSearchConsoleClientInternal(options, true)
 }

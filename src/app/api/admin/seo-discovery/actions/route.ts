@@ -12,7 +12,10 @@ import {
   stableAdminActionError,
   type SeoDiscoveryAdminAction,
 } from '@/lib/seo-discovery/admin-api'
-import { createGoogleSearchConsoleClient } from '@/lib/seo-discovery/google-gsc-client'
+import {
+  createGoogleSearchConsoleClient,
+  createGoogleSearchConsoleProbeClient,
+} from '@/lib/seo-discovery/google-gsc-client'
 import { FIXED_SITEMAP_URL } from '@/lib/seo-discovery/sitemap-reader'
 import { syncSitemapDiscoveryJobs } from '@/lib/seo-discovery/sitemap-sync'
 
@@ -161,7 +164,9 @@ async function executeAction(
     return { ok: true, action: action.action, result }
   }
 
-  const client = createGoogleSearchConsoleClient()
+  const client = action.action === 'test_connection'
+    ? createGoogleSearchConsoleProbeClient()
+    : createGoogleSearchConsoleClient()
   const connection = await client.getConnectionStatus()
 
   if (action.action === 'test_connection') {

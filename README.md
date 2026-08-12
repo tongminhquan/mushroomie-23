@@ -15,7 +15,7 @@ Trang [Báo cáo hệ thống Mushroomie](https://mushroomie.io.vn/bao-cao-he-th
 - Công nghệ frontend, backend, database và production.
 - Toàn bộ phân hệ sản phẩm, đơn hàng, thanh toán, voucher, mini game, CMS và admin.
 - Luồng đặt hàng, webhook thanh toán và kiểm soát tồn kho.
-- Cấu trúc 29 Prisma model.
+- Cấu trúc 30 Prisma model.
 - Bảo mật, hiệu suất, SEO, analytics và CI/CD.
 - Dàn ý thuyết trình cùng câu hỏi phản biện thường gặp.
 
@@ -27,9 +27,9 @@ Tại thời điểm phát hành trang báo cáo:
 
 | Thành phần | Quy mô |
 |---|---:|
-| Page route | 78 — gồm 77 route nghiệp vụ và 1 route báo cáo |
-| API route | 73 |
-| Prisma model | 29 |
+| Page route | 79 — gồm 78 route nghiệp vụ và 1 route báo cáo |
+| API route | 75 |
+| Prisma model | 30 |
 | Tệp kiểm thử/tài nguyên kiểm thử | Hơn 100 |
 
 ## Kiến trúc tổng thể
@@ -42,7 +42,7 @@ flowchart LR
     CF --> NG["Nginx<br/>Reverse proxy · Static · MIME"]
     NG --> APP["Next.js 16<br/>React 19 · Node.js · PM2"]
     APP --> ORM["Prisma ORM<br/>Transaction"]
-    ORM --> DB["MySQL<br/>29 models"]
+    ORM --> DB["MySQL<br/>30 models"]
     APP --> PAY["VietQR / Casso / SePay / PayOS"]
     APP --> MAIL["SMTP / Nodemailer"]
     APP --> MEDIA["Sharp / WebP / UUID"]
@@ -205,6 +205,17 @@ Quyền được kiểm tra tại backend API, không chỉ ẩn nút trên giao
 - Open Graph, Twitter Card và ảnh chia sẻ.
 - Noindex cho admin, API, tài khoản, giỏ hàng và thanh toán.
 - Landing page địa phương cho Đồng Nai, Biên Hòa, Trảng Dài và TP.HCM.
+- Hàng đợi discovery idempotent cho bài viết `published`, sản phẩm `active` và
+  URL trong sitemap; publication không bị chặn nếu subsystem hoặc Google lỗi.
+- Worker có lease/CAS, batch tối đa 10, eligibility gate và retry có giới hạn.
+- Search Console Sitemap API chỉ gửi sitemap khi cần; URL Inspection API chỉ đọc
+  trạng thái Google đã quan sát, không tự động “Request indexing”.
+- Admin theo dõi tại `/admin/seo/lap-chi-muc` với phân quyền backend, pagination,
+  filter, bằng chứng canonical/crawl và error code đã rút gọn.
+
+Google Indexing API không được sử dụng vì sản phẩm/bài viết Mushroomie không
+thuộc phạm vi `JobPosting` hoặc livestream `BroadcastEvent`. Sitemap submission
+là tín hiệu discovery, không phải cam kết Google sẽ index ngay.
 
 ### 14. Analytics và marketing
 
@@ -217,7 +228,7 @@ Quyền được kiểm tra tại backend API, không chỉ ẩn nút trên giao
 
 ## Cơ sở dữ liệu
 
-Schema MySQL gồm 29 Prisma model, chia thành các miền:
+Schema MySQL gồm 30 Prisma model, chia thành các miền:
 
 | Miền | Models |
 |---|---|
@@ -226,6 +237,7 @@ Schema MySQL gồm 29 Prisma model, chia thành các miền:
 | Đơn hàng & thanh toán | Order, OrderItem, OrderStatusHistory, Payment, PaymentWebhookEvent, EmailLog |
 | Voucher & trò chơi | Voucher, UserVoucher, VoucherRedemptionLog, GameScore |
 | Nội dung | Post, PostRevision, PostTag, PostTagMap |
+| SEO discovery | SeoDiscoveryJob |
 | Tương tác & vận hành | Contact, Review, Banner, AdminLog, Setting |
 
 ## Bảo mật
@@ -317,6 +329,18 @@ npm run build
 
 Các script có khả năng thay đổi database hoặc media phải chạy backup/dry-run theo runbook trước khi dùng chế độ apply.
 
+Backfill SEO discovery luôn dry-run mặc định:
+
+```bash
+npm run seo:discovery:backfill
+# Chỉ sau backup, schema check và review summary:
+npm run seo:discovery:backfill:apply
+```
+
+Hướng dẫn đầy đủ về feature flags, service account, quota, trạng thái, rollout,
+monitoring và rollback nằm tại
+[`docs/operations/google-search-console.md`](docs/operations/google-search-console.md).
+
 ## Production
 
 Production chạy tại [mushroomie.io.vn](https://mushroomie.io.vn) theo mô hình:
@@ -340,6 +364,7 @@ Tài liệu vận hành:
 - [Production checklist](production_checklist.md).
 - [Incident checklist](incident_checklist.md).
 - [Testing guide](docs/testing.md).
+- [Google Search Console & SEO Discovery runbook](docs/operations/google-search-console.md).
 
 ## Video giới thiệu
 
