@@ -330,7 +330,9 @@ All actions require admin authorization on the server. Manual retry endpoints ar
 - Admin endpoints use existing admin/super-admin authentication and server authorization.
 - Manual actions use rate limiting and admin audit logs.
 - Same-origin URL construction and the eligibility gate prevent SSRF.
-- HTTP calls use timeouts, bounded response sizes, and a restricted redirect policy.
+- Search Console calls use one bounded 15-second total deadline per request,
+  bounded response sizes, and no redirects. Public-page eligibility and sitemap
+  reads retain their separate stricter fetch deadlines.
 - Error messages are normalized before persistence; raw provider responses are not stored.
 - No customer, order, payment, voucher, or user data is involved.
 

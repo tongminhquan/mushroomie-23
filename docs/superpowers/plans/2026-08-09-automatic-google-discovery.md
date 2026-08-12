@@ -409,7 +409,7 @@ export interface GoogleSearchConsoleClient {
 }
 ```
 
-Tests must verify disabled/missing-credential status, exact Search Console REST endpoints, encoded property and sitemap parameters, `inspectionUrl`/`siteUrl` request body, 5-second timeouts, redacted errors, and typed handling for 401, 403, 404, 429, and 5xx. Mock both auth and `fetch`; never call Google in tests.
+Tests must verify disabled/missing-credential status, exact Search Console REST endpoints, encoded property and sitemap parameters, `inspectionUrl`/`siteUrl` request body, a bounded 15-second total Search Console timeout, redacted errors, and typed handling for 401, 403, 404, 429, and 5xx. Mock both auth and `fetch`; never call Google in tests.
 
 - [ ] **Step 3: Implement disabled-first client selection**
 

@@ -629,12 +629,31 @@ describe('runSeoDiscoveryBatch leasing', () => {
     expect(client.updateManyCalls.some(({ data }) => data.status === 'RETRY')).toBe(false)
   })
 
-  it('does not start a known five-second network operation without deadline headroom', async () => {
+  it('does not start a network operation without deadline headroom', async () => {
     const client = new FakeWorkerClient([fakeJob(1)]).initialize()
     const readSitemap = vi.fn(async () => new Map<string, Date | null>())
 
     const summary = await runSeoDiscoveryBatch(workerOptions(client, {
       batchTimeBudgetMs: 4_999,
+      monotonicNow: () => 0,
+      configurationRecoveryCoordinator: { recover: async () => 0 },
+      readSitemap,
+    }))
+
+    expect(summary).toMatchObject({ claimed: 1, processed: 0, failed: 1 })
+    expect(readSitemap).not.toHaveBeenCalled()
+    expect(client.jobs[0]).toMatchObject({
+      status: 'PENDING_ELIGIBILITY',
+      lease_token: null,
+    })
+  })
+
+  it('does not start a bounded Google operation with less than fifteen seconds of headroom', async () => {
+    const client = new FakeWorkerClient([fakeJob(1)]).initialize()
+    const readSitemap = vi.fn(async () => new Map<string, Date | null>())
+
+    const summary = await runSeoDiscoveryBatch(workerOptions(client, {
+      batchTimeBudgetMs: 14_999,
       monotonicNow: () => 0,
       configurationRecoveryCoordinator: { recover: async () => 0 },
       readSitemap,

@@ -87,7 +87,7 @@ build, migration hoặc restart PM2.
 
 Adapter chỉ chấp nhận credential `type=service_account`, là file thường, đọc
 được, không quá 64 KiB và có realpath nằm ngoài repository/public. Mọi request
-có deadline tổng 5 giây, không đi theo redirect; lỗi và response được chuẩn hóa
+Search Console có deadline tổng 15 giây, không đi theo redirect; lỗi và response được chuẩn hóa
 để không lộ token, URL query hoặc credential path.
 
 Khi `SEO_DISCOVERY_ENABLED=true` nhưng `GSC_INTEGRATION_ENABLED=false`, riêng

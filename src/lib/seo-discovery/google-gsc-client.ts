@@ -26,7 +26,7 @@ const WEBMASTERS_API_ROOT = 'https://www.googleapis.com/webmasters/v3'
 const URL_INSPECTION_ENDPOINT = 'https://searchconsole.googleapis.com/v1/urlInspection/index:inspect'
 const CANONICAL_SITEMAP_URL = 'https://mushroomie.io.vn/sitemap.xml'
 const CONNECTION_PROBE_URL = 'https://mushroomie.io.vn/'
-const REQUEST_TIMEOUT_MS = 5_000
+const REQUEST_TIMEOUT_MS = 15_000
 const MAX_JSON_RESPONSE_BYTES = 1024 * 1024
 const MAX_CREDENTIAL_FILE_BYTES = 64 * 1024
 

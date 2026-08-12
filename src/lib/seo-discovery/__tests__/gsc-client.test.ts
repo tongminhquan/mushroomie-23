@@ -326,7 +326,7 @@ describe('createGoogleSearchConsoleClient', () => {
       scopes: ['https://www.googleapis.com/auth/webmasters'],
       clientOptions: {
         transporterOptions: {
-          timeout: 5_000,
+          timeout: 15_000,
         },
       },
     })
@@ -595,14 +595,39 @@ describe('createGoogleSearchConsoleClient', () => {
     expect(String(error)).not.toContain(responseSecret)
   })
 
-  it('times out the entire request after exactly five seconds while auth is pending', async () => {
+  it('allows a bounded provider response that completes after five seconds', async () => {
+    vi.useFakeTimers()
+    const fetchMock = vi.fn<typeof fetch>().mockImplementation(async () => (
+      new Promise<Response>((resolve) => {
+        setTimeout(() => {
+          resolve(new Response(JSON.stringify({ sitemap: [] }), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          }))
+        }, 7_500)
+      })
+    ))
+    const { client } = await createEnabledClient(fetchMock)
+
+    const outcome = client.listSitemaps().then(
+      (value) => ({ value, error: null }),
+      (error: unknown) => ({ value: null, error }),
+    )
+    await vi.advanceTimersByTimeAsync(7_499)
+    expect(fetchMock).toHaveBeenCalledOnce()
+    await vi.advanceTimersByTimeAsync(1)
+
+    await expect(outcome).resolves.toEqual({ value: [], error: null })
+  })
+
+  it('times out the entire request after exactly fifteen seconds while auth is pending', async () => {
     const fetchMock = vi.fn<typeof fetch>()
     const { client } = await createEnabledClient(fetchMock)
     googleAuthMocks.getRequestHeaders.mockReturnValueOnce(new Promise(() => undefined))
     vi.useFakeTimers()
 
     const outcome = client.listSitemaps().catch((caught) => caught)
-    await vi.advanceTimersByTimeAsync(4_999)
+    await vi.advanceTimersByTimeAsync(14_999)
     expect(fetchMock).not.toHaveBeenCalled()
     await vi.advanceTimersByTimeAsync(1)
     await expect(outcome).resolves.toBeInstanceOf(GscClientError)
@@ -620,12 +645,12 @@ describe('createGoogleSearchConsoleClient', () => {
       new Promise<Headers>((resolve) => {
         setTimeout(() => {
           resolve(new Headers({ authorization: 'Bearer late-token' }))
-        }, 5_001)
+        }, 15_001)
       })
     ))
 
     const outcome = client.listSitemaps().catch((caught) => caught)
-    await vi.advanceTimersByTimeAsync(5_000)
+    await vi.advanceTimersByTimeAsync(15_000)
     await expect(outcome).resolves.toMatchObject({
       code: 'GSC_REQUEST_TIMEOUT',
       retryable: true,
@@ -637,7 +662,7 @@ describe('createGoogleSearchConsoleClient', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it('aborts a pending fetch at the five-second total deadline', async () => {
+  it('aborts a pending fetch at the fifteen-second total deadline', async () => {
     const fetchMock = vi.fn<typeof fetch>().mockImplementation(async (_input, init) => (
       new Promise<Response>((_resolve, reject) => {
         init?.signal?.addEventListener('abort', () => {
@@ -651,7 +676,7 @@ describe('createGoogleSearchConsoleClient', () => {
     vi.useFakeTimers()
 
     const outcome = client.listSitemaps().catch((caught) => caught)
-    await vi.advanceTimersByTimeAsync(4_999)
+    await vi.advanceTimersByTimeAsync(14_999)
     const signal = fetchMock.mock.calls[0]?.[1]?.signal
     expect(signal?.aborted).toBe(false)
     await vi.advanceTimersByTimeAsync(1)
