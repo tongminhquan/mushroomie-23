@@ -842,4 +842,4 @@ git status --short
 git log --oneline --decorate -8
 ```
 
-Expected: clean worktree; five scoped implementation commits after the approved design commits. Do not push or deploy until the user authorizes the release workflow.
+Expected: clean worktree; every Task 1–5 implementation, review-driven fix, contract clarification, and tracked evidence update remains individually traceable in history. Additional narrow follow-up/docs commits are expected and must not be squashed merely to force an obsolete commit count. Do not push or deploy until the user authorizes the release workflow.
