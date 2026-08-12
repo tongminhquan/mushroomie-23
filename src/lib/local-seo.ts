@@ -166,6 +166,7 @@ export const PUBLISHED_LOCAL_SLUGS = [
 export const LOCAL_SEO_LAST_MODIFIED = new Date('2026-08-12T00:00:00.000Z')
 
 export function getLocalSeoLastModified(_slug: string): Date {
+  void _slug
   return LOCAL_SEO_LAST_MODIFIED
 }
 
