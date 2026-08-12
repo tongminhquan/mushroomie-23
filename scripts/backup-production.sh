@@ -4,57 +4,92 @@ set -euo pipefail
 PROJECT_DIR="/var/www/mushroomie"
 BACKUP_DIR="$PROJECT_DIR/backups"
 UPLOADS_DIR="$PROJECT_DIR/public/uploads"
-DATE="$(date +%F-%H%M%S)"
+DATE="$(date -u +%Y%m%dT%H%M%SZ)"
+DB_FINAL="$BACKUP_DIR/db/mysql-$DATE.sql.gz"
+DB_PARTIAL="$DB_FINAL.partial"
+UPLOAD_FINAL="$BACKUP_DIR/uploads/uploads-$DATE.tar.gz"
+UPLOAD_PARTIAL="$UPLOAD_FINAL.partial"
 
-mkdir -p "$BACKUP_DIR/uploads" "$BACKUP_DIR/db" "$BACKUP_DIR/logs"
+umask 077
 
-echo "[$(date)] Starting Mushroomie backup..."
-
-cd "$PROJECT_DIR"
-
-if [ -d "$UPLOADS_DIR" ]; then
-  tar -czf "$BACKUP_DIR/uploads/uploads-$DATE.tar.gz" public/uploads
-  echo "[$(date)] Uploads backup created: uploads-$DATE.tar.gz"
-else
-  echo "[$(date)] ERROR: uploads directory not found: $UPLOADS_DIR"
+fail() {
+  printf '%s\n' "$1" >&2
   exit 1
-fi
+}
 
-# Extract database URL from .env safely
-DB_URL=""
-if [ -f "$PROJECT_DIR/.env" ]; then
-  DB_URL=$(grep "DATABASE_URL=" "$PROJECT_DIR/.env" | cut -d '"' -f 2)
-fi
+cleanup_partial_artifacts() {
+  rm -f -- "$DB_PARTIAL" "$UPLOAD_PARTIAL"
+}
 
-if [ -z "$DB_URL" ]; then
-  echo "[$(date)] WARNING: DATABASE_URL is missing. Skipping DB backup."
-else
-  # Using standard mysqldump with the parsed URL components could be tricky if it has special characters.
-  # We will just write a wrapper instruction or execute mysqldump.
-  # Assuming the URL is "mysql://user:pass@host:port/dbname"
-  # Since extracting complex DB credentials from standard URL via bash is error-prone,
-  # it's better to manually specify the variables, but here we can try a basic extraction
-  
-  DB_USER=$(echo "$DB_URL" | sed -E 's/mysql:\/\/([^:]+):.*/\1/')
-  DB_PASS=$(echo "$DB_URL" | sed -E 's/mysql:\/\/[^:]+:([^@]+)@.*/\1/')
-  DB_HOST=$(echo "$DB_URL" | sed -E 's/mysql:\/\/[^@]+@([^:]+):.*/\1/')
-  DB_PORT=$(echo "$DB_URL" | sed -E 's/mysql:\/\/[^@]+@[^:]+:([0-9]+)\/.*/\1/')
-  DB_NAME=$(echo "$DB_URL" | sed -E 's/mysql:\/\/[^\/]+\/(.*)/\1/' | cut -d '?' -f 1)
-  
-  # URL Decode the password if necessary
-  # Note: The decoded password might need to be explicitly set in a .my.cnf or safely passed.
-  
-  # A safer way without echoing the password into the command line is using an environment variable
-  export MYSQL_PWD=$(printf '%b' "${DB_PASS//%/\\x}")
-  
-  mysqldump --no-tablespaces -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" "$DB_NAME" | gzip > "$BACKUP_DIR/db/mysql-$DATE.sql.gz"
-  echo "[$(date)] Database backup created: mysql-$DATE.sql.gz"
-  
-  unset MYSQL_PWD
-fi
+trap cleanup_partial_artifacts EXIT
 
-# Retention: delete backups older than 30 days
-find "$BACKUP_DIR/uploads" -type f -name "*.tar.gz" -mtime +30 -delete
-find "$BACKUP_DIR/db" -type f -name "*.sql.gz" -mtime +30 -delete
+test -d "$PROJECT_DIR" || fail "SEO_DISCOVERY_BACKUP_PROJECT_DIR_MISSING"
+test -d "$UPLOADS_DIR" || fail "SEO_DISCOVERY_BACKUP_UPLOADS_DIR_MISSING"
+test -f "$PROJECT_DIR/.env" || fail "SEO_DISCOVERY_BACKUP_ENV_MISSING"
+command -v node >/dev/null || fail "SEO_DISCOVERY_BACKUP_NODE_MISSING"
+command -v mysqldump >/dev/null || fail "SEO_DISCOVERY_BACKUP_MYSQLDUMP_MISSING"
+command -v gzip >/dev/null || fail "SEO_DISCOVERY_BACKUP_GZIP_MISSING"
+command -v tar >/dev/null || fail "SEO_DISCOVERY_BACKUP_TAR_MISSING"
+command -v base64 >/dev/null || fail "SEO_DISCOVERY_BACKUP_BASE64_MISSING"
 
-echo "[$(date)] Mushroomie backup completed."
+mkdir -p "$BACKUP_DIR/uploads" "$BACKUP_DIR/db"
+
+# Parse .env without sourcing it, then use the WHATWG URL parser so encoded
+# credentials and reserved characters are handled structurally.
+DB_URL="$(
+  cd "$PROJECT_DIR"
+  node --input-type=module -e "
+    import { readFileSync } from 'node:fs'
+    import { parse } from 'dotenv'
+    const value = parse(readFileSync('.env')).DATABASE_URL
+    if (typeof value === 'string') process.stdout.write(value)
+  "
+)"
+test -n "$DB_URL" || fail "SEO_DISCOVERY_BACKUP_DATABASE_URL_REQUIRED"
+
+mapfile -t DB_PARTS < <(
+  DATABASE_URL="$DB_URL" node -e '
+    const parsed = new URL(process.env.DATABASE_URL)
+    if (parsed.protocol !== "mysql:") process.exit(2)
+    const values = [
+      decodeURIComponent(parsed.username),
+      decodeURIComponent(parsed.password),
+      parsed.hostname,
+      parsed.port || "3306",
+      decodeURIComponent(parsed.pathname.replace(/^\//, "")),
+    ]
+    if (values.some((value) => value.length === 0 || value.includes("\n"))) process.exit(2)
+    for (const value of values) console.log(Buffer.from(value).toString("base64"))
+  '
+)
+test "${#DB_PARTS[@]}" -eq 5 || fail "SEO_DISCOVERY_BACKUP_DATABASE_URL_INVALID"
+
+decode_part() {
+  printf '%s' "$1" | base64 --decode
+}
+
+DB_USER="$(decode_part "${DB_PARTS[0]}")"
+DB_PASS="$(decode_part "${DB_PARTS[1]}")"
+DB_HOST="$(decode_part "${DB_PARTS[2]}")"
+DB_PORT="$(decode_part "${DB_PARTS[3]}")"
+DB_NAME="$(decode_part "${DB_PARTS[4]}")"
+
+printf '[%s] Creating database backup...\n' "$(date -Is)"
+MYSQL_PWD="$DB_PASS" mysqldump --single-transaction --quick --no-tablespaces --host="$DB_HOST" --port="$DB_PORT" --user="$DB_USER" "$DB_NAME" | gzip -c > "$DB_PARTIAL"
+test -s "$DB_PARTIAL" || fail "SEO_DISCOVERY_BACKUP_DATABASE_EMPTY"
+gzip -t "$DB_PARTIAL" || fail "SEO_DISCOVERY_BACKUP_DATABASE_INVALID"
+
+printf '[%s] Creating uploads backup...\n' "$(date -Is)"
+tar -czf "$UPLOAD_PARTIAL" -C "$PROJECT_DIR" public/uploads
+test -s "$UPLOAD_PARTIAL" || fail "SEO_DISCOVERY_BACKUP_UPLOADS_EMPTY"
+tar -tzf "$UPLOAD_PARTIAL" >/dev/null || fail "SEO_DISCOVERY_BACKUP_UPLOADS_INVALID"
+
+# Publish only fully validated artifacts. Existing backups are never pruned or
+# overwritten by this script; retention is an explicit operator task.
+mv -- "$DB_PARTIAL" "$DB_FINAL"
+mv -- "$UPLOAD_PARTIAL" "$UPLOAD_FINAL"
+trap - EXIT
+
+printf 'SEO_DISCOVERY_BACKUP_DATABASE=%s\n' "$DB_FINAL"
+printf 'SEO_DISCOVERY_BACKUP_UPLOADS=%s\n' "$UPLOAD_FINAL"
+printf 'SEO_DISCOVERY_BACKUP_COMPLETE\n'
