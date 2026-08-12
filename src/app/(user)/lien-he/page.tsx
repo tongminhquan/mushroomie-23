@@ -6,11 +6,22 @@ import Button from '@/components/ui/Button'
 import AnimateOnScroll from '@/components/ui/AnimateOnScroll'
 import SafeEmail from '@/components/ui/SafeEmail'
 import { BRAND } from '@/lib/local-seo'
+import { LOCAL_AREA_HUBS } from '@/lib/local-seo-link-graph'
 import { getPriorityLocalLinks } from '@/lib/priority-local-keywords'
 
 // Liên kết Local SEO trong thân trang liên hệ (nội bộ, anchor tự nhiên)
+const HUB_LINK_LABELS = {
+  'Đồng Nai': 'Khám phá phụ kiện handmade phục vụ Đồng Nai',
+  'Trảng Dài': 'Xem phụ kiện handmade tại Trảng Dài',
+  'Biên Hòa': 'Khám phá phụ kiện handmade giao Biên Hòa',
+  'TP.HCM': 'Đặt phụ kiện handmade giao online đến TP.HCM',
+} as const
+
 const LOCAL_LINKS = [
-  { href: '/phu-kien-handmade-dong-nai', label: 'Khám phá phụ kiện handmade tại Đồng Nai' },
+  ...LOCAL_AREA_HUBS.map((hub) => ({
+    href: `/${hub.slug}`,
+    label: HUB_LINK_LABELS[hub.area],
+  })),
   ...getPriorityLocalLinks('contact'),
 ]
 
@@ -276,6 +287,7 @@ export default function ContactPage() {
                 <Link
                   key={l.href}
                   href={l.href}
+                  prefetch={false}
                   className="inline-flex min-h-11 items-center rounded-full border border-theme-border bg-theme-subtle px-4 py-2 text-[13px] font-semibold text-theme-secondary transition-colors hover:border-primary hover:text-theme-accent"
                 >
                   {l.label}

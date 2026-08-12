@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, MapPin } from 'lucide-react'
+import { LOCAL_AREA_HUBS } from '@/lib/local-seo-link-graph'
 import { getPriorityLocalHomeCards } from '@/lib/priority-local-keywords'
 
 /**
@@ -7,20 +8,32 @@ import { getPriorityLocalHomeCards } from '@/lib/priority-local-keywords'
  * Anchor text tiếng Việt tự nhiên, không nhồi từ khóa. Phục vụ internal linking
  * cho gói Local SEO (Đồng Nai / Biên Hòa / TP.HCM).
  */
-const AREAS = [
-  {
-    href: '/phu-kien-handmade-dong-nai',
+const HUB_CARD_DETAILS = {
+  'Đồng Nai': {
     emoji: '🧶',
-    label: 'Phụ kiện handmade Đồng Nai',
     description: 'Vòng tay, móc khóa, charm và quà tặng custom',
   },
-  ...getPriorityLocalHomeCards(),
-  {
-    href: '/phu-kien-handmade-bien-hoa',
+  'Trảng Dài': {
+    emoji: '🍄',
+    description: 'Đặt sản phẩm và hẹn nhận tại xưởng sau khi xác nhận',
+  },
+  'Biên Hòa': {
     emoji: '📍',
-    label: 'Phụ kiện handmade gần Biên Hòa',
     description: 'Tư vấn từ xưởng Trảng Dài và giao hàng linh hoạt',
   },
+  'TP.HCM': {
+    emoji: '📦',
+    description: 'Đặt online từ Đồng Nai và giao đến TP.HCM',
+  },
+} as const
+
+const AREAS = [
+  ...LOCAL_AREA_HUBS.map((hub) => ({
+    href: `/${hub.slug}`,
+    label: hub.label,
+    ...HUB_CARD_DETAILS[hub.area],
+  })),
+  ...getPriorityLocalHomeCards(),
 ]
 
 export default function HomeLocalAreas() {
@@ -40,6 +53,7 @@ export default function HomeLocalAreas() {
           <Link
             key={a.href}
             href={a.href}
+            prefetch={false}
             className="theme-transition group rounded-[18px] border-[1.5px] border-theme-border bg-theme-card p-5 shadow-card hover:-translate-y-1 motion-reduce:transform-none"
           >
             <div className="mb-2 text-2xl" aria-hidden>{a.emoji}</div>

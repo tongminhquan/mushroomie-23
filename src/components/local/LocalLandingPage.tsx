@@ -7,12 +7,12 @@ import {
   deliveryNote,
   faqPageSchema,
   getLocalFaqs,
-  getRelatedPages,
   localBusinessSchema,
   localServiceSchema,
   type LocalPage,
 } from '@/lib/local-seo'
 import { getAreaDelivery, getAreaNote } from '@/lib/local-area-content'
+import { getLocalDiscoveryLinks, getLocalHubMemberLinks } from '@/lib/local-seo-link-graph'
 
 /**
  * Template landing page Local SEO cho Mushroomie.
@@ -20,7 +20,8 @@ import { getAreaDelivery, getAreaNote } from '@/lib/local-area-content'
  * (nền kem, đỏ #e41d1d làm accent, heading Paytone One), không nặng, mobile-first.
  */
 export default function LocalLandingPage({ page }: { page: LocalPage }) {
-  const related = getRelatedPages(page.slug)
+  const related = getLocalDiscoveryLinks(page.slug)
+  const hubMembers = getLocalHubMemberLinks(page.slug)
   const faqs = getLocalFaqs(page)
   const areaNote = getAreaNote(page.slug)
   const areaDelivery = getAreaDelivery(page.area)
@@ -233,6 +234,28 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
         </section>
       )}
 
+      {hubMembers.length > 0 && (
+        <section data-reveal className="brand-container mt-8" aria-labelledby="local-area-hub-heading">
+          <div className="rounded-[18px] border-[1.5px] border-theme-border bg-theme-card p-5 sm:p-6">
+            <h2 id="local-area-hub-heading" className="font-heading text-lg text-theme-primary">
+              Khám phá thêm sản phẩm phục vụ {page.area}
+            </h2>
+            <div className="mt-3 flex flex-wrap gap-2.5">
+              {hubMembers.map((member) => (
+                <Link
+                  key={member.slug}
+                  href={member.href}
+                  prefetch={false}
+                  className="theme-transition inline-flex min-h-11 items-center rounded-full border-[1.5px] border-theme-border bg-theme-subtle px-4 py-2 text-sm font-semibold text-theme-secondary hover:border-primary hover:text-theme-accent"
+                >
+                  {member.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Internal links: sản phẩm + custom + liên hệ */}
       <section data-reveal className="brand-container mt-8">
         <h2 className="font-heading text-lg text-theme-primary">Xem thêm tại {BRAND.name}</h2>
@@ -257,11 +280,12 @@ export default function LocalLandingPage({ page }: { page: LocalPage }) {
             {related.map((r) => (
               <Link
                 key={r.slug}
-                href={`/${r.slug}`}
+                href={r.href}
+                prefetch={false}
                 className="group rounded-[16px] border-[1.5px] border-theme-border bg-theme-card p-4 shadow-card transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
               >
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-theme-accent"><MapPin size={12} /> {r.area}</span>
-                <p className="mt-1 font-heading text-sm leading-snug text-theme-primary group-hover:text-theme-accent">{r.crumb}</p>
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-theme-accent"><MapPin size={12} /> Gợi ý liên quan</span>
+                <p className="mt-1 font-heading text-sm leading-snug text-theme-primary group-hover:text-theme-accent">{r.label}</p>
               </Link>
             ))}
           </div>
