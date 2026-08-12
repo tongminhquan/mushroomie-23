@@ -10,7 +10,7 @@ export function generateMetadata(): Metadata {
   if (!page) return {}
   const url = `${SITE_URL}/${SLUG}`
   return {
-    title: page.seoTitle,
+    title: { absolute: page.seoTitle },
     description: page.metaDescription,
     alternates: { canonical: url },
     openGraph: {

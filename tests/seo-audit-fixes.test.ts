@@ -2,6 +2,8 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
 import test from 'node:test'
+import { pathToFileURL } from 'node:url'
+import { LOCAL_B30_OWNER_SLUGS } from '../src/lib/local-seo-b30'
 import { BRAND, LOCAL_PAGES, aboutPageSchema, brandEntityRef, localBusinessSchema } from '../src/lib/local-seo'
 import {
   RETURN_WINDOW_DAYS,
@@ -11,17 +13,52 @@ import {
 } from '../src/lib/merchant-schema'
 import { pickRelatedPosts } from '../src/lib/related-posts'
 
-/** Root layout dùng template '%s | Mushroomie'. */
-const TITLE_SUFFIX_LENGTH = ' | Mushroomie'.length
 /** Ngưỡng an toàn để title không bị Google cắt trên SERP. */
+const MIN_TITLE_LENGTH = 50
 const MAX_TITLE_LENGTH = 60
 
-test('local landing titles stay within the SERP truncation limit once the brand suffix is applied', () => {
-  const tooLong = LOCAL_PAGES
-    .filter((page) => page.seoTitle.length + TITLE_SUFFIX_LENGTH > MAX_TITLE_LENGTH)
-    .map((page) => `${page.slug} (${page.seoTitle.length + TITLE_SUFFIX_LENGTH})`)
+test('all 23 B30 local landing titles stay within the raw SERP reference range', () => {
+  assert.equal(LOCAL_B30_OWNER_SLUGS.length, 23)
 
-  assert.deepEqual(tooLong, [])
+  const invalid = LOCAL_B30_OWNER_SLUGS.flatMap((slug) => {
+    const page = LOCAL_PAGES.find((candidate) => candidate.slug === slug)
+    assert.ok(page, `missing local page for ${slug}`)
+    return page.seoTitle.length >= MIN_TITLE_LENGTH && page.seoTitle.length <= MAX_TITLE_LENGTH
+      ? []
+      : [`${slug} (${page.seoTitle.length})`]
+  })
+
+  assert.deepEqual(invalid, [])
+})
+
+test('all 23 B30 route modules return the raw page title as absolute metadata', async () => {
+  assert.equal(LOCAL_B30_OWNER_SLUGS.length, 23)
+
+  for (const slug of LOCAL_B30_OWNER_SLUGS) {
+    const page = LOCAL_PAGES.find((candidate) => candidate.slug === slug)
+    assert.ok(page, `missing local page for ${slug}`)
+    const routePath = path.resolve(__dirname, `../src/app/(user)/${slug}/page.tsx`)
+    const routeSource = fs.readFileSync(routePath, 'utf8')
+
+    assert.equal(
+      routeSource.match(/title:\s*\{\s*absolute:\s*page\.seoTitle\s*\}/gu)?.length ?? 0,
+      1,
+      `${slug} must expose one top-level absolute metadata title`,
+    )
+    assert.equal(
+      routeSource.match(/title:\s*page\.seoTitle/gu)?.length ?? 0,
+      2,
+      `${slug} must preserve only the OpenGraph and Twitter title strings`,
+    )
+
+    const routeModule = await import(pathToFileURL(routePath).href)
+    assert.equal(typeof routeModule.generateMetadata, 'function', `${slug} has no generateMetadata`)
+    const metadata = routeModule.generateMetadata()
+
+    assert.deepEqual(metadata.title, { absolute: page.seoTitle }, `${slug} still inherits the root title template`)
+    assert.equal(metadata.openGraph?.title, page.seoTitle)
+    assert.equal(metadata.twitter?.title, page.seoTitle)
+  }
 })
 
 test('every local landing page still has a non-empty, unique title', () => {
