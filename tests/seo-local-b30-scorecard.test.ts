@@ -1517,3 +1517,89 @@ test('the entrypoint validates argv before it touches a configured GSC credentia
     await assert.rejects(stat(marker), { code: 'ENOENT' })
   })
 })
+
+test('the B30 measurement contract documents evidence rules, official sources and safe commands', async () => {
+  const contract = await readFile(
+    path.resolve('docs/seo-local-b30/measurement-contract.md'),
+    'utf8',
+  )
+
+  for (const requiredText of [
+    'exactly 30 target queries',
+    'sc-domain:mushroomie.io.vn',
+    'web / final / VNM',
+    'GSC averagePosition = aggregated diagnostic metric, never exact rank proof.',
+    'organicTopOne = true only after three valid weekly rank observations.',
+    'Local Pack position is reported separately.',
+    'VN / vi / mobile',
+    '6–8 days apart',
+    'ownerConflict',
+    '`rank-tracker` or `manual-serp`',
+    '30 organicTopOne',
+    '0 owner conflicts',
+    '0 operational errors',
+    'Google rankings cannot be guaranteed',
+    'Linux',
+    'descriptor-bound',
+    'Windows',
+    'fails closed',
+  ]) {
+    assert.ok(contract.includes(requiredText), `missing contract text: ${requiredText}`)
+  }
+
+  for (const officialUrl of [
+    'https://developers.google.com/webmaster-tools/v1/searchanalytics/query',
+    'https://developers.google.com/webmaster-tools/v1/how-tos/search_analytics',
+    'https://developers.google.com/webmaster-tools/limits',
+    'https://support.google.com/business/answer/7091/improve-your-local-ranking-on-google',
+  ]) {
+    assert.ok(contract.includes(officialUrl), `missing official source: ${officialUrl}`)
+  }
+
+  const commandLines = contract
+    .split(/\r?\n/u)
+    .filter((line) => line.includes('npm run seo:local:b30:scorecard'))
+  assert.ok(commandLines.length >= 2)
+  assert.ok(commandLines.some((line) => (
+    !line.includes('--rank-input') && !line.includes('--output-dir')
+  )))
+  assert.ok(commandLines.some((line) => (
+    line.includes('--start-date')
+    && line.includes('--end-date')
+    && line.includes('--rank-input')
+    && line.includes('--output-dir')
+  )))
+  assert.equal(commandLines.some((line) => /GOOGLE_APPLICATION_CREDENTIALS|credential|private[_-]?key|public[\\/]/iu.test(line)), false)
+})
+
+test('the published rank-observation example is schema-only and contains no fabricated position', async () => {
+  const example = await readFile(
+    path.resolve('docs/seo-local-b30/rank-observation.example.csv'),
+    'utf8',
+  )
+  const rows = example.trimEnd().split(/\r?\n/u)
+
+  assert.equal(rows.length, 2)
+  assert.equal(rows[0], RANK_OBSERVATION_COLUMNS.join(','))
+  const cells = rows[1].split(',')
+  assert.equal(cells.length, RANK_OBSERVATION_COLUMNS.length)
+  assert.equal(cells[2], '')
+  assert.equal(cells[3], '')
+  assert.equal(cells.some((cell) => /^[=+\-@]/u.test(cell)), false)
+  assert.doesNotMatch(example, /BEGIN (?:RSA )?PRIVATE KEY|ya29\.|Bearer\s|GOOGLE_APPLICATION_CREDENTIALS|private_key|client_email/iu)
+  assert.doesNotMatch(example, /(?:^|,)1,(?:1,|,)/mu)
+  assert.doesNotMatch(example, /(?:^|,)(?:public[\\/]|\.\.)(?:[^,]*)/imu)
+
+  assert.deepEqual(parseRankObservationsCsv(example, '2026-08-17'), [{
+    query: 'vòng tay handmade Đồng Nai',
+    ownerUrl: 'https://mushroomie.io.vn/vong-tay-handmade-dong-nai',
+    organicPosition: null,
+    localPackPosition: null,
+    location: 'Đồng Nai',
+    country: 'VN',
+    language: 'vi',
+    device: 'mobile',
+    measuredAt: '2026-08-17',
+    source: 'rank-tracker',
+  }])
+})
