@@ -33,6 +33,33 @@ export interface GoogleSearchConsoleClient {
   inspectUrl(url: string): Promise<UrlInspectionResult>
 }
 
+export type SearchAnalyticsDevice = 'DESKTOP' | 'MOBILE' | 'TABLET'
+
+export interface SearchAnalyticsRequest {
+  startDate: string
+  endDate: string
+  query: string
+}
+
+export interface SearchAnalyticsRow {
+  query: string
+  page: string
+  device: SearchAnalyticsDevice
+  clicks: number
+  impressions: number
+  ctr: number
+  position: number
+}
+
+export interface GoogleSearchConsoleAnalyticsClient {
+  querySearchAnalytics(
+    request: SearchAnalyticsRequest,
+  ): Promise<SearchAnalyticsRow[]>
+}
+
+export type GoogleSearchConsoleFullClient =
+  GoogleSearchConsoleClient & GoogleSearchConsoleAnalyticsClient
+
 export type GscClientErrorCode =
   | 'GSC_DISABLED'
   | 'GSC_CONFIGURATION_REQUIRED'

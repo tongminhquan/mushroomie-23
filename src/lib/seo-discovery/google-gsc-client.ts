@@ -16,6 +16,10 @@ import {
   GscClientError,
   type ConnectionStatus,
   type GoogleSearchConsoleClient,
+  type GoogleSearchConsoleFullClient,
+  type SearchAnalyticsDevice,
+  type SearchAnalyticsRequest,
+  type SearchAnalyticsRow,
   type SitemapStatus,
   type UrlInspectionResult,
 } from './gsc-client'
@@ -25,10 +29,17 @@ const WEBMASTERS_SCOPE = 'https://www.googleapis.com/auth/webmasters'
 const WEBMASTERS_API_ROOT = 'https://www.googleapis.com/webmasters/v3'
 const URL_INSPECTION_ENDPOINT = 'https://searchconsole.googleapis.com/v1/urlInspection/index:inspect'
 const CANONICAL_SITEMAP_URL = 'https://mushroomie.io.vn/sitemap.xml'
+const CANONICAL_SEARCH_ANALYTICS_PROPERTY = 'sc-domain:mushroomie.io.vn'
 const CONNECTION_PROBE_URL = 'https://mushroomie.io.vn/'
 const REQUEST_TIMEOUT_MS = 15_000
 const MAX_JSON_RESPONSE_BYTES = 1024 * 1024
 const MAX_CREDENTIAL_FILE_BYTES = 64 * 1024
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+const SEARCH_ANALYTICS_DEVICES = new Set<SearchAnalyticsDevice>([
+  'DESKTOP',
+  'MOBILE',
+  'TABLET',
+])
 
 type GscEnvironment = Readonly<Record<string, string | undefined>>
 
@@ -170,11 +181,54 @@ function nullableCount(value: unknown): number | null {
   return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : null
 }
 
+function isIsoDate(value: unknown): value is string {
+  return typeof value === 'string' && ISO_DATE_PATTERN.test(value)
+}
+
+function isFiniteNonNegativeNumber(value: unknown): value is number {
+  return (
+    typeof value === 'number'
+    && Number.isFinite(value)
+    && value >= 0
+  )
+}
+
+function isSearchAnalyticsDevice(
+  value: string,
+): value is SearchAnalyticsDevice {
+  return SEARCH_ANALYTICS_DEVICES.has(value as SearchAnalyticsDevice)
+}
+
+async function cancelResponseBody(
+  body: ReadableStream<Uint8Array> | null,
+): Promise<void> {
+  if (!body) {
+    return
+  }
+
+  try {
+    await body.cancel()
+  } catch {
+    // Preserve the stable adapter error if provider stream cleanup fails.
+  }
+}
+
+async function cancelResponseReader(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+): Promise<void> {
+  try {
+    await reader.cancel()
+  } catch {
+    // Preserve the stable adapter error if provider stream cleanup fails.
+  }
+}
+
 async function readBoundedJson(response: Response): Promise<unknown> {
   const declaredLength = response.headers.get('content-length')
   if (declaredLength !== null) {
     const parsedLength = Number(declaredLength)
     if (!Number.isFinite(parsedLength) || parsedLength > MAX_JSON_RESPONSE_BYTES) {
+      await cancelResponseBody(response.body)
       throw invalidResponseError()
     }
   }
@@ -195,7 +249,7 @@ async function readBoundedJson(response: Response): Promise<unknown> {
 
     totalBytes += value.byteLength
     if (totalBytes > MAX_JSON_RESPONSE_BYTES) {
-      void reader.cancel()
+      await cancelResponseReader(reader)
       throw invalidResponseError()
     }
     chunks.push(value)
@@ -266,6 +320,53 @@ function mapInspection(payload: unknown): UrlInspectionResult {
   }
 }
 
+function mapSearchAnalytics(payload: unknown): SearchAnalyticsRow[] {
+  if (!isRecord(payload)) {
+    throw invalidResponseError()
+  }
+
+  if (payload.rows === undefined) {
+    return []
+  }
+
+  if (!Array.isArray(payload.rows)) {
+    throw invalidResponseError()
+  }
+
+  return payload.rows.map((entry) => {
+    if (
+      !isRecord(entry)
+      || !Array.isArray(entry.keys)
+      || entry.keys.length !== 3
+      || !entry.keys.every((key) => typeof key === 'string')
+    ) {
+      throw invalidResponseError()
+    }
+
+    const [query, page, device] = entry.keys as [string, string, string]
+    if (
+      !isSearchAnalyticsDevice(device)
+      || !isFiniteNonNegativeNumber(entry.clicks)
+      || !isFiniteNonNegativeNumber(entry.impressions)
+      || !isFiniteNonNegativeNumber(entry.ctr)
+      || entry.ctr > 1
+      || !isFiniteNonNegativeNumber(entry.position)
+    ) {
+      throw invalidResponseError()
+    }
+
+    return {
+      query,
+      page,
+      device,
+      clicks: entry.clicks,
+      impressions: entry.impressions,
+      ctr: entry.ctr,
+      position: entry.position,
+    }
+  })
+}
+
 function normalizeProductionUrl(value: string): string {
   try {
     return assertProductionUrl(value)
@@ -274,7 +375,7 @@ function normalizeProductionUrl(value: string): string {
   }
 }
 
-class DisabledGoogleSearchConsoleClient implements GoogleSearchConsoleClient {
+class DisabledGoogleSearchConsoleClient implements GoogleSearchConsoleFullClient {
   async getConnectionStatus(): Promise<ConnectionStatus> {
     return { state: 'disabled', code: 'GSC_DISABLED' }
   }
@@ -290,10 +391,16 @@ class DisabledGoogleSearchConsoleClient implements GoogleSearchConsoleClient {
   async inspectUrl(): Promise<UrlInspectionResult> {
     throw new GscClientError('GSC_DISABLED')
   }
+
+  async querySearchAnalytics(): Promise<SearchAnalyticsRow[]> {
+    throw new GscClientError('GSC_DISABLED')
+  }
 }
 
 class ConfigurationRequiredGoogleSearchConsoleClient
-implements GoogleSearchConsoleClient {
+implements GoogleSearchConsoleFullClient {
+  constructor(private readonly searchAnalyticsEnabled = true) {}
+
   async getConnectionStatus(): Promise<ConnectionStatus> {
     return {
       state: 'configuration_required',
@@ -318,16 +425,27 @@ implements GoogleSearchConsoleClient {
       configurationRequired: true,
     })
   }
+
+  async querySearchAnalytics(): Promise<SearchAnalyticsRow[]> {
+    if (!this.searchAnalyticsEnabled) {
+      throw new GscClientError('GSC_DISABLED')
+    }
+
+    throw new GscClientError('GSC_CONFIGURATION_REQUIRED', {
+      configurationRequired: true,
+    })
+  }
 }
 
 class AuthenticatedGoogleSearchConsoleClient
-implements GoogleSearchConsoleClient {
+implements GoogleSearchConsoleFullClient {
   private readonly auth: GoogleAuth
 
   constructor(
     private readonly property: string,
     credentialPath: string,
     private readonly fetchImplementation: typeof fetch,
+    private readonly searchAnalyticsEnabled: boolean,
     private readonly inspectConnectionPermission = false,
   ) {
     this.auth = new GoogleAuth({
@@ -388,6 +506,71 @@ implements GoogleSearchConsoleClient {
     )
   }
 
+  async querySearchAnalytics(
+    request: SearchAnalyticsRequest,
+  ): Promise<SearchAnalyticsRow[]> {
+    if (!this.searchAnalyticsEnabled) {
+      throw new GscClientError('GSC_DISABLED')
+    }
+
+    if (this.property !== CANONICAL_SEARCH_ANALYTICS_PROPERTY) {
+      throw new GscClientError('GSC_CONFIGURATION_REQUIRED', {
+        configurationRequired: true,
+      })
+    }
+
+    if (
+      !isRecord(request)
+      || !isIsoDate(request.startDate)
+      || !isIsoDate(request.endDate)
+      || request.startDate > request.endDate
+      || typeof request.query !== 'string'
+    ) {
+      throw invalidResponseError()
+    }
+
+    const query = request.query.normalize('NFC').trim()
+    if (!query || query.length > 4_096) {
+      throw invalidResponseError()
+    }
+
+    const endpoint = `${WEBMASTERS_API_ROOT}/sites/${encodeURIComponent(this.property)}/searchAnalytics/query`
+    return this.executeRequest(
+      endpoint,
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          startDate: request.startDate,
+          endDate: request.endDate,
+          type: 'web',
+          dataState: 'final',
+          dimensions: ['query', 'page', 'device'],
+          aggregationType: 'auto',
+          rowLimit: 25_000,
+          dimensionFilterGroups: [{
+            groupType: 'and',
+            filters: [
+              {
+                dimension: 'country',
+                operator: 'equals',
+                expression: 'VNM',
+              },
+              {
+                dimension: 'query',
+                operator: 'contains',
+                expression: query,
+              },
+            ],
+          }],
+        }),
+      },
+      async (response) => mapSearchAnalytics(await readBoundedJson(response)),
+    )
+  }
+
   private async executeRequest<T>(
     endpoint: string,
     init: RequestInit,
@@ -425,9 +608,7 @@ implements GoogleSearchConsoleClient {
       try {
         authenticationHeaders = await this.auth.getRequestHeaders(endpoint)
       } catch {
-        if (timedOut) {
-          throw requestTimeoutError()
-        }
+        throwIfDeadlineExceeded()
         throw new GscClientError('GSC_AUTHENTICATION_FAILED', {
           configurationRequired: true,
         })
@@ -452,27 +633,31 @@ implements GoogleSearchConsoleClient {
           signal: controller.signal,
         })
       } catch {
-        if (timedOut || controller.signal.aborted) {
-          throw requestTimeoutError()
-        }
+        throwIfDeadlineExceeded()
         throw new GscClientError('GSC_NETWORK_ERROR', { retryable: true })
       }
 
+      throwIfDeadlineExceeded()
+
       if (!response.ok) {
+        await cancelResponseBody(response.body)
+        throwIfDeadlineExceeded()
         throw mapHttpError(response.status)
       }
 
+      let mappedResponse: T
       try {
-        return await mapResponse(response)
+        mappedResponse = await mapResponse(response)
       } catch (error) {
-        if (timedOut || controller.signal.aborted) {
-          throw requestTimeoutError()
-        }
+        throwIfDeadlineExceeded()
         if (error instanceof GscClientError) {
           throw error
         }
         throw invalidResponseError()
       }
+
+      throwIfDeadlineExceeded()
+      return mappedResponse
     })()
 
     try {
@@ -488,7 +673,7 @@ implements GoogleSearchConsoleClient {
 function createGoogleSearchConsoleClientInternal(
   options: CreateGoogleSearchConsoleClientOptions,
   allowDisabledIntegrationProbe: boolean,
-): GoogleSearchConsoleClient {
+): GoogleSearchConsoleFullClient {
   const environment = options.env ?? process.env
   const config = readSeoDiscoveryConfig(environment)
   if (
@@ -503,20 +688,21 @@ function createGoogleSearchConsoleClientInternal(
     options.repositoryRoot ?? process.cwd(),
   )
   if (!credentialPath) {
-    return new ConfigurationRequiredGoogleSearchConsoleClient()
+    return new ConfigurationRequiredGoogleSearchConsoleClient(config.gscEnabled)
   }
 
   return new AuthenticatedGoogleSearchConsoleClient(
     config.property,
     credentialPath,
     options.fetch ?? globalThis.fetch,
+    config.gscEnabled,
     allowDisabledIntegrationProbe,
   )
 }
 
 export function createGoogleSearchConsoleClient(
   options: CreateGoogleSearchConsoleClientOptions = {},
-): GoogleSearchConsoleClient {
+): GoogleSearchConsoleFullClient {
   return createGoogleSearchConsoleClientInternal(options, false)
 }
 
