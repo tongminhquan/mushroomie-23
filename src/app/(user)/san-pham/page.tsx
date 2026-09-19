@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import type { Prisma } from '@prisma/client'
-import { SlidersHorizontal, X } from 'lucide-react'
+import { Gift, SlidersHorizontal, X } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import ProductCard from '@/components/product/ProductCard'
 import CatalogSeoContent from '@/components/product/CatalogSeoContent'
@@ -221,6 +221,9 @@ export default async function ProductsPage({
               </p>
 
               <div className="mt-5 flex flex-wrap items-center gap-2.5">
+                <Link href="/chon-qua" prefetch={false} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-dark focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+                  <Gift size={17} aria-hidden="true" /> Tìm quà hợp ý
+                </Link>
                 <span className="rounded-full border border-theme-border bg-theme-card px-4 py-2 text-sm font-semibold text-theme-secondary">
                   {total} sản phẩm sẵn sàng cá nhân hóa
                 </span>

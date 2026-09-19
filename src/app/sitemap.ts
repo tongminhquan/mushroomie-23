@@ -33,6 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     { url: `${baseUrl}/tin-tuc`, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/chon-qua`, changeFrequency: 'weekly', priority: 0.7 },
     // /cau-chuyen permanently redirects to /gioi-thieu, so the canonical /gioi-thieu (below)
     // is the sitemap entry — listing the alias would put a redirect URL in the sitemap.
     { url: `${baseUrl}/gioi-thieu`, changeFrequency: 'monthly', priority: 0.7 },

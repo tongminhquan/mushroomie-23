@@ -25,12 +25,15 @@ export default function HomeFeaturedProducts({ products }: { products: HomeProdu
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
-        <div className="mt-10 flex justify-center md:mt-12">
+        <div className="mt-10 flex flex-wrap justify-center gap-3 md:mt-12">
           <Link
             href="/san-pham"
             className="group inline-flex min-h-12 items-center gap-2 rounded-full bg-primary px-7 text-sm font-bold text-white shadow-[0_8px_20px_rgba(201,20,20,0.3)] transition-transform duration-200 hover:-translate-y-0.5"
           >
             Xem bộ sưu tập <ArrowRight size={17} className="transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
+          <Link href="/chon-qua" prefetch={false} className="inline-flex min-h-12 items-center gap-2 rounded-full border border-theme-border bg-theme-card px-7 text-sm font-bold text-theme-primary hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+            <Gift size={17} aria-hidden="true" /> Tìm quà hợp ý
           </Link>
         </div>
       </BrandContainer>
