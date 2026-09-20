@@ -52,7 +52,7 @@ Chrome DevTools MCP chạy qua CLI/daemon của gói MCP với Chrome for Testin
 - Viewport thực đo: 1440, 1366, 390 và 360px. Không tràn ngang; một H1; 12 card/trang; khung ảnh 3:4; không ảnh đã tải nào bị broken. Select cao 48px, nút tìm và reset cao 44px.
 - Form native GET được thao tác chọn bằng bàn phím và click submit sau khi cuộn nút vào vùng nhìn thấy. Ngân sách 100.000đ + vòng tay + cá nhân hóa trả 6 sản phẩm đúng danh mục, có badge cá nhân hóa, giá từ 30.000đ đến 45.000đ; URL giữ đủ ba bộ lọc.
 - Click Trang sau giữ `budget=100000`, chuyển `page=2` và trả 12 card. Danh mục không tồn tại trả trạng thái rỗng, không tự nới bộ lọc.
-- Giao diện tối không tràn ngang; chữ badge vẫn `rgb(43,43,43)` trên nền vàng/hồng. Không có console error/warn trong các lượt kiểm tra responsive và thao tác cuối. Có một browser issue CORB từ tài nguyên bên thứ ba trong lượt kiểm tra kéo dài; không có request ứng dụng thất bại trong lượt cuối.
+- Giao diện tối không tràn ngang; chữ badge vẫn `rgb(43,43,43)` trên nền vàng/hồng. Không có console error/warn trong các lượt kiểm tra responsive và thao tác cuối. Có một browser issue CORB trong lượt kiểm tra kéo dài; không có request ứng dụng thất bại trong lượt cuối.
 - Các route `/`, `/san-pham`, `/chon-qua`, URL lọc/rỗng/trang lớn, `/gioi-thieu`, `/tin-tuc`, `/mini-game`, `/tai-khoan/dang-nhap`, `/gio-hang`, `/thanh-toan`, `/voucher`, `/lien-he`, `/sitemap.xml`, `/api/health` trả HTTP 200.
 - `/cau-chuyen` trả 308 về `/gioi-thieu`, đúng alias có sẵn trong code; trang đích 200. `/admin` trả 307 về đăng nhập khi chưa xác thực, đúng thiết kế.
 - 21 file JS và 2 file CSS lấy từ HTML thực tế đều HTTP 200 và đúng MIME. Logo, favicon và các ảnh sản phẩm quan sát trong browser tải thành công.
